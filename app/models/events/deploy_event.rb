@@ -5,7 +5,7 @@ module Events
     ENVIRONMENTS = %w(uat staging production)
 
     def app_name
-      (details['app_name'] || details['app']).try(:downcase)
+      (details['app_name'] || details['app'])&.downcase
     end
 
     def server
