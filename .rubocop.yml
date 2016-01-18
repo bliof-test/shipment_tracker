@@ -26,9 +26,11 @@ Style/BlockDelimiters:
   EnforcedStyle: semantic
   Enabled: true
 
-Style/TrailingComma:
+Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
-  Enabled: true
+
+Style/TrailingCommaInLiteral:
+  EnforcedStyleForMultiline: comma
 
 Style/AlignParameters:
   EnforcedStyle: with_fixed_indentation
