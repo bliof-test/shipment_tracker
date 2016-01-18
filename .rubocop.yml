@@ -1,5 +1,4 @@
 AllCops:
-  RunRailsCops: true
   Exclude:
     - 'bin/**/*'
     - 'db/**/*'
@@ -9,6 +8,9 @@ AllCops:
     - Gemfile
     - 'hooks/**/*'
     - 'vendor/bundle/**/*'
+
+Rails:
+  Enabled: true
 
 Metrics/LineLength:
   Max: 110
