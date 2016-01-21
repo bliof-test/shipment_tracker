@@ -4,13 +4,13 @@ module Sections
       'panel-success' => 'success',
       'panel-danger'  => 'danger',
       'panel-warning' => 'warning',
-    }
+    }.freeze
 
     DEFAULT_ICON_TRANSLATIONS = {
       'icon-success' => 'success',
       'icon-warning' => 'warning',
       'icon-danger' => 'failed',
-    }
+    }.freeze
 
     def initialize(
       panel_element,

@@ -47,7 +47,7 @@ module ApplicationHelper
     classes << '.pull-right' if align_right
     haml_tag(
       classes,
-      href: url, target: '_blank', title: 'Help'
+      href: url, target: '_blank', title: 'Help',
     )
   end
 

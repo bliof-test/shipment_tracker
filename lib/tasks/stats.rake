@@ -51,8 +51,8 @@ namespace :stats do
 
       releases_in_time = releases_with_inherit.select { |r|
         r.production_deploy_time.present? &&
-        r.production_deploy_time >= from_date &&
-        r.production_deploy_time < to_date
+          r.production_deploy_time >= from_date &&
+          r.production_deploy_time < to_date
       }
       if releases_in_time.count == releases.count
         puts "STATS WARNING: There maybe more releases for #{app_name}. Increase the incursion-depth."

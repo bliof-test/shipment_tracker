@@ -9,11 +9,11 @@ module OmniAuth
 
       uid do
         token = (callback_uri.query_values || {})['token']
-        if options[:prefix] == '/events'
-          source = current_path.sub(%r{^#{options[:prefix]}/}, '')
-        else
-          source = current_path.sub(%r{^/}, '')
-        end
+        source = if options[:prefix] == '/events'
+                   current_path.sub(%r{^#{options[:prefix]}/}, '')
+                 else
+                   current_path.sub(%r{^/}, '')
+                 end
         source if Token.valid?(source, token)
       end
 

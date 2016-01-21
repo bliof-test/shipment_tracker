@@ -47,7 +47,7 @@ RSpec.describe Repositories::BuildRepository do
       it 'returns the state at that moment' do
         repository.apply(build(:circle_ci_event, success?: true, version: 'abc', created_at: 3.hours.ago))
         repository.apply(build(:circle_ci_event, success?: true, version: 'def', created_at: 2.hours.ago))
-        repository.apply(build(:circle_ci_event, success?: false, version: 'abc', created_at: 1.hours.ago))
+        repository.apply(build(:circle_ci_event, success?: false, version: 'abc', created_at: 1.hour.ago))
         repository.apply(build(:circle_ci_event, success?: false, version: 'def', created_at: Time.current))
 
         result = repository.builds_for(

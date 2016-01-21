@@ -77,9 +77,7 @@ RSpec.describe 'EventsController' do
 
       it 'saves the event' do
         expect(event_factory).to receive(:create).with(
-          'circleci',
-          { 'foo' => 'bar', 'token' => 'the payloads token' },
-          nil
+          'circleci', { 'foo' => 'bar', 'token' => 'the payloads token' }, nil
         )
 
         post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token'

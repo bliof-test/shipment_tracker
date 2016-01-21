@@ -24,13 +24,13 @@ module LogSubscribers
 
     def append_info_to_payload(payload)
       super
-      payload[:git_repository_loader] = (git_repository_loader_before || 0) +
-                                        (git_repository_loader_during || 0) +
-                                        GitRepositoryLoaderSubscriber.reset_runtime
+      payload[:git_repository_loader] = (git_repository_loader_before || 0)
+                                      + (git_repository_loader_during || 0)
+                                      + GitRepositoryLoaderSubscriber.reset_runtime
 
-      payload[:git_repository] = (git_repository_before || 0) +
-                                 (git_repository_during || 0) +
-                                 GitRepositoryLoaderSubscriber.reset_runtime
+      payload[:git_repository] = (git_repository_before || 0)
+                               + (git_repository_during || 0)
+                               + GitRepositoryLoaderSubscriber.reset_runtime
     end
 
     module ClassMethods

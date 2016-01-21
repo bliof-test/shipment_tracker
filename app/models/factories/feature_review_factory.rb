@@ -5,14 +5,14 @@ require 'feature_review'
 
 module Factories
   class FeatureReviewFactory
-    QUERY_PARAM_WHITELIST = %w(apps uat_url)
+    QUERY_PARAM_WHITELIST = %w(apps uat_url).freeze
 
     def create_from_text(text)
       URI.extract(text, %w(http https))
-        .map { |uri| parse_uri(uri) }
-        .compact
-        .select { |url| url.path == '/feature_reviews' }
-        .map { |url| create_from_url_string(url) }
+         .map { |uri| parse_uri(uri) }
+         .compact
+         .select { |url| url.path == '/feature_reviews' }
+         .map { |url| create_from_url_string(url) }
     end
 
     def create_from_tickets(tickets)
