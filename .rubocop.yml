@@ -10,6 +10,9 @@ AllCops:
     - 'hooks/**/*'
     - 'vendor/bundle/**/*'
 
+Performance/TimesMap:
+  Enabled: false  # TODO: Remove when fix released: https://github.com/bbatsov/rubocop/commit/162febe3da7cfac6cdd5a6c28bfc21385ad3c729
+
 Rails:
   Enabled: true
 
@@ -26,7 +29,7 @@ Metrics/AbcSize:
   Max: 20
 
 Style/NestedParenthesizedCalls:
-  Enabled: false  # Disable until it's possible to configure for method arity.
+  Enabled: false  # TODO: Enable when possible to configure for method arity.
 
 Style/Documentation:
   Enabled: false
