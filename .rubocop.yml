@@ -13,6 +13,9 @@ AllCops:
 Rails:
   Enabled: true
 
+Style/NestedParenthesizedCalls:
+  Enabled: false  # Disable until it's possible to configure for method arity.
+
 Metrics/LineLength:
   Max: 110
 
