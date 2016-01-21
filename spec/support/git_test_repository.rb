@@ -84,8 +84,8 @@ module Support
 
     attr_reader :repo, :commits
 
-    def create_rugged_commit(tree_oid:, message:, author_name:, time:, pretend_version:, parents: nil)
-      parents ||= repo.empty? ? [] : [repo.head.target].compact
+    def create_rugged_commit(tree_oid:, message:, author_name:, time:, pretend_version:, parents: [])
+      parents = [repo.head.target_id] if parents.empty? && !repo.empty?
 
       commit_oid = Rugged::Commit.create(
         repo,
