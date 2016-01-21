@@ -33,7 +33,6 @@ Style/Documentation:
 
 Style/BlockDelimiters:
   EnforcedStyle: semantic
-  Enabled: true
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
