@@ -40,6 +40,14 @@ RSpec.describe Events::DeployEvent do
         expect(subject.environment).to eq('uat')
       end
 
+      context 'when the app name does not have the environment in lowercase' do
+        let(:payload) { { 'app' => 'nameless-forest-UAT' } }
+
+        it 'downcases the environment' do
+          expect(subject.environment).to eq('uat')
+        end
+      end
+
       context 'when the app name does not include the environment at the end' do
         let(:payload) { { 'app' => 'nameless-forest' } }
 
@@ -56,14 +64,16 @@ RSpec.describe Events::DeployEvent do
           'server' => 'uat.example.com',
           'version' => '123abc',
           'deployed_by' => 'bob',
+          'environment' => 'UAT',
         }
       }
 
-      it 'returns the correct values' do
+      it 'returns the correct downcased values' do
         expect(subject.app_name).to eq('someapp')
         expect(subject.server).to eq('uat.example.com')
         expect(subject.version).to eq('123abc')
         expect(subject.deployed_by).to eq('bob')
+        expect(subject.environment).to eq('uat')
       end
     end
   end
