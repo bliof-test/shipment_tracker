@@ -21,7 +21,7 @@ module Events
     end
 
     def environment
-      details.fetch('environment', heroku_environment)
+      details.fetch('environment', heroku_environment).try(:downcase)
     end
 
     private
@@ -32,7 +32,7 @@ module Events
 
     def app_name_extension
       return nil unless app_name
-      app_name.split('-').last
+      app_name.split('-').last.downcase
     end
 
     def servers
