@@ -19,7 +19,7 @@ class FeatureReviewsController < ApplicationController
 
     feature_review = factory.create_from_url_string(request.original_url)
     @feature_review_with_statuses = Queries::FeatureReviewQuery.new(feature_review, at: time)
-                                    .feature_review_with_statuses
+                                                               .feature_review_with_statuses
   end
 
   def search

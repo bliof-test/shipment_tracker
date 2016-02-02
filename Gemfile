@@ -12,7 +12,7 @@ gem 'has_secure_token'
 gem 'honeybadger', '~> 2.0'
 gem 'jquery-rails'
 gem 'newrelic_rpm'
-gem 'octokit', '~> 4.0', require: false
+gem 'octokit', '4.1.0', require: false
 gem 'omniauth'
 gem 'omniauth-auth0'
 gem 'pg'

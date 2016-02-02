@@ -38,7 +38,7 @@ FactoryGirl.define do
 
     details do
       details = default_details.merge(changelog_details)
-      details.merge!('comment' => { 'body' => comment_body }) if comment_body
+      details['comment'] = { 'body' => comment_body } if comment_body
       details
     end
 

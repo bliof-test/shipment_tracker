@@ -2,10 +2,10 @@ require 'events/base_event'
 
 module Events
   class DeployEvent < Events::BaseEvent
-    ENVIRONMENTS = %w(uat staging production)
+    ENVIRONMENTS = %w(uat staging production).freeze
 
     def app_name
-      (details['app_name'] || details['app']).try(:downcase)
+      (details['app_name'] || details['app'])&.downcase
     end
 
     def server

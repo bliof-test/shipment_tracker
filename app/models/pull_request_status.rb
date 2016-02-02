@@ -47,8 +47,8 @@ class PullRequestStatus
   def decorated_feature_reviews(sha)
     tickets = Repositories::TicketRepository.new.tickets_for_versions([sha])
     feature_reviews = Factories::FeatureReviewFactory.new
-                      .create_from_tickets(tickets)
-                      .select { |fr| fr.versions.include?(sha) }
+                                                     .create_from_tickets(tickets)
+                                                     .select { |fr| fr.versions.include?(sha) }
     feature_reviews.map do |feature_review|
       FeatureReviewWithStatuses.new(
         feature_review,
@@ -81,7 +81,7 @@ class PullRequestStatus
 
   def url_to_autoprepared_feature_review(url_opts, sha)
     last_staging_deploy = Repositories::DeployRepository.new.last_staging_deploy_for_version(sha)
-    url_opts.merge!(uat_url: last_staging_deploy.server) if last_staging_deploy
+    url_opts[:uat_url] = last_staging_deploy.server if last_staging_deploy
     routes.feature_reviews_url(url_opts)
   end
 

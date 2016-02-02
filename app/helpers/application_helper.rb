@@ -47,7 +47,7 @@ module ApplicationHelper
     classes << '.pull-right' if align_right
     haml_tag(
       classes,
-      href: url, target: '_blank', title: 'Help'
+      href: url, target: '_blank', title: 'Help',
     )
   end
 
@@ -57,7 +57,7 @@ module ApplicationHelper
     "#{attribute}: #{message.to_sentence}"
   end
 
-  def panel(heading:, klass: nil, **options, &block)
+  def panel(heading:, klass: nil, **options)
     status_panel = options.key?(:status)
     status = options.delete(:status)
     classes = status_panel ? panel_class(status) : 'panel-info'
@@ -69,7 +69,7 @@ module ApplicationHelper
         end
         panel_heading_button(options[:button_link])
       end
-      block.call
+      yield
     end
   end
 

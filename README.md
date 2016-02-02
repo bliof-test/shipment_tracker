@@ -116,7 +116,7 @@ The application will require a reboot before taking effect.
 
 ## License
 
-Copyright © 2015 Funding Circle Ltd.
+Copyright © 2015-2016 Funding Circle Ltd.
 
 Distributed under the BSD 3-Clause License.
 

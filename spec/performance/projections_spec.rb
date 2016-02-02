@@ -217,18 +217,18 @@ RSpec.describe 'Projection performance', type: :request do
     results
   end
 
-  def csv(name:, headers:, &block)
+  def csv(name:, headers:)
     filename = Rails.root.join('performance', "#{name}.csv")
     FileUtils.mkdir_p File.dirname(filename)
     CSV.open(filename, 'wb') do |csv_contents|
       csv_contents << headers
-      block.call(csv_contents)
+      yield csv_contents
     end
   end
 
-  def progression(start: 10_000, points: 10, factor: 2, &block)
+  def progression(start: 10_000, points: 10, factor: 2)
     (points - 1).times.reduce([start]) { |a, _e| a << a.last * factor }.each do |count|
-      block.call(count)
+      yield count
     end
   end
 

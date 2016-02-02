@@ -63,7 +63,7 @@ class GitRepositoryLoader
     when 'ssh'
       options_for_ssh(&block)
     else
-      block.call({})
+      yield({})
     end
   end
 
@@ -78,7 +78,7 @@ class GitRepositoryLoader
     file
   end
 
-  def options_for_ssh(&block)
+  def options_for_ssh
     fail 'ssh_user not set' unless ssh_user
     fail 'ssh_public_key not set' unless ssh_public_key
     fail 'ssh_private_key not set' unless ssh_private_key
@@ -86,12 +86,10 @@ class GitRepositoryLoader
     ssh_public_key_file = create_temporary_file(ssh_public_key)
     ssh_private_key_file = create_temporary_file(ssh_private_key)
 
-    block.call(
-      credentials: Rugged::Credentials::SshKey.new(
-        username: ssh_user,
-        privatekey: ssh_private_key_file.path,
-        publickey: ssh_public_key_file.path,
-      ),
+    yield credentials: Rugged::Credentials::SshKey.new(
+      username: ssh_user,
+      privatekey: ssh_private_key_file.path,
+      publickey: ssh_public_key_file.path,
     )
   ensure
     ssh_public_key_file.unlink if ssh_public_key_file
