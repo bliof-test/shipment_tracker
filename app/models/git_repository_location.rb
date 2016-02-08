@@ -6,6 +6,7 @@ class GitRepositoryLocation < ActiveRecord::Base
     self.name = extract_name(uri)
   end
 
+  validates :uri, presence: true
   validates :name, uniqueness: true
   validate :must_have_valid_uri
 

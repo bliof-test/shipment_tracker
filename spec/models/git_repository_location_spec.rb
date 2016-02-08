@@ -22,6 +22,7 @@ RSpec.describe GitRepositoryLocation do
       https_url_no_git = GitRepositoryLocation.new(uri: 'https://github.com/FundingCircle/shipment_tracker')
       ssh_clone_url = GitRepositoryLocation.new(uri: 'git@github.com:user/repo.git')
       invalid_url = GitRepositoryLocation.new(uri: 'github.com\user\repo.git')
+      empty_url = GitRepositoryLocation.new(uri: '')
 
       expect(ssh_url).to be_valid
       expect(http_url).to be_valid
@@ -29,6 +30,7 @@ RSpec.describe GitRepositoryLocation do
       expect(https_url_no_git).to be_valid
       expect(ssh_clone_url).to be_valid
       expect(invalid_url).not_to be_valid
+      expect(empty_url).not_to be_valid
     end
 
     it 'must have a unique name' do
