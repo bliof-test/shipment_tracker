@@ -40,19 +40,23 @@ module Repositories
     def apply(event)
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
-      last_ticket = (store.where(key: event.key).last.try(:attributes) || {}).except('id')
-
       feature_reviews = feature_review_factory.create_from_text(event.comment)
 
+      last_ticket = previous_ticket_data(event.key)
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
-
       store.create!(new_ticket)
+
       update_pull_requests_for(new_ticket) if update_pull_request?(event, feature_reviews)
     end
 
     private
 
     attr_reader :store, :git_repository_location, :feature_review_factory
+
+    def previous_ticket_data(key)
+      attrs = store.where(key: key).last.try(:attributes) || {}
+      attrs.except!('id')
+    end
 
     def update_pull_request?(event, feature_reviews)
       return false if Rails.configuration.data_maintenance_mode

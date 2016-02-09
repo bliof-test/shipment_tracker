@@ -164,7 +164,7 @@ RSpec.describe Repositories::TicketRepository do
       expect(results).to eq([Ticket.new(ticket_1.merge(status: 'In Progress', approved_at: nil))])
     end
 
-    it 'projects the tickets referenced in JIRA comments' do
+    it 'snapshots tickets linked to a Feature Review' do
       jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
       jira_4 = { key: 'JIRA-4', summary: 'Ticket 4' }
       ticket_1 = jira_1.merge(ticket_defaults)
@@ -173,19 +173,15 @@ RSpec.describe Repositories::TicketRepository do
       [
         build(:jira_event, :created, jira_1),
         build(:jira_event, :started, jira_1),
-        build(:jira_event, :development_completed, jira_1.merge(comment_body: "Review #{url}")),
+        build(:jira_event, :development_completed, jira_1.merge(comment_body: "Please review #{url}")),
 
         build(:jira_event, :created, key: 'JIRA-2'),
-        build(
-          :jira_event,
-          :created,
-          key: 'JIRA-3',
-          comment_body: 'Review http://example.com/feature_reviews/extra/stuff',
-        ),
+        build(:jira_event, :created, key: 'JIRA-3', comment_body: 'http://example.com/feature_reviews/fake'),
 
         build(:jira_event, :created, jira_4),
         build(:jira_event, :started, jira_4),
-        build(:jira_event, :development_completed, jira_4.merge(comment_body: "#{url} is ready!")),
+        build(:jira_event, :development_completed, jira_4.merge(comment_body: url)),
+
         build(:jira_event, :deployed, jira_1.merge(created_at: approval_time)),
       ].each do |event|
         repository.apply(event)
