@@ -2,8 +2,6 @@ require 'events/jira_event'
 require 'snapshots/ticket'
 require 'ticket'
 
-require 'addressable/uri'
-
 module Repositories
   class TicketRepository
     def initialize(store = Snapshots::Ticket,
