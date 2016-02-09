@@ -40,5 +40,6 @@ module ShipmentTracker
     config.git_repository_cache_dir = Dir.tmpdir
     config.github_access_token = ENV['GITHUB_REPO_STATUS_ACCESS_TOKEN']
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
+    config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
   end
 end

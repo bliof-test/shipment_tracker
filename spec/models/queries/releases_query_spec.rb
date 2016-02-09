@@ -4,6 +4,7 @@ RSpec.describe Queries::ReleasesQuery do
   subject(:releases_query) {
     Queries::ReleasesQuery.new(
       per_page: 50,
+      region: 'gb',
       git_repo: git_repository,
       app_name: app_name,
     )
@@ -55,7 +56,8 @@ RSpec.describe Queries::ReleasesQuery do
     allow(Repositories::DeployRepository).to receive(:new).and_return(deploy_repository)
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
     allow(git_repository).to receive(:recent_commits_on_main_branch).with(50).and_return(commits)
-    allow(deploy_repository).to receive(:deploys_for_versions).with(versions, environment: 'production')
+    allow(deploy_repository).to receive(:deploys_for_versions)
+      .with(versions, environment: 'production', region: 'gb')
       .and_return(deploys)
     allow(ticket_repository).to receive(:tickets_for_versions).with(associated_versions)
       .and_return(tickets)
@@ -88,7 +90,7 @@ RSpec.describe Queries::ReleasesQuery do
 
   describe '#deployed_releases' do
     subject(:deployed_releases) { releases_query.deployed_releases }
-    it 'returns list of releases deployed to production' do
+    it 'returns list of releases deployed to production in region "gb"' do
       approved_feature_review = FeatureReview.new(
         versions: approved_ticket.versions,
         path: approved_ticket.paths.first,

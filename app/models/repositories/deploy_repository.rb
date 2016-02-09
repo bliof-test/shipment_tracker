@@ -13,10 +13,11 @@ module Repositories
       deploys(apps, server, at)
     end
 
-    def deploys_for_versions(versions, environment:)
+    def deploys_for_versions(versions, environment:, region:)
       query = store.select('DISTINCT ON (version) *')
       query = query.where(store.arel_table['version'].in(versions))
       query = query.where(environment: environment)
+      query = query.where(region: region)
       query.order('version, id DESC').map { |deploy_record|
         Deploy.new(deploy_record.attributes)
       }

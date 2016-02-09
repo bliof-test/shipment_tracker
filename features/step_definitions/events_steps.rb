@@ -50,6 +50,7 @@ Given 'commit "$version" of "$app" is deployed by "$name" to server "$server" at
     :deploy_event,
     server: server,
     app_name: app,
+    locale: 'gb',
     version: scenario_context.resolve_version(version),
     deployed_by: name,
   ).details
@@ -66,6 +67,7 @@ Given 'commit "$ver" of "$app" is deployed by "$name" to production at "$time"' 
     server: "#{app}.example.com",
     environment: 'production',
     app_name: app,
+    locale: 'gb',
     version: scenario_context.resolve_version(ver),
     deployed_by: name,
   ).details
