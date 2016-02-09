@@ -3,23 +3,35 @@ require 'rails_helper'
 RSpec.describe Events::DeployEvent do
   subject { Events::DeployEvent.new(details: payload) }
 
-  context 'when given a valid payload' do
-    let(:payload) {
-      {
-        'app_name' => 'soMeApp',
-        'servers' => ['prod1.example.com', 'prod2.example.com'],
-        'version' => '123abc',
-        'deployed_by' => 'bob',
-        'environment' => 'staging',
-      }
+  let(:payload) {
+    {
+      'app_name' => 'soMeApp',
+      'servers' => ['prod1.example.com', 'prod2.example.com'],
+      'version' => '123abc',
+      'deployed_by' => 'bob',
+      'locale' => 'us',
+      'environment' => 'staging',
     }
+  }
 
+  context 'when given a valid payload' do
     it 'returns the correct values' do
       expect(subject.app_name).to eq('someapp')
       expect(subject.server).to eq('prod1.example.com')
       expect(subject.version).to eq('123abc')
       expect(subject.deployed_by).to eq('bob')
       expect(subject.environment).to eq('staging')
+      expect(subject.locale).to eq('us')
+    end
+
+    context 'when the payload does not have locale' do
+      before do
+        payload.delete('locale')
+      end
+
+      it 'uses default locale "gb"' do
+        expect(subject.locale).to eq('gb')
+      end
     end
 
     context 'when the payload comes from Heroku' do

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150930111438) do
+ActiveRecord::Schema.define(version: 20160209134817) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 20150930111438) do
     t.string   "deployed_by"
     t.datetime "event_created_at"
     t.string   "environment"
+    t.string   "region"
   end
 
   add_index "deploys", ["server", "app_name"], name: "index_deploys_on_server_and_app_name", using: :btree

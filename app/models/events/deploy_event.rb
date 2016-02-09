@@ -24,6 +24,12 @@ module Events
       details.fetch('environment', heroku_environment).try(:downcase)
     end
 
+    def locale
+      # default value needed for older events without locale
+      # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2'
+      details.fetch('locale', 'gb')
+    end
+
     private
 
     def heroku_environment

@@ -33,6 +33,7 @@ module Repositories
       store.create!(
         app_name: event.app_name,
         server: event.server,
+        region: event.locale,
         environment: event.environment,
         version: event.version,
         deployed_by: event.deployed_by,
