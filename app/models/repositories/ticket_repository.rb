@@ -31,10 +31,6 @@ module Repositories
         .map { |t| Ticket.new(t.attributes) }
     end
 
-    def find_last_by_key(key)
-      store.where(key: key).order('id ASC').last
-    end
-
     def apply(event)
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 

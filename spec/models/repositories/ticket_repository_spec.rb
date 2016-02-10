@@ -399,21 +399,4 @@ RSpec.describe Repositories::TicketRepository do
       end
     end
   end
-
-  describe '#find_last_by_key' do
-    let!(:tickets) {
-      [
-        Snapshots::Ticket.create(key: '1', summary: 'first'),
-        Snapshots::Ticket.create(key: '2', summary: 'second'),
-        Snapshots::Ticket.create(key: '1', summary: 'fourth'),
-        Snapshots::Ticket.create(key: '3', summary: 'third'),
-      ]
-    }
-
-    context 'when key is specified' do
-      it 'returns the last snapshot with that key' do
-        expect(subject.find_last_by_key('1')).to eq(tickets[2])
-      end
-    end
-  end
 end
