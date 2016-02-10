@@ -193,8 +193,9 @@ RSpec.describe Repositories::TicketRepository do
       ])
     end
 
-    it 'ignores non JIRA issue events' do
-      expect { repository.apply(build(:jira_event_user_created)) }.to_not raise_error
+    it 'ignores events that are not JIRA issues' do
+      store = repository.instance_variable_get(:@store)
+      expect { repository.apply(build(:jira_event_user_created)) }.to_not change { store.count }
     end
 
     context 'when multiple feature reviews are referenced in the same JIRA ticket' do
