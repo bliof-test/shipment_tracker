@@ -5,8 +5,8 @@
   %br A release is approved if any associated tickets have been approved in JIRA.
 
 %ul.nav.nav-tabs
-  - Rails.configuration.available_deploy_regions.each do |tab_region|
-    %li{ :class => ('active' if (tab_region == @region)), :role => "presentation" }
+  - Rails.configuration.deploy_regions.each do |tab_region|
+    %li{ class: ('active' if (tab_region == @region)), role: "presentation" }
       %a(href="?region=#{tab_region}")
         %span #{flag_icon(tab_region.to_sym)} #{tab_region.upcase}
 
