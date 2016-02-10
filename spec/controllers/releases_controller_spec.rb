@@ -43,7 +43,7 @@ RSpec.describe ReleasesController do
       allow(GitRepositoryLocation).to receive(:github_url_for_app).with(app_name).and_return(github_url)
       allow(Queries::ReleasesQuery).to receive(:new).with(
         per_page: 50,
-        region: 'gb',
+        region: anything,
         git_repo: repository,
         app_name: app_name,
       ).and_return(releases_query)
@@ -72,11 +72,39 @@ RSpec.describe ReleasesController do
       end
     end
 
-    context 'when no region is passed in' do
+    context 'when no region is passed in and no cookie set' do
       it 'redirects to region "gb"' do
         get :show, id: app_name
         expect(response).to have_http_status(:redirect)
         expect(response.redirect_url).to eq('http://test.host/releases/frontend?region=gb')
+      end
+
+      it 'sets cookie to region "gb"' do
+        get :show, id: app_name
+        expect(response.cookies['deploy_region']).to eq('gb')
+      end
+    end
+
+    context 'when no region is passed and deploy region cookie is set' do
+      let(:region) { 'us' }
+
+      it 'redirects to releases with same region as set in cookie' do
+        request.cookies['deploy_region'] = region
+        get :show, id: app_name
+        expect(response).to have_http_status(:redirect)
+        expect(response.redirect_url).to eq("http://test.host/releases/frontend?region=#{region}")
+        expect(cookies['deploy_region']).to eq(region)
+      end
+    end
+
+    context 'when "de" region is passed and deploy region cookie is set to "nl"' do
+      let(:cookie_region) { 'nl' }
+      let(:params_region) { 'de' }
+
+      it 'navigates to releases with same region as set in parameters and updates cookie value' do
+        cookies['deploy_region'] = cookie_region
+        get :show, id: app_name, region: params_region
+        expect(cookies['deploy_region']).to eq(params_region)
       end
     end
   end
