@@ -42,10 +42,14 @@ module ShipmentTracker
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
 
     # default value needed for older events without locale
-    # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2'
     config.default_deploy_locale = ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb')
 
+    # default value needed as not all heroku app names have the local as perfix
+    config.default_heroku_deploy_locale = ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us')
+
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
+
+    # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2'
     config.available_deploy_regions = ENV.fetch('available_deploy_region', %w(gb us))
   end
 end

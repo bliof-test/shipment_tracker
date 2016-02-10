@@ -25,7 +25,7 @@ module Events
     end
 
     def locale
-      details.fetch('locale', heroku_locale).try(:downcase) || Rails.configuration.default_deploy_locale
+      details.fetch('locale', heroku_locale).try(:downcase) || default_locale
     end
 
     private
@@ -36,6 +36,18 @@ module Events
 
     def heroku_locale
       app_name_prefix if Rails.configuration.available_deploy_regions.include?(app_name_prefix)
+    end
+
+    def default_locale
+      if deployed_to_heroku?
+        Rails.configuration.default_heroku_deploy_locale
+      else
+        Rails.configuration.default_deploy_locale
+      end
+    end
+
+    def deployed_to_heroku?
+      details.fetch('url', '').split('.')[-2] == 'herokuapp'
     end
 
     def app_name_extension
