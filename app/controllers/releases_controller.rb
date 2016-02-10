@@ -4,6 +4,8 @@ class ReleasesController < ApplicationController
   end
 
   def show
+    update_cookies
+    redirect_to release_path(app_name, region: region) unless params[:region]
     projection = build_projection
     @pending_releases = projection.pending_releases
     @deployed_releases = projection.deployed_releases
@@ -18,12 +20,22 @@ class ReleasesController < ApplicationController
   def build_projection
     Queries::ReleasesQuery.new(
       per_page: 50,
+      region: region,
       git_repo: git_repository,
       app_name: app_name)
   end
 
   def app_name
     params[:id]
+  end
+
+  def region
+    cookies[:deploy_region]
+  end
+
+  def update_cookies
+    cookies.permanent[:deploy_region] ||= Rails.configuration.default_deploy_region
+    cookies.permanent[:deploy_region] = params[:region] if params[:region]
   end
 
   def git_repository

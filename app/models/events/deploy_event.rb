@@ -24,15 +24,28 @@ module Events
       details.fetch('environment', heroku_environment).try(:downcase)
     end
 
+    def locale
+      details.fetch('locale', heroku_locale).try(:downcase) || Rails.configuration.default_deploy_locale
+    end
+
     private
 
     def heroku_environment
       app_name_extension if ENVIRONMENTS.include?(app_name_extension)
     end
 
+    def heroku_locale
+      app_name_prefix if Rails.configuration.available_deploy_regions.include?(app_name_prefix)
+    end
+
     def app_name_extension
       return nil unless app_name
       app_name.split('-').last.downcase
+    end
+
+    def app_name_prefix
+      return nil unless app_name
+      app_name.split('-').first.downcase
     end
 
     def servers

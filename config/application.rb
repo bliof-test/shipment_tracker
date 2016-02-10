@@ -40,5 +40,12 @@ module ShipmentTracker
     config.git_repository_cache_dir = Dir.tmpdir
     config.github_access_token = ENV['GITHUB_REPO_STATUS_ACCESS_TOKEN']
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
+
+    # default value needed for older events without locale
+    # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2'
+    config.default_deploy_locale = ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb')
+
+    config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
+    config.available_deploy_regions = ENV.fetch('available_deploy_region', %w(gb us))
   end
 end
