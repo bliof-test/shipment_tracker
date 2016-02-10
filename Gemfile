@@ -5,6 +5,7 @@ gem 'rails', '~> 4.2.1'
 
 gem 'addressable', require: 'addressable/uri'
 gem 'bootstrap-sass'
+gem 'flag-icon-sass'
 gem 'delayed_job_active_record'
 gem 'dotenv'
 gem 'haml-rails'

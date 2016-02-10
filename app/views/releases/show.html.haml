@@ -4,6 +4,12 @@
   View which releases (merged commits) are pending deployment or have already been deployed.
   %br A release is approved if any associated tickets have been approved in JIRA.
 
+%ul.nav.nav-tabs
+  - Rails.configuration.deploy_regions.each do |tab_region|
+    %li{ class: ('active' if (tab_region == @region)), role: "presentation" }
+      %a(href="?region=#{tab_region}")
+        %span #{flag_icon(tab_region.to_sym)} #{tab_region.upcase}
+
 %h2 Pending
 
 %table.table.table-condensed
