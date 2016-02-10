@@ -59,7 +59,9 @@ RSpec.describe Events::DeployEvent do
       end
 
       context 'when the app name does not have the environment in lowercase' do
-        let(:payload) { { 'app' => 'nameless-forest-UAT' } }
+        before do
+          payload['app'] = 'nameless-forest-UAT'
+        end
 
         it 'downcases the environment' do
           expect(subject.environment).to eq('uat')
@@ -67,15 +69,19 @@ RSpec.describe Events::DeployEvent do
       end
 
       context 'when the app name does not have the locale prefix in lowercase' do
-        let(:payload) { { 'app' => 'US-nameless-forest-uat' } }
+        before do
+          payload['app'] = 'GB-nameless-forest'
+        end
 
         it 'downcases the environment' do
-          expect(subject.locale).to eq('us')
+          expect(subject.locale).to eq('gb')
         end
       end
 
       context 'when the app name does not include the environment at the end' do
-        let(:payload) { { 'app' => 'nameless-forest' } }
+        before do
+          payload['app'] = 'nameless-forest'
+        end
 
         it 'sets the environment to nil' do
           expect(subject.environment).to be nil
@@ -83,10 +89,12 @@ RSpec.describe Events::DeployEvent do
       end
 
       context 'when the app name does not include the locale prefix' do
-        let(:payload) { { 'app' => 'nameless-forest' } }
+        before do
+          payload['app'] = 'nameless-forest'
+        end
 
         it 'sets the environment to nil' do
-          expect(subject.locale).to eq('gb')
+          expect(subject.locale).to eq('us')
         end
       end
     end
