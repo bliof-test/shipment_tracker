@@ -51,46 +51,43 @@ RSpec.describe Repositories::DeployRepository do
     let(:server) { 'uat.fundingcircle.com' }
 
     let(:defaults) {
-      { app_name: 'frontend', server: server, deployed_by: 'Bob', version: 'abc', region: 'gb' }
-    }
-    let(:defaults_evt) {
       { app_name: 'frontend', server: server, deployed_by: 'Bob', version: 'abc', locale: 'gb' }
     }
 
     it 'projects last deploy' do
-      repository.apply(build(:deploy_event, defaults_evt.merge(version: 'abc')))
+      repository.apply(build(:deploy_event, defaults.merge(version: 'abc')))
       results = repository.deploys_for(apps: apps, server: server)
       expect(results).to eq([Deploy.new(defaults.merge(version: 'abc', correct: true, region: 'gb'))])
 
-      repository.apply(build(:deploy_event, defaults_evt.merge(version: 'def')))
+      repository.apply(build(:deploy_event, defaults.merge(version: 'def')))
       results = repository.deploys_for(apps: apps, server: server)
       expect(results).to eq([Deploy.new(defaults.merge(version: 'def', correct: false, region: 'gb'))])
     end
 
     it 'is case insensitive when a repo name and the event app name do not match in case' do
-      repository.apply(build(:deploy_event, defaults_evt.merge(app_name: 'Frontend')))
+      repository.apply(build(:deploy_event, defaults.merge(app_name: 'Frontend')))
 
       results = repository.deploys_for(apps: apps, server: server)
       expect(results).to eq([Deploy.new(defaults.merge(app_name: 'frontend', correct: true, region: 'gb'))])
     end
 
     it 'ignores the deploys event when it is for another server' do
-      repository.apply(build(:deploy_event, defaults_evt.merge(server: 'other.fundingcircle.com')))
+      repository.apply(build(:deploy_event, defaults.merge(server: 'other.fundingcircle.com')))
 
       expect(repository.deploys_for(apps: apps, server: server)).to eq([])
     end
 
     it 'ignores the deploy event when it is for an app that is not under review' do
-      repository.apply(build(:deploy_event, defaults_evt.merge(app_name: 'irrelevant_app')))
+      repository.apply(build(:deploy_event, defaults.merge(app_name: 'irrelevant_app')))
 
       expect(repository.deploys_for(apps: apps, server: server)).to eq([])
     end
 
     it 'reports an incorrect version deployed to the UAT when event is for a different app version' do
-      repository.apply(build(:deploy_event, defaults_evt))
+      repository.apply(build(:deploy_event, defaults))
       expect(repository.deploys_for(apps: apps, server: server).map(&:correct)).to eq([true])
 
-      repository.apply(build(:deploy_event, defaults_evt.merge(version: 'def')))
+      repository.apply(build(:deploy_event, defaults.merge(version: 'def')))
       expect(repository.deploys_for(apps: apps, server: server).map(&:correct)).to eq([false])
     end
 
@@ -98,8 +95,8 @@ RSpec.describe Repositories::DeployRepository do
       let(:apps) { { 'frontend' => 'abc', 'backend' => 'abc' } }
 
       it 'returns multiple deploys' do
-        repository.apply(build(:deploy_event, defaults_evt.merge(app_name: 'frontend')))
-        repository.apply(build(:deploy_event, defaults_evt.merge(app_name: 'backend')))
+        repository.apply(build(:deploy_event, defaults.merge(app_name: 'frontend')))
+        repository.apply(build(:deploy_event, defaults.merge(app_name: 'backend')))
 
         expect(repository.deploys_for(apps: apps, server: server)).to match_array([
           Deploy.new(defaults.merge(app_name: 'frontend', correct: true, region: 'gb')),
@@ -168,7 +165,7 @@ RSpec.describe Repositories::DeployRepository do
   describe '#last_staging_deploy_for_version' do
     let(:version) { 'abc' }
     let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', region: 'de' } }
-    let(:defaults_evt) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de' } }
+    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de' } }
 
     context 'when no deploy exist' do
       it 'returns nil' do
@@ -179,9 +176,9 @@ RSpec.describe Repositories::DeployRepository do
     context 'when no deploys exist for the version under review' do
       before do
         [
-          build(:deploy_event, defaults_evt.merge(server: 'a', environment: 'uat', version: 'def')),
-          build(:deploy_event, defaults_evt.merge(server: 'b', environment: 'uat', version: 'ghi')),
-          build(:deploy_event, defaults_evt.merge(server: 'c', environment: 'production', version: 'xyz')),
+          build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: 'def')),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: 'ghi')),
+          build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: 'xyz')),
         ].each do |deploy|
           repository.apply(deploy)
         end
@@ -195,10 +192,10 @@ RSpec.describe Repositories::DeployRepository do
     context 'when a deploy exists for the version under review' do
       before do
         [
-          build(:deploy_event, defaults_evt.merge(server: 'a', environment: 'uat', version: version)),
-          build(:deploy_event, defaults_evt.merge(server: 'b', environment: 'uat', version: version)),
-          build(:deploy_event, defaults_evt.merge(server: 'b', environment: 'uat', version: 'def')),
-          build(:deploy_event, defaults_evt.merge(server: 'c', environment: 'production', version: version)),
+          build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: version)),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: version)),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: 'def')),
+          build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: version)),
         ].each do |deploy|
           repository.apply(deploy)
         end
@@ -212,7 +209,7 @@ RSpec.describe Repositories::DeployRepository do
 
       it 'looks for any non-production environments' do
         repository.apply(
-          build(:deploy_event, defaults_evt.merge(server: 'c', environment: 'staging', version: version)),
+          build(:deploy_event, defaults.merge(server: 'c', environment: 'staging', version: version)),
         )
 
         expect(repository.last_staging_deploy_for_version(version)).to eq(
