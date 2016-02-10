@@ -35,7 +35,7 @@ module Events
     end
 
     def heroku_locale
-      app_name_prefix if Rails.configuration.available_deploy_regions.include?(app_name_prefix)
+      app_name_prefix if Rails.configuration.deploy_regions.include?(app_name_prefix)
     end
 
     def default_locale
