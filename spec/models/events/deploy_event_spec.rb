@@ -37,19 +37,25 @@ RSpec.describe Events::DeployEvent do
     context 'when the payload comes from Heroku' do
       let(:payload) {
         {
-          'app' => 'nameless-forest-uat',
+          'app' => 'us-nameless-forest-uat',
+          'app_uuid' => '8d1e4aff-eac8-4ced-90c8-bf97f8334a4c',
+          'git_log' => '',
+          'head' => '2beae04',
+          'head_long' => '2beae049a22c053883661771551f914d2d3de6e5',
+          'prev_head' => '7650eb713bcaae1e4c03637eae2e333fc4fb5a74',
+          'release' => 'v189',
+          'url' => 'http://us-nameless-forest-uat.herokuapp.com',
           'user' => 'user@example.com',
-          'url' => 'http://nameless-forest-uat.herokuapp.com',
-          'head_long' => '123abc',
         }
       }
 
       it 'returns the correct values' do
-        expect(subject.app_name).to eq('nameless-forest-uat')
-        expect(subject.server).to eq('http://nameless-forest-uat.herokuapp.com')
-        expect(subject.version).to eq('123abc')
+        expect(subject.app_name).to eq('us-nameless-forest-uat')
         expect(subject.deployed_by).to eq('user@example.com')
         expect(subject.environment).to eq('uat')
+        expect(subject.locale).to eq('us')
+        expect(subject.server).to eq('http://us-nameless-forest-uat.herokuapp.com')
+        expect(subject.version).to eq('2beae049a22c053883661771551f914d2d3de6e5')
       end
 
       context 'when the app name does not have the environment in lowercase' do
@@ -60,11 +66,27 @@ RSpec.describe Events::DeployEvent do
         end
       end
 
+      context 'when the app name does not have the locale prefix in lowercase' do
+        let(:payload) { { 'app' => 'US-nameless-forest-uat' } }
+
+        it 'downcases the environment' do
+          expect(subject.locale).to eq('us')
+        end
+      end
+
       context 'when the app name does not include the environment at the end' do
         let(:payload) { { 'app' => 'nameless-forest' } }
 
         it 'sets the environment to nil' do
           expect(subject.environment).to be nil
+        end
+      end
+
+      context 'when the app name does not include the locale prefix' do
+        let(:payload) { { 'app' => 'nameless-forest' } }
+
+        it 'sets the environment to nil' do
+          expect(subject.locale).to eq('gb')
         end
       end
     end

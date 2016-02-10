@@ -25,9 +25,7 @@ module Events
     end
 
     def locale
-      # default value needed for older events without locale
-      # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2'
-      details.fetch('locale', 'gb')
+      details.fetch('locale', heroku_locale).try(:downcase) || Rails.configuration.default_deploy_locale
     end
 
     private
@@ -36,9 +34,18 @@ module Events
       app_name_extension if ENVIRONMENTS.include?(app_name_extension)
     end
 
+    def heroku_locale
+      app_name_prefix if Rails.configuration.available_deploy_regions.include?(app_name_prefix)
+    end
+
     def app_name_extension
       return nil unless app_name
       app_name.split('-').last.downcase
+    end
+
+    def app_name_prefix
+      return nil unless app_name
+      app_name.split('-').first.downcase
     end
 
     def servers
