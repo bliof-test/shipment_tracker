@@ -1,3 +1,11 @@
+GIT
+  remote: git@github.com:cfiorini/flag-icon-sass.git
+  revision: ee03505227cdc5d15b0568348e037a01c848482c
+  branch: master
+  specs:
+    flag-icon-sass (1.1.1)
+      sass (~> 3.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -315,6 +323,7 @@ DEPENDENCIES
   delayed_job_active_record
   dotenv
   factory_girl
+  flag-icon-sass!
   foreman
   haml-rails
   has_secure_token

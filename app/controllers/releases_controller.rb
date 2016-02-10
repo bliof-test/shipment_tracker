@@ -30,7 +30,7 @@ class ReleasesController < ApplicationController
   end
 
   def region
-    cookies[:deploy_region]
+    @region = cookies[:deploy_region]
   end
 
   def update_cookies
