@@ -16,4 +16,9 @@ class Ticket
   def approved?
     Rails.application.config.approved_statuses.include?(status)
   end
+
+  def authorised?
+    return false if approved_at.nil?
+    approved_at < event_created_at
+  end
 end
