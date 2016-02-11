@@ -152,16 +152,28 @@ RSpec.describe Repositories::TicketRepository do
       repository.apply(build(:jira_event, :approved, jira_1.merge(created_at: approval_time)))
       results = repository.tickets_for_path(path)
       expect(results).to eq([
-        Ticket.new(ticket_1.merge(status: 'Ready for Deployment', approved_at: approval_time)),
+        Ticket.new(
+          ticket_1.merge(
+            status: 'Ready for Deployment', approved_at: approval_time, event_created_at: approval_time,
+          ),
+        ),
       ])
 
       repository.apply(build(:jira_event, :deployed, jira_1.merge(created_at: approval_time + 1.hour)))
       results = repository.tickets_for_path(path)
-      expect(results).to eq([Ticket.new(ticket_1.merge(status: 'Done', approved_at: approval_time))])
+      expect(results).to eq([
+        Ticket.new(ticket_1.merge(
+                     status: 'Done', approved_at: approval_time, event_created_at: approval_time + 1.hour,
+        )),
+      ])
 
       repository.apply(build(:jira_event, :rejected, jira_1.merge(created_at: approval_time + 2.hours)))
       results = repository.tickets_for_path(path)
-      expect(results).to eq([Ticket.new(ticket_1.merge(status: 'In Progress', approved_at: nil))])
+      expect(results).to eq([
+        Ticket.new(ticket_1.merge(
+                     status: 'In Progress', approved_at: nil, event_created_at: approval_time + 2.hours,
+        )),
+      ])
     end
 
     it 'snapshots tickets linked to a Feature Review' do
@@ -188,7 +200,11 @@ RSpec.describe Repositories::TicketRepository do
       end
 
       expect(repository.tickets_for_path(path)).to match_array([
-        Ticket.new(ticket_1.merge(status: 'Done', approved_at: approval_time)),
+        Ticket.new(
+          ticket_1.merge(
+            status: 'Done', approved_at: approval_time, event_created_at: approval_time,
+          ),
+        ),
         Ticket.new(ticket_4.merge(status: 'Ready For Review')),
       ])
     end
@@ -223,22 +239,24 @@ RSpec.describe Repositories::TicketRepository do
     context 'with at specified' do
       it 'returns the state at that moment' do
         time = Time.current.change(usec: 0)
-        t = [time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute]
+        times = [time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute]
         jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
         jira_2 = { key: 'JIRA-2', summary: 'Ticket 2' }
         ticket_1 = jira_1.merge(ticket_defaults)
 
         [
-          build(:jira_event, :created, jira_1.merge(comment_body: url, created_at: t[0])),
-          build(:jira_event, :approved, jira_1.merge(created_at: t[1])),
-          build(:jira_event, :created, jira_2.merge(created_at: t[2])),
-          build(:jira_event, :created, jira_2.merge(comment_body: url, created_at: t[3])),
+          build(:jira_event, :created, jira_1.merge(comment_body: url, created_at: times[0])),
+          build(:jira_event, :approved, jira_1.merge(created_at: times[1])),
+          build(:jira_event, :created, jira_2.merge(created_at: times[2])),
+          build(:jira_event, :created, jira_2.merge(comment_body: url, created_at: times[3])),
         ].each do |event|
           repository.apply(event)
         end
 
-        expect(repository.tickets_for_path(path, at: t[2])).to match_array([
-          Ticket.new(ticket_1.merge(status: 'Ready for Deployment', approved_at: t[1])),
+        expect(repository.tickets_for_path(path, at: times[2])).to match_array([
+          Ticket.new(ticket_1.merge(
+                       status: 'Ready for Deployment', approved_at: times[1], event_created_at: times[1],
+          )),
         ])
       end
     end
