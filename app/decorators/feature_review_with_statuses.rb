@@ -63,12 +63,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def authorised?
-    return false if tickets.empty?
-
-    tickets.each do |ticket|
-      return false if ticket.approved_at.nil? || ticket.approved_at < ticket.event_created_at
-    end
-    true
+    @authorised ||= tickets.present? && tickets.all?(&:authorised?)
   end
 
   def approved_at
