@@ -233,6 +233,47 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
+  describe '#authorised?' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).authorised? }
+    let(:current_time) { Time.current }
+
+    context 'when there are no tickets' do
+      let(:tickets) { [] }
+      it { is_expected.to be false }
+    end
+
+    context 'when all tickets were approved after they were linked' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved_at: current_time, event_created_at: current_time),
+          instance_double(Ticket, approved_at: current_time, event_created_at: 1.hour.ago),
+        ]
+      }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when at least one ticket was approved before it was linked' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved_at: current_time, event_created_at: current_time),
+          instance_double(Ticket, approved_at: 1.hour.ago, event_created_at: current_time),
+        ]
+      }
+      it { is_expected.to be false }
+    end
+
+    context 'when at least one ticket is not yet approved' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved_at: nil, event_created_at: 1.hour.ago),
+          instance_double(Ticket, approved_at: current_time, event_created_at: 1.hour.ago)
+        ]
+      }
+      it { is_expected.to be false}
+    end
+  end
+
   describe 'approval' do
     subject(:decorator) { FeatureReviewWithStatuses.new(feature_review, tickets: tickets) }
 

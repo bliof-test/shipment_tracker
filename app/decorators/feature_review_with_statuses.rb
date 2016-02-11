@@ -62,6 +62,15 @@ class FeatureReviewWithStatuses < SimpleDelegator
     end
   end
 
+  def authorised?
+    return false if tickets.empty?
+
+    tickets.each do |ticket|
+      return false if ticket.approved_at.nil? || ticket.approved_at < ticket.event_created_at
+    end
+    true
+  end
+
   def approved_at
     return unless approved?
     @approved_at ||= tickets.map(&:approved_at).max
