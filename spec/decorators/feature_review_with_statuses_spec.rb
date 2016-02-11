@@ -37,7 +37,7 @@ RSpec.describe FeatureReviewWithStatuses do
   context 'when initialized without builds, deploys, qa_submission, tickets, uatest and time' do
     let(:decorator) { described_class.new(feature_review) }
 
-    it 'returns default values for #builds, #deploy,s #qa_submission, #tickets, #uatest and #time' do
+    it 'returns default values for #builds, #deploys, #qa_submission, #tickets, #uatest and #time' do
       expect(decorator.builds).to eq({})
       expect(decorator.deploys).to eq([])
       expect(decorator.qa_submission).to eq(nil)
@@ -60,7 +60,7 @@ RSpec.describe FeatureReviewWithStatuses do
       allow(GitRepositoryLocation).to receive(:github_urls_for_apps).with(app_names).and_return(github_urls)
     end
 
-    it 'returs the repo URLs for the apps under review' do
+    it 'returns the repo URLs for the apps under review' do
       expect(decorator.github_repo_urls).to eq(github_urls)
     end
   end
@@ -236,7 +236,7 @@ RSpec.describe FeatureReviewWithStatuses do
   describe 'approval' do
     subject(:decorator) { FeatureReviewWithStatuses.new(feature_review, tickets: tickets) }
 
-    describe 'approved_at' do
+    describe '#approved_at' do
       let(:approval_time) { Time.current }
       let(:tickets) {
         [
