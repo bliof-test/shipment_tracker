@@ -66,6 +66,16 @@ class FeatureReviewWithStatuses < SimpleDelegator
     @authorised ||= tickets.present? && tickets.all?(&:authorised?)
   end
 
+  def authorisation_status
+    return :not_approved unless approved?
+
+    if authorised?
+      :approved
+    else
+      :requires_reapproval
+    end
+  end
+
   def approved_at
     return unless approved?
     @approved_at ||= tickets.map(&:approved_at).max

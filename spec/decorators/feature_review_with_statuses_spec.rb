@@ -248,7 +248,6 @@ RSpec.describe FeatureReviewWithStatuses do
           instance_double(Ticket, authorised?: true),
         ]
       }
-
       it { is_expected.to be true }
     end
 
@@ -260,6 +259,45 @@ RSpec.describe FeatureReviewWithStatuses do
         ]
       }
       it { is_expected.to be false }
+    end
+  end
+
+  describe '#authorisation_status' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).authorisation_status }
+
+    context 'when there are no associated tickets' do
+      let(:tickets) { [] }
+      it { is_expected.to be :not_approved }
+    end
+
+    context 'when any associated tickets are not approved' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved?: false),
+          instance_double(Ticket, approved?: true),
+        ]
+      }
+      it { is_expected.to be :not_approved }
+    end
+
+    context 'when all associated tickets are approved after Feature Review offered' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved?: true, authorised?: true),
+          instance_double(Ticket, approved?: true, authorised?: true),
+        ]
+      }
+      it { is_expected.to be :approved }
+    end
+
+    context 'when any associated tickets are approved before Feature Review offered' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved?: true, authorised?: true),
+          instance_double(Ticket, approved?: true, authorised?: false),
+        ]
+      }
+      it { is_expected.to be :requires_reapproval }
     end
   end
 
