@@ -42,6 +42,7 @@ RSpec.describe Queries::ReleasesQuery do
       paths: ['/feature_reviews?apps%5Bapp1%5D=xyz&apps%5Bapp2%5D=uvw'],
       status: 'Done',
       approved_at: approval_time,
+      version_timestamps: { 'xyz' => approval_time - 1.hour, 'uvw' => approval_time - 1.hour },
     )
   }
   let(:not_approved_ticket) {

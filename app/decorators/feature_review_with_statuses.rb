@@ -63,7 +63,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def authorised?
-    @authorised ||= tickets.present? && tickets.all?(&:authorised?)
+    @authorised ||= tickets.present? && tickets.all? { |t| t.authorised?(versions) }
   end
 
   def authorisation_status
@@ -83,10 +83,6 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def approved?
     @approved ||= tickets.present? && tickets.all?(&:approved?)
-  end
-
-  def approval_status
-    approved? ? :approved : :not_approved
   end
 
   def approved_path

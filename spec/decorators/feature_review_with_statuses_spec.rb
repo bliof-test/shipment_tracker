@@ -10,7 +10,9 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
 
   let(:uat_url) { 'http://uat.com' }
-  let(:feature_review) { instance_double(FeatureReview, uat_url: uat_url, app_versions: apps) }
+  let(:feature_review) {
+    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: apps.values)
+  }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
   subject(:decorator) {
@@ -363,24 +365,6 @@ RSpec.describe FeatureReviewWithStatuses do
       end
     end
 
-    describe '#approval_status' do
-      context 'when feature review is approved' do
-        let(:tickets) { [instance_double(Ticket, approved?: true)] }
-
-        it 'returns :approved' do
-          expect(decorator.approval_status).to be :approved
-        end
-      end
-
-      context 'when feature review is not approved' do
-        let(:tickets) { [instance_double(Ticket, approved?: false)] }
-
-        it 'returns :not_approved' do
-          expect(subject.approval_status).to be :not_approved
-        end
-      end
-    end
-
     describe '#approved_path' do
       let(:feature_review) {
         instance_double(
@@ -388,15 +372,16 @@ RSpec.describe FeatureReviewWithStatuses do
           base_path: '/something',
           query_hash: { 'apps' => apps, 'uat_url' => 'http://uat.com' },
           app_versions: apps,
+          versions: apps.values,
         )
       }
 
-      context 'feature review is approved' do
+      context 'when Feature Review is authorised' do
         let(:approval_time) { Time.parse('2013-09-05 14:56:52 UTC') }
         let(:tickets) {
           [
-            instance_double(Ticket, approved?: true, approved_at: approval_time),
-            instance_double(Ticket, approved?: true, approved_at: approval_time - 1.hour),
+            instance_double(Ticket, authorised?: true, approved?: true, approved_at: approval_time),
+            instance_double(Ticket, authorised?: true, approved?: true, approved_at: approval_time - 1.hour),
           ]
         }
 
@@ -410,7 +395,7 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       context 'feature review is not approved' do
-        let(:tickets) { [instance_double(Ticket, approved?: false)] }
+        let(:tickets) { [instance_double(Ticket, authorised?: false)] }
 
         it 'returns nil' do
           expect(subject.approved_path).to be_nil

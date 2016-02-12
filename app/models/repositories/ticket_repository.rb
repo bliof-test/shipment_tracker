@@ -72,9 +72,9 @@ module Repositories
 
     def merge_version_timestamps(ticket, feature_reviews, event)
       old_version_timestamps = ticket.fetch('version_timestamps', {})
-      new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) do |version, hash|
-                                 hash[version] = event.created_at
-                               end
+      new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) { |version, hash|
+        hash[version] = event.created_at
+      }
       new_version_timestamps.merge!(old_version_timestamps)
     end
 

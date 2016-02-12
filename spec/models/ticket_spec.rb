@@ -20,26 +20,41 @@ RSpec.describe Ticket do
   end
 
   describe '#authorised?' do
-    subject { ticket.authorised? }
+    let(:versions) { %w(abc def) }
+    let(:current_time) { Time.current }
+
+    subject { ticket.authorised?(versions) }
 
     context 'when the ticket was approved after it was linked' do
-      let(:ticket_attributes) { { approved_at: Time.current, event_created_at: 1.hour.ago } }
-      it { is_expected.to be false }
-    end
-
-    context 'when the ticket was approved before it was linked' do
-      let(:ticket_attributes) { { approved_at: 1.hour.ago, event_created_at: Time.current } }
+      let(:ticket_attributes) {
+        { approved_at: current_time, version_timestamps: { versions.first => 1.hour.ago } }
+      }
       it { is_expected.to be true }
     end
 
-    context 'when the ticket was approved and linked at the same time' do
-      let(:current_time) { Time.current }
-      let(:ticket_attributes) { { approved_at: current_time, event_created_at: current_time } }
+    context 'when the ticket was approved before it was linked' do
+      let(:ticket_attributes) {
+        { approved_at: 1.hour.ago, version_timestamps: { versions.first => current_time } }
+      }
       it { is_expected.to be false }
     end
 
+    context 'when the ticket was approved and linked at the same time' do
+      let(:ticket_attributes) {
+        { approved_at: current_time, version_timestamps: { versions.first => current_time } }
+      }
+      it { is_expected.to be true }
+    end
+
     context 'when the ticket has not been approved' do
-      let(:ticket_attributes) { { approved_at: nil, event_created_at: Time.current } }
+      let(:ticket_attributes) { { approved_at: nil } }
+      it { is_expected.to be false }
+    end
+
+    context 'when the ticket has not been linked to any of the passed in versions' do
+      let(:ticket_attributes) {
+        { approved_at: current_time, version_timestamps: { 'foo' => 1.hour.ago } }
+      }
       it { is_expected.to be false }
     end
   end

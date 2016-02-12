@@ -32,7 +32,7 @@ module FeatureReviewsHelper
     case status
     when true, :success, :approved
       'success'
-    when false, :failure, :not_approved
+    when false, :failure, :not_approved, :requires_reapproval
       'danger'
     else
       'warning'
@@ -44,8 +44,8 @@ module FeatureReviewsHelper
   end
 
   def feature_status(feature_review)
-    status = "Feature Status: #{feature_review.approval_status.to_s.humanize}"
-    status << " at #{feature_review.approved_at}" if feature_review.approved? && feature_review.approved_at
+    status = "Feature Status: #{feature_review.authorisation_status.to_s.humanize}"
+    status << " at #{feature_review.approved_at}" if feature_review.authorised? && feature_review.approved_at
     status
   end
 

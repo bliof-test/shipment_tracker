@@ -97,7 +97,8 @@ module Support
 
     def approve_ticket(jira_key:, approver_email:, approve:, time: nil)
       ticket_details = @tickets.fetch(jira_key).except(:status, :comment_body)
-      ticket_details.merge!(user_email: approver_email, updated: time)
+      ticket_details[:user_email] = approver_email
+      ticket_details[:updated] = time
       event = build(
         :jira_event,
         approve ? :approved : :rejected,
