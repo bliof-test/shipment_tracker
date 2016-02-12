@@ -10,6 +10,7 @@ class Ticket
     attribute :paths, Array, default: []
     attribute :approved_at, DateTime
     attribute :event_created_at, DateTime
+    attribute :version_timestamps, Hash[String => DateTime]
     attribute :versions, Array, default: []
   end
 

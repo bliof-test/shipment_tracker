@@ -66,7 +66,16 @@ module Repositories
         'event_created_at' => event.created_at,
         'versions' => merge_ticket_versions(last_ticket, feature_reviews),
         'approved_at' => merge_approved_at(last_ticket, event),
+        'version_timestamps' => merge_version_timestamps(last_ticket, feature_reviews, event),
       )
+    end
+
+    def merge_version_timestamps(ticket, feature_reviews, event)
+      old_version_timestamps = ticket.fetch('version_timestamps', {})
+      new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) do |version, hash|
+                                 hash[version] = event.created_at
+                               end
+      new_version_timestamps.merge!(old_version_timestamps)
     end
 
     def merge_ticket_paths(ticket, feature_reviews)
