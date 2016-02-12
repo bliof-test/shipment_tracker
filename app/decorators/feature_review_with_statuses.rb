@@ -90,6 +90,6 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def approved_path
-    "#{base_path}?#{query_hash.merge(time: approved_at.utc).to_query}" if approved?
+    "#{base_path}?#{query_hash.merge(time: approved_at.utc).to_query}" if authorised?
   end
 end

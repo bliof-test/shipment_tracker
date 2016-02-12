@@ -15,7 +15,7 @@ class Release
     commit.id
   end
 
-  def approved?
-    feature_reviews.any?(&:approved?)
+  def authorised?
+    feature_reviews.any?(&:authorised?)
   end
 end

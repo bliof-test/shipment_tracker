@@ -83,3 +83,20 @@ Scenario: Viewing releases for an app
     | [#merge1](https://github.com/...)  | Merge feature1 into master | FR_ONE          | Not approved          |                       | no       | 2014-10-01 17:34 |
     | [#master2](https://github.com/...) | historic commit            |                 |                       |                       | no       |                  |
     | [#master1](https://github.com/...) | initial commit             |                 |                       |                       | no       | 2014-09-28 11:37 |
+
+
+Scenario: Release requires re-approval
+  Given an application called "frontend"
+  And a commit "#master1" with message "merge commit" is created at "2016-01-17 10:20:45"
+  And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
+  And ticket "JIRA-ONE" is approved by "bob@fundingcircle.com" at "2016-01-19 15:20:34"
+  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version  |
+    | frontend | #master1 |
+  And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
+
+  When I view the releases for "frontend"
+
+  Then I should see the "pending" releases
+    | version                            | subject      | feature reviews | review statuses     | review times | approved |
+    | [#master1](https://github.com/...) | merge commit | FR_ONE          | Requires reapproval |              | no       |

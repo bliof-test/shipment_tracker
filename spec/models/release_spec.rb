@@ -14,19 +14,19 @@ RSpec.describe Release do
     end
   end
 
-  describe '#approved?' do
+  describe '#authorised?' do
     subject(:release) { Release.new(feature_reviews: feature_reviews) }
 
-    it 'returns true if any of its feature reviews are approved' do
-      allow(feature_review1).to receive(:approved?).and_return(true)
-      allow(feature_review2).to receive(:approved?).and_return(false)
-      expect(release.approved?).to be true
+    it 'returns true if any of its feature reviews are authorised' do
+      allow(feature_review1).to receive(:authorised?).and_return(true)
+      allow(feature_review2).to receive(:authorised?).and_return(false)
+      expect(release.authorised?).to be true
     end
 
-    it 'returns false if none of its feature reviews are approved' do
-      allow(feature_review1).to receive(:approved?).and_return(false)
-      allow(feature_review2).to receive(:approved?).and_return(false)
-      expect(release.approved?).to be false
+    it 'returns false if none of its feature reviews are authorised' do
+      allow(feature_review1).to receive(:authorised?).and_return(false)
+      allow(feature_review2).to receive(:authorised?).and_return(false)
+      expect(release.authorised?).to be false
     end
   end
 end
