@@ -20,10 +20,10 @@ RSpec.describe Ticket do
   end
 
   describe '#authorised?' do
+    subject { ticket.authorised?(versions) }
+
     let(:versions) { %w(abc def) }
     let(:current_time) { Time.current }
-
-    subject { ticket.authorised?(versions) }
 
     context 'when the ticket was approved after it was linked' do
       let(:ticket_attributes) {
@@ -51,9 +51,15 @@ RSpec.describe Ticket do
       it { is_expected.to be false }
     end
 
-    context 'when the ticket has not been linked to any of the passed in versions' do
+    context 'when the ticket has not been linked to the versions under review' do
+      let(:ticket_attributes) { { approved_at: current_time, version_timestamps: { 'foo' => 1.hour.ago } } }
+      it { is_expected.to be false }
+    end
+
+    context 'when the ticket has been linked before approval but no versions are under review' do
+      let(:versions) { [] }
       let(:ticket_attributes) {
-        { approved_at: current_time, version_timestamps: { 'foo' => 1.hour.ago } }
+        { approved_at: current_time, version_timestamps: { versions.first => 1.hour.ago } }
       }
       it { is_expected.to be false }
     end
