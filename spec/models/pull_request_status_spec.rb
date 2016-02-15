@@ -38,43 +38,73 @@ RSpec.describe PullRequestStatus do
       allow(ticket_repository).to receive(:tickets_for_versions).and_return(tickets)
     end
 
-    context 'when a single feature review exists for the relevant commit' do
-      let(:tickets) {
-        [
-          Ticket.new(
-            versions: %w(abc def unrelated),
-            paths: [
-              feature_review_path(app1: 'abc', app2: 'def'),
-              feature_review_path(app1: 'unrelated'),
-            ],
-            status: 'Done',
-          ),
-        ]
-      }
+    context 'when a single Feature Review exists for the relevant commit' do
+      context 'when the tickets associated with the Feature Review are authorised' do
+        let(:tickets) {
+          [
+            Ticket.new(
+              versions: %w(abc def unrelated),
+              paths: [
+                feature_review_path(app1: 'abc', app2: 'def'),
+                feature_review_path(app1: 'unrelated'),
+              ],
+              approved_at: Time.current,
+              status: 'Done',
+              version_timestamps: { 'abc' => 1.hour.ago, 'def' => 1.hour.ago, 'unrelated' => 2.hours.ago },
+            ),
+          ]
+        }
 
-      let(:target_url) { 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def' }
-      let(:description) { 'Approved Feature Review found' }
-      let(:state) { 'success' }
+        let(:target_url) { 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def' }
+        let(:description) { 'Approved Feature Review found' }
+        let(:state) { 'success' }
 
-      it 'posts status "success" with description and link to feature review' do
-        pull_request_status.update(repo_url: repo_url, sha: sha)
-        expect(stub).to have_been_requested
+        it 'posts status "success" with description and link to Feature Review' do
+          pull_request_status.update(repo_url: repo_url, sha: sha)
+          expect(stub).to have_been_requested
+        end
+      end
+
+      context 'when the tickets associated with the Feature Review are not authorised' do
+        let(:tickets) {
+          [
+            Ticket.new(
+              versions: %w(abc),
+              paths: [feature_review_path(app1: 'abc')],
+              status: 'Done',
+              approved_at: 1.hour.ago,
+              version_timestamps: { 'abc' => Time.current },
+            ),
+          ]
+        }
+        let(:target_url) { 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc' }
+        let(:description) { 'Re-approval required for Feature Review' }
+        let(:state) { 'pending' }
+
+        it 'posts status "pending" with description and link to Feature Review' do
+          pull_request_status.update(repo_url: repo_url, sha: sha)
+          expect(stub).to have_been_requested
+        end
       end
     end
 
-    context 'when multiple feature reviews exist for the relevant commit' do
-      context 'when one of the feature reviews are approved' do
+    context 'when multiple Feature Reviews exist for the relevant commit' do
+      context 'when one of the Feature Reviews is authorised' do
         let(:tickets) {
           [
             Ticket.new(
               versions: %w(abc def),
               paths: [feature_review_path(app1: 'abc', app2: 'def')],
               status: 'In Progress',
+              approved_at: nil,
+              version_timestamps: { 'abc' => 1.hour.ago },
             ),
             Ticket.new(
               versions: %w(abc def),
               paths: [feature_review_path(app1: 'abc')],
               status: 'Done',
+              approved_at: Time.current,
+              version_timestamps: { 'abc' => 2.hours.ago, 'def' => 1.hour.ago },
             ),
           ]
         }
@@ -83,13 +113,13 @@ RSpec.describe PullRequestStatus do
         let(:description) { 'Approved Feature Review found' }
         let(:state) { 'success' }
 
-        it 'posts status "success" with description and to feature review search' do
+        it 'posts status "success" with description and link to Feature Review search' do
           pull_request_status.update(repo_url: repo_url, sha: sha)
           expect(stub).to have_been_requested
         end
       end
 
-      context 'when no feature reviews are approved' do
+      context 'when none of the Feature Reviews are authorised' do
         let(:tickets) {
           [
             Ticket.new(
@@ -109,14 +139,14 @@ RSpec.describe PullRequestStatus do
         let(:description) { 'Awaiting approval for Feature Review' }
         let(:state) { 'pending' }
 
-        it 'posts status "pending" with description and link to feature review search' do
+        it 'posts status "pending" with description and link to Feature Review search' do
           pull_request_status.update(repo_url: repo_url, sha: sha)
           expect(stub).to have_been_requested
         end
       end
     end
 
-    context 'when no feature review exists' do
+    context 'when no Feature Review exists' do
       let(:deploy_repository) { instance_double(Repositories::DeployRepository) }
       let(:deploy) { nil }
       let(:tickets) { [] }
@@ -129,7 +159,7 @@ RSpec.describe PullRequestStatus do
         allow(deploy_repository).to receive(:last_staging_deploy_for_version).with(sha).and_return(deploy)
       end
 
-      it 'posts status "failure" with description and link to view a feature review' do
+      it 'posts status "failure" with description and link to view a Feature Review' do
         pull_request_status.update(repo_url: repo_url, sha: sha)
         expect(stub).to have_been_requested
       end
