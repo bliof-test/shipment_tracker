@@ -303,8 +303,8 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
-  describe '#approved_at' do
-    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).approved_at }
+  describe '#tickets_approved_at' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).tickets_approved_at }
 
     let(:approval_time) { Time.current }
 

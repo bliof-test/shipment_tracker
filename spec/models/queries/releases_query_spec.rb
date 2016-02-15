@@ -103,7 +103,7 @@ RSpec.describe Queries::ReleasesQuery do
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])
       expect(deployed_releases.map(&:authorised?)).to eq([true, false])
       expect(deployed_releases.map(&:feature_reviews)).to eq([[authorised_feature_review], []])
-      expect(deployed_releases.map(&:feature_reviews).flatten.first.approved_at).to eq(approval_time)
+      expect(deployed_releases.map(&:feature_reviews).flatten.first.tickets_approved_at).to eq(approval_time)
     end
   end
 end

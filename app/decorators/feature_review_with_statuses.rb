@@ -76,7 +76,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
     end
   end
 
-  def approved_at
+  def tickets_approved_at
     return unless tickets_approved?
     @approved_at ||= tickets.map(&:approved_at).max
   end
@@ -86,6 +86,6 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def approved_path
-    "#{base_path}?#{query_hash.merge(time: approved_at.utc).to_query}" if authorised?
+    "#{base_path}?#{query_hash.merge(time: tickets_approved_at.utc).to_query}" if authorised?
   end
 end
