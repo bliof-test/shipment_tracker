@@ -2,7 +2,7 @@ require 'slack-notifier'
 
 class SlackNotifier
   def initialize
-    @notifier = Slack::Notifier.new ENV['SLACK_WEB_HOOK']
+    @notifier = Slack::Notifier.new(ENV.fetch('SLACK_WEBHOOK'))
   end
 
   def send(msg, channel)
