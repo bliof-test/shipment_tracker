@@ -64,4 +64,38 @@ RSpec.describe Ticket do
       it { is_expected.to be false }
     end
   end
+
+  describe '#authorisation_status' do
+    subject { ticket.authorisation_status(versions) }
+
+    let(:versions) { %w(abc def) }
+
+    context 'when ticket is not done' do
+      let(:ticket_attributes) { { status: 'Ready for Acceptance' } }
+
+      it 'returns its current status' do
+        expect(subject).to eq('Ready for Acceptance')
+      end
+    end
+
+    context 'when ticket is done' do
+      let(:ticket_attributes) { { status: 'Done' } }
+
+      context 'when ticket is authorised' do
+        before do
+          allow(ticket).to receive(:authorised?).and_return(true)
+        end
+
+        it { is_expected.to eq('Done') }
+      end
+
+      context 'when ticket is not authorised' do
+        before do
+          allow(ticket).to receive(:authorised?).and_return(false)
+        end
+
+        it { is_expected.to eq('Requires reapproval') }
+      end
+    end
+  end
 end

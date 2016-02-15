@@ -13,7 +13,6 @@ class Ticket
     attribute :versions, Array, default: []
   end
 
-  # TODO: test
   def authorisation_status(versions_under_review)
     return 'Requires reapproval' if approved? && !authorised?(versions_under_review)
     status
