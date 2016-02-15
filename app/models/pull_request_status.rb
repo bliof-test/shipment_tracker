@@ -98,7 +98,7 @@ class PullRequestStatus
       not_found_status
     elsif feature_reviews.any?(&:authorised?)
       approved_status
-    elsif feature_reviews.any?(&:approved?)
+    elsif feature_reviews.any?(&:tickets_approved?)
       reapproval_status
     else
       not_approved_status
