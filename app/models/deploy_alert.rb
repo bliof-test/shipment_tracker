@@ -1,5 +1,6 @@
 require 'repositories/deploy_repository'
 require 'git_repository_loader'
+require 'git_repository_location'
 
 class DeployAlert
   attr_reader :deploy_env
