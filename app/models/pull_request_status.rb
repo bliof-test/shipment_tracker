@@ -96,11 +96,20 @@ class PullRequestStatus
   def status_for(feature_reviews)
     if feature_reviews.empty?
       not_found_status
-    elsif feature_reviews.any?(&:approved?)
+    elsif feature_reviews.any?(&:authorised?)
       approved_status
+    elsif feature_reviews.any?(&:tickets_approved?)
+      reapproval_status
     else
       not_approved_status
     end
+  end
+
+  def searching_status
+    {
+      status: 'pending',
+      description: 'Searching for Feature Review',
+    }
   end
 
   def not_found_status
@@ -117,17 +126,17 @@ class PullRequestStatus
     }
   end
 
+  def reapproval_status
+    {
+      status: 'pending',
+      description: 'Re-approval required for Feature Review',
+    }
+  end
+
   def not_approved_status
     {
       status: 'pending',
       description: 'Awaiting approval for Feature Review',
-    }
-  end
-
-  def searching_status
-    {
-      status: 'pending',
-      description: 'Searching for Feature Review',
     }
   end
 end

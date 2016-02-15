@@ -111,7 +111,7 @@ Scenario: Viewing a Feature Review
 
   Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
 
-  And I should only see the ticket
+  And I should see the tickets
     | Ticket                                        | Summary       | Status               |
     | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | Ready for Deployment |
 
@@ -134,6 +134,36 @@ Scenario: Viewing a Feature Review
     | backend  | #old    | no      |
 
 @logged_in
+Scenario: Viewing a Feature Review that requires re-approval
+  Given an application called "frontend"
+
+  And a ticket "JIRA-1" with summary "Some work" is started at "2014-10-11 13:01:17"
+  And a ticket "JIRA-2" with summary "More work" is started at "2014-10-11 15:10:27"
+
+  And a commit "#abc" by "Alice" is created at "2014-10-12 11:01:00" for app "frontend"
+  And a commit "#def" by "Alice" is created at "2014-10-13 12:02:00" for app "frontend"
+
+  And ticket "JIRA-1" is approved by "jim@fundingcircle.com" at "2014-10-13 17:30:10"
+
+  And developer prepares review known as "FR" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version |
+    | frontend | #abc    |
+
+  And at time "2014-10-14 16:00:01" adds link for review "FR" to comment for ticket "JIRA-1"
+  And at time "2014-10-14 17:00:01" adds link for review "FR" to comment for ticket "JIRA-2"
+
+  And ticket "JIRA-2" is approved by "jim@fundingcircle.com" at "2014-10-14 17:30:10"
+
+  When I visit the feature review known as "FR"
+
+  Then I should see that the Feature Review requires reapproval
+
+  And I should see the tickets
+    | Ticket                                    | Summary   | Status               |
+    | [JIRA-1](https://jira.test/browse/JIRA-1) | Some work | Requires reapproval  |
+    | [JIRA-2](https://jira.test/browse/JIRA-2) | More work | Ready for Deployment |
+
+@logged_in
 Scenario: Viewing a Feature Review as at a specified time
   Given an application called "frontend"
 
@@ -146,37 +176,37 @@ Scenario: Viewing a Feature Review as at a specified time
 
   When I visit feature review "FR_123" as at "2014-10-04 14:00:00"
 
-  Then I should only see the ticket
+  Then I should see the tickets
     | Ticket                                        | Summary       | Status      |
     | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | In Progress |
 
   And I should see the time "2014-10-04 14:00:00" for the Feature Review
 
-  @logged_in
-  Scenario: Viewing an approved Feature Review after regenerating snapshots
-    Given an application called "frontend"
+@logged_in
+Scenario: Viewing an approved Feature Review after regenerating snapshots
+  Given an application called "frontend"
 
-    And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:00:00"
-    And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
-    And developer prepares review known as "FR_123" for UAT "uat.fundingcircle.com" with apps
-      | app_name | version |
-      | frontend | #abc    |
-    And at time "2014-10-04 14:00:00.500" adds link for review "FR_123" to comment for ticket "JIRA-123"
-    And ticket "JIRA-123" is approved by "jim@fundingcircle.com" at "2014-10-05 17:30:10"
+  And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:00:00"
+  And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
+  And developer prepares review known as "FR_123" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version |
+    | frontend | #abc    |
+  And at time "2014-10-04 14:00:00.500" adds link for review "FR_123" to comment for ticket "JIRA-123"
+  And ticket "JIRA-123" is approved by "jim@fundingcircle.com" at "2014-10-05 17:30:10"
 
-    And snapshots are regenerated
+  And snapshots are regenerated
 
-    When I visit feature review "FR_123" as at "2014-10-04 15:00:00"
-    Then I should see that the Feature Review was not approved
-    Then I should only see the ticket
-      | Ticket                                        | Summary       | Status      |
-      | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | In Progress |
+  When I visit feature review "FR_123" as at "2014-10-04 15:00:00"
+  Then I should see that the Feature Review was not approved
+  Then I should see the tickets
+    | Ticket                                        | Summary       | Status      |
+    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | In Progress |
 
-    When I visit feature review "FR_123" as at "2014-10-06 10:00:00"
-    Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
-    And I should only see the ticket
-      | Ticket                                        | Summary       | Status               |
-      | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | Ready for Deployment |
+  When I visit feature review "FR_123" as at "2014-10-06 10:00:00"
+  Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
+  And I should see the tickets
+    | Ticket                                        | Summary       | Status               |
+    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | Ready for Deployment |
 
 
 Scenario: QA rejects feature

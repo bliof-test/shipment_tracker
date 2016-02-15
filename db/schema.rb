@@ -11,10 +11,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160209134817) do
+ActiveRecord::Schema.define(version: 20160212113505) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+  enable_extension "hstore"
 
   create_table "builds", force: :cascade do |t|
     t.string   "version"
@@ -90,10 +91,11 @@ ActiveRecord::Schema.define(version: 20160209134817) do
     t.string   "key"
     t.string   "summary"
     t.string   "status"
-    t.text     "paths",            array: true
+    t.text     "paths",                                        array: true
     t.datetime "event_created_at"
-    t.string   "versions",         array: true
+    t.string   "versions",                                     array: true
     t.datetime "approved_at"
+    t.hstore   "version_timestamps", default: {}, null: false
   end
 
   add_index "tickets", ["key"], name: "index_tickets_on_key", using: :btree

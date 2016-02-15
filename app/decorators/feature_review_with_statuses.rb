@@ -62,20 +62,30 @@ class FeatureReviewWithStatuses < SimpleDelegator
     end
   end
 
-  def approved_at
-    return unless approved?
+  def authorised?
+    @authorised ||= tickets.present? && tickets.all? { |t| t.authorised?(versions) }
+  end
+
+  def authorisation_status
+    return :not_approved unless tickets_approved?
+
+    if authorised?
+      :approved
+    else
+      :requires_reapproval
+    end
+  end
+
+  def tickets_approved_at
+    return unless tickets_approved?
     @approved_at ||= tickets.map(&:approved_at).max
   end
 
-  def approved?
+  def tickets_approved?
     @approved ||= tickets.present? && tickets.all?(&:approved?)
   end
 
-  def approval_status
-    approved? ? :approved : :not_approved
-  end
-
   def approved_path
-    "#{base_path}?#{query_hash.merge(time: approved_at.utc).to_query}" if approved?
+    "#{base_path}?#{query_hash.merge(time: tickets_approved_at.utc).to_query}" if authorised?
   end
 end

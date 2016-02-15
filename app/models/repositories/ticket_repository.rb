@@ -2,8 +2,6 @@ require 'events/jira_event'
 require 'snapshots/ticket'
 require 'ticket'
 
-require 'addressable/uri'
-
 module Repositories
   class TicketRepository
     def initialize(store = Snapshots::Ticket,
@@ -33,26 +31,26 @@ module Repositories
         .map { |t| Ticket.new(t.attributes) }
     end
 
-    def find_last_by_key(key)
-      store.where(key: key).order('id ASC').last
-    end
-
     def apply(event)
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
-      last_ticket = (store.where(key: event.key).last.try(:attributes) || {}).except('id')
-
       feature_reviews = feature_review_factory.create_from_text(event.comment)
 
+      last_ticket = previous_ticket_data(event.key)
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
-
       store.create!(new_ticket)
+
       update_pull_requests_for(new_ticket) if update_pull_request?(event, feature_reviews)
     end
 
     private
 
     attr_reader :store, :git_repository_location, :feature_review_factory
+
+    def previous_ticket_data(key)
+      attrs = store.where(key: key).last.try(:attributes) || {}
+      attrs.except!('id')
+    end
 
     def update_pull_request?(event, feature_reviews)
       return false if Rails.configuration.data_maintenance_mode
@@ -68,7 +66,16 @@ module Repositories
         'event_created_at' => event.created_at,
         'versions' => merge_ticket_versions(last_ticket, feature_reviews),
         'approved_at' => merge_approved_at(last_ticket, event),
+        'version_timestamps' => merge_version_timestamps(last_ticket, feature_reviews, event),
       )
+    end
+
+    def merge_version_timestamps(ticket, feature_reviews, event)
+      old_version_timestamps = ticket.fetch('version_timestamps', {})
+      new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) { |version, hash|
+        hash[version] = event.created_at
+      }
+      new_version_timestamps.merge!(old_version_timestamps)
     end
 
     def merge_ticket_paths(ticket, feature_reviews)
@@ -79,17 +86,13 @@ module Repositories
 
     def merge_ticket_versions(ticket, feature_reviews)
       old_versions = ticket.fetch('versions', [])
-      new_versions = feature_review_versions(feature_reviews)
+      new_versions = feature_reviews.flat_map(&:versions)
       old_versions.concat(new_versions).uniq
     end
 
     def merge_approved_at(last_ticket, event)
       return nil unless Ticket.new(status: event.status).approved?
       last_ticket['approved_at'] || event.created_at
-    end
-
-    def feature_review_versions(feature_reviews)
-      feature_reviews.flat_map(&:versions)
     end
 
     def update_pull_requests_for(ticket_hash)

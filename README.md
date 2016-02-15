@@ -94,6 +94,8 @@ Please make sure the following command runs every few minutes:
 bundle exec rake jobs:update_git
 ```
 
+This can be done with the cron job (via whenever gem) specified in [`config/schedule.rb`](config/schedule.rb).
+
 *Warning:* This recurring task should run on **every** server that your application is running on.
 
 ### Enable GitHub Webhooks

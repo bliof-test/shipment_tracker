@@ -42,6 +42,7 @@ RSpec.describe Queries::ReleasesQuery do
       paths: ['/feature_reviews?apps%5Bapp1%5D=xyz&apps%5Bapp2%5D=uvw'],
       status: 'Done',
       approved_at: approval_time,
+      version_timestamps: { 'xyz' => approval_time - 1.hour, 'uvw' => approval_time - 1.hour },
     )
   }
   let(:not_approved_ticket) {
@@ -73,7 +74,7 @@ RSpec.describe Queries::ReleasesQuery do
   describe '#pending_releases' do
     subject(:pending_releases) { releases_query.pending_releases }
     it 'returns list of releases not yet deployed to production' do
-      not_approved_feature_review = FeatureReview.new(
+      not_authorised_feature_review = FeatureReview.new(
         versions: not_approved_ticket.versions,
         path: not_approved_ticket.paths.first,
       )
@@ -82,16 +83,16 @@ RSpec.describe Queries::ReleasesQuery do
       expect(pending_releases.map(&:subject)).to eq(['new commit on master'])
       expect(pending_releases.map(&:production_deploy_time)).to eq([nil])
       expect(pending_releases.map(&:deployed_by)).to eq([nil])
-      expect(pending_releases.map(&:approved?)).to eq([false])
-      expect(pending_releases.map(&:feature_reviews)).to eq([[not_approved_feature_review]])
-      expect(pending_releases.map(&:feature_reviews).flatten.first.approved?).to eq(false)
+      expect(pending_releases.map(&:authorised?)).to eq([false])
+      expect(pending_releases.map(&:feature_reviews)).to eq([[not_authorised_feature_review]])
+      expect(pending_releases.map(&:feature_reviews).flatten.first.authorised?).to eq(false)
     end
   end
 
   describe '#deployed_releases' do
     subject(:deployed_releases) { releases_query.deployed_releases }
     it 'returns list of releases deployed to production in region "gb"' do
-      approved_feature_review = FeatureReview.new(
+      authorised_feature_review = FeatureReview.new(
         versions: approved_ticket.versions,
         path: approved_ticket.paths.first,
       )
@@ -100,9 +101,9 @@ RSpec.describe Queries::ReleasesQuery do
       expect(deployed_releases.map(&:subject)).to eq(['merge commit', 'first commit on master branch'])
       expect(deployed_releases.map(&:production_deploy_time)).to eq([deploy_time, nil])
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])
-      expect(deployed_releases.map(&:approved?)).to eq([true, false])
-      expect(deployed_releases.map(&:feature_reviews)).to eq([[approved_feature_review], []])
-      expect(deployed_releases.map(&:feature_reviews).flatten.first.approved_at).to eq(approval_time)
+      expect(deployed_releases.map(&:authorised?)).to eq([true, false])
+      expect(deployed_releases.map(&:feature_reviews)).to eq([[authorised_feature_review], []])
+      expect(deployed_releases.map(&:feature_reviews).flatten.first.tickets_approved_at).to eq(approval_time)
     end
   end
 end

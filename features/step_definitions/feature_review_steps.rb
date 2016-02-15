@@ -58,7 +58,7 @@ Then 'I should see the deploys to UAT with heading "$status" and content' do |st
   expect(feature_review_page.deploys).to match_array(expected_deploys)
 end
 
-Then 'I should only see the ticket' do |ticket_table|
+Then 'I should see the tickets' do |ticket_table|
   expected_tickets = ticket_table.hashes
   expect(feature_review_page.tickets).to match_array(expected_tickets)
 end
@@ -117,6 +117,10 @@ end
 
 Then 'I should see that the Feature Review was not approved' do
   expect(feature_review_page.feature_status).to eq('Feature Status: Not approved')
+end
+
+Then 'I should see that the Feature Review requires reapproval' do
+  expect(feature_review_page.feature_status).to eq('Feature Status: Requires reapproval')
 end
 
 When 'I reload the page after a while' do
