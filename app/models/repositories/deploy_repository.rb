@@ -1,5 +1,6 @@
 require 'events/deploy_event'
 require 'snapshots/deploy'
+require 'deploy'
 
 module Repositories
   class DeployRepository
@@ -23,6 +24,16 @@ module Repositories
       }
     end
 
+    # TODO: will be used for further DeployAlerting
+    # def deploys_ordered_by_id(order:, environment:, region:)
+    #   query = store.select('*')
+    #   query = query.where(environment: environment)
+    #   query = query.where(region: region)
+    #   query.order("id #{order}").map { |deploy_record|
+    #     Deploy.new(deploy_record.attributes)
+    #   }
+    # end
+
     def last_staging_deploy_for_version(version)
       last_matching_non_prod_deploy = store.where.not(environment: 'production').where(version: version).last
       Deploy.new(last_matching_non_prod_deploy.attributes) if last_matching_non_prod_deploy
@@ -31,7 +42,7 @@ module Repositories
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
 
-      store.create!(
+      deploy = store.create!(
         app_name: event.app_name,
         server: event.server,
         region: event.locale,
@@ -40,11 +51,20 @@ module Repositories
         deployed_by: event.deployed_by,
         event_created_at: event.created_at,
       )
+
+      audit_deploy(Deploy.new(deploy.attributes))
     end
 
     private
 
     attr_reader :store
+
+    def audit_deploy(deploy)
+      # TODO: Objects can't be passed to delayed job
+      deploy_attrs = deploy.attributes
+      deploy_attrs[:event_created_at] = deploy.event_created_at.to_i
+      DeployAlertJob.perform_later(deploy_attrs) if DeployAlert.auditable?(deploy)
+    end
 
     def deploys(apps, server, at)
       query = store.select('DISTINCT ON (server, app_name) *').where(server: server)
