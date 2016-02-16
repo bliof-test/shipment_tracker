@@ -417,14 +417,8 @@ RSpec.describe GitRepository do
     end
 
     context 'the requested commit is on master' do
-      let(:git_diagram) do
-        <<-'EOS'
-          o-A-B---
-         /        \
-       -o-------o--C---o
-        EOS
-      end
-      let(:sha) { version('C') }
+      let(:git_diagram) { '-o-A-o' }
+      let(:sha) { version('A') }
 
       it 'returns true' do
         expect(repo.commit_on_master?(sha)).to be true
