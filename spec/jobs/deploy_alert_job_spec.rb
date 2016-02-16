@@ -2,6 +2,8 @@ require 'rails_helper'
 
 RSpec.describe DeployAlertJob do
   describe '#perform' do
+    let(:time) { Time.current.change(usec: 0) }
+
     let(:deploy_attrs) {
       {
         'id' => 1,
@@ -9,18 +11,18 @@ RSpec.describe DeployAlertJob do
         'server' => 'test.com',
         'version' => 'xyz',
         'deployed_by' => 'Bob',
-        'event_created_at' => Time.now.to_s,
+        'event_created_at' => time.to_s,
         'environment' => 'production',
         'region' => 'us',
       }
     }
-    let(:expected_arg) {
-      Deploy.new(deploy_attrs)
+
+    let(:expected_deploy) {
+      Deploy.new(deploy_attrs.merge(event_created_at: time))
     }
 
     it 'runs DeployAlertJob.audit with correct arguments' do
-      allow(DeployAlert).to receive(:audit)
-      expect(DeployAlert).to receive(:audit).with(expected_arg)
+      expect(DeployAlert).to receive(:audit).with(expected_deploy)
 
       DeployAlertJob.perform_now(deploy_attrs)
     end
