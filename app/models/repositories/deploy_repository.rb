@@ -53,18 +53,16 @@ module Repositories
         event_created_at: event.created_at,
       )
 
-      audit_deploy(Deploy.new(deploy.attributes))
+      audit_deploy(deploy.attributes)
     end
 
     private
 
     attr_reader :store
 
-    def audit_deploy(deploy)
-      # TODO: Objects can't be passed to delayed job
-      deploy_attrs = deploy.attributes
-      deploy_attrs[:event_created_at] = deploy.event_created_at.to_i
-      DeployAlertJob.perform_later(deploy_attrs) if DeployAlert.auditable?(deploy)
+    def audit_deploy(deploy_attrs)
+      deploy_attrs['event_created_at'] = deploy_attrs['event_created_at'].to_s
+      DeployAlertJob.perform_later(deploy_attrs)
     end
 
     def deploys(apps, server, at)

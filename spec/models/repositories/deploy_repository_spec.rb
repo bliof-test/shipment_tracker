@@ -21,14 +21,14 @@ RSpec.describe Repositories::DeployRepository do
     }
     let(:expected_attrs) {
       {
-        app_name: 'frontend',
-        correct: nil,
-        deployed_by: 'Bob',
-        event_created_at: 0,
-        server: 'test.com',
-        region: 'us',
-        version: 'xyz',
-        environment: 'production',
+        'id' => a_value > 0,
+        'app_name' => 'frontend',
+        'server' => 'test.com',
+        'version' => 'xyz',
+        'deployed_by' => 'Bob',
+        'event_created_at' => '',
+        'environment' => environment,
+        'region' => 'us',
       }
     }
 

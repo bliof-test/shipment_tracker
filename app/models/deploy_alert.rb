@@ -9,9 +9,7 @@ class DeployAlert
     deploy.environment == 'production' && GitRepositoryLocation.app_names.include?(deploy.app_name)
   end
 
-  def self.audit(deploy_attrs)
-    deploy = Deploy.new(deploy_attrs)
-
+  def self.audit(deploy)
     return unless auditable?(deploy)
 
     github_repo = GitRepositoryLoader.from_rails_config.load(deploy.app_name)
