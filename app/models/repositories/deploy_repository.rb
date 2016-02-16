@@ -1,6 +1,7 @@
 require 'events/deploy_event'
 require 'snapshots/deploy'
 require 'deploy'
+require 'deploy_alert_job'
 
 module Repositories
   class DeployRepository

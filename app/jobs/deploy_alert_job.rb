@@ -1,3 +1,5 @@
+require 'slack/notifications'
+
 class DeployAlertJob < ActiveJob::Base
   queue_as :default
 
