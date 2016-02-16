@@ -38,6 +38,8 @@ Style/Documentation:
 
 Style/BlockDelimiters:
   EnforcedStyle: semantic
+  Exclude:
+    - 'spec/**/*'
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma

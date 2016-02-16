@@ -1,6 +1,5 @@
 require 'events/jenkins_event'
 
-# rubocop:disable Style/BlockDelimiters
 FactoryGirl.define do
   factory :jenkins_event, class: Events::JenkinsEvent do
     transient do
@@ -22,4 +21,3 @@ FactoryGirl.define do
     initialize_with { new(attributes) }
   end
 end
-# rubocop:enable Style/BlockDelimiters

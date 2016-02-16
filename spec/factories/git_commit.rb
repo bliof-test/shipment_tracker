@@ -1,6 +1,5 @@
 require 'git_commit'
 
-# rubocop:disable Style/BlockDelimiters
 FactoryGirl.define do
   factory :git_commit do
     sequence(:id) { |n| "abc#{n}" }
@@ -10,4 +9,3 @@ FactoryGirl.define do
     initialize_with { new(attributes) }
   end
 end
-# rubocop:enable Style/BlockDelimiters
