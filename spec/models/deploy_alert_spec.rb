@@ -6,8 +6,6 @@ require 'support/repository_builder'
 
 RSpec.describe DeployAlert do
   let(:app_name) { 'frontend' }
-  let(:staging_env) { 'staging' }
-  let(:production_env) { 'production' }
 
   describe '.auditable?' do
     before do
@@ -15,7 +13,7 @@ RSpec.describe DeployAlert do
     end
 
     context 'non-production env' do
-      let(:deploy) { Deploy.new(environment: staging_env) }
+      let(:deploy) { Deploy.new(environment: 'staging') }
 
       it 'returns false' do
         expect(DeployAlert.auditable?(deploy)).to be false
@@ -23,7 +21,7 @@ RSpec.describe DeployAlert do
     end
 
     context 'app not under audit' do
-      let(:deploy) { Deploy.new(app_name: 'something', environment: production_env) }
+      let(:deploy) { Deploy.new(app_name: 'something', environment: 'production') }
 
       it 'returns false' do
         expect(DeployAlert.auditable?(deploy)).to be false
@@ -31,7 +29,7 @@ RSpec.describe DeployAlert do
     end
 
     context 'production env and app is under audit' do
-      let(:deploy) { Deploy.new(environment: production_env, app_name: app_name) }
+      let(:deploy) { Deploy.new(app_name: app_name, environment: 'production') }
 
       it 'returns true' do
         expect(DeployAlert.auditable?(deploy)).to be true
@@ -40,7 +38,6 @@ RSpec.describe DeployAlert do
   end
 
   describe '#audit' do
-    let(:git_diagram) { '-o-A-o' }
     let(:repository_loader) { instance_double(GitRepositoryLoader) }
     let(:test_git_repo) { Support::RepositoryBuilder.build(git_diagram) }
     let(:rugged_repo) { Rugged::Repository.new(test_git_repo.dir) }
@@ -48,7 +45,7 @@ RSpec.describe DeployAlert do
 
     before do
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
-      allow(repository_loader).to receive(:load).with('frontend').and_return(repo)
+      allow(repository_loader).to receive(:load).with(app_name).and_return(repo)
       allow(GitRepositoryLocation).to receive(:app_names).and_return([app_name])
     end
 
@@ -58,7 +55,7 @@ RSpec.describe DeployAlert do
       let(:sha) { version('A') }
       let(:deploy) {
         Deploy.new(
-          version: sha, environment: production_env, app_name: app_name,
+          version: sha, environment: 'production', app_name: app_name,
           deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'))
       }
 
@@ -79,7 +76,7 @@ RSpec.describe DeployAlert do
       let(:sha) { version('A') }
       let(:deploy) {
         Deploy.new(
-          version: sha, environment: production_env, app_name: app_name,
+          version: sha, environment: 'production', app_name: app_name,
           deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'))
       }
 
@@ -92,36 +89,6 @@ RSpec.describe DeployAlert do
         expect(DeployAlert.audit(deploy)).to eq(expected_message)
       end
     end
-
-    # context 'last deploy to analyzed environment has approved ticket' do
-    #   let(:sha) { version('A') }
-    #   let(:deploy) { Deploy.new(version: sha, environment: prod_env, app_name: app_name) }
-    #   let(:tickets) {
-    #     [
-    #       Ticket.new(
-    #         versions: %w(abc def unrelated),
-    #         paths: [
-    #           feature_review_path(app1: 'abcd123'),
-    #         ],
-    #         status: 'Done',
-    #       ),
-    #     ]
-    #   }
-    #
-    #   subject do
-    #     DeployAlert.new(deploy, prod_env)
-    #   end
-    #
-    #   xit 'returns true'
-    # end
-
-    # context 'deploy to analyzed environment is not in the commits range' do
-
-    # end
-
-    # context 'last deploy to analyzed environment has unapproved ticket' do
-    #
-    # end
   end
 
   private
