@@ -5,7 +5,6 @@ AllCops:
     - 'db/**/*'
     - 'script/**/*'
     - 'lib/tasks/cucumber.rake'
-    - Guardfile
     - Gemfile
     - 'hooks/**/*'
     - 'vendor/bundle/**/*'
