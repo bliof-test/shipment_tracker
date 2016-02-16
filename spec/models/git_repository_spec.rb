@@ -400,6 +400,32 @@ RSpec.describe GitRepository do
     end
   end
 
+  describe '#commit_on_master?' do
+    context 'the requested commit is not on master' do
+      let(:git_diagram) do
+        <<-'EOS'
+             o-A-o
+            /
+          -o-----o
+        EOS
+      end
+      let(:sha) { version('A') }
+
+      it 'returns false' do
+        expect(repo.commit_on_master?(sha)).to be false
+      end
+    end
+
+    context 'the requested commit is on master' do
+      let(:git_diagram) { '-o-A-o' }
+      let(:sha) { version('A') }
+
+      it 'returns true' do
+        expect(repo.commit_on_master?(sha)).to be true
+      end
+    end
+  end
+
   private
 
   def version(pretend_version)

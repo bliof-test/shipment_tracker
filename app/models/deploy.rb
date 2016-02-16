@@ -9,5 +9,6 @@ class Deploy
     attribute :server, String
     attribute :region, String
     attribute :version, String
+    attribute :environment, String
   end
 end

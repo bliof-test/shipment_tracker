@@ -13,6 +13,33 @@ RSpec.describe Repositories::DeployRepository do
     end
   end
 
+  describe '#apply' do
+    let(:versions) { %w(abc def xyz jkl) }
+    let(:environment) { 'production' }
+    let(:defaults) {
+      { app_name: 'frontend', server: 'test.com', deployed_by: 'Bob', environment: environment, locale: 'us' }
+    }
+    let(:expected_attrs) {
+      {
+        'id' => a_value > 0,
+        'app_name' => 'frontend',
+        'server' => 'test.com',
+        'version' => 'xyz',
+        'deployed_by' => 'Bob',
+        'event_created_at' => '',
+        'environment' => environment,
+        'region' => 'us',
+      }
+    }
+
+    it 'scheduled a DeployAlertJob' do
+      allow(DeployAlert).to receive(:auditable?).and_return(true)
+      expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)
+
+      repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'production')))
+    end
+  end
+
   describe '#deploys_for_versions' do
     let(:versions) { %w(abc def xyz jkl) }
     let(:environment) { 'production' }
@@ -51,7 +78,14 @@ RSpec.describe Repositories::DeployRepository do
     let(:server) { 'uat.fundingcircle.com' }
 
     let(:defaults) {
-      { app_name: 'frontend', server: server, deployed_by: 'Bob', version: 'abc', locale: 'gb' }
+      {
+        app_name: 'frontend',
+        server: server,
+        deployed_by: 'Bob',
+        version: 'abc',
+        locale: 'gb',
+        environment: 'uat',
+      }
     }
 
     it 'projects last deploy' do
@@ -106,26 +140,28 @@ RSpec.describe Repositories::DeployRepository do
     end
 
     context 'with no apps' do
+      let(:defaults) { { deployed_by: 'dj', environment: 'uat' } }
       it 'returns deploys for all apps to that server' do
-        repository.apply(build(:deploy_event, server: 'x.io', version: '1', app_name: 'a', deployed_by: 'dj'))
-        repository.apply(build(:deploy_event, server: 'x.io', version: '2', app_name: 'b', deployed_by: 'dj'))
-        repository.apply(build(:deploy_event, server: 'y.io', version: '3', app_name: 'c', deployed_by: 'dj'))
+        repository.apply(build(:deploy_event, defaults.merge(server: 'x.io', version: '1', app_name: 'a')))
+        repository.apply(build(:deploy_event, defaults.merge(server: 'x.io', version: '2', app_name: 'b')))
+        repository.apply(build(:deploy_event, defaults.merge(server: 'y.io', version: '3', app_name: 'c')))
 
         results = repository.deploys_for(server: 'x.io')
 
         expect(results).to match_array([
           Deploy.new(
-            app_name: 'a', server: 'x.io', version: '1', deployed_by: 'dj', correct: false, region: 'us',
+            defaults.merge(app_name: 'a', server: 'x.io', version: '1', correct: false, region: 'us'),
+
           ),
           Deploy.new(
-            app_name: 'b', server: 'x.io', version: '2', deployed_by: 'dj', correct: false, region: 'us',
+            defaults.merge(app_name: 'b', server: 'x.io', version: '2', correct: false, region: 'us'),
           ),
         ])
       end
     end
 
     context 'with at specified' do
-      let(:defaults) { { server: 'x.io', deployed_by: 'dj' } }
+      let(:defaults) { { server: 'x.io', deployed_by: 'dj', environment: 'uat' } }
       let(:time) { (Time.current - 4.hours).change(usec: 0) }
       it 'returns the state at that moment' do
         events = [
@@ -155,6 +191,7 @@ RSpec.describe Repositories::DeployRepository do
                      deployed_by: 'dj',
                      region: 'us',
                      correct: true,
+                     environment: 'uat',
                      event_created_at: time,
                     ),
         ])
@@ -164,8 +201,8 @@ RSpec.describe Repositories::DeployRepository do
 
   describe '#last_staging_deploy_for_version' do
     let(:version) { 'abc' }
-    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', region: 'de' } }
-    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de' } }
+    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', region: 'de', environment: 'uat' } }
+    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de', environment: 'uat' } }
 
     context 'when no deploy exist' do
       it 'returns nil' do
@@ -209,7 +246,7 @@ RSpec.describe Repositories::DeployRepository do
 
       it 'looks for any non-production environments' do
         repository.apply(
-          build(:deploy_event, defaults.merge(server: 'c', environment: 'staging', version: version)),
+          build(:deploy_event, defaults.merge(server: 'c', environment: 'uat', version: version)),
         )
 
         expect(repository.last_staging_deploy_for_version(version)).to eq(
