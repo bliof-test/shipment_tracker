@@ -53,7 +53,7 @@ group :test do
   gem 'database_cleaner'
   gem 'factory_girl'
   gem 'rack-test', require: 'rack/test'
-  gem 'shoulda-matchers'
+  gem 'shoulda-matchers', require: false
   gem 'simplecov', require: false
   gem 'webmock', require: false
 end
