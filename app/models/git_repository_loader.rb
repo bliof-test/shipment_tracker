@@ -6,6 +6,7 @@ require 'rugged'
 
 class GitRepositoryLoader
   class NotFound < RuntimeError; end
+  class BadLocation < RuntimeError; end
 
   def self.from_rails_config
     config = Rails.configuration
@@ -24,9 +25,8 @@ class GitRepositoryLoader
     @cache_dir = cache_dir
   end
 
-  def load(repository_name)
-    git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
-    fail GitRepositoryLoader::NotFound unless git_repository_location
+  def load_and_update(repository_name)
+    git_repository_location = find_repo_location(repository_name)
 
     options_for(git_repository_location.uri) do |options|
       repository = updated_rugged_repository(git_repository_location, options)
@@ -34,9 +34,21 @@ class GitRepositoryLoader
     end
   end
 
+  def load(repository_name)
+    git_repository_location = find_repo_location(repository_name)
+    repository = rugged_repository(git_repository_location)
+    GitRepository.new(repository)
+  end
+
   private
 
   attr_reader :cache_dir, :ssh_user, :ssh_private_key, :ssh_public_key
+
+  def find_repo_location(repository_name)
+    git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
+    fail GitRepositoryLoader::NotFound unless git_repository_location
+    git_repository_location
+  end
 
   def updated_rugged_repository(git_repository_location, options)
     Rails.logger.info "Updating repository #{git_repository_location.name} (#{git_repository_location.uri})"
@@ -53,6 +65,13 @@ class GitRepositoryLoader
     instrument('clone') do
       Rugged::Repository.clone_at(git_repository_location.uri, dir, options)
     end
+  end
+
+  def rugged_repository(git_repository_location)
+    dir = repository_dir_name(git_repository_location)
+    Rugged::Repository.new(dir)
+  rescue Rugged::RepositoryError
+    raise GitRepositoryLoader::BadLocation
   end
 
   def repository_dir_name(git_repository_location)

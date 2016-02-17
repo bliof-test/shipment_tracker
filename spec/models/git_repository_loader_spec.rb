@@ -4,6 +4,10 @@ require 'support/git_test_repository'
 
 RSpec.describe GitRepositoryLoader do
   let(:cache_dir) { Dir.mktmpdir }
+  let(:test_git_repo) { Support::GitTestRepository.new }
+  let(:repo_uri) { "file://#{test_git_repo.dir}" }
+  let(:repo_name) { test_git_repo.dir.split('/').last }
+  let!(:git_repository_location) { GitRepositoryLocation.create(uri: repo_uri) }
 
   subject(:git_repository_loader) { GitRepositoryLoader.new(cache_dir: cache_dir) }
 
@@ -91,11 +95,7 @@ RSpec.describe GitRepositoryLoader do
       it 'removes the destination directory before cloning' do
         git_repository = git_repository_loader.load(repo_name)
 
-        # Screw up the git repository
-        path = git_repository.path
-        FileUtils.rm_rf(path)
-        Dir.mkdir(path)
-        File.open(File.join(path, 'foo.txt'), 'w') do |f| f.write('foo') end
+        screw_up_git_repository(git_repository)
 
         # Reload the git repository
         expect { git_repository_loader.load(repo_name) }.not_to raise_error
@@ -182,5 +182,12 @@ RSpec.describe GitRepositoryLoader do
         end
       end
     end
+  end
+
+  def screw_up_git_repository(git_repository)
+    path = git_repository.path
+    FileUtils.rm_rf(path)
+    Dir.mkdir(path)
+    File.open(File.join(path, 'foo.txt'), 'w') do |f| f.write('foo') end
   end
 end

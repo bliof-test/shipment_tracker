@@ -1,4 +1,5 @@
 require 'git_clone_url'
+require 'git_repository_fetch_job'
 
 class GitRepositoryLocation < ActiveRecord::Base
   before_validation on: :create do
@@ -35,6 +36,7 @@ class GitRepositoryLocation < ActiveRecord::Base
     git_repository_location = find_by_github_ssh_url(ssh_url)
     return unless git_repository_location
     git_repository_location.update(remote_head: payload['after'])
+    GitRepositoryFetchJob.perform_later(name: git_repository_location.name)
   end
 
   private
