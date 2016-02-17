@@ -55,17 +55,4 @@ namespace :jobs do
       sleep 5
     end
   end
-
-  desc 'Update git cache'
-  task update_git: :environment do
-    manage_pid pid_path_for('jobs_update_git')
-
-    puts "[#{Time.current}] Running update_git"
-    git_repository_loader = GitRepositoryLoader.from_rails_config
-    GitRepositoryLocation.app_names.each do |repository_name|
-      puts "[#{Time.current}] Updating #{repository_name}"
-      git_repository_loader.load(repository_name)
-    end
-    puts "[#{Time.current}] Completed update_git"
-  end
 end
