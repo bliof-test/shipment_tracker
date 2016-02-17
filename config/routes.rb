@@ -17,7 +17,7 @@ Rails.application.routes.draw do
 
   resources :releases, only: [:index, :show]
 
-  resources :repository_locations,
+  resources :repositories,
     controller: 'git_repository_locations',
     as: 'git_repository_locations',
     only: [:index, :create]

@@ -11,7 +11,7 @@ module Pages
 
     def fill_in(uri:)
       page.fill_in 'URI', with: uri
-      page.click_link_or_button('Create Git repository location')
+      page.click_link_or_button('Add Git Repository')
       self
     end
 
