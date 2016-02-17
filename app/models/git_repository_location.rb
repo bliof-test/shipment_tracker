@@ -1,6 +1,8 @@
 require 'octokit'
 
 class GitRepositoryLocation < ActiveRecord::Base
+  REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
+
   before_validation on: :create do
     self.uri = convert_remote_uri(uri)
     self.name = extract_name(uri)
@@ -11,11 +13,11 @@ class GitRepositoryLocation < ActiveRecord::Base
   validate :must_have_valid_uri
 
   def must_have_valid_uri
-    URI.parse(uri)
-  rescue URI::InvalidURIError
-    errors.add(:uri, "must be valid in accordance with rfc3986.
-      If using the github SSH clone url then amend to match the following format:
-      ssh://git@github.com/ORGANIZATION/REPO.git")
+    unless uri =~ REPO_URI_REGEX
+      errors.add(:uri, "must be valid in accordance with rfc3986.
+        If using the github SSH clone url then amend to match the following format:
+        ssh://git@github.com/ORGANIZATION/REPO.git")
+    end
   end
 
   def self.app_names

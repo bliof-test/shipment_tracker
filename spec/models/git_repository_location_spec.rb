@@ -21,7 +21,10 @@ RSpec.describe GitRepositoryLocation do
       https_url = GitRepositoryLocation.new(uri: 'https://github.com/FundingCircle/shipment_tracker.git')
       https_url_no_git = GitRepositoryLocation.new(uri: 'https://github.com/FundingCircle/shipment_tracker')
       ssh_clone_url = GitRepositoryLocation.new(uri: 'git@github.com:user/repo.git')
+      file_uri = GitRepositoryLocation.new(uri: 'file:///path/to/repo')
+
       invalid_url = GitRepositoryLocation.new(uri: 'github.com\user\repo.git')
+      repo_name = GitRepositoryLocation.new(uri: 'repo')
       empty_url = GitRepositoryLocation.new(uri: '')
 
       expect(ssh_url).to be_valid
@@ -29,7 +32,10 @@ RSpec.describe GitRepositoryLocation do
       expect(https_url).to be_valid
       expect(https_url_no_git).to be_valid
       expect(ssh_clone_url).to be_valid
+      expect(file_uri).to be_valid
+
       expect(invalid_url).not_to be_valid
+      expect(repo_name).not_to be_valid
       expect(empty_url).not_to be_valid
     end
 
