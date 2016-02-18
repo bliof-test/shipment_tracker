@@ -65,6 +65,7 @@ namespace :jobs do
 
     loader = GitRepositoryLoader.from_rails_config
     repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+    repos_hash_before = repos_hash_changed.dup
 
     loop do
       start_time = Time.current
@@ -82,8 +83,9 @@ namespace :jobs do
 
       repos_hash_after = GitRepositoryLocation.app_remote_head_hash
       repos_hash_changed = repos_hash_after.delete_if { |name, remote_head|
-        remote_head == repos_hash_changed[name]
+        remote_head == repos_hash_before[name]
       }
+      repos_hash_before = repos_hash_after.dup
 
       end_time = Time.current
       puts "[#{end_time}] Updated git in #{end_time - start_time} seconds"
