@@ -110,7 +110,6 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
     before do
       GitRepositoryLocation.create(uri: 'ssh://git@github.com/some/some_other_repo.git')
-      allow(GitRepositoryFetchJob).to receive(:perform_later)
     end
 
     context 'when the GitRepositoryLocation has a regular URI' do
@@ -123,12 +122,6 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
         expect(GitRepositoryLocation.find_by_name('some_repo').remote_head).to eq('def456')
         expect(GitRepositoryLocation.find_by_name('some_other_repo').remote_head).to be(nil)
-      end
-
-      it 'enques a background job to fetch' do
-        expect(GitRepositoryFetchJob).to receive(:perform_later).with(name: 'some_repo')
-
-        update_from_github_notification
       end
     end
 

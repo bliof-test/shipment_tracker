@@ -1,5 +1,4 @@
 require 'git_clone_url'
-require 'git_repository_fetch_job'
 
 class GitRepositoryLocation < ActiveRecord::Base
   before_validation on: :create do
@@ -36,7 +35,6 @@ class GitRepositoryLocation < ActiveRecord::Base
     git_repository_location = find_by_github_ssh_url(ssh_url)
     return unless git_repository_location
     git_repository_location.update(remote_head: payload['after'])
-    GitRepositoryFetchJob.perform_later(name: git_repository_location.name)
   end
 
   private
@@ -47,14 +45,14 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
   private_class_method :find_by_github_ssh_url
 
-  def extract_name(uri)
-    uri.chomp('.git').split('/').last
-  end
-
   def self.url_from_uri(uri)
     parsed_uri = GitCloneUrl.parse(uri)
     path = parsed_uri.path.start_with?('/') ? parsed_uri.path[1..-1] : parsed_uri.path
     "https://#{parsed_uri.host}/#{path.chomp('.git')}"
   end
   private_class_method :url_from_uri
+
+  def extract_name(uri)
+    uri.chomp('.git').split('/').last
+  end
 end
