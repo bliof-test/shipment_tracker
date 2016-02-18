@@ -55,4 +55,24 @@ namespace :jobs do
       sleep 5
     end
   end
+
+  desc 'Continuously updates the git cache'
+  task update_git_cache_loop: :environment do
+    Signal.trap('TERM') do
+      warn 'Terminating rake task jobs:update_git_cache_loop...'
+      @shutdown = true
+    end
+    loader = GitRepositoryLoader.from_rails_config
+    loop do
+      start_time = Time.current
+      puts "[#{start_time}] Running update git cache for all apps"
+      GitRepositoryLocation.app_names.each do |app_name|
+        break if @shutdown
+        loader.load_and_update(app_name)
+      end
+      end_time = Time.current
+      puts "[#{end_time}] Updated git in #{end_time - start_time} seconds"
+      sleep 5
+    end
+  end
 end
