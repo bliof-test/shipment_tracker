@@ -62,14 +62,26 @@ namespace :jobs do
       warn 'Terminating rake task jobs:update_git_cache_loop...'
       @shutdown = true
     end
+
     loader = GitRepositoryLoader.from_rails_config
+    repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+
     loop do
       start_time = Time.current
       puts "[#{start_time}] Running update git cache for all apps"
-      GitRepositoryLocation.app_names.each do |app_name|
-        break if @shutdown
-        loader.load_and_update(app_name)
-      end
+
+      repos_hash_changed.each_key { |name|
+        Thread.new do
+          break if @shutdown
+          loader.load_and_update(name)
+        end
+      }.each(&:join)
+
+      repos_hash_after = GitRepositoryLocation.app_remote_head_hash
+      repos_hash_changed = repos_hash_after.delete_if { |name, remote_head|
+        remote_head == repos_hash_changed[name]
+      }
+
       end_time = Time.current
       puts "[#{end_time}] Updated git in #{end_time - start_time} seconds"
       sleep 5
