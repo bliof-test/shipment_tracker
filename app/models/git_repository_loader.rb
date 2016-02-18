@@ -35,9 +35,13 @@ class GitRepositoryLoader
   end
 
   def load(repository_name)
-    git_repository_location = find_repo_location(repository_name)
-    repository = rugged_repository(git_repository_location)
-    GitRepository.new(repository)
+    if Rails.configuration.allow_git_fetch_on_request
+      load_and_update(repository_name)
+    else
+      git_repository_location = find_repo_location(repository_name)
+      repository = rugged_repository(git_repository_location)
+      GitRepository.new(repository)
+    end
   end
 
   private

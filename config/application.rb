@@ -39,6 +39,7 @@ module ShipmentTracker
                                   .split(/\s*,\s*/)
     config.git_repository_cache_dir = Dir.tmpdir
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
+    config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
 
     # default value needed for older events without locale
     config.default_deploy_locale = ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb')
