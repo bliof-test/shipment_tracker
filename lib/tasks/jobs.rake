@@ -1,3 +1,12 @@
+def update_repos(group)
+  group.map { |name|
+    Thread.new do
+      break if @shutdown
+      @loader.load_and_update(name)
+    end
+  }.each(&:join)
+end
+
 namespace :jobs do
   def already_running?(pid_path)
     pid = File.read(pid_path)
@@ -63,26 +72,28 @@ namespace :jobs do
       @shutdown = true
     end
 
-    loader = GitRepositoryLoader.from_rails_config
-    repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+    @loader = GitRepositoryLoader.from_rails_config
+    outside_total_repos = GitRepositoryLocation.app_remote_head_hash
+    repos_to_update = []
 
     loop do
       start_time = Time.current
       puts "[#{start_time}] Running update git cache for all apps"
 
-      repos_hash_changed.keys.each_slice(4) do |group|
-        # Note: we limit to run 4 threads to avoid running out of memory.
-        group.map { |name|
-          Thread.new do
-            break if @shutdown
-            loader.load_and_update(name)
-          end
-        }.each(&:join)
+      if repos_to_update.empty?
+        outside_total_repos.keys.each_slice(4) do |group|
+          update_repos(group)
+        end
+      else
+        repos_to_update.each_slice(4) do |group|
+          update_repos(group)
+        end
       end
 
-      repos_hash_after = GitRepositoryLocation.app_remote_head_hash
-      repos_hash_changed = repos_hash_after.delete_if { |name, remote_head|
-        remote_head == repos_hash_changed[name]
+      inside_total_repos = GitRepositoryLocation.app_remote_head_hash
+
+      repos_to_update = outside_total_repos.select { |name, _|
+        outside_total_repos[name] != inside_total_repos[name]
       }
 
       end_time = Time.current
