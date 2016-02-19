@@ -45,4 +45,7 @@ RSpec.configure do |config|
   config.order = :random # Use `--seed` to deterministically reproduce test failures related to randomization.
 
   config.color = true
+
+  # By default `let` and `subject` are threadsafe, which adds overhead and slows down tests not using threads.
+  config.threadsafe = false
 end
