@@ -94,19 +94,19 @@ RSpec.describe GitRepositoryLoader do
     end
 
     context 'with an HTTP URI' do
-      let(:repo_uri) { 'http://example.com/some_repo.git' }
+      let(:repo_uri) { 'http://example.com/repo.git' }
 
       it 'should not use credentials' do
         expect(Rugged::Repository).to receive(:clone_at) do |_uri, _dir, options|
           expect(options).to_not have_key(:credentials)
         end
 
-        git_repository_loader.load('some_repo')
+        git_repository_loader.load('repo')
       end
     end
 
     context 'with an SSH URI' do
-      let(:repo_uri) { 'ssh://example.com/some_repo.git' }
+      let(:repo_uri) { 'ssh://git@example.com/owner/repo.git' }
       let(:ssh_private_key) { 'PR1V4t3' }
       let(:ssh_public_key) { 'PU8L1C' }
       let(:ssh_user) { 'alice' }
@@ -144,7 +144,7 @@ RSpec.describe GitRepositoryLoader do
           expect(File.stat(public_key_file)).to_not be_world_readable
         end
 
-        git_repository_loader.load('some_repo')
+        git_repository_loader.load('repo')
 
         expect(File.exist?(private_key_file)).to be(false), 'The privatekey file should be cleaned up'
       end
@@ -153,7 +153,7 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_private_key) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_private_key not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_private_key not set')
         end
       end
 
@@ -161,7 +161,7 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_public_key) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_public_key not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_public_key not set')
         end
       end
 
@@ -169,7 +169,7 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_user) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_user not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_user not set')
         end
       end
     end

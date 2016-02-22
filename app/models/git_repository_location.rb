@@ -1,24 +1,13 @@
 require 'git_clone_url'
 
 class GitRepositoryLocation < ActiveRecord::Base
-  REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
 
   before_validation on: :create do
-    self.uri = convert_remote_uri(uri)
     self.name = extract_name(uri)
   end
 
   validates :uri, presence: true
   validates :name, uniqueness: true
-  validate :must_have_valid_uri
-
-  def must_have_valid_uri
-    unless uri =~ REPO_URI_REGEX
-      errors.add(:uri, "must be valid in accordance with rfc3986.
-        If using the github SSH clone url then amend to match the following format:
-        ssh://git@github.com/ORGANIZATION/REPO.git")
-    end
-  end
 
   def self.app_names
     all.order(name: :asc).pluck(:name)
@@ -56,15 +45,6 @@ class GitRepositoryLocation < ActiveRecord::Base
     find_by('uri LIKE ?', "%#{path}")
   end
   private_class_method :find_by_github_ssh_url
-
-
-  def convert_remote_uri(remote_url)
-    return remote_url unless remote_url.start_with?('git@')
-    domain, path = remote_url.match(/git@(.*):(.*)/).captures
-    "ssh://git@#{domain}/#{path}"
-  rescue NoMethodError
-    remote_url
-  end
 
   def extract_name(uri)
     uri.chomp('.git').split('/').last
