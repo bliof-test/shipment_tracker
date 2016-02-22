@@ -29,7 +29,7 @@ RSpec.configure do |config|
   config.include Support::GithubApiHelpers
 
   config.before(:each, :disable_repo_verification) do
-    allow(GitCLI).to receive(:repo_accessible?).and_return(true)
+    allow_any_instance_of(OctokitClient).to receive(:repo_accessible?).and_return(true)
   end
 
   config.expect_with :rspec do |expectations|

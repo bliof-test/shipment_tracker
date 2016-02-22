@@ -4,8 +4,8 @@ require 'forms/repository_locations_form'
 RSpec.describe Forms::RepositoryLocationsForm do
   subject(:form) { Forms::RepositoryLocationsForm.new(git_uri) }
 
-  describe '#valid?', :disable_repo_verification do
-    describe 'URI validation' do
+  describe '#valid?' do
+    describe 'URI validation', :disable_repo_verification do
       context 'when the domain is whitelisted' do
         let(:git_uri) { 'https://github.com/owner/repo.git' }
         it { is_expected.to be_valid }
@@ -46,7 +46,7 @@ RSpec.describe Forms::RepositoryLocationsForm do
     describe 'repository accessibility' do
       context 'when the repo does not exist or we lack read permissions' do
         it 'is not valid' do
-          allow(GitCLI).to receive(:repo_accessible?).and_return(false)
+          allow_any_instance_of(Octokit::Client).to receive(:repository?).and_return(false)
           expect(repo_form('ssh://git@github.com/owner/repo.git')).to_not be_valid
         end
       end

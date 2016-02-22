@@ -84,7 +84,6 @@ Scenario: Viewing releases for an app
     | #master2 | historic commit            |                 |                       |                       | no       |                  |
     | #master1 | initial commit             |                 |                       |                       | no       | 2014-09-28 11:37 |
 
-
 Scenario: Release requires re-approval
   Given an application called "frontend"
   And a commit "#master1" with message "merge commit" is created at "2016-01-17 10:20:45"

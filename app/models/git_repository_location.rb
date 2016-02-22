@@ -1,7 +1,6 @@
 require 'git_clone_url'
 
 class GitRepositoryLocation < ActiveRecord::Base
-
   before_validation on: :create do
     self.name = extract_name(uri)
   end

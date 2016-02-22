@@ -1,5 +1,5 @@
 require 'git_clone_url'
-require 'git_cli'
+require 'octokit_client'
 
 require 'active_model'
 
@@ -53,7 +53,7 @@ module Forms
     end
 
     def repo_accessible?
-      unless GitCLI.repo_accessible?(uri)
+      unless OctokitClient.instance.repo_accessible?(uri)
         errors.add(:repository, 'is not accessible either due to permissions or it does not exist')
         return false
       end
