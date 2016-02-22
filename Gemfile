@@ -8,14 +8,15 @@ gem 'bootstrap-sass'
 gem 'delayed_job_active_record'
 gem 'dotenv'
 gem 'flag-icon-sass'
+gem 'git_clone_url'
 gem 'haml-rails'
 gem 'has_secure_token'
 gem 'honeybadger', '~> 2.0'
 gem 'jquery-rails'
 gem 'newrelic_rpm'
 gem 'octokit', '4.1.0', require: false
-gem 'omniauth'
 gem 'omniauth-auth0'
+gem 'omniauth'
 gem 'pg'
 gem 'rack-timeout'
 gem 'rugged', '~> 0.23.0'
@@ -23,8 +24,8 @@ gem 'sass-rails'
 gem 'slack-notifier'
 gem 'therubyracer'
 gem 'uglifier'
-gem 'unicorn'
 gem 'unicorn-rails'
+gem 'unicorn'
 gem 'virtus'
 gem 'whenever'
 
@@ -53,7 +54,7 @@ group :test do
   gem 'database_cleaner'
   gem 'factory_girl'
   gem 'rack-test', require: 'rack/test'
-  gem 'shoulda-matchers'
+  gem 'shoulda-matchers', require: false
   gem 'simplecov', require: false
   gem 'webmock', require: false
 end

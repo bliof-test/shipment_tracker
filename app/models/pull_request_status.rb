@@ -3,12 +3,12 @@ require 'octokit'
 
 require 'factories/feature_review_factory'
 require 'feature_review_with_statuses'
-require 'repositories/ticket_repository'
+require 'octokit_client'
 require 'repositories/deploy_repository'
+require 'repositories/ticket_repository'
 
 class PullRequestStatus
-  def initialize(token: Rails.application.config.github_access_token)
-    @token = token
+  def initialize
     @routes = Rails.application.routes.url_helpers
   end
 
@@ -42,7 +42,7 @@ class PullRequestStatus
 
   private
 
-  attr_reader :token, :routes
+  attr_reader :routes
 
   def decorated_feature_reviews(sha)
     tickets = Repositories::TicketRepository.new.tickets_for_versions([sha])
@@ -58,9 +58,8 @@ class PullRequestStatus
   end
 
   def publish_status(repo_url:, sha:, status:, description:, target_url: nil)
-    client = Octokit::Client.new(access_token: token)
     repo = Octokit::Repository.from_url(repo_url)
-    client.create_status(repo, sha, status,
+    OctokitClient.instance.create_status(repo, sha, status,
       context: 'shipment-tracker',
       target_url: target_url,
       description: description)

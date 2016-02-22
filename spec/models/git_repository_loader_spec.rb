@@ -11,11 +11,22 @@ RSpec.describe GitRepositoryLoader do
     let(:test_git_repo) { Support::GitTestRepository.new }
     let(:repo_uri) { "file://#{test_git_repo.dir}" }
     let(:repo_name) { test_git_repo.dir.split('/').last }
-    let!(:git_repository_location) { GitRepositoryLocation.create(uri: repo_uri) }
+    let(:remote_head) { test_git_repo.head_oid }
+
+    let(:git_repository_location) {
+      instance_double(
+        GitRepositoryLocation,
+        id: anything,
+        name: repo_name,
+        uri: repo_uri,
+        remote_head: remote_head,
+      )
+    }
 
     before do
       test_git_repo.create_commit
-      git_repository_location.update(remote_head: test_git_repo.head_oid)
+
+      allow(GitRepositoryLocation).to receive(:find_by_name).and_return(git_repository_location)
     end
 
     it 'returns a GitRepository' do
@@ -23,10 +34,10 @@ RSpec.describe GitRepositoryLoader do
     end
 
     context 'when the repository location does not exist' do
+      let(:git_repository_location) { nil }
+
       it 'raises a NotFound exception' do
-        expect {
-          git_repository_loader.load('non-existent-repo')
-        }.to raise_error(GitRepositoryLoader::NotFound)
+        expect { git_repository_loader.load('missing-repo') }.to raise_error(GitRepositoryLoader::NotFound)
       end
     end
 
@@ -53,9 +64,7 @@ RSpec.describe GitRepositoryLoader do
       end
 
       context 'when the local copy is not up-to-date' do
-        before do
-          create_remote_commit
-        end
+        let(:remote_head) { 'newer-commit' }
 
         it 'should fetch the repository' do
           expect(Rugged::Repository).to_not receive(:clone_at)
@@ -94,19 +103,19 @@ RSpec.describe GitRepositoryLoader do
     end
 
     context 'with an HTTP URI' do
-      let(:repo_uri) { 'http://example.com/some_repo.git' }
+      let(:repo_uri) { 'http://example.com/repo.git' }
 
       it 'should not use credentials' do
         expect(Rugged::Repository).to receive(:clone_at) do |_uri, _dir, options|
           expect(options).to_not have_key(:credentials)
         end
 
-        git_repository_loader.load('some_repo')
+        git_repository_loader.load('repo')
       end
     end
 
     context 'with an SSH URI' do
-      let(:repo_uri) { 'ssh://example.com/some_repo.git' }
+      let(:repo_uri) { 'git@example.com:owner/repo.git' }
       let(:ssh_private_key) { 'PR1V4t3' }
       let(:ssh_public_key) { 'PU8L1C' }
       let(:ssh_user) { 'alice' }
@@ -144,7 +153,7 @@ RSpec.describe GitRepositoryLoader do
           expect(File.stat(public_key_file)).to_not be_world_readable
         end
 
-        git_repository_loader.load('some_repo')
+        git_repository_loader.load('repo')
 
         expect(File.exist?(private_key_file)).to be(false), 'The privatekey file should be cleaned up'
       end
@@ -153,7 +162,7 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_private_key) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_private_key not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_private_key not set')
         end
       end
 
@@ -161,7 +170,7 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_public_key) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_public_key not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_public_key not set')
         end
       end
 
@@ -169,14 +178,9 @@ RSpec.describe GitRepositoryLoader do
         let(:ssh_user) { nil }
 
         it 'raises an error' do
-          expect { git_repository_loader.load('some_repo') }.to raise_error('ssh_user not set')
+          expect { git_repository_loader.load('repo') }.to raise_error('ssh_user not set')
         end
       end
     end
-  end
-
-  def create_remote_commit
-    test_git_repo.create_commit
-    git_repository_location.update(remote_head: test_git_repo.head_oid)
   end
 end

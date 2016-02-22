@@ -1,9 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe PullRequestStatus do
-  subject(:pull_request_status) { described_class.new(token: token) }
+  subject(:pull_request_status) { described_class.new }
 
-  let(:token) { 'a-token' }
   let(:routes) { double(:routes) }
 
   let(:sha) { 'abc' }
@@ -14,7 +13,6 @@ RSpec.describe PullRequestStatus do
     {
       'Accept' => 'application/vnd.github.v3+json',
       'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-      'Authorization' => 'token a-token',
       'Content-Type' => 'application/json',
       'User-Agent' => /^Octokit Ruby Gem/,
     }

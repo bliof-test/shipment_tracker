@@ -1,6 +1,5 @@
 require 'events/jira_event'
 
-# rubocop:disable Style/BlockDelimiters
 FactoryGirl.define do
   factory :jira_event, class: Events::JiraEvent do
     transient do
@@ -140,4 +139,3 @@ FactoryGirl.define do
     end
   end
 end
-# rubocop:enable Style/BlockDelimiters

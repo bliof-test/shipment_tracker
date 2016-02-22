@@ -1,43 +1,19 @@
 require 'rails_helper'
 
-RSpec.describe GitRepositoryLocation do
+RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   describe 'before validations' do
-    it 'converts SSH clone URIs to SSH URIs' do
-      location = GitRepositoryLocation.create(uri: 'git@github.com:user/repo.git')
-      expect(location.uri).to eq('ssh://git@github.com/user/repo.git')
-    end
-
-    it 'returns the original URI if it can not convert it' do
-      incorrect_uri = 'git@github.com/user/repo.git'
-      location = GitRepositoryLocation.create(uri: incorrect_uri)
-      expect(location.uri).to eq(incorrect_uri)
+    it 'extracts the name from the URI' do
+      location = GitRepositoryLocation.create(uri: 'git@github.com/owner/repo.git')
+      expect(location.name).to eq('repo')
     end
   end
 
   describe 'validations' do
-    it 'must have a valid uri' do
-      ssh_url = GitRepositoryLocation.new(uri: 'ssh://git@github.com/user/repo.git')
-      http_url = GitRepositoryLocation.new(uri: 'http://github.com/FundingCircle/shipment_tracker.git')
-      https_url = GitRepositoryLocation.new(uri: 'https://github.com/FundingCircle/shipment_tracker.git')
-      https_url_no_git = GitRepositoryLocation.new(uri: 'https://github.com/FundingCircle/shipment_tracker')
-      ssh_clone_url = GitRepositoryLocation.new(uri: 'git@github.com:user/repo.git')
-      invalid_url = GitRepositoryLocation.new(uri: 'github.com\user\repo.git')
-      empty_url = GitRepositoryLocation.new(uri: '')
-
-      expect(ssh_url).to be_valid
-      expect(http_url).to be_valid
-      expect(https_url).to be_valid
-      expect(https_url_no_git).to be_valid
-      expect(ssh_clone_url).to be_valid
-      expect(invalid_url).not_to be_valid
-      expect(empty_url).not_to be_valid
-    end
-
     it 'must have a unique name' do
       GitRepositoryLocation.create(uri: 'https://github.com/FundingCircle/shipment_tracker.git')
-      not_valid = GitRepositoryLocation.new(uri: 'https://github.com/OtherOrg/shipment_tracker.git')
-      expect(not_valid).to_not be_valid
-      expect(not_valid.errors[:name]).to eq(['has already been taken'])
+      duplicate_name = GitRepositoryLocation.new(uri: 'https://github.com/OtherOrg/shipment_tracker.git')
+      expect(duplicate_name).not_to be_valid
+      expect(duplicate_name.errors[:name]).to contain_exactly('has already been taken')
     end
   end
 
@@ -65,6 +41,7 @@ RSpec.describe GitRepositoryLocation do
         'ssh://git@github.com/organization/repo.git',
         'git://git@github.com/organization/repo.git',
         'https://github.com/organization/repo.git',
+        'git@github.com:organization/repo.git',
       ].each do |uri|
         context "when the uri is #{uri}" do
           let(:uri) { uri }

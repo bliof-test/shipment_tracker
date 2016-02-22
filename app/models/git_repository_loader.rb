@@ -1,7 +1,8 @@
-require 'rugged'
-require 'active_support/notifications'
-
+require 'git_clone_url'
 require 'git_repository'
+
+require 'active_support/notifications'
+require 'rugged'
 
 class GitRepositoryLoader
   class NotFound < RuntimeError; end
@@ -59,8 +60,8 @@ class GitRepositoryLoader
   end
 
   def options_for(uri, &block)
-    case URI.parse(uri).scheme
-    when 'ssh'
+    parsed_uri = GitCloneUrl.parse(uri)
+    if ['ssh', 'git', nil].include?(parsed_uri.scheme) && parsed_uri.user == 'git'
       options_for_ssh(&block)
     else
       yield({})

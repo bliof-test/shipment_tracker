@@ -28,6 +28,10 @@ RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
   config.include Support::GithubApiHelpers
 
+  config.before(:each, :disable_repo_verification) do
+    allow_any_instance_of(OctokitClient).to receive(:repo_accessible?).and_return(true)
+  end
+
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4.
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -45,4 +49,7 @@ RSpec.configure do |config|
   config.order = :random # Use `--seed` to deterministically reproduce test failures related to randomization.
 
   config.color = true
+
+  # By default `let` and `subject` are threadsafe, which adds overhead and slows down tests not using threads.
+  config.threadsafe = false
 end

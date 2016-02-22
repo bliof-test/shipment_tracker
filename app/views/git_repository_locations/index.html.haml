@@ -1,16 +1,16 @@
-- title 'Repository Locations'
+- title 'Repositories'
 
-= form_for(@new_git_repository_location, class: 'form-horizontal') do |form|
+= form_for(@repo_location_form, url: git_repository_locations_path, class: 'form-horizontal') do |form|
   .form-group.row
-    = form.label(:uri, 'URI', class: 'col-md-1 control-label')
+    = form.label(:uri, 'Git URI', class: 'col-md-1 control-label')
     .col-md-4
-      = form.text_field(:uri, class: 'form-control')
+      = form.text_field(:uri, placeholder: 'git@github.com:user/repo.git', class: 'form-control')
   .form-group.row
     .col-md-offset-1.col-md-4
-      = form.submit(class: 'btn btn-primary')
+      = form.submit('Add Git Repository', class: 'btn btn-primary')
 
 
-- table headers: ["Name", "URI"], classes: 'git_repository_locations' do
+- table headers: ['Name', 'URI'], classes: 'git_repository_locations' do
   - @git_repository_locations.each do |git_repository_location|
     %tr
       %td= git_repository_location.name

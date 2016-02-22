@@ -12,6 +12,7 @@ if ENV['COVERAGE']
 end
 
 require 'cucumber/rails'
+require 'cucumber/rspec/doubles'
 
 $LOAD_PATH.unshift Rails.root.join('spec')
 

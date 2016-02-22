@@ -5,7 +5,6 @@ AllCops:
     - 'db/**/*'
     - 'script/**/*'
     - 'lib/tasks/cucumber.rake'
-    - Guardfile
     - Gemfile
     - 'hooks/**/*'
     - 'vendor/bundle/**/*'
@@ -39,6 +38,8 @@ Style/Documentation:
 
 Style/BlockDelimiters:
   EnforcedStyle: semantic
+  Exclude:
+    - 'spec/**/*'
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
