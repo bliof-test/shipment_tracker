@@ -28,6 +28,10 @@ RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
   config.include Support::GithubApiHelpers
 
+  config.before(:each, :disable_repo_verification) do
+    allow(GitCLI).to receive(:repo_accessible?).and_return(true)
+  end
+
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4.
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
