@@ -50,6 +50,12 @@ RSpec.describe Forms::RepositoryLocationsForm do
           expect(repo_form('ssh://git@github.com/owner/repo.git')).to_not be_valid
         end
       end
+
+      context 'when the check is skipped because the repo is not on GitHub' do
+        it 'is not valid' do
+          expect(repo_form('ssh://git@bitbucket.com/owner/repo.git')).to_not be_valid
+        end
+      end
     end
   end
 
