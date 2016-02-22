@@ -19,9 +19,9 @@ Scenario: Preparing a Feature Review
     | backend         | #def                |
     | UAT environment | http://www.some.url |
   Then I should see the feature review page with the applications:
-    | app_name | version                        |
-    | frontend | [#abc](https://github.com/...) |
-    | backend  | [#def](https://github.com/...) |
+    | app_name | version |
+    | frontend | #abc    |
+    | backend  | #def    |
   And I can see the UAT environment "http://www.some.url"
 
 @logged_in
@@ -32,8 +32,8 @@ Scenario: Editing a feature review not yet linked to a ticket
     And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
     And a commit "#def" by "Bob" is created at "2014-10-04 12:30:00" for app "backend"
     And I prepare a feature review for:
-      | field name      | content             |
-      | frontend        | #abc                |
+      | field name      | content |
+      | frontend        | #abc    |
 
   When I click modify button on review panel
     And I fill in the data for a feature review:
@@ -41,9 +41,9 @@ Scenario: Editing a feature review not yet linked to a ticket
       | backend         | #def                |
       | UAT environment | http://www.some.url |
   Then I should see the feature review page with the applications:
-    | app_name | version                        |
-    | frontend | [#abc](https://github.com/...) |
-    | backend  | [#def](https://github.com/...) |
+    | app_name | version |
+    | frontend | #abc    |
+    | backend  | #def    |
     And I can see the UAT environment "http://www.some.url"
 
 
@@ -112,8 +112,8 @@ Scenario: Viewing a Feature Review
   Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
 
   And I should see the tickets
-    | Ticket                                        | Summary       | Status               |
-    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | Ready for Deployment |
+    | Ticket   | Summary       | Status               |
+    | JIRA-123 | Urgent ticket | Ready for Deployment |
 
   And I should see a summary with heading "danger" and content
     | status  | title                 |
@@ -159,9 +159,9 @@ Scenario: Viewing a Feature Review that requires re-approval
   Then I should see that the Feature Review requires reapproval
 
   And I should see the tickets
-    | Ticket                                    | Summary   | Status               |
-    | [JIRA-1](https://jira.test/browse/JIRA-1) | Some work | Requires reapproval  |
-    | [JIRA-2](https://jira.test/browse/JIRA-2) | More work | Ready for Deployment |
+    | Ticket | Summary   | Status               |
+    | JIRA-1 | Some work | Requires reapproval  |
+    | JIRA-2 | More work | Ready for Deployment |
 
 @logged_in
 Scenario: Viewing a Feature Review as at a specified time
@@ -177,8 +177,8 @@ Scenario: Viewing a Feature Review as at a specified time
   When I visit feature review "FR_123" as at "2014-10-04 14:00:00"
 
   Then I should see the tickets
-    | Ticket                                        | Summary       | Status      |
-    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      |
+    | JIRA-123 | Urgent ticket | In Progress |
 
   And I should see the time "2014-10-04 14:00:00" for the Feature Review
 
@@ -199,14 +199,14 @@ Scenario: Viewing an approved Feature Review after regenerating snapshots
   When I visit feature review "FR_123" as at "2014-10-04 15:00:00"
   Then I should see that the Feature Review was not approved
   Then I should see the tickets
-    | Ticket                                        | Summary       | Status      |
-    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      |
+    | JIRA-123 | Urgent ticket | In Progress |
 
   When I visit feature review "FR_123" as at "2014-10-06 10:00:00"
   Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
   And I should see the tickets
-    | Ticket                                        | Summary       | Status               |
-    | [JIRA-123](https://jira.test/browse/JIRA-123) | Urgent ticket | Ready for Deployment |
+    | Ticket   | Summary       | Status               |
+    | JIRA-123 | Urgent ticket | Ready for Deployment |
 
 
 Scenario: QA rejects feature

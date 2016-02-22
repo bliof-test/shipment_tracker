@@ -16,12 +16,9 @@ end
 
 Then 'I should see the feature review page with the applications:' do |table|
   expected_app_info = table.hashes.map { |hash|
-    version, link = hash.fetch('version').match(/\A\[(.*)\]\((.*)\)\z/).try(:captures)
+    version = hash.fetch('version')
     real_version = scenario_context.resolve_version(version)
-    mock_path = scenario_context.repository_for(hash.fetch('app_name')).mock_remote_path
-    link = link.sub('...', "#{mock_path}/commit/#{real_version}")
-
-    hash.merge('version' => "[#{real_version.slice(0..6)}](#{link})")
+    hash.merge('version' => real_version.slice(0..6))
   }
 
   expect(feature_review_page.app_info).to match_array(expected_app_info)

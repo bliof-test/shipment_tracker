@@ -31,20 +31,13 @@ module Sections
         return icon_translation_for(icon) if icon
       end
 
-      link = find_valid_link(cell_element)
-      link ? "[#{link.text}](#{link[:href]})" : cell_element.text
+      cell_element.text
     end
 
     def icon_translation_for(icon_element)
       icon_element['class'].split(' ').map {|klass|
         icon_translations[klass]
       }.compact.first
-    end
-
-    def find_valid_link(element)
-      return unless element.has_css?('a')
-      link = element.find('a')
-      link[:href] == '#' ? nil : link
     end
   end
 end
