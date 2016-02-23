@@ -15,6 +15,10 @@ module Pages
       self
     end
 
+    def check_token_type(token_type)
+      page.check(token_type)
+    end
+
     def git_repository_locations
       Sections::TableSection.new(page.find('table.git_repository_locations')).items
     end

@@ -19,10 +19,10 @@ Scenario: Add repository with auto-generated tokens
   Given I am on the new repository location form
   When I enter a valid uri "ssh://git@github.com/owner/app_name.git"
   And I select the tokens for auto-generation:
-    | Tokens             |
-    | circleci (webhook) |
-    | circleci (curl)    |
-    | deployment         |
+    | Tokens               |
+    | CircleCI (webhook)   |
+    | CircleCI (post test) |
+    | Deployment           |
   And I visit the tokens page
   Then I should see the tokens
   | Token type         | Token name |

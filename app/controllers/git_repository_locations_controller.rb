@@ -2,11 +2,13 @@ class GitRepositoryLocationsController < ApplicationController
   def index
     @repo_location_form = repo_location_form
     @git_repository_locations = GitRepositoryLocation.all.order(:name)
+    @token_types = Forms::RepositoryLocationsForm.default_token_types
   end
 
   def create
     @git_repository_location = GitRepositoryLocation.new(git_repository_location_params)
     @repo_location_form = repo_location_form
+    @token_types = Forms::RepositoryLocationsForm.default_token_types
     if @repo_location_form.valid? && @git_repository_location.save
       redirect_to :git_repository_locations
     else
@@ -27,10 +29,11 @@ class GitRepositoryLocationsController < ApplicationController
   end
 
   def repo_location_form
-    Forms::RepositoryLocationsForm.new(params.dig(:forms_repository_locations_form, :uri))
+    Forms::RepositoryLocationsForm.new(params.dig(:forms_repository_locations_form, :uri),
+     params.dig(:forms_repository_locations_form, :uri))
   end
 
   def git_repository_location_params
-    params.require(:forms_repository_locations_form).permit(:uri)
+    params.require(:forms_repository_locations_form).permit(:uri, :token_types)
   end
 end
