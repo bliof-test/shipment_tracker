@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 require 'forms/repository_locations_form'
 
 RSpec.describe Forms::RepositoryLocationsForm do
@@ -56,6 +56,24 @@ RSpec.describe Forms::RepositoryLocationsForm do
           expect(repo_form('ssh://git@bitbucket.com/owner/repo.git')).to_not be_valid
         end
       end
+    end
+  end
+
+  describe '.default_token_types' do
+    let(:expected_tokens) {
+      [
+        { id: 'circleci', name: 'CircleCI (webhook)', value: 'true' },
+        { id: 'circleci-manual', name: 'CircleCI (post test)', value: 'false' },
+        { id: 'deploy', name: 'Deployment', value: 'true' },
+        { id: 'jenkins', name: 'Jenkins', value: 'false' },
+        { id: 'jira', name: 'JIRA', value: 'false' },
+        { id: 'uat', name: 'UAT', value: 'false' },
+        { id: 'github_notifications', name: 'Github Notifications', value: 'false' },
+      ]
+    }
+
+    it 'returns complete list of token types and default values' do
+      expect(Forms::RepositoryLocationsForm.default_token_types).to eq(expected_tokens)
     end
   end
 
