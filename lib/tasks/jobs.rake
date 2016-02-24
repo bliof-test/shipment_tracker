@@ -56,8 +56,8 @@ namespace :jobs do
     end
   end
 
-  desc 'Continuously updates the git cache'
-  task update_git_cache_loop: :environment do
+  desc 'Continuously updates the local git repositories'
+  task update_git_loop: :environment do
     Signal.trap('TERM') do
       warn 'Terminating rake task jobs:update_git_cache_loop...'
       @shutdown = true
@@ -69,12 +69,12 @@ namespace :jobs do
 
     loop do
       start_time = Time.current
-      puts "[#{start_time}] Running update git cache for all apps"
+      puts "[#{start_time}] Updating all git repositories"
 
       repos_hash_changed.keys.in_groups(4).map { |group|
         # Note: we limit to run 4 threads to avoid running out of memory.
         Thread.new do
-          group.each do |name|
+          group.compact.each do |name|
             break if @shutdown
             loader.load(name, update_repo: true)
           end
@@ -88,7 +88,7 @@ namespace :jobs do
       repos_hash_before = repos_hash_after.dup
 
       end_time = Time.current
-      puts "[#{end_time}] Updated git in #{end_time - start_time} seconds"
+      puts "[#{end_time}] Updated git repositories in #{end_time - start_time} seconds"
       sleep 5
     end
   end
