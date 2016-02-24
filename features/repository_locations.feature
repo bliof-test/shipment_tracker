@@ -18,14 +18,8 @@ Scenario: Add repositories
 Scenario: Add repository with auto-generated tokens
   Given I am on the new repository location form
   When I enter a valid uri "ssh://git@github.com/owner/app_name.git"
-  And I select the tokens for auto-generation:
-    | Tokens               |
-    | CircleCI (webhook)   |
-    | CircleCI (post test) |
-    | Deployment           |
   And I visit the tokens page
   Then I should see the tokens
-  | Token type         | Token name |
-  | circleci (webhook) | app_name   |
-  | circleci (curl)    | app_name   |
-  | deployment         | app_name   |
+    | Source               | Name     | Endpoint        |
+    | CircleCI (webhook)   | app_name | circleci        |
+    | Deployment           | app_name | deploy          |

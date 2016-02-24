@@ -11,9 +11,6 @@ Then 'I should see the repository locations:' do |table|
   expect(git_repository_location_page.git_repository_locations).to eq(expected_git_repository_locations)
 end
 
-And 'I select the tokens for auto-generation:' do |table|
-  token_types = table.hashes.map{ |row| row['Tokens'] }
-  token_types.each do |token_type|
-    git_repository_location_page.check_token_type(token_type)
-  end
+When 'I visit the tokens page' do
+  tokens_page.visit
 end
