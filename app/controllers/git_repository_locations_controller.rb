@@ -29,11 +29,15 @@ class GitRepositoryLocationsController < ApplicationController
   end
 
   def repo_location_form
-    Forms::RepositoryLocationsForm.new(params.dig(:forms_repository_locations_form, :uri),
-     params.dig(:forms_repository_locations_form, :uri))
+    Forms::RepositoryLocationsForm.new(
+      params.dig(:forms_repository_locations_form, :uri),
+      params[:token_types]
+    )
   end
 
   def git_repository_location_params
-    params.require(:forms_repository_locations_form).permit(:uri, :token_types)
+    permitted = params.require(:forms_repository_locations_form).permit(:uri)
+    permitted.merge!(params.permit(:token_types)) if params[:token_types].present?
+    permitted
   end
 end
