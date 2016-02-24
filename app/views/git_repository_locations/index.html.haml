@@ -6,13 +6,14 @@
     .col-md-4
       = form.text_field(:uri, placeholder: 'git@github.com:user/repo.git', class: 'form-control')
   .form-group.row
-    = form.label('Tokens', class: 'col-md-1 control-label')
-    .col-md-4
-      %ul
-        - @token_types.each do |token|
-          %li
+    %label.col-md-1.control-label Tokens
+    .col-md-2
+      - @token_types.each do |token|
+        .checkbox
+          %label
             = check_box_tag("token_types[#{token[:id]}]", token[:id], name: 'token_types[]')
-            = label_tag("token_types_#{token[:id]}", token[:name], class: 'col-md-1 control-label')
+            = token[:name]
+
   .form-group.row
     .col-md-offset-1.col-md-4
       = form.submit('Add Git Repository', class: 'btn btn-primary')
