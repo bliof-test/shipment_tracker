@@ -11,7 +11,7 @@
       - @token_types.each do |token|
         .checkbox
           %label
-            = check_box_tag("token_types[#{token[:id]}]", token[:id], name: 'token_types[]')
+            = check_box_tag("token_types[#{token[:id]}]", token[:id], token[:value], name: 'token_types[]')
             = token[:name]
 
   .form-group.row
