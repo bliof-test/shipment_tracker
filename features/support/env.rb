@@ -75,3 +75,7 @@ World(Rack::Test::Methods)
 After do |scenario|
   File.open('tmp/last_failure.html', 'w') { |f| f.write(page.source) } if scenario.failed?
 end
+
+Rails.application.configure do
+  config.allow_git_fetch_on_request = true
+end

@@ -76,7 +76,7 @@ namespace :jobs do
         Thread.new do
           group.each do |name|
             break if @shutdown
-            loader.load_and_update(name)
+            loader.load(name, update_repo: true)
           end
         end
       }.each(&:join)

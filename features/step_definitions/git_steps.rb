@@ -11,8 +11,6 @@ Given 'a commit "$version" by "$name" is created at "$time" for app "$app"' do |
     time: Time.zone.parse(time).utc,
     pretend_version: version,
   )
-  loader = GitRepositoryLoader.from_rails_config
-  loader.load_and_update(app)
 end
 
 Given 'a commit "$version" with message "$message" is created at "$time"' do |version, message, time|
@@ -22,8 +20,6 @@ Given 'a commit "$version" with message "$message" is created at "$time"' do |ve
     time: Time.zone.parse(time).utc,
     pretend_version: version,
   )
-  loader = GitRepositoryLoader.from_rails_config
-  loader.load_and_update(scenario_context.last_application)
 end
 
 Given 'the branch "$branch_name" is checked out' do |branch_name|
@@ -38,9 +34,6 @@ Given 'the branch "$branch" is merged with merge commit "$version" at "$time' do
     author_name: 'Alice',
     time: Time.zone.parse(time).utc,
   )
-
-  loader = GitRepositoryLoader.from_rails_config
-  loader.load_and_update(scenario_context.last_application)
 end
 
 Given 'all pull requests for "$commit" should be updated to "$status" status' do |_commit, status|
