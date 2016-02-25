@@ -30,10 +30,6 @@ class GitRepositoryLocation < ActiveRecord::Base
     github_urls
   end
 
-  def self.app_remote_head_hash
-    all.each_with_object({}) { |repo, repo_hash| repo_hash[repo.name] = repo.remote_head }
-  end
-
   def self.update_from_github_notification(payload)
     ssh_url = payload.fetch('repository', {}).fetch('ssh_url', nil)
     git_repository_location = find_by_github_ssh_url(ssh_url)
