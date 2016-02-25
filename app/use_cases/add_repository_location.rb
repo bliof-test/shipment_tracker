@@ -12,12 +12,11 @@ class AddRepositoryLocation
 
   def add_repo(args)
     uri = args[:uri]
-    git_repository_location = GitRepositoryLocation.new(uri: uri)
-    unless git_repository_location.save
-      fail :failed_adding_repo, errors: get_errors_msg(git_repository_location)
-    end
+    git_repo_location = GitRepositoryLocation.new(uri: uri)
 
-    repo_name = git_repository_location.name
+    return fail :failed_repo, errors: get_errors_msg(git_repo_location) unless git_repo_location.save
+
+    repo_name = git_repo_location.name
     args[:repo_name] = repo_name
     continue(args)
   end
@@ -26,7 +25,6 @@ class AddRepositoryLocation
     token_types = args[:token_types]
     repo_name = args[:repo_name]
     return continue(repo_name) if token_types.nil?
-
 
     tokens_created = true
     token_types.each do |token_type|
