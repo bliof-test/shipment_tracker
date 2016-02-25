@@ -3,16 +3,16 @@ require 'add_repository_location'
 require 'forms/repository_locations_form'
 
 RSpec.describe AddRepositoryLocation do
-  let(:form) { double() }
-  let(:git_repo_location) { double() }
+  let(:form) { double }
+  let(:git_repo_location) { double }
 
   before do
     allow(form).to receive(:valid?).and_return(true)
-    allow(form).to receive_message_chain(:errors, :full_messages => [''])
+    allow(form).to receive_message_chain(:errors, full_messages: [''])
   end
 
   context 'when valid URI and a token selected' do
-    let(:token_types) { ['system_1', 'system2'] }
+    let(:token_types) { %w(system_1 system2) }
     let(:token_mock) { instance_double(Token) }
 
     before do
@@ -44,7 +44,7 @@ RSpec.describe AddRepositoryLocation do
       allow(GitRepositoryLocation).to receive(:new).and_return(git_repo_location)
       expect(Token).to receive(:new).with(
         name: 'repo',
-        source: anything()
+        source: anything,
       ).exactly(token_types.size).times.and_return(token_mock)
       AddRepositoryLocation.run(
         validation_form: form,
@@ -63,7 +63,7 @@ RSpec.describe AddRepositoryLocation do
         result = AddRepositoryLocation.run(
           validation_form: form,
           uri: 'owner/repo.git',
-          token_types: token_types
+          token_types: token_types,
         )
         expect(result).to fail_with(:failed_generating_token)
       end
@@ -71,7 +71,6 @@ RSpec.describe AddRepositoryLocation do
   end
 
   context 'when invalid URI' do
-
     it 'fails validation' do
       allow(form).to receive(:valid?).and_return(false)
       result = AddRepositoryLocation.run(validation_form: form, uri: 'owner/repo.git')

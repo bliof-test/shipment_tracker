@@ -29,14 +29,14 @@ module Forms
     end
 
     def self.default_token_types
-      @@default_token_types ||= Token.sources.map do |token_src|
-        if DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
-          value = true
-        else
-          value = false
-        end
+      @default_token_types ||= Token.sources.map { |token_src|
+        value = if DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
+                  true
+                else
+                  false
+                end
         { id: token_src.endpoint, name: token_src.name, value: value }
-      end
+      }
     end
 
     private

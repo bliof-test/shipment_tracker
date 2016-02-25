@@ -33,6 +33,7 @@ RSpec.describe GitRepositoryLocationsController do
     context 'when the GitRepositoryLocation is valid' do
       let(:params) { { forms_repository_locations_form: { uri: 'ssh://git@github.com/some/repo.git' } } }
 
+      it { is_expected.to set_flash[:success] }
       it { is_expected.to redirect_to(git_repository_locations_path) }
     end
   end

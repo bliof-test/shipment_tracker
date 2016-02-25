@@ -10,13 +10,15 @@ class GitRepositoryLocationsController < ApplicationController
     @token_types = Forms::RepositoryLocationsForm.default_token_types
 
     AddRepositoryLocation.run(git_repo_location_params).match do
-      success do
+      success do |repo_name|
+        flash[:success] = "Successfuly Added #{repo_name} Repository. " \
+                              'Selected tokens were generated and can be found on Tokens page.'
         redirect_to :git_repository_locations
       end
 
       failure do |errors|
         @git_repository_locations = GitRepositoryLocation.all
-        flash.now[:error] = errors if errors
+        flash.now[:error] = errors.errors if errors
         render :index
       end
     end
@@ -27,14 +29,14 @@ class GitRepositoryLocationsController < ApplicationController
   def repo_location_form
     Forms::RepositoryLocationsForm.new(
       params.dig(:forms_repository_locations_form, :uri),
-      params[:token_types]
+      params[:token_types],
     )
   end
 
   def git_repo_location_params
     permitted = params.require(:forms_repository_locations_form).permit(:uri)
-    permitted.merge!(token_types: params[:token_types]) if params[:token_types].present?
-    permitted.merge!(validation_form: @repo_location_form)
+    permitted[:token_types] = params[:token_types] if params[:token_types].present?
+    permitted[:validation_form] = @repo_location_form
     permitted
   end
 end
