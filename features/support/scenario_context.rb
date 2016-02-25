@@ -30,7 +30,7 @@ module Support
     def setup_application(name)
       dir = "#{Dir.mktmpdir}/#{name}"
       Dir.mkdir(dir)
-      test_repo = Support::GitTestRepository.new(dir, app: app)
+      test_repo = Support::GitTestRepository.new(dir)
 
       @application = name
       @repos[name] = test_repo

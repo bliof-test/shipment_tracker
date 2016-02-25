@@ -1,6 +1,5 @@
 require 'rugged'
 require 'active_support/inflector/transliterate'
-require 'rack/test'
 
 module Support
   class GitTestRepository
@@ -10,7 +9,7 @@ module Support
 
     delegate :checkout, to: :repo
 
-    def initialize(dir = Dir.mktmpdir, app: nil)
+    def initialize(dir = Dir.mktmpdir)
       @dir = File.realpath(dir)
       @repo = Rugged::Repository.init_at(dir)
       @repo.config['user.name'] = 'Unconfigured'
@@ -18,7 +17,6 @@ module Support
       @now = Time.at(0)
       @total_commits = 0
       @commits = {}
-      @app = app
     end
 
     def create_commit(author_name: 'Alice', pretend_version: nil, message: 'A new commit', time: nil)
@@ -32,14 +30,13 @@ module Support
       @now += 60
       time ||= @now
 
-      old_head_oid = head_oid
-
       create_rugged_commit(
-        tree_oid: oid, message: message,
-        author_name: author_name, time: time,
-        pretend_version: pretend_version
+        tree_oid: oid,
+        message: message,
+        author_name: author_name,
+        time: time,
+        pretend_version: pretend_version,
       )
-      post_github_notification(old_head_oid)
     end
 
     def create_branch(branch_name)
@@ -57,8 +54,6 @@ module Support
 
       fail 'Conflict detected!' if merge_index.conflicts?
 
-      old_head_oid = head_oid
-
       create_rugged_commit(
         tree_oid: merge_index.write_tree(repo),
         message: "Merge #{branch_name} into master",
@@ -67,7 +62,6 @@ module Support
         parents: [master_tip_oid, branch_tip_oid],
         pretend_version: pretend_version,
       )
-      post_github_notification(old_head_oid)
     end
 
     def commit_for_pretend_version(pretend_version)
@@ -76,8 +70,6 @@ module Support
 
     def head_oid
       repo.head.target_id
-    rescue Rugged::ReferenceError
-      '' # not available if initial commit
     end
 
     def uri
@@ -86,9 +78,7 @@ module Support
 
     private
 
-    include Rack::Test::Methods
-
-    attr_reader :repo, :commits, :app
+    attr_reader :repo, :commits
 
     def create_rugged_commit(tree_oid:, message:, author_name:, time:, pretend_version:, parents: [])
       parents = [repo.head.target_id] if parents.empty? && !repo.empty?
@@ -105,32 +95,6 @@ module Support
 
       @commits[pretend_version] = commit_oid if pretend_version
       @total_commits += 1
-    end
-
-    def post_github_notification(old_head_oid)
-      return unless app
-      github_payload = JSON.parse(<<-END)
-        {
-          "before": "#{old_head_oid}", "after": "#{head_oid}",
-          "repository": {
-            "name": "#{repo_name}",
-            "full_name": "#{full_repo_name}",
-            "git_url": "#{uri}",
-            "ssh_url": "#{uri}",
-            "clone_url": "#{uri}"
-          }
-        }
-      END
-      url = '/github_notifications'
-      post url, github_payload.to_json, 'CONTENT_TYPE' => 'application/json', 'HTTP_X_GITHUB_EVENT' => 'push'
-    end
-
-    def full_repo_name
-      uri.split('/').last(2).join('/')
-    end
-
-    def repo_name
-      full_repo_name.split('/').last
     end
 
     def author(author_name, time)
