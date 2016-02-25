@@ -27,7 +27,6 @@ gem 'uglifier'
 gem 'unicorn-rails'
 gem 'unicorn'
 gem 'virtus'
-gem 'whenever'
 
 group :development do
   gem 'better_errors', require: false

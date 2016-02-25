@@ -91,10 +91,8 @@ It's important to keep the Shipment Tracker git cache reasonably up-to-date to a
 Please make sure the following command runs every few minutes:
 
 ```
-bundle exec rake jobs:update_git
+bundle exec rake jobs:update_git_loop
 ```
-
-This can be done with the cron job (via whenever gem) specified in [`config/schedule.rb`](config/schedule.rb).
 
 *Warning:* This recurring task should run on **every** server that your application is running on.
 
