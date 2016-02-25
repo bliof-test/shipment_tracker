@@ -13,7 +13,7 @@ RSpec.describe TokensController do
   let(:tokens) { [Token.new] }
 
   before do
-    allow(Token).to receive(:all).and_return(tokens)
+    allow(Token).to receive(:order).and_return(tokens)
   end
 
   describe 'GET #index', :logged_in do
