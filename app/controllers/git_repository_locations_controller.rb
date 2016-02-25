@@ -11,7 +11,7 @@ class GitRepositoryLocationsController < ApplicationController
 
     AddRepositoryLocation.run(git_repo_location_params).match do
       success do |repo_name|
-        flash[:success] = "Successfuly Added #{repo_name} Repository. " \
+        flash[:success] = "Successfuly added #{repo_name} repository. " \
                               'Selected tokens were generated and can be found on Tokens page.'
         redirect_to :git_repository_locations
       end
