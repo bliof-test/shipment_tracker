@@ -24,9 +24,9 @@ class AddRepositoryLocation
 
   def generate_tokens(args)
     token_types = args[:token_types]
-    return continue(args) if token_types.nil?
-
     repo_name = args[:repo_name]
+    return continue(repo_name) if token_types.nil?
+
 
     tokens_created = true
     token_types.each do |token_type|
@@ -35,7 +35,7 @@ class AddRepositoryLocation
     end
 
     return fail :failed_generating_token unless tokens_created
-    continue(args[:repo_name])
+    continue(repo_name)
   end
 
   private
