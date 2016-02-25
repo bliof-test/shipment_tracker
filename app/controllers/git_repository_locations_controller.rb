@@ -17,7 +17,7 @@ class GitRepositoryLocationsController < ApplicationController
       end
 
       failure do |errors|
-        @git_repository_locations = GitRepositoryLocation.all
+        @git_repository_locations = GitRepositoryLocation.all.order(:name)
         flash.now[:error] = errors.errors if errors
         render :index
       end
