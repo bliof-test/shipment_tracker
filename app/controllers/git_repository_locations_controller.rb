@@ -6,27 +6,23 @@ class GitRepositoryLocationsController < ApplicationController
   end
 
   def create
-    @git_repository_location = GitRepositoryLocation.new(git_repository_location_params)
     @repo_location_form = repo_location_form
     @token_types = Forms::RepositoryLocationsForm.default_token_types
-    if @repo_location_form.valid? && @git_repository_location.save
-      redirect_to :git_repository_locations
-    else
-      @git_repository_locations = GitRepositoryLocation.all
-      flash.now[:error] = errors
-      render :index
+
+    AddRepositoryLocation.run(git_repo_location_params).match do
+      success do
+        redirect_to :git_repository_locations
+      end
+
+      failure do |errors|
+        @git_repository_locations = GitRepositoryLocation.all
+        flash.now[:error] = errors if errors
+        render :index
+      end
     end
   end
 
   private
-
-  def errors
-    if @git_repository_location.errors.empty?
-      @repo_location_form.errors.full_messages.to_sentence
-    else
-      @git_repository_location.errors.full_messages.to_sentence
-    end
-  end
 
   def repo_location_form
     Forms::RepositoryLocationsForm.new(
@@ -35,9 +31,10 @@ class GitRepositoryLocationsController < ApplicationController
     )
   end
 
-  def git_repository_location_params
+  def git_repo_location_params
     permitted = params.require(:forms_repository_locations_form).permit(:uri)
     permitted.merge!(params.permit(:token_types)) if params[:token_types].present?
+    permitted.merge!(validation_form: @repo_location_form)
     permitted
   end
 end

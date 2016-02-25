@@ -9,7 +9,7 @@ class AddRepositoryLocation
     if validation_form.valid?
       continue(args)
     else
-      fail :invalid_uri
+      fail :invalid_uri, :errors => validation_form.errors.full_messages.to_sentence
     end
   end
 
@@ -17,7 +17,7 @@ class AddRepositoryLocation
     uri = args[:uri]
     git_repository_location = GitRepositoryLocation.new(uri: uri)
     if !git_repository_location.save
-      fail :failed_adding_repo
+      fail :failed_adding_repo, :errors => git_repository_location.errors.full_messages.to_sentence
     end
 
     repo_name = git_repository_location.name

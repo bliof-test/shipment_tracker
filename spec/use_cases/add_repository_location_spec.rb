@@ -8,6 +8,7 @@ RSpec.describe AddRepositoryLocation do
 
   before do
     allow(form).to receive(:valid?).and_return(true)
+    allow(form).to receive_message_chain(:errors, :full_messages => [''])
   end
 
   context 'when valid URI and a token selected' do
