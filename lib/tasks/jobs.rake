@@ -56,16 +56,34 @@ namespace :jobs do
     end
   end
 
-  desc 'Update git cache'
-  task update_git: :environment do
-    manage_pid pid_path_for('jobs_update_git')
+  desc 'Continuously updates the local git repositories'
+  task update_git_loop: :environment do
+    manage_pid pid_path_for('update_git_loop')
 
-    puts "[#{Time.current}] Running update_git"
-    git_repository_loader = GitRepositoryLoader.from_rails_config
-    GitRepositoryLocation.app_names.each do |repository_name|
-      puts "[#{Time.current}] Updating #{repository_name}"
-      git_repository_loader.load(repository_name)
+    Signal.trap('TERM') do
+      warn 'Terminating rake task jobs:update_git_loop...'
+      @shutdown = true
     end
-    puts "[#{Time.current}] Completed update_git"
+
+    loader = GitRepositoryLoader.from_rails_config
+
+    loop do
+      start_time = Time.current
+      puts "[#{start_time}] Updating all git repositories"
+
+      app_names = GitRepositoryLocation.pluck(:name)
+      app_names.in_groups(4).map { |group|
+        Thread.new do # Limited to 4 threads to avoid running out of memory.
+          group.compact.each do |app_name|
+            break if @shutdown
+            loader.load(app_name, update_repo: true)
+          end
+        end
+      }.each(&:join)
+
+      end_time = Time.current
+      puts "[#{end_time}] Updated #{app_names.size} repositories in #{end_time - start_time} seconds"
+      sleep 5
+    end
   end
 end

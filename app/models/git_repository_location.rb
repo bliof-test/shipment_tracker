@@ -45,14 +45,14 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
   private_class_method :find_by_github_ssh_url
 
-  def extract_name(uri)
-    uri.chomp('.git').split('/').last
-  end
-
   def self.url_from_uri(uri)
     parsed_uri = GitCloneUrl.parse(uri)
     path = parsed_uri.path.start_with?('/') ? parsed_uri.path[1..-1] : parsed_uri.path
     "https://#{parsed_uri.host}/#{path.chomp('.git')}"
   end
   private_class_method :url_from_uri
+
+  def extract_name(uri)
+    uri.chomp('.git').split('/').last
+  end
 end

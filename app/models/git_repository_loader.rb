@@ -6,6 +6,7 @@ require 'rugged'
 
 class GitRepositoryLoader
   class NotFound < RuntimeError; end
+  class BadLocation < RuntimeError; end
 
   def self.from_rails_config
     config = Rails.configuration
@@ -24,22 +25,32 @@ class GitRepositoryLoader
     @cache_dir = cache_dir
   end
 
-  def load(repository_name)
-    git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
-    fail GitRepositoryLoader::NotFound unless git_repository_location
+  def load(repository_name, update_repo: Rails.configuration.allow_git_fetch_on_request)
+    git_repository_location = find_repo_location(repository_name)
 
-    options_for(git_repository_location.uri) do |options|
-      repository = updated_rugged_repository(git_repository_location, options)
-      GitRepository.new(repository)
-    end
+    repository = if update_repo
+                   options_for(git_repository_location.uri) { |options|
+                     updated_rugged_repository(git_repository_location, options)
+                   }
+                 else
+                   rugged_repository(git_repository_location)
+                 end
+
+    GitRepository.new(repository)
   end
 
   private
 
   attr_reader :cache_dir, :ssh_user, :ssh_private_key, :ssh_public_key
 
+  def find_repo_location(repository_name)
+    git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
+    fail GitRepositoryLoader::NotFound,
+      "Cannot find GitRepositoryLocation record for #{repository_name.inspect}" unless git_repository_location
+    git_repository_location
+  end
+
   def updated_rugged_repository(git_repository_location, options)
-    Rails.logger.info "Updating repository #{git_repository_location.name} (#{git_repository_location.uri})"
     dir = repository_dir_name(git_repository_location)
     Rugged::Repository.new(dir, options).tap do |repository|
       instrument('fetch') do
@@ -53,6 +64,14 @@ class GitRepositoryLoader
     instrument('clone') do
       Rugged::Repository.clone_at(git_repository_location.uri, dir, options)
     end
+  end
+
+  def rugged_repository(git_repository_location)
+    dir = repository_dir_name(git_repository_location)
+    Rugged::Repository.new(dir)
+  rescue Rugged::RepositoryError
+    raise GitRepositoryLoader::BadLocation,
+      "Invalid directory location for repository: #{git_repository_location.name}"
   end
 
   def repository_dir_name(git_repository_location)

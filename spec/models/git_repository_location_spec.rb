@@ -88,6 +88,10 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   end
 
   describe '.update_from_github_notification' do
+    subject(:update_from_github_notification) {
+      GitRepositoryLocation.update_from_github_notification(github_payload)
+    }
+
     let(:github_payload) {
       JSON.parse(<<-END)
         {
@@ -114,7 +118,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       end
 
       it 'updates remote_head for the correct GitRepositoryLocation' do
-        GitRepositoryLocation.update_from_github_notification(github_payload)
+        update_from_github_notification
 
         expect(GitRepositoryLocation.find_by_name('some_repo').remote_head).to eq('def456')
         expect(GitRepositoryLocation.find_by_name('some_other_repo').remote_head).to be(nil)
@@ -123,7 +127,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
     context 'when no GitRepositoryLocation is found' do
       it 'fails silently' do
-        expect { GitRepositoryLocation.update_from_github_notification(github_payload) }.to_not raise_error
+        expect { update_from_github_notification }.to_not raise_error
       end
     end
 
@@ -137,7 +141,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
         END
       }
       it 'fails silently' do
-        expect { GitRepositoryLocation.update_from_github_notification(github_payload) }.to_not raise_error
+        expect { update_from_github_notification }.to_not raise_error
       end
     end
   end
