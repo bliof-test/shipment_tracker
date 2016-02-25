@@ -33,7 +33,7 @@ class GitRepositoryLocationsController < ApplicationController
 
   def git_repo_location_params
     permitted = params.require(:forms_repository_locations_form).permit(:uri)
-    permitted.merge!(params.permit(:token_types)) if params[:token_types].present?
+    permitted.merge!(token_types: params[:token_types]) if params[:token_types].present?
     permitted.merge!(validation_form: @repo_location_form)
     permitted
   end
