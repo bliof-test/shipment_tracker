@@ -58,6 +58,8 @@ namespace :jobs do
 
   desc 'Continuously updates the local git repositories'
   task update_git_loop: :environment do
+    manage_pid pid_path_for('update_git_loop')
+
     Signal.trap('TERM') do
       warn 'Terminating rake task jobs:update_git_loop...'
       @shutdown = true
