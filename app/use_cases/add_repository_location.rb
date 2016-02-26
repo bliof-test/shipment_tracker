@@ -11,15 +11,14 @@ class AddRepositoryLocation
       args[:token_types],
     )
 
-    return fail :invalid_uri, message: get_errors_msg(validation_form) unless validation_form.valid?
+    return fail :invalid_uri, message: errors_for(validation_form) unless validation_form.valid?
     continue(args)
   end
 
   def add_repo(args)
-    uri = args[:uri]
-    git_repo_location = GitRepositoryLocation.new(uri: uri)
+    git_repo_location = GitRepositoryLocation.new(uri: args[:uri])
 
-    return fail :failed_repo, message: get_errors_msg(git_repo_location) unless git_repo_location.save
+    return fail :failed_repo, message: errors_for(git_repo_location) unless git_repo_location.save
 
     repo_name = git_repo_location.name
     args[:repo_name] = repo_name
@@ -41,7 +40,7 @@ class AddRepositoryLocation
 
   private
 
-  def get_errors_msg(obj)
+  def errors_for(obj)
     obj.errors.full_messages.to_sentence
   end
 end

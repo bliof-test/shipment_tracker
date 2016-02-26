@@ -14,7 +14,7 @@ RSpec.describe Forms::RepositoryLocationsForm do
     ]
   }
 
-  subject(:form) { Forms::RepositoryLocationsForm.new(git_uri, expected_tokens) }
+  subject(:form) { Forms::RepositoryLocationsForm.new(git_uri, nil) }
 
   describe '#valid?' do
     describe 'URI validation', :disable_repo_verification do
