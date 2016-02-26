@@ -17,7 +17,7 @@ module Forms
     REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
     DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
 
-    attr_reader :uri
+    attr_reader :uri, :token_types
 
     def initialize(uri, token_types)
       @uri = uri
@@ -30,11 +30,7 @@ module Forms
 
     def self.default_token_types
       @default_token_types ||= Token.sources.map { |token_src|
-        value = if DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
-                  true
-                else
-                  false
-                end
+        value = DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
         { id: token_src.endpoint, name: token_src.name, value: value }
       }
     end

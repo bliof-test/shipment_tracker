@@ -6,7 +6,7 @@ class AddRepositoryLocation
   def validate(args)
     validation_form = args[:validation_form]
 
-    return fail :invalid_uri, errors: get_errors_msg(validation_form) unless validation_form.valid?
+    return fail :invalid_uri, message: get_errors_msg(validation_form) unless validation_form.valid?
     continue(args)
   end
 
@@ -14,7 +14,7 @@ class AddRepositoryLocation
     uri = args[:uri]
     git_repo_location = GitRepositoryLocation.new(uri: uri)
 
-    return fail :failed_repo, errors: get_errors_msg(git_repo_location) unless git_repo_location.save
+    return fail :failed_repo, message: get_errors_msg(git_repo_location) unless git_repo_location.save
 
     repo_name = git_repo_location.name
     args[:repo_name] = repo_name

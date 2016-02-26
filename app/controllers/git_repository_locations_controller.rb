@@ -11,20 +11,27 @@ class GitRepositoryLocationsController < ApplicationController
 
     AddRepositoryLocation.run(git_repo_location_params).match do
       success do |repo_name|
-        flash[:success] = "Successfuly added #{repo_name} repository. " \
-                              'Selected tokens were generated and can be found on Tokens page.'
+        flash[:success] = get_success_msg(repo_name)
+
         redirect_to :git_repository_locations
       end
 
-      failure do |errors|
+      failure do |message|
         @git_repository_locations = GitRepositoryLocation.all.order(:name)
-        flash.now[:error] = errors.errors if errors
+        flash.now[:error] = message.errors if message
         render :index
       end
     end
   end
 
   private
+
+  def get_success_msg(repo_name)
+    msg = "Successfuly added #{repo_name} repository."
+    msg.concat(' Selected tokens were generated'\
+      'and can be found on Tokens page.') unless @repo_location_form.token_types.blank?
+    msg
+  end
 
   def repo_location_form
     Forms::RepositoryLocationsForm.new(
