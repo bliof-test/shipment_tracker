@@ -29,6 +29,6 @@ class Token < ActiveRecord::Base
   private
 
   def lowercase_name
-    self.name.downcase! if self.name
+    name.downcase! if name
   end
 end
