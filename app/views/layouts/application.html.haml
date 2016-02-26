@@ -43,7 +43,7 @@
       - if flash[:warning] # the yellow one
         .alert.alert-warning= flash[:warning]
       - if flash[:success] # the green one
-        .alert.alert-success= flash[:success]
+        .alert.alert-success= flash[:success].html_safe
       - if flash[:info] # the blue one
         .alert.alert-info= flash[:info]
       = yield
