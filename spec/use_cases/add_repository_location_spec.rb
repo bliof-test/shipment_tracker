@@ -9,6 +9,7 @@ RSpec.describe AddRepositoryLocation do
   before do
     allow(form).to receive(:valid?).and_return(true)
     allow(form).to receive_message_chain(:errors, full_messages: [''])
+    allow(Forms::RepositoryLocationsForm).to receive(:new).and_return(form)
   end
 
   context 'when valid URI and a token selected' do
@@ -23,20 +24,20 @@ RSpec.describe AddRepositoryLocation do
     end
 
     it 'runs successfully' do
-      result = AddRepositoryLocation.run(validation_form: form, uri: 'git@github.com/owner/repo.git')
+      result = AddRepositoryLocation.run({})
       expect(result).to be_a_success
     end
 
     it 'adds repository' do
       expect(GitRepositoryLocation).to receive(:new).and_return(git_repo_location)
-      AddRepositoryLocation.run(validation_form: form, uri: 'git@github.com/owner/repo.git')
+      AddRepositoryLocation.run(validation_form: form, uri: 'git@github.com:owner/repo.git')
     end
 
     it 'generates token for each toke_type' do
       expect(Token).to receive(:new).exactly(token_types.size).times.and_return(token_mock)
       AddRepositoryLocation.run(
         validation_form: form,
-        uri: 'git@github.com/owner/repo.git',
+        uri: 'git@github.com:owner/repo.git',
         token_types: token_types)
     end
 
@@ -48,7 +49,7 @@ RSpec.describe AddRepositoryLocation do
       ).exactly(token_types.size).times.and_return(token_mock)
       AddRepositoryLocation.run(
         validation_form: form,
-        uri: 'git@github.com/owner/repo.git',
+        uri: 'git@github.com:owner/repo.git',
         token_types: token_types)
     end
 

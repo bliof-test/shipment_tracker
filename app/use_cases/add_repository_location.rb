@@ -1,10 +1,15 @@
+require 'forms/repository_locations_form'
+
 class AddRepositoryLocation
   include SolidUseCase
 
   steps :validate, :add_repo, :generate_tokens
 
   def validate(args)
-    validation_form = args[:validation_form]
+    validation_form = Forms::RepositoryLocationsForm.new(
+      args[:uri],
+      args[:token_types],
+    )
 
     return fail :invalid_uri, message: get_errors_msg(validation_form) unless validation_form.valid?
     continue(args)
@@ -26,13 +31,11 @@ class AddRepositoryLocation
     repo_name = args[:repo_name]
     return continue(repo_name) if token_types.nil?
 
-    tokens_created = true
     token_types.each do |token_type|
       token = Token.new(name: repo_name, source: token_type)
-      tokens_created &= token.save
+      return fail :failed_generating_token unless token.save
     end
 
-    return fail :failed_generating_token unless tokens_created
     continue(repo_name)
   end
 
