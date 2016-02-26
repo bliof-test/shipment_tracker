@@ -108,7 +108,17 @@ Shipment Tracker uses push notifications to update repositories that it keeps tr
 
 To configure the webhook for a repository, first go into the API Tokens tab of Shipment Tracker and find (or create) a Github Notifications token. Next, in Github, go into the repository settings and add a new webhook. The "Payload URL" should be set to the Github Notifications URL from Shipment Tracker, the "Content type" should be JSON, and Github should send *All* events for this repository. Add the webhook, and all new Github Pull Requests should now show the Shipment Tracker status.
 
-You'll also need a [GitHub Access Token][access tokens] for authentication with the GitHub API. It'll only need the `repo:status` scope enabled. Set the token as the `GITHUB_REPO_STATUS_ACCESS_TOKEN` environment variable when booting the application (use `.env.development` during development).
+You'll also need a [GitHub Access Token][access tokens] for authentication with the GitHub API.
+
+There are two environment variables for GitHub tokens.
+
+| Environment variable | Description |
+| --- | --- |
+| `GITHUB_REPO_READ_TOKEN` | For validation when onboarding a new repository.<br>Should have `repo` scope. Token owner must have READ access to repositories. |
+| `GITHUB_REPO_STATUS_WRITE_TOKEN` | For creating commit statuses in Pull Requests.<br>Should have `repo:status` scope. Token owner must have WRITE access to repositories. |
+
+Recommended to use two different tokens, from two different users (one with READ access, one with WRITE),
+instead of one super token.
 
 ### Maintenance Mode
 
