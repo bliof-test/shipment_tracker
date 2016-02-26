@@ -1,7 +1,7 @@
 class Token < ActiveRecord::Base
   has_secure_token :value
 
-  before_validation(on: [:create, :save]) do
+  before_validation(on: [:create, :update]) do
     lowercase_name
   end
 

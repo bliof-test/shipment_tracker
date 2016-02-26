@@ -9,7 +9,11 @@ class GitRepositoryLocationsController < ApplicationController
 
     AddRepositoryLocation.run(git_repo_location_params).match do
       success do |repo_name|
-        flash[:success] = get_success_msg(repo_name)
+        flash[:success] = %Q[#{ActionController::Base.helpers.link_to('Tokens', tokens_path)}].html_safe
+        # get_success_msg(
+        #   repo_name,
+        #   url_for(action: 'index', controller: 'tokens', only_path: false, protocol: 'https'),
+        # ).html_safe
 
         redirect_to :git_repository_locations
       end
@@ -24,10 +28,10 @@ class GitRepositoryLocationsController < ApplicationController
 
   private
 
-  def get_success_msg(repo_name)
+  def get_success_msg(repo_name, tokens_link)
     msg = "Successfuly added #{repo_name} repository."
-    msg.concat(' Selected tokens were generated'\
-      'and can be found on Tokens page.') unless params[:token_types].blank?
+    msg.concat(" Selected tokens were generated" \
+      "and can be found on <a href='#{tokens_link}'>Tokens</a> page.") unless params[:token_types].blank?
     msg
   end
 
