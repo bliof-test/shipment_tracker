@@ -1,7 +1,7 @@
 class TokensController < ApplicationController
   def index
     @token = Token.new
-    @tokens = Token.order('LOWER(name)')
+    @tokens = Token.order(:name)
     @sources = Token.sources
   end
 
