@@ -14,9 +14,9 @@ class GitRepositoryLocationsController < ApplicationController
         redirect_to :git_repository_locations
       end
 
-      failure do |message|
+      failure do |error|
         @git_repository_locations = GitRepositoryLocation.all.order(:name)
-        flash.now[:error] = message.errors if message
+        flash.now[:error] = error.message
         render :index
       end
     end
