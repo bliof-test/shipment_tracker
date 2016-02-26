@@ -32,7 +32,7 @@ RSpec.configure do |config|
   config.include SolidUseCase::RSpecMatchers
 
   config.before(:each, :disable_repo_verification) do
-    allow_any_instance_of(OctokitClient).to receive(:repo_accessible?).and_return(true)
+    allow_any_instance_of(GithubClient).to receive(:repo_accessible?).and_return(true)
   end
 
   config.expect_with :rspec do |expectations|

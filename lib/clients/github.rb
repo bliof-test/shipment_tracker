@@ -1,8 +1,11 @@
 require 'git_clone_url'
 require 'octokit'
 
+require 'forwardable'
+
 class GithubClient
-  delegate :create_status, to: :client
+  extend Forwardable
+  def_delegator :client, :create_status
 
   def initialize(token)
     @token = token
