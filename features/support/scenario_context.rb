@@ -1,6 +1,5 @@
 require 'support/git_test_repository'
 require 'support/feature_review_helpers'
-require 'support/github_api_helpers'
 require 'git_repository_location'
 
 require 'webmock'
@@ -11,7 +10,6 @@ module Support
   class ScenarioContext
     include Support::FeatureReviewHelpers
     include ActiveSupport::Testing::TimeHelpers
-    include Support::GithubApiHelpers
     include WebMock::API
 
     attr_reader :stubbed_requests
