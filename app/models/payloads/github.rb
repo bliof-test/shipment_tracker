@@ -12,6 +12,10 @@ module Payloads
       pull_request.fetch('base', {}).fetch('repo', {})['html_url']
     end
 
+    def full_repo_name
+      repository['full_name']
+    end
+
     def action
       data['action']
     end
@@ -22,6 +26,10 @@ module Payloads
 
     def pull_request
       data.fetch('pull_request', {})
+    end
+
+    def repository
+      data.fetch('repository', {})
     end
   end
 end
