@@ -56,6 +56,6 @@ class GithubNotificationsController < ApplicationController
   end
 
   def payload
-    @payload ||= Payloads::PullRequest.new(params[:github_notification])
+    @payload ||= Payloads::Github.new(params[:github_notification])
   end
 end

@@ -1,5 +1,5 @@
 module Payloads
-  class PullRequest
+  class Github
     def initialize(data)
       @data = data
     end
