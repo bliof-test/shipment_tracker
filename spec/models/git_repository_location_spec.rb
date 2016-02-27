@@ -145,4 +145,22 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       end
     end
   end
+
+  describe '.repo_exists?' do
+    context 'when the repository is tracked' do
+      it 'returns true' do
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
+
+        expect(GitRepositoryLocation.repo_exists?('owner/repo')).to be true
+      end
+    end
+
+    context 'when the repistory is not tracked' do
+      it 'returns false' do
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/another-repo.git')
+
+        expect(GitRepositoryLocation.repo_exists?('owner/repo')).to be false
+      end
+    end
+  end
 end

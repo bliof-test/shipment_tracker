@@ -1,3 +1,5 @@
+require 'git_repository_location'
+require 'payloads/github'
 require 'pull_request_status'
 
 class GithubNotificationsController < ApplicationController
@@ -51,8 +53,7 @@ class GithubNotificationsController < ApplicationController
   end
 
   def audited_repo?
-    inferred_repo_name = payload.base_repo_url.split('/').last
-    GitRepositoryLocation.uris.any? { |uri| uri.include?(inferred_repo_name) }
+    GitRepositoryLocation.repo_exists?(payload.full_repo_name)
   end
 
   def payload

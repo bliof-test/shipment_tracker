@@ -37,6 +37,10 @@ class GitRepositoryLocation < ActiveRecord::Base
     git_repository_location.update(remote_head: payload['after'])
   end
 
+  def self.repo_exists?(full_repo_name)
+    uris.any? { |uri| uri.include?(full_repo_name) }
+  end
+
   private
 
   def self.find_by_github_ssh_url(url)
