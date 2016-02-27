@@ -5,31 +5,19 @@ module Payloads
     end
 
     def head_sha
-      pull_request.fetch('head', {})['sha']
+      @data.dig('pull_request', 'head', 'sha')
     end
 
     def base_repo_url
-      pull_request.fetch('base', {}).fetch('repo', {})['html_url']
+      @data.dig('pull_request', 'base', 'repo', 'html_url')
     end
 
     def full_repo_name
-      repository['full_name']
+      @data.dig('repository', 'full_name')
     end
 
     def action
-      data['action']
-    end
-
-    private
-
-    attr_reader :data
-
-    def pull_request
-      data.fetch('pull_request', {})
-    end
-
-    def repository
-      data.fetch('repository', {})
+      @data['action']
     end
   end
 end
