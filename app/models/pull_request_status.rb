@@ -1,9 +1,9 @@
 require 'active_support/json'
 require 'octokit'
 
+require 'clients/github'
 require 'factories/feature_review_factory'
 require 'feature_review_with_statuses'
-require 'octokit_client'
 require 'repositories/deploy_repository'
 require 'repositories/ticket_repository'
 
@@ -59,7 +59,7 @@ class PullRequestStatus
 
   def publish_status(repo_url:, sha:, status:, description:, target_url: nil)
     repo = Octokit::Repository.from_url(repo_url)
-    OctokitClient.instance.create_status(repo, sha, status,
+    github.create_status(repo, sha, status,
       context: 'shipment-tracker',
       target_url: target_url,
       description: description)
@@ -137,5 +137,9 @@ class PullRequestStatus
       status: 'pending',
       description: 'Awaiting approval for Feature Review',
     }
+  end
+
+  def github
+    @github ||= GithubClient.new(ShipmentTracker::GITHUB_REPO_STATUS_WRITE_TOKEN)
   end
 end

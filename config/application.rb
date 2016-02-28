@@ -14,6 +14,9 @@ Bundler.require(*Rails.groups)
 Dotenv.load
 
 module ShipmentTracker
+  GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
+  GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
+
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers;
@@ -47,8 +50,4 @@ module ShipmentTracker
     # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2' codes
     config.deploy_regions = ENV.fetch('DEPLOY_REGIONS', 'gb,us').split(',')
   end
-
-  # Global constants
-  GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN')
-  GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN')
 end
