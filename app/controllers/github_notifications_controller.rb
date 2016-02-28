@@ -10,7 +10,7 @@ class GithubNotificationsController < ApplicationController
       process_pull_request
       head :ok
     elsif push?
-      GitRepositoryLocation.update_from_github_notification(request.request_parameters)
+      update_remote_head
       head :ok
     else
       head :accepted
@@ -34,6 +34,12 @@ class GithubNotificationsController < ApplicationController
 
   def push?
     github_event == 'push'
+  end
+
+  def update_remote_head
+    git_repository_location = GitRepositoryLocation.find_by_full_repo_name(payload.full_repo_name)
+    return unless git_repository_location
+    git_repository_location.update(remote_head: payload.after_sha)
   end
 
   def process_pull_request

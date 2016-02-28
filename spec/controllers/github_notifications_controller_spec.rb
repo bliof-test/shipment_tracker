@@ -81,12 +81,13 @@ RSpec.describe GithubNotificationsController do
         request.env['HTTP_X_GITHUB_EVENT'] = 'push'
       end
 
-      let(:payload) { {} }
-
       it 'updates the corresponding repository location' do
-        expect(GitRepositoryLocation).to receive(:update_from_github_notification).with(payload)
+        git_repository_location = instance_double(GitRepositoryLocation)
+        allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
 
-        post :create, payload
+        expect(git_repository_location).to receive(:update).with(remote_head: 'abc123')
+
+        post :create, github_notification: { after: 'abc123', repository: { full_name: 'owner/repo' } }
       end
     end
 
