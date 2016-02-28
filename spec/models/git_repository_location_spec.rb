@@ -18,8 +18,8 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   end
 
   describe '.uris' do
-    let(:uris) { %w(ssh://git@github.com/some/some-repo.git ssh://git@github.com/some/other-repo.git) }
-    it 'returns an array of uris' do
+    it 'returns an array of URIs' do
+      uris = %w(ssh://git@github.com/owner/foo.git git@github.com:owner/bar.git)
       uris.each do |uri|
         GitRepositoryLocation.create(uri: uri)
       end
@@ -63,18 +63,16 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
   describe '.github_urls_for_apps' do
     context 'when given a list of app names' do
-      let(:app_names) { %w(app1 app2 app3) }
-
       before do
-        app_names.first(2).each do |app_name|
-          GitRepositoryLocation.create(name: app_name, uri: "https://github.com/organization/#{app_name}")
-        end
+        GitRepositoryLocation.create(name: 'app1', uri: 'https://github.com/owner/app1')
+        GitRepositoryLocation.create(name: 'app2', uri: 'git@github.com:owner/app2.git')
       end
 
       it 'returns a hash of app names and urls' do
-        expect(GitRepositoryLocation.github_urls_for_apps(app_names)).to eq(
-          'app1' => 'https://github.com/organization/app1',
-          'app2' => 'https://github.com/organization/app2',
+        result = GitRepositoryLocation.github_urls_for_apps(['app1', 'app2', 'app3'])
+        expect(result).to eq(
+          'app1' => 'https://github.com/owner/app1',
+          'app2' => 'https://github.com/owner/app2',
           'app3' => nil,
         )
       end

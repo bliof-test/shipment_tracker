@@ -23,11 +23,9 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
 
   def self.github_urls_for_apps(app_names)
-    github_urls = {}
-    app_names.each do |app_name|
+    app_names.each_with_object({}) do |app_name, github_urls|
       github_urls[app_name] = github_url_for_app(app_name)
     end
-    github_urls
   end
 
   def self.update_from_github_notification(payload)
