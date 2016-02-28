@@ -9,9 +9,6 @@ AllCops:
     - 'hooks/**/*'
     - 'vendor/bundle/**/*'
 
-Performance/TimesMap:
-  Enabled: false  # TODO: Remove when fix released: https://github.com/bbatsov/rubocop/commit/162febe3da7cfac6cdd5a6c28bfc21385ad3c729
-
 Rails:
   Enabled: true
 
@@ -52,5 +49,11 @@ Style/AlignParameters:
 
 Style/MultilineBlockChain:
   Enabled: false
+
+Style/SignalException:
+  EnforcedStyle: semantic
+
+Style/FrozenStringLiteralComment:
+  Enabled: false  # TODO: Enable in separate PR.
 
 inherit_from: .rubocop_todo.yml
