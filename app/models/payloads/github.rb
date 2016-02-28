@@ -4,6 +4,10 @@ module Payloads
       @data = data
     end
 
+    def after_sha
+      @data['after']
+    end
+
     def head_sha
       @data.dig('pull_request', 'head', 'sha')
     end
