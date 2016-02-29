@@ -18,8 +18,8 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   end
 
   describe '.uris' do
-    let(:uris) { %w(ssh://git@github.com/some/some-repo.git ssh://git@github.com/some/other-repo.git) }
-    it 'returns an array of uris' do
+    it 'returns an array of URIs' do
+      uris = %w(ssh://git@github.com/owner/foo.git git@github.com:owner/bar.git)
       uris.each do |uri|
         GitRepositoryLocation.create(uri: uri)
       end
@@ -63,18 +63,16 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
   describe '.github_urls_for_apps' do
     context 'when given a list of app names' do
-      let(:app_names) { %w(app1 app2 app3) }
-
       before do
-        app_names.first(2).each do |app_name|
-          GitRepositoryLocation.create(name: app_name, uri: "https://github.com/organization/#{app_name}")
-        end
+        GitRepositoryLocation.create(name: 'app1', uri: 'https://github.com/owner/app1')
+        GitRepositoryLocation.create(name: 'app2', uri: 'git@github.com:owner/app2.git')
       end
 
       it 'returns a hash of app names and urls' do
-        expect(GitRepositoryLocation.github_urls_for_apps(app_names)).to eq(
-          'app1' => 'https://github.com/organization/app1',
-          'app2' => 'https://github.com/organization/app2',
+        result = GitRepositoryLocation.github_urls_for_apps(%w(app1 app2 app3))
+        expect(result).to eq(
+          'app1' => 'https://github.com/owner/app1',
+          'app2' => 'https://github.com/owner/app2',
           'app3' => nil,
         )
       end
@@ -87,62 +85,47 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
     end
   end
 
-  describe '.update_from_github_notification' do
-    subject(:update_from_github_notification) {
-      GitRepositoryLocation.update_from_github_notification(github_payload)
-    }
+  describe '.find_by_full_repo_name' do
+    context 'when a GitRepositoryLocation exists with the same name' do
+      it 'returns a GitRepositoryLocation' do
+        repo_location = GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
 
-    let(:github_payload) {
-      JSON.parse(<<-END)
-        {
-          "before": "abc123",
-          "after": "def456",
-          "repository": {
-            "name": "repo",
-            "full_name": "some/some_repo",
-            "git_url": "git://github.com/some/some_repo.git",
-            "ssh_url": "git@github.com:some/some_repo.git",
-            "clone_url": "https://github.com/some/some_repo.git"
-          }
-        }
-      END
-    }
-
-    before do
-      GitRepositoryLocation.create(uri: 'ssh://git@github.com/some/some_other_repo.git')
-    end
-
-    context 'when the GitRepositoryLocation has a regular URI' do
-      before do
-        GitRepositoryLocation.create(uri: 'ssh://git@github.com/some/some_repo.git')
-      end
-
-      it 'updates remote_head for the correct GitRepositoryLocation' do
-        update_from_github_notification
-
-        expect(GitRepositoryLocation.find_by_name('some_repo').remote_head).to eq('def456')
-        expect(GitRepositoryLocation.find_by_name('some_other_repo').remote_head).to be(nil)
+        result = GitRepositoryLocation.find_by_full_repo_name('owner/repo')
+        expect(result).to eq(repo_location)
       end
     end
 
-    context 'when no GitRepositoryLocation is found' do
-      it 'fails silently' do
-        expect { update_from_github_notification }.to_not raise_error
+    context 'when a GitRepositoryLocation does not exist with the same name' do
+      it 'returns nil' do
+        result = GitRepositoryLocation.find_by_full_repo_name('owner/repo')
+        expect(result).to be_nil
+      end
+    end
+  end
+
+  describe '.repo_exists?' do
+    context 'when the repository is tracked' do
+      it 'returns true' do
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
+
+        expect(GitRepositoryLocation.repo_exists?('owner/repo')).to be true
       end
     end
 
-    context 'when payload does not have a repository key' do
-      let(:github_payload) {
-        JSON.parse(<<-END)
-          {
-            "before": "abc123",
-            "after": "def456"
-          }
-        END
-      }
-      it 'fails silently' do
-        expect { update_from_github_notification }.to_not raise_error
+    context 'when the repistory is not tracked' do
+      it 'returns false' do
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/another-repo.git')
+
+        expect(GitRepositoryLocation.repo_exists?('owner/repo')).to be false
       end
+    end
+  end
+
+  describe '#full_repo_name' do
+    it 'returns the full repository name' do
+      repository_loction = GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
+
+      expect(repository_loction.full_repo_name).to eq('owner/repo')
     end
   end
 end

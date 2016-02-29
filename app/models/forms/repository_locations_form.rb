@@ -1,5 +1,5 @@
+require 'clients/github'
 require 'git_clone_url'
-require 'octokit_client'
 require 'token'
 
 require 'active_model'
@@ -63,7 +63,7 @@ module Forms
     end
 
     def repo_accessible?
-      unless OctokitClient.instance.repo_accessible?(uri)
+      unless github.repo_accessible?(uri)
         errors.add(:repository, 'is not accessible either due to permissions or it does not exist')
         return false
       end
@@ -75,6 +75,10 @@ module Forms
       WHITELIST_DOMAINS.include?(parsed_uri.host)
     rescue URI::InvalidComponentError
       false
+    end
+
+    def github
+      @github_client ||= GithubClient.new(ShipmentTracker::GITHUB_REPO_READ_TOKEN)
     end
   end
 end

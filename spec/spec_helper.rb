@@ -20,19 +20,19 @@ root = Pathname.new('..').expand_path(File.dirname(__FILE__))
   $LOAD_PATH.unshift path.to_s
 end
 
+require 'webmock/rspec'
 require 'solid_use_case'
 require 'solid_use_case/rspec_matchers'
+
+require 'clients/github'
 require 'support/feature_review_helpers'
-require 'support/github_api_helpers'
-require 'webmock/rspec'
 
 RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
-  config.include Support::GithubApiHelpers
   config.include SolidUseCase::RSpecMatchers
 
   config.before(:each, :disable_repo_verification) do
-    allow_any_instance_of(OctokitClient).to receive(:repo_accessible?).and_return(true)
+    allow_any_instance_of(GithubClient).to receive(:repo_accessible?).and_return(true)
   end
 
   config.expect_with :rspec do |expectations|

@@ -1,7 +1,5 @@
 require 'rails_helper'
 
-include Shoulda::Matchers::ActionController # FIXME: https://github.com/thoughtbot/shoulda-matchers/issues/903
-
 RSpec.describe GitRepositoryLocationsController do
   context 'when logged out' do
     let(:repo_location) {

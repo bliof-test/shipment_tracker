@@ -14,18 +14,20 @@ RSpec.describe Forms::RepositoryLocationsForm do
     ]
   }
 
-  subject(:form) { Forms::RepositoryLocationsForm.new(git_uri, nil) }
+  before { stub_const('ShipmentTracker::GITHUB_REPO_READ_TOKEN', 'token') }
 
   describe '#valid?' do
     describe 'URI validation', :disable_repo_verification do
       context 'when the domain is whitelisted' do
-        let(:git_uri) { 'https://github.com/owner/repo.git' }
-        it { is_expected.to be_valid }
+        it 'is valid' do
+          expect(repo_form('https://github.com/owner/repo.git', expected_tokens)).to be_valid
+        end
       end
 
       context 'when the domain is not whitelisted' do
-        let(:git_uri) { 'https://example.com/owner/repo.git' }
-        it { is_expected.to_not be_valid }
+        it 'is not valid' do
+          expect(repo_form('https://example.com/owner/repo.git', expected_tokens)).to_not be_valid
+        end
       end
 
       context 'when the input is a valid Git URI' do
@@ -58,7 +60,7 @@ RSpec.describe Forms::RepositoryLocationsForm do
     describe 'repository accessibility' do
       context 'when the repo does not exist or we lack read permissions' do
         it 'is not valid' do
-          allow_any_instance_of(Octokit::Client).to receive(:repository?).and_return(false)
+          allow_any_instance_of(GithubClient).to receive(:repo_accessible?).and_return(false)
           expect(repo_form('ssh://git@github.com/owner/repo.git', expected_tokens)).to_not be_valid
         end
       end

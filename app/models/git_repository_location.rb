@@ -23,27 +23,27 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
 
   def self.github_urls_for_apps(app_names)
-    github_urls = {}
-    app_names.each do |app_name|
+    app_names.each_with_object({}) do |app_name, github_urls|
       github_urls[app_name] = github_url_for_app(app_name)
     end
-    github_urls
   end
 
-  def self.update_from_github_notification(payload)
-    ssh_url = payload.fetch('repository', {}).fetch('ssh_url', nil)
-    git_repository_location = find_by_github_ssh_url(ssh_url)
-    return unless git_repository_location
-    git_repository_location.update(remote_head: payload['after'])
+  def self.find_by_full_repo_name(repo_name)
+    find_by('uri LIKE ?', "%#{repo_name}%")
+  end
+
+  def self.repo_exists?(full_repo_name)
+    uris.any? { |uri| uri.include?(full_repo_name) }
+  end
+
+  def full_repo_name
+    @full_repo_name ||= begin
+      parsed_uri = GitCloneUrl.parse(uri)
+      (parsed_uri.path.start_with?('/') ? parsed_uri.path[1..-1] : parsed_uri.path).chomp('.git')
+    end
   end
 
   private
-
-  def self.find_by_github_ssh_url(url)
-    path = Addressable::URI.parse(url).try(:path)
-    find_by('uri LIKE ?', "%#{path}")
-  end
-  private_class_method :find_by_github_ssh_url
 
   def self.url_from_uri(uri)
     parsed_uri = GitCloneUrl.parse(uri)

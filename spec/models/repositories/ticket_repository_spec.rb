@@ -128,13 +128,10 @@ RSpec.describe Repositories::TicketRepository do
     let(:url) { feature_review_url(app: 'foo') }
     let(:path) { feature_review_path(app: 'foo') }
     let(:ticket_defaults) { { paths: [path], versions: %w(foo), version_timestamps: { 'foo' => nil } } }
-    let(:repository_location) {
-      instance_double(GitRepositoryLocation, uri: 'ssh://git@github.com/owner/frontend.git')
-    }
+    let(:repository_location) { instance_double(GitRepositoryLocation, full_repo_name: 'owner/frontend') }
 
     before do
-      allow(git_repo_location).to receive(:find_by_name)
-        .and_return(repository_location)
+      allow(git_repo_location).to receive(:find_by_name).and_return(repository_location)
       allow(PullRequestUpdateJob).to receive(:perform_later)
     end
 
@@ -306,11 +303,11 @@ RSpec.describe Repositories::TicketRepository do
 
           it 'schedules an update to the pull request for each version' do
             expect(PullRequestUpdateJob).to receive(:perform_later).with(
-              repo_url: 'ssh://git@github.com/owner/frontend',
+              full_repo_name: 'owner/frontend',
               sha: 'abc',
             )
             expect(PullRequestUpdateJob).to receive(:perform_later).with(
-              repo_url: 'ssh://git@github.com/owner/frontend',
+              full_repo_name: 'owner/frontend',
               sha: 'def',
             )
             repository.apply(event)
@@ -359,7 +356,7 @@ RSpec.describe Repositories::TicketRepository do
 
         it 'schedules an update to the pull request for each version' do
           expect(PullRequestUpdateJob).to receive(:perform_later).with(
-            repo_url: 'ssh://git@github.com/owner/frontend',
+            full_repo_name: 'owner/frontend',
             sha: 'abc',
           )
           repository.apply(approval_event)
@@ -381,7 +378,7 @@ RSpec.describe Repositories::TicketRepository do
 
         it 'schedules an update to the pull request for each version' do
           expect(PullRequestUpdateJob).to receive(:perform_later).with(
-            repo_url: 'ssh://git@github.com/owner/frontend',
+            full_repo_name: 'owner/frontend',
             sha: 'abc',
           )
           repository.apply(unapproval_event)

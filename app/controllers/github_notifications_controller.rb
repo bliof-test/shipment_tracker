@@ -1,3 +1,5 @@
+require 'git_repository_location'
+require 'payloads/github'
 require 'pull_request_status'
 
 class GithubNotificationsController < ApplicationController
@@ -8,7 +10,7 @@ class GithubNotificationsController < ApplicationController
       process_pull_request
       head :ok
     elsif push?
-      GitRepositoryLocation.update_from_github_notification(request.request_parameters)
+      update_remote_head
       head :ok
     else
       head :accepted
@@ -34,13 +36,16 @@ class GithubNotificationsController < ApplicationController
     github_event == 'push'
   end
 
+  def update_remote_head
+    git_repository_location = GitRepositoryLocation.find_by_full_repo_name(payload.full_repo_name)
+    return unless git_repository_location
+    git_repository_location.update(remote_head: payload.after_sha)
+  end
+
   def process_pull_request
     return unless relevant_pull_request?
 
-    status_options = {
-      repo_url: payload.base_repo_url,
-      sha: payload.head_sha,
-    }
+    status_options = { full_repo_name: payload.full_repo_name, sha: payload.head_sha }
 
     PullRequestStatus.new.reset(status_options)
     PullRequestUpdateJob.perform_later(status_options)
@@ -51,11 +56,10 @@ class GithubNotificationsController < ApplicationController
   end
 
   def audited_repo?
-    inferred_repo_name = payload.base_repo_url.split('/').last
-    GitRepositoryLocation.uris.any? { |uri| uri.include?(inferred_repo_name) }
+    GitRepositoryLocation.repo_exists?(payload.full_repo_name)
   end
 
   def payload
-    @payload ||= Payloads::PullRequest.new(params[:github_notification])
+    @payload ||= Payloads::Github.new(params[:github_notification])
   end
 end

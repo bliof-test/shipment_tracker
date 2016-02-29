@@ -1,11 +1,12 @@
 require 'events/jira_event'
+require 'factories/feature_review_factory'
+require 'git_repository_location'
 require 'snapshots/ticket'
 require 'ticket'
 
 module Repositories
   class TicketRepository
-    def initialize(store = Snapshots::Ticket,
-      git_repository_location: GitRepositoryLocation)
+    def initialize(store = Snapshots::Ticket, git_repository_location: GitRepositoryLocation)
       @store = store
       @git_repository_location = git_repository_location
       @feature_review_factory = Factories::FeatureReviewFactory.new
@@ -102,7 +103,7 @@ module Repositories
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
         PullRequestUpdateJob.perform_later(
-          repo_url: repository_location.uri.chomp('.git'),
+          full_repo_name: repository_location.full_repo_name,
           sha: version,
         ) if repository_location
       end
