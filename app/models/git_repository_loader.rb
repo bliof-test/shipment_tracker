@@ -92,9 +92,13 @@ class GitRepositoryLoader
   end
 
   def create_temporary_file(key)
-    file = Tempfile.new('key', cache_dir)
-    file.write(key.strip + "\n")
-    file.close
+    file = Tempfile.open('key', cache_dir)
+    begin
+      file.write(key.strip + "\n")
+    ensure
+      file.close
+    end
+
     file
   end
 
@@ -108,8 +112,8 @@ class GitRepositoryLoader
 
     yield credentials: Rugged::Credentials::SshKey.new(
       username: ssh_user,
-      privatekey: ssh_private_key_file.path,
       publickey: ssh_public_key_file.path,
+      privatekey: ssh_private_key_file.path,
     )
   ensure
     ssh_public_key_file.unlink if ssh_public_key_file
