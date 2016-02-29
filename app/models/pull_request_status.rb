@@ -12,30 +12,27 @@ class PullRequestStatus
     @routes = Rails.application.routes.url_helpers
   end
 
-  def update(repo_url:, sha:)
+  def update(full_repo_name:, sha:)
     feature_reviews = decorated_feature_reviews(sha)
+
     status, description = status_for(feature_reviews).values_at(:status, :description)
 
-    target_url = target_url_for(
-      repo_url: repo_url,
-      sha: sha,
-      feature_reviews: feature_reviews,
-    )
+    target_url = target_url_for(full_repo_name: full_repo_name, sha: sha, feature_reviews: feature_reviews)
 
-    publish_status(
-      repo_url: repo_url,
+    github.create_status(
+      repo: full_repo_name,
       sha: sha,
-      status: status,
+      state: status,
       description: description,
       target_url: target_url,
     )
   end
 
-  def reset(repo_url:, sha:)
-    publish_status(
-      repo_url: repo_url,
+  def reset(full_repo_name:, sha:)
+    github.create_status(
+      repo: full_repo_name,
       sha: sha,
-      status: searching_status[:status],
+      state: searching_status[:status],
       description: searching_status[:description],
     )
   end
@@ -50,37 +47,28 @@ class PullRequestStatus
                                                      .create_from_tickets(tickets)
                                                      .select { |fr| fr.versions.include?(sha) }
     feature_reviews.map do |feature_review|
-      FeatureReviewWithStatuses.new(
-        feature_review,
-        tickets: tickets.select { |t| t.paths.include?(feature_review.path) },
-      )
+      linked_tickets = tickets.select { |ticket| ticket.paths.include?(feature_review.path) }
+      FeatureReviewWithStatuses.new(feature_review, tickets: linked_tickets)
     end
   end
 
-  def publish_status(repo_url:, sha:, status:, description:, target_url: nil)
-    repo = Octokit::Repository.from_url(repo_url)
-    github.create_status(repo, sha, status,
-      context: 'shipment-tracker',
-      target_url: target_url,
-      description: description)
-  end
-
-  def target_url_for(repo_url:, sha:, feature_reviews:)
+  def target_url_for(full_repo_name:, sha:, feature_reviews:)
     url_opts = { protocol: 'https' }
-    repo_name = repo_url.split('/').last
+    repo_name = full_repo_name.split('/').last
 
     if feature_reviews.empty?
-      url_to_autoprepared_feature_review(url_opts.merge(apps: { repo_name => sha }), sha)
+      url_to_autoprepared_feature_review(url_opts, repo_name, sha)
     elsif feature_reviews.length == 1
       url_to_feature_review(url_opts, feature_reviews.first.path)
     else
-      url_to_search_feature_reviews(url_opts.merge(application: repo_name, version: sha))
+      url_to_search_feature_reviews(url_opts, repo_name, sha)
     end
   end
 
-  def url_to_autoprepared_feature_review(url_opts, sha)
+  def url_to_autoprepared_feature_review(url_opts, repo_name, sha)
     last_staging_deploy = Repositories::DeployRepository.new.last_staging_deploy_for_version(sha)
     url_opts[:uat_url] = last_staging_deploy.server if last_staging_deploy
+    url_opts[:apps] = { repo_name => sha }
     routes.feature_reviews_url(url_opts)
   end
 
@@ -88,7 +76,9 @@ class PullRequestStatus
     routes.root_url(url_opts).chomp('/') + feature_review_path
   end
 
-  def url_to_search_feature_reviews(url_opts)
+  def url_to_search_feature_reviews(url_opts, repo_name, sha)
+    url_opts[:application] = repo_name
+    url_opts[:version] = sha
     routes.search_feature_reviews_url(url_opts)
   end
 

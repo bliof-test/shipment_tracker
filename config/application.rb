@@ -16,6 +16,7 @@ Dotenv.load
 module ShipmentTracker
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
+  # TODO: Move Rails config constants here
 
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.

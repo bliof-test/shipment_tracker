@@ -1,14 +1,18 @@
 require 'git_clone_url'
 require 'octokit'
 
-require 'forwardable'
-
 class GithubClient
-  extend Forwardable
-  def_delegator :client, :create_status
-
   def initialize(token)
     @token = token
+  end
+
+  def create_status(repo:, sha:, state:, description:, target_url: nil)
+    client.create_status(
+      repo, sha, state,
+      context: 'shipment-tracker',
+      description: description,
+      target_url: target_url
+    )
   end
 
   def repo_accessible?(uri)

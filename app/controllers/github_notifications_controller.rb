@@ -45,10 +45,7 @@ class GithubNotificationsController < ApplicationController
   def process_pull_request
     return unless relevant_pull_request?
 
-    status_options = {
-      repo_url: payload.base_repo_url,
-      sha: payload.head_sha,
-    }
+    status_options = { full_repo_name: payload.full_repo_name, sha: payload.head_sha }
 
     PullRequestStatus.new.reset(status_options)
     PullRequestUpdateJob.perform_later(status_options)

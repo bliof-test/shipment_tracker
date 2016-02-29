@@ -2,54 +2,50 @@ require 'rails_helper'
 
 RSpec.describe GithubNotificationsController do
   describe 'POST #create', :logged_in do
-    context 'when event is a pull request' do
+    context 'when event is a pull request notification' do
       before do
         request.env['HTTP_X_GITHUB_EVENT'] = 'pull_request'
       end
 
       context 'when the pull request is newly opened' do
-        let(:sha) { '12345' }
-        let(:repo_url) { 'https://github.com/FundingCircle/hello_world_rails' }
-
-        it 'sets the pull request status' do
+        it 'reset and sets the pull request status' do
           allow(GitRepositoryLocation).to receive(:repo_exists?).and_return(true)
           pull_request_status = instance_double(PullRequestStatus)
           allow(PullRequestStatus).to receive(:new).and_return(pull_request_status)
 
           expect(pull_request_status).to receive(:reset).with(
-            repo_url: repo_url,
-            sha: sha,
+            full_repo_name: 'owner/repo',
+            sha: 'abc123',
           ).ordered
 
           expect(pull_request_status).to receive(:update).with(
-            repo_url: repo_url,
-            sha: sha,
+            full_repo_name: 'owner/repo',
+            sha: 'abc123',
           ).ordered
 
-          post :create, github_notification: pr_payload(action: 'opened', repo_url: repo_url, sha: sha)
+          post :create, github_notification:
+            pr_payload(action: 'opened', full_repo_name: 'owner/repo', sha: 'abc123')
         end
       end
 
       context 'when the pull request receives a new commit' do
-        let(:sha) { '12345' }
-        let(:repo_url) { 'https://github.com/FundingCircle/hello_world_rails' }
-
-        it 'sets the pull request status' do
+        it 'resets then sets the pull request status' do
           allow(GitRepositoryLocation).to receive(:repo_exists?).and_return(true)
           pull_request_status = instance_double(PullRequestStatus)
           allow(PullRequestStatus).to receive(:new).and_return(pull_request_status)
 
           expect(pull_request_status).to receive(:reset).with(
-            repo_url: repo_url,
-            sha: sha,
+            full_repo_name: 'owner/repo',
+            sha: 'abc123',
           ).ordered
 
           expect(pull_request_status).to receive(:update).with(
-            repo_url: repo_url,
-            sha: sha,
+            full_repo_name: 'owner/repo',
+            sha: 'abc123',
           ).ordered
 
-          post :create, github_notification: pr_payload(action: 'synchronize', repo_url: repo_url, sha: sha)
+          post :create, github_notification:
+            pr_payload(action: 'synchronize', full_repo_name: 'owner/repo', sha: 'abc123')
         end
       end
 
@@ -100,17 +96,15 @@ RSpec.describe GithubNotificationsController do
     end
   end
 
-  def pr_payload(action:, repo_url:, sha:)
+  def pr_payload(action:, full_repo_name:, sha:)
     {
       'action' => action,
+      'repository' => {
+        'full_name' => full_repo_name,
+      },
       'pull_request' => {
         'head' => {
           'sha' => sha,
-        },
-        'base' => {
-          'repo' => {
-            'html_url' => repo_url,
-          },
         },
       },
     }

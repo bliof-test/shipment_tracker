@@ -2,13 +2,17 @@ require 'spec_helper'
 require 'clients/github'
 
 RSpec.describe GithubClient do
-  subject(:github) { GithubClient.new(token) }
-  let(:token) { 'token' }
+  subject(:github) { GithubClient.new('token') }
 
-  describe 'delegation' do
-    it 'delegates #create_status' do
-      expect_any_instance_of(Octokit::Client).to receive(:create_status)
-      github.create_status('some', 'expected', 'args')
+  describe '#create_status' do
+    it 'creates a commit status' do
+      expect_any_instance_of(Octokit::Client).to receive(:create_status).with(
+        'owner/repo', 'abc123', 'success', context: 'shipment-tracker', description: 'foo', target_url: 'url'
+      )
+
+      github.create_status(
+        repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo', target_url: 'url',
+      )
     end
   end
 
