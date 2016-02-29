@@ -120,4 +120,12 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       end
     end
   end
+
+  describe '#full_repo_name' do
+    it 'returns the full repository name' do
+      repository_loction = GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
+
+      expect(repository_loction.full_repo_name).to eq('owner/repo')
+    end
+  end
 end

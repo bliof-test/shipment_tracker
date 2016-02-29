@@ -36,6 +36,13 @@ class GitRepositoryLocation < ActiveRecord::Base
     uris.any? { |uri| uri.include?(full_repo_name) }
   end
 
+  def full_repo_name
+    @full_repo_name ||= begin
+      parsed_uri = GitCloneUrl.parse(uri)
+      (parsed_uri.path.start_with?('/') ? parsed_uri.path[1..-1] : parsed_uri.path).chomp('.git')
+    end
+  end
+
   private
 
   def self.url_from_uri(uri)
