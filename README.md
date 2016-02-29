@@ -14,6 +14,10 @@ All received events are stored in the DB and are never modified.
 [Event sourcing] is used to replay each event allowing us to reconstruct the state
 of the system at any point in time.
 
+## Releases
+
+Releases are tracked via the Releases page for [this project](https://shipment-tracker.fundingcircle.co.uk/releases/shipment_tracker)
+
 ## Getting Started
 
 Install the Ruby version specified in `.ruby-version`.
