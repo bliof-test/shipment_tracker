@@ -1,5 +1,6 @@
 require 'git_clone_url'
 require 'octokit_client'
+require 'token'
 
 require 'active_model'
 
@@ -14,15 +15,24 @@ module Forms
 
     WHITELIST_DOMAINS = %w(github.com).freeze
     REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
+    DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
 
-    attr_reader :uri
+    attr_reader :uri, :token_types
 
-    def initialize(uri)
+    def initialize(uri, token_types)
       @uri = uri
+      @token_types = token_types
     end
 
     def valid?
       valid_uri? && repo_accessible? && errors.empty?
+    end
+
+    def self.default_token_types
+      @default_token_types ||= Token.sources.map { |token_src|
+        value = DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
+        { id: token_src.endpoint, name: token_src.name, value: value }
+      }
     end
 
     private

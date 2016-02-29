@@ -1,6 +1,10 @@
 class Token < ActiveRecord::Base
   has_secure_token :value
 
+  before_validation(on: [:create, :update]) do
+    lowercase_name
+  end
+
   def self.valid?(source, token)
     token.present? && exists?(source: source, value: token)
   end
@@ -20,5 +24,11 @@ class Token < ActiveRecord::Base
     else
       EventTypeRepository.from_rails_config.find_by_endpoint(source).name
     end
+  end
+
+  private
+
+  def lowercase_name
+    name.downcase! if name
   end
 end

@@ -15,18 +15,21 @@ root = Pathname.new('..').expand_path(File.dirname(__FILE__))
 [
   root.join('app', 'models'),
   root.join('app', 'decorators'),
+  root.join('app', 'use_cases'),
 ].each do |path|
   $LOAD_PATH.unshift path.to_s
 end
 
+require 'solid_use_case'
+require 'solid_use_case/rspec_matchers'
 require 'support/feature_review_helpers'
 require 'support/github_api_helpers'
-
 require 'webmock/rspec'
 
 RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
   config.include Support::GithubApiHelpers
+  config.include SolidUseCase::RSpecMatchers
 
   config.before(:each, :disable_repo_verification) do
     allow_any_instance_of(OctokitClient).to receive(:repo_accessible?).and_return(true)

@@ -1,0 +1,3 @@
+= "Repository #{repo_name} successfuly added."
+- unless params[:token_types].blank?
+  = "<br/>Created tokens can be viewed on the #{link_to('Tokens', tokens_path)} page.".html_safe

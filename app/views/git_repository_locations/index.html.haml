@@ -1,14 +1,22 @@
 - title 'Repositories'
 
-= form_for(@repo_location_form, url: git_repository_locations_path, class: 'form-horizontal') do |form|
+= form_for('repository_locations_form', url: git_repository_locations_path, class: 'form-horizontal') do |form|
   .form-group.row
     = form.label(:uri, 'Git URI', class: 'col-md-1 control-label')
     .col-md-4
       = form.text_field(:uri, placeholder: 'git@github.com:user/repo.git', class: 'form-control')
   .form-group.row
+    %label.col-md-1.control-label Tokens
+    .col-md-2
+      - @token_types.each do |token|
+        .checkbox
+          %label
+            = check_box_tag("token_types[#{token[:id]}]", token[:id], token[:value], name: 'token_types[]')
+            = token[:name]
+
+  .form-group.row
     .col-md-offset-1.col-md-4
       = form.submit('Add Git Repository', class: 'btn btn-primary')
-
 
 - table headers: ['Name', 'URI'], classes: 'git_repository_locations' do
   - @git_repository_locations.each do |git_repository_location|
