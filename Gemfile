@@ -13,6 +13,7 @@ gem 'haml-rails'
 gem 'has_secure_token'
 gem 'honeybadger', '~> 2.0'
 gem 'jquery-rails'
+gem 'jira-ruby', require: 'jira'
 gem 'newrelic_rpm'
 gem 'octokit', '4.1.0', require: false
 gem 'omniauth-auth0'
