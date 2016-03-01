@@ -32,6 +32,10 @@ class GitRepositoryLocation < ActiveRecord::Base
     find_by('uri LIKE ?', "%#{repo_name}%")
   end
 
+  def self.app_remote_head_hash
+    all.each_with_object({}) { |repo, repo_hash| repo_hash[repo.name] = repo.remote_head }
+  end
+
   def self.repo_exists?(full_repo_name)
     uris.any? { |uri| uri.include?(full_repo_name) }
   end
