@@ -22,7 +22,7 @@ class JiraClient
       read_timeout: 120,
     }
 
-    @jira_client ||= JIRA::Client.new(options)
+    JIRA::Client.new(@options)
   end
   private_class_method :jira_client
 end
