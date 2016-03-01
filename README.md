@@ -16,7 +16,7 @@ of the system at any point in time.
 
 ## Releases
 
-Releases are tracked via the Releases page for [this project](https://shipment-tracker.fundingcircle.co.uk/releases/shipment_tracker)
+Merges in the deployment branch are tracked on the shipment tracker application and not GitHub.
 
 ## Getting Started
 
