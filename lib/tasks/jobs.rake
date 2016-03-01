@@ -83,8 +83,8 @@ namespace :jobs do
       }.each(&:join)
 
       repos_hash_after = GitRepositoryLocation.app_remote_head_hash
-      repos_hash_changed = repos_hash_after.delete_if { |name, remote_head|
-        remote_head == repos_hash_before[name]
+      repos_hash_changed = repos_hash_after.select { |name, remote_head|
+        remote_head != repos_hash_before[name]
       }
       repos_hash_before = repos_hash_after.dup
 
