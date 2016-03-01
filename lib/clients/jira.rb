@@ -8,13 +8,12 @@ class JiraClient
   end
 
   def self.get_issue(id)
-    client = jira_client
-    client.Issue.find(id)
+    jira_client.client.Issue.find(id)
   end
   private_class_method :get_issue
 
   def self.jira_client
-    options = {
+    @options ||= {
       username: ShipmentTracker::JIRA_USER,
       password: ShipmentTracker::JIRA_PASSWD,
       site: ShipmentTracker::JIRA_HOST_NAME,
