@@ -2,6 +2,24 @@ require 'spec_helper'
 require 'payloads/github'
 
 RSpec.describe Payloads::Github do
+  describe '#before_sha' do
+    context 'when payload contains "before" data (push event)' do
+      it 'returns sha' do
+        payload = Payloads::Github.new('before' => 'abc123')
+
+        expect(payload.before_sha).to eq('abc123')
+      end
+    end
+
+    context 'when payload does not contain "before" data' do
+      it 'returns nil' do
+        payload = Payloads::Github.new('some_key' => 'some_value')
+
+        expect(payload.before_sha).to be_nil
+      end
+    end
+  end
+
   describe '#after_sha' do
     context 'when payload contains "after" data (push event)' do
       it 'returns sha' do
