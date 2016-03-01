@@ -71,7 +71,7 @@ namespace :jobs do
 
     loop do
       start_time = Time.current
-      puts "[#{start_time}] Updating all git repositories"
+      puts "[#{start_time}] Updating #{repos_hash_changed.size} git repositories"
 
       repos_hash_changed.keys.in_groups(4).map { |group|
         Thread.new do # Limited to 4 threads to avoid running out of memory.
