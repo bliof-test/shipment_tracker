@@ -15,10 +15,10 @@ class JiraClient
 
   def self.jira_client
     options = {
-      username: ENV['JIRA_USER'],
-      password: ENV['JIRA_PASSWD'],
-      site: ENV['JIRA_HOST'],
-      context_path: ENV['JIRA_PATH'],
+      username: ShipmentTracker::JIRA_USER,
+      password: ShipmentTracker::JIRA_PASSWD,
+      site: ShipmentTracker::JIRA_HOST_NAME,
+      context_path: ShipmentTracker::JIRA_PATH,
       auth_type: :basic,
       read_timeout: 120,
     }
