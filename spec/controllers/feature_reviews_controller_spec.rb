@@ -179,7 +179,8 @@ RSpec.describe FeatureReviewsController do
   end
 
   describe 'POST #link_ticket', :logged_in do
-    subject(:link_ticket) { post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123' }
+    let(:ticket_id) { 'JIRA-123' }
+    subject(:link_ticket) { post :link_ticket, return_to: feature_review_path, jira_key: ticket_id }
 
     let(:expected_comment) { "[Feature ready for review|http://test.host#{feature_review_path}]" }
     let(:feature_review_path) { '/feature_reviews?some=app' }
@@ -197,8 +198,19 @@ RSpec.describe FeatureReviewsController do
       expect(response).to redirect_to(feature_review_path)
     end
 
+    context 'when the key is invalid' do
+      let(:ticket_id) { 'INVALID' }
+      let(:expected_flash_error) { 'Failed to link. Please check that the ticket ID is correct.' }
+
+      it 'shows flash error asking to check ticker ID' do
+        link_ticket
+        expect(flash[:error]).to eq(expected_flash_error)
+        expect(response).to redirect_to(feature_review_path)
+      end
+    end
+
     context 'when posting to Jira fails' do
-      let(:error) { JIRA::HTTPError.new(response) }
+      let(:error) { JiraClient::InvalidKeyError }
 
       before do
         allow(JiraClient).to receive(:post_comment).and_raise(error)
@@ -207,7 +219,7 @@ RSpec.describe FeatureReviewsController do
       context 'because of HTTP not found' do
         let(:response) { double('response', message: 'Not found', code: '404') }
         let(:expected_flash_error) {
-          'Failed to link to JIRA-123. Please check that the ticket ID is correct.'
+          'Failed to link. Please check that the ticket ID is correct.'
         }
 
         it 'shows a flash error asking the user to check the ticket ID' do
@@ -219,8 +231,9 @@ RSpec.describe FeatureReviewsController do
       end
 
       context 'because of an other error' do
+        let(:error) { JIRA::HTTPError.new(response) }
         let(:response) { double('response', message: 'Bad request', code: '400') }
-        let(:expected_flash_error) { 'Failed to link to JIRA-123. Something went wrong.' }
+        let(:expected_flash_error) { 'Failed to link. Something went wrong.' }
 
         it 'shows a basic flash error' do
           link_ticket
