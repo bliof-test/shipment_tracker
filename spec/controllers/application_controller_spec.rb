@@ -40,4 +40,7 @@ RSpec.describe ApplicationController, :logged_in do
       end
     end
   end
+
+  xdescribe '#path_from_url' do
+  end
 end

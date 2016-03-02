@@ -56,6 +56,12 @@ module Pages
       page.click_link_or_button('Submit')
     end
 
+    def link_a_jira_ticket(jira_key:)
+      verify!
+      page.fill_in('jira_key', with: jira_key)
+      page.click_link_or_button('Link')
+    end
+
     def qa_submission_panel
       verify!
       Sections::PanelListSection.new(

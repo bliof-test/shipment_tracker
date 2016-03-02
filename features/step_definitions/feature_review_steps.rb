@@ -128,3 +128,8 @@ end
 When 'I click modify button on review panel' do
   page.click_link_or_button('Modify')
 end
+
+When 'I link the feature review "$nickname" to the Jira ticket "$jira_key"' do |nickname, jira_key|
+  feature_review_page.link_a_jira_ticket(jira_key: jira_key)
+  scenario_context.link_ticket_and_feature_review(jira_key: jira_key, feature_review_nickname: nickname)
+end

@@ -6,6 +6,7 @@ RSpec.describe FeatureReviewsController do
     it { is_expected.to require_authentication_on(:get, :show) }
     it { is_expected.to require_authentication_on(:post, :create) }
     it { is_expected.to require_authentication_on(:get, :search) }
+    it { is_expected.to require_authentication_on(:post, :link_ticket) }
   end
 
   describe 'GET #new', :logged_in do
@@ -174,6 +175,35 @@ RSpec.describe FeatureReviewsController do
 
       expect(assigns(:links)).to eq(expected_links)
       expect(assigns(:applications)).to eq(applications)
+    end
+  end
+
+  describe 'POST #link_ticket', :logged_in do
+    let(:expected_comment) { "[Feature ready for review|http://test.host#{feature_review_path}]" }
+    let(:feature_review_path) { '/feature_reviews?some=app' }
+    before do
+      allow(JiraClient).to receive(:post_comment)
+    end
+
+    it 'posts a comment to Jira' do
+      expect(JiraClient).to receive(:post_comment).with('JIRA-123', expected_comment)
+      post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
+    end
+
+    it 'redirects to the return path' do
+      post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
+      expect(response).to redirect_to(feature_review_path)
+    end
+
+    context 'when posting to Jira fails' do
+      let(:expected_flash_error) { 'Failed to link to JIRA-123. Please check that the ticket ID is correct.' }
+
+      it 'shows a flash error' do
+        allow(JiraClient).to receive(:post_comment).and_raise JIRA::HTTPError
+        post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
+        expect(flash[:error]).to eq(expected_flash_error)
+        expect(response).to redirect_to(feature_review_path)
+      end
     end
   end
 end

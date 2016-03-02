@@ -1,3 +1,5 @@
+require 'clients/jira'
+
 class FeatureReviewsController < ApplicationController
   def new
     @app_names = GitRepositoryLocation.app_names
@@ -37,6 +39,12 @@ class FeatureReviewsController < ApplicationController
     flash.now[:error] = 'No Feature Reviews found.' if @links.empty?
   end
 
+  def link_ticket
+    post_jira_comment
+
+    redirect_to redirect_path
+  end
+
   private
 
   def time
@@ -61,5 +69,30 @@ class FeatureReviewsController < ApplicationController
 
   def git_repository_for(app_name)
     git_repository_loader.load(app_name)
+  end
+
+  def redirect_path
+    @redirect_path ||= path_from_url(params[:return_to])
+  end
+
+  def post_jira_comment
+    JiraClient.post_comment(jira_key, jira_comment)
+    flash[:success] = "Feature Review was linked to #{jira_key}."\
+    ' Refresh this page in a moment and the ticket will appear.'
+  rescue StandardError => error
+    flash[:error] = "Failed to link to #{jira_key}. Please check that the ticket ID is correct."
+    Honeybadger.notify(error)
+  end
+
+  def jira_comment
+    "[Feature ready for review|#{feature_review_url}]"
+  end
+
+  def jira_key
+    request.request_parameters['jira_key']
+  end
+
+  def feature_review_url
+    "#{root_url.chomp('/')}#{redirect_path}"
   end
 end
