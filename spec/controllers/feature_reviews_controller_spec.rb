@@ -200,7 +200,7 @@ RSpec.describe FeatureReviewsController do
 
     context 'when the key is invalid' do
       let(:ticket_id) { 'INVALID' }
-      let(:expected_flash_error) { 'Failed to link. Please check that the ticket ID is correct.' }
+      let(:expected_flash_error) { 'Failed to link INVALID. Please check that the ticket ID is correct.' }
 
       it 'shows flash error asking to check ticker ID' do
         link_ticket
@@ -219,7 +219,7 @@ RSpec.describe FeatureReviewsController do
       context 'because of HTTP not found' do
         let(:response) { double('response', message: 'Not found', code: '404') }
         let(:expected_flash_error) {
-          'Failed to link. Please check that the ticket ID is correct.'
+          'Failed to link JIRA-123. Please check that the ticket ID is correct.'
         }
 
         it 'shows a flash error asking the user to check the ticket ID' do
@@ -233,7 +233,7 @@ RSpec.describe FeatureReviewsController do
       context 'because of an other error' do
         let(:error) { JIRA::HTTPError.new(response) }
         let(:response) { double('response', message: 'Bad request', code: '400') }
-        let(:expected_flash_error) { 'Failed to link. Something went wrong.' }
+        let(:expected_flash_error) { 'Failed to link JIRA-123. Something went wrong.' }
 
         it 'shows a basic flash error' do
           link_ticket

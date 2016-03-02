@@ -76,14 +76,14 @@ class FeatureReviewsController < ApplicationController
   end
 
   def post_jira_comment
-    JiraClient.post_comment(jira_key, jira_comment)
+    JiraClient.post_comment(jira_key, jira_comment) if valid_format?(jira_key)
     flash[:success] = "Feature Review was linked to #{jira_key}."\
     ' Refresh this page in a moment and the ticket will appear.'
   rescue StandardError => error
     if error.is_a?(JiraClient::InvalidKeyError)
-      flash[:error] = 'Failed to link. Please check that the ticket ID is correct.'
+      flash[:error] = "Failed to link #{jira_key}. Please check that the ticket ID is correct."
     else
-      flash[:error] = 'Failed to link. Something went wrong.'
+      flash[:error] = "Failed to link #{jira_key}. Something went wrong."
       Honeybadger.notify(error)
     end
   end
@@ -92,10 +92,13 @@ class FeatureReviewsController < ApplicationController
     "[Feature ready for review|#{feature_review_url}]"
   end
 
-  def jira_key
-    jira_key = request.request_parameters['jira_key']
+  def valid_format?(jira_key)
     fail JiraClient::InvalidKeyError unless /[A-Z][A-Z]+-\d*/ =~ jira_key
-    jira_key
+    true
+  end
+
+  def jira_key
+    request.request_parameters['jira_key']
   end
 
   def feature_review_url
