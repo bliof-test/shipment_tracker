@@ -16,7 +16,7 @@ class JiraClient
     @options ||= {
       username: ShipmentTracker::JIRA_USER,
       password: ShipmentTracker::JIRA_PASSWD,
-      site: ShipmentTracker::JIRA_HOST_NAME,
+      site: ShipmentTracker::JIRA_FQDN,
       context_path: ShipmentTracker::JIRA_PATH,
       auth_type: :basic,
       read_timeout: 120,
