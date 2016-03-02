@@ -179,6 +179,8 @@ RSpec.describe FeatureReviewsController do
   end
 
   describe 'POST #link_ticket', :logged_in do
+    subject(:link_ticket) { post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123' }
+
     let(:expected_comment) { "[Feature ready for review|http://test.host#{feature_review_path}]" }
     let(:feature_review_path) { '/feature_reviews?some=app' }
     before do
@@ -187,22 +189,44 @@ RSpec.describe FeatureReviewsController do
 
     it 'posts a comment to Jira' do
       expect(JiraClient).to receive(:post_comment).with('JIRA-123', expected_comment)
-      post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
+      link_ticket
     end
 
     it 'redirects to the return path' do
-      post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
+      link_ticket
       expect(response).to redirect_to(feature_review_path)
     end
 
     context 'when posting to Jira fails' do
-      let(:expected_flash_error) { 'Failed to link to JIRA-123. Please check that the ticket ID is correct.' }
+      let(:error) { JIRA::HTTPError.new(response) }
 
-      it 'shows a flash error' do
-        allow(JiraClient).to receive(:post_comment).and_raise JIRA::HTTPError
-        post :link_ticket, return_to: feature_review_path, jira_key: 'JIRA-123'
-        expect(flash[:error]).to eq(expected_flash_error)
-        expect(response).to redirect_to(feature_review_path)
+      before do
+        allow(JiraClient).to receive(:post_comment).and_raise(error)
+      end
+
+      context 'because of HTTP not found' do
+        let(:response) { double('response', message: 'Not found', code: '404') }
+        let(:expected_flash_error) {
+          'Failed to link to JIRA-123. Please check that the ticket ID is correct.'
+        }
+
+        it 'shows a flash error asking the user to check the ticket ID' do
+          link_ticket
+
+          expect(flash[:error]).to eq(expected_flash_error)
+          expect(response).to redirect_to(feature_review_path)
+        end
+      end
+
+      context 'because of an other error' do
+        let(:response) { double('response', message: 'Bad request', code: '400') }
+        let(:expected_flash_error) { 'Failed to link to JIRA-123. Something went wrong.' }
+
+        it 'shows a basic flash error' do
+          link_ticket
+          expect(flash[:error]).to eq(expected_flash_error)
+          expect(response).to redirect_to(feature_review_path)
+        end
       end
     end
   end
