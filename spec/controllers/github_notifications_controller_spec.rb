@@ -7,68 +7,10 @@ RSpec.describe GithubNotificationsController do
         request.env['HTTP_X_GITHUB_EVENT'] = 'pull_request'
       end
 
-      context 'when the pull request is newly opened' do
-        it 'reset and sets the pull request status' do
-          allow(GitRepositoryLocation).to receive(:repo_exists?).and_return(true)
-          pull_request_status = instance_double(PullRequestStatus)
-          allow(PullRequestStatus).to receive(:new).and_return(pull_request_status)
+      it 'runs HandlePullRequestEvent use case' do
+        expect(HandlePullRequestEvent).to receive(:run).with(anything)
 
-          expect(pull_request_status).to receive(:reset).with(
-            full_repo_name: 'owner/repo',
-            sha: 'abc123',
-          ).ordered
-
-          expect(pull_request_status).to receive(:update).with(
-            full_repo_name: 'owner/repo',
-            sha: 'abc123',
-          ).ordered
-
-          post :create, github_notification:
-            pr_payload(action: 'opened', full_repo_name: 'owner/repo', sha: 'abc123')
-        end
-      end
-
-      context 'when the pull request receives a new commit' do
-        it 'resets then sets the pull request status' do
-          allow(GitRepositoryLocation).to receive(:repo_exists?).and_return(true)
-          pull_request_status = instance_double(PullRequestStatus)
-          allow(PullRequestStatus).to receive(:new).and_return(pull_request_status)
-
-          expect(pull_request_status).to receive(:reset).with(
-            full_repo_name: 'owner/repo',
-            sha: 'abc123',
-          ).ordered
-
-          expect(pull_request_status).to receive(:update).with(
-            full_repo_name: 'owner/repo',
-            sha: 'abc123',
-          ).ordered
-
-          post :create, github_notification:
-            pr_payload(action: 'synchronize', full_repo_name: 'owner/repo', sha: 'abc123')
-        end
-      end
-
-      context 'when the pull request activity is not relevant' do
-        it 'does not set the pull request status' do
-          expect(PullRequestStatus).to_not receive(:new)
-          expect(PullRequestUpdateJob).to_not receive(:perform_later)
-
-          post :create, github_notification: { action: 'reopened' }
-        end
-      end
-
-      context 'when the pull request is not for an audited repo' do
-        before do
-          allow(GitRepositoryLocation).to receive(:repo_exists?).and_return(false)
-        end
-
-        it 'does not set the pull request status' do
-          expect(PullRequestStatus).to_not receive(:new)
-          expect(PullRequestUpdateJob).to_not receive(:perform_later)
-
-          post :create, github_notification: { action: 'opened' }
-        end
+        post :create, github_notification: {}
       end
     end
 
@@ -77,10 +19,10 @@ RSpec.describe GithubNotificationsController do
         request.env['HTTP_X_GITHUB_EVENT'] = 'push'
       end
 
-      it 'runs the handle_push_event use case' do
+      it 'runs the HandlePushEvent use case' do
         expect(HandlePushEvent).to receive(:run).with(anything)
 
-        post :create, github_notification: { after: 'abc123', repository: { full_name: 'owner/repo' } }
+        post :create, github_notification: {}
       end
     end
 
