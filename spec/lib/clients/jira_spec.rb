@@ -6,7 +6,7 @@ RSpec.describe JiraClient do
     allow(comment_mock).to receive(:save)
     allow(comments_mock).to receive(:build).and_return(comment_mock)
     allow(issue_mock).to receive(:comments).and_return(comments_mock)
-    allow(client_mock).to receive_message_chain(:client, :Issue, :find).and_return(issue_mock)
+    allow(client_mock).to receive_message_chain(:Issue, :find).and_return(issue_mock)
     allow(JIRA::Client).to receive(:new).and_return(client_mock)
   end
 

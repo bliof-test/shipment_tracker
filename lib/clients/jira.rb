@@ -8,7 +8,7 @@ class JiraClient
   end
 
   def self.get_issue(id)
-    jira_client.client.Issue.find(id)
+    jira_client.Issue.find(id)
   end
   private_class_method :get_issue
 
@@ -20,6 +20,8 @@ class JiraClient
       context_path: ShipmentTracker::JIRA_PATH,
       auth_type: :basic,
       read_timeout: 120,
+      use_ssl: true,
+      ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
     }
 
     JIRA::Client.new(@options)
