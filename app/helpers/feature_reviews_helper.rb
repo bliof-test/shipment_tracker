@@ -52,7 +52,7 @@ module FeatureReviewsHelper
   def jira_link(jira_key)
     link_to(
       jira_key,
-      "https://#{ShipmentTracker::JIRA_HOST_NAME}/browse/#{jira_key}",
+      "#{ShipmentTracker::JIRA_FQDN}/browse/#{jira_key}",
       target: '_blank',
     )
   end

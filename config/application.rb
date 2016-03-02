@@ -16,7 +16,7 @@ Dotenv.load
 module ShipmentTracker
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
-  JIRA_HOST_NAME ||= ENV.fetch('JIRA_HOST_NAME', nil)
+  JIRA_FQDN ||= ENV.fetch('JIRA_FQDN', nil)
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
