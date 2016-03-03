@@ -41,6 +41,8 @@ RSpec.describe HandlePushEvent do
       let(:tickets) { [] }
 
       it 'does nothing' do
+        expect(JiraClient).not_to receive(:post_comment)
+
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/repo',
@@ -48,8 +50,7 @@ RSpec.describe HandlePushEvent do
           after_sha: 'def456',
         )
 
-        result = HandlePushEvent.run(github_payload)
-        expect(result).to be_failure
+        HandlePushEvent.run(github_payload)
       end
     end
 

@@ -53,30 +53,29 @@ class PullRequestStatus
   end
 
   def target_url_for(full_repo_name:, sha:, feature_reviews:)
-    url_opts = { protocol: ENV.fetch('PROTOCOL', 'https') }
     repo_name = full_repo_name.split('/').last
 
     if feature_reviews.empty?
-      url_to_autoprepared_feature_review(url_opts, repo_name, sha)
+      url_to_autoprepared_feature_review(repo_name, sha)
     elsif feature_reviews.length == 1
-      url_to_feature_review(url_opts, feature_reviews.first.path)
+      url_to_feature_review(feature_reviews.first.path)
     else
-      url_to_search_feature_reviews(url_opts, repo_name, sha)
+      url_to_search_feature_reviews(repo_name, sha)
     end
   end
 
-  def url_to_autoprepared_feature_review(url_opts, repo_name, sha)
+  def url_to_autoprepared_feature_review(repo_name, sha, url_opts = {})
     last_staging_deploy = Repositories::DeployRepository.new.last_staging_deploy_for_version(sha)
     url_opts[:uat_url] = last_staging_deploy.server if last_staging_deploy
     url_opts[:apps] = { repo_name => sha }
     routes.feature_reviews_url(url_opts)
   end
 
-  def url_to_feature_review(url_opts, feature_review_path)
-    routes.root_url(url_opts).chomp('/') + feature_review_path
+  def url_to_feature_review(feature_review_path)
+    routes.root_url.chomp('/') + feature_review_path
   end
 
-  def url_to_search_feature_reviews(url_opts, repo_name, sha)
+  def url_to_search_feature_reviews(repo_name, sha, url_opts = {})
     url_opts[:application] = repo_name
     url_opts[:version] = sha
     routes.search_feature_reviews_url(url_opts)
