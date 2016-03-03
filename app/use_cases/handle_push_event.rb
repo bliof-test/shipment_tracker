@@ -38,6 +38,7 @@ class HandlePushEvent
   end
 
   def feature_review_url(feature_review_path)
-    Rails.application.routes.url_helpers.root_url(protocol: 'https').chomp('/') + feature_review_path
+    Rails.application.routes.url_helpers.root_url(protocol: ENV.fetch('PROTOCOL', 'https'))
+         .chomp('/') + feature_review_path
   end
 end

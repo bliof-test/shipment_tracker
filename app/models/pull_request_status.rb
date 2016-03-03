@@ -53,7 +53,7 @@ class PullRequestStatus
   end
 
   def target_url_for(full_repo_name:, sha:, feature_reviews:)
-    url_opts = { protocol: 'https' }
+    url_opts = { protocol: ENV.fetch('PROTOCOL', 'https') }
     repo_name = full_repo_name.split('/').last
 
     if feature_reviews.empty?
