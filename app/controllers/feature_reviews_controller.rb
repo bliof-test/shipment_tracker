@@ -1,7 +1,4 @@
-require 'clients/jira'
-
 class FeatureReviewsController < ApplicationController
-  class DuplicateKeyError < RuntimeError; end
   def new
     @app_names = GitRepositoryLocation.app_names
     @feature_review_form = feature_review_form
@@ -41,7 +38,19 @@ class FeatureReviewsController < ApplicationController
   end
 
   def link_ticket
-    post_jira_comment
+    LinkTicket.run(
+      jira_key: params['jira_key'],
+      feature_review_path: redirect_path,
+      root_url: root_url,
+    ).match do
+      success do |success_message|
+        flash[:success] = success_message
+      end
+
+      failure do |error|
+        flash[:error] = error.message
+      end
+    end
 
     redirect_to redirect_path
   end
@@ -77,43 +86,6 @@ class FeatureReviewsController < ApplicationController
   end
 
   def normalize_feature_review_path(path)
-    Factories::FeatureReviewFactory.new.create_from_url_string(path).path
-  end
-
-  def post_jira_comment
-    JiraClient.post_comment(jira_key, jira_comment) if valid_format?(jira_key) &&
-                                                       assert_not_linked(jira_key, redirect_path)
-    flash[:success] = "Feature Review was linked to #{jira_key}."\
-    ' Refresh this page in a moment and the ticket will appear.'
-  rescue JiraClient::InvalidKeyError
-    flash[:error] = "Failed to link #{jira_key}. Please check that the ticket ID is correct."
-  rescue DuplicateKeyError
-    flash[:error] = "Failed to link #{jira_key}. Duplicate tickets should not be added."
-  rescue StandardError => error
-    flash[:error] = "Failed to link #{jira_key}. Something went wrong."
-    Honeybadger.notify(error)
-  end
-
-  def jira_comment
-    "[Feature ready for review|#{feature_review_url}]"
-  end
-
-  def valid_format?(jira_key)
-    fail JiraClient::InvalidKeyError unless /[A-Z][A-Z]+-\d*/ =~ jira_key
-    true
-  end
-
-  def assert_not_linked(jira_key, feature_review_path)
-    tickets = Repositories::TicketRepository.new.tickets_for_path(feature_review_path)
-    fail DuplicateKeyError if tickets.any? { |ticket| ticket.key == jira_key }
-    true
-  end
-
-  def jira_key
-    params['jira_key']
-  end
-
-  def feature_review_url
-    "#{root_url.chomp('/')}#{redirect_path}"
+    factory.create_from_url_string(path).path
   end
 end
