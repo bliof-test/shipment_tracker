@@ -27,7 +27,7 @@ class RelinkTicketJob < ActiveJob::Base
     message = "[Feature ready for review|#{feature_review_url(new_feature_review_path)}]"
     JiraClient.post_comment(ticket_key, message)
   rescue JiraClient::InvalidKeyError
-    Rails.logger.error "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."
+    Rails.logger.warn "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."
   rescue StandardError => error
     Honeybadger.notify(error)
   end
