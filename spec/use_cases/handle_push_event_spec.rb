@@ -128,5 +128,44 @@ RSpec.describe HandlePushEvent do
         end
       end
     end
+
+    context 'when the linking fails for a ticket' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, key: 'ISSUE-1', paths: paths_issue1),
+          instance_double(Ticket, key: 'ISSUE-2', paths: paths_issue2),
+        ]
+      }
+
+      let(:paths_issue1) {
+        [
+          feature_review_path(app1: 'abc'),
+          feature_review_path(app1: 'def'),
+        ]
+      }
+
+      let(:paths_issue2) {
+        [
+          feature_review_path(app1: 'abc'),
+          feature_review_path(app1: 'xyz'),
+        ]
+      }
+
+      it 'should rescue and continue to link other tickets' do
+        allow(JiraClient).to receive(:post_comment).with(tickets.first.key, anything)
+          .and_raise(JiraClient::InvalidKeyError)
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/app1',
+          before_sha: 'abc',
+          after_sha: 'uvw',
+        )
+
+        expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)
+
+        HandlePushEvent.run(github_payload)
+      end
+    end
   end
 end

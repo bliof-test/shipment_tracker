@@ -35,6 +35,9 @@ class HandlePushEvent
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
     message = "[Feature ready for review|#{feature_review_url(new_feature_review_path)}]"
     JiraClient.post_comment(ticket_key, message)
+  rescue
+    Rails.logger.error "Failed to post comment to Jira ticket #{ticket_key}."\
+      "The issue might have been deleted"
   end
 
   def feature_review_url(feature_review_path)
