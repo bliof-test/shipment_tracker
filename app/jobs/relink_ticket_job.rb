@@ -5,9 +5,9 @@ require 'repositories/ticket_repository'
 class RelinkTicketJob < ActiveJob::Base
   queue_as :default
 
-  def perform(payload)
-    before_sha = payload.delete(:before_sha)
-    after_sha = payload.delete(:after_sha)
+  def perform(args)
+    before_sha = args.delete(:before_sha)
+    after_sha = args.delete(:after_sha)
 
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
@@ -27,8 +27,7 @@ class RelinkTicketJob < ActiveJob::Base
     message = "[Feature ready for review|#{feature_review_url(new_feature_review_path)}]"
     JiraClient.post_comment(ticket_key, message)
   rescue JiraClient::InvalidKeyError
-    Rails.logger.error "Failed to post comment to Jira ticket #{ticket_key}."\
-      'The issue might have been deleted'
+    Rails.logger.error "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."
   rescue StandardError => error
     Honeybadger.notify(error)
   end
