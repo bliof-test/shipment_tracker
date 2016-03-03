@@ -21,15 +21,13 @@ class LinkTicket
   end
 
   def post_comment(args)
-    begin
-      JiraClient.post_comment(args[:jira_key], jira_comment(args))
-    rescue JiraClient::InvalidKeyError
-      return fail :invalid_key, message: invalid_key_message(args)
-    rescue StandardError => error
-      Honeybadger.notify(error)
-      return fail :post_failed, message: generic_error_message(args)
-    end
+    JiraClient.post_comment(args[:jira_key], jira_comment(args))
     continue(success_message(args))
+  rescue JiraClient::InvalidKeyError
+    fail :invalid_key, message: invalid_key_message(args)
+  rescue StandardError => error
+    Honeybadger.notify(error)
+    fail :post_failed, message: generic_error_message(args)
   end
 
   private
