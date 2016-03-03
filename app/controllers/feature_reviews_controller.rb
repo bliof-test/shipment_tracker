@@ -96,7 +96,7 @@ class FeatureReviewsController < ApplicationController
   end
 
   def jira_key
-    request.request_parameters['jira_key']
+    params['jira_key']
   end
 
   def feature_review_url

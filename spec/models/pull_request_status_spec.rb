@@ -37,7 +37,7 @@ RSpec.describe PullRequestStatus do
             sha: 'abc',
             state: 'success',
             description: 'Approved Feature Review found',
-            target_url: 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
+            target_url: 'https://localhost:1201/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
           )
 
           PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
@@ -62,7 +62,7 @@ RSpec.describe PullRequestStatus do
             sha: 'abc',
             state: 'pending',
             description: 'Re-approval required for Feature Review',
-            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc',
+            target_url: 'https://localhost:1201/feature_reviews?apps%5Brepo%5D=abc',
           )
 
           PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc')
@@ -95,7 +95,7 @@ RSpec.describe PullRequestStatus do
             sha: 'abc',
             state: 'success',
             description: 'Approved Feature Review found',
-            target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
+            target_url: 'https://localhost:1201/feature_reviews/search?application=app1&version=abc',
           )
 
           PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
@@ -122,7 +122,7 @@ RSpec.describe PullRequestStatus do
             sha: 'abc',
             state: 'pending',
             description: 'Awaiting approval for Feature Review',
-            target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
+            target_url: 'https://localhost:1201/feature_reviews/search?application=app1&version=abc',
           )
 
           PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
@@ -146,7 +146,7 @@ RSpec.describe PullRequestStatus do
           sha: 'abc123',
           state: 'failure',
           description: "No Feature Review found. Click 'Details' to create one.",
-          target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
+          target_url: 'https://localhost:1201/feature_reviews?apps%5Brepo%5D=abc123',
         )
 
         PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
@@ -161,7 +161,7 @@ RSpec.describe PullRequestStatus do
             sha: 'abc123',
             state: 'failure',
             description: "No Feature Review found. Click 'Details' to create one.",
-            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+            target_url: 'https://localhost:1201/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
           )
 
           PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')

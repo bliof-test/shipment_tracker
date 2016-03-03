@@ -34,8 +34,8 @@ module ShipmentTracker
     config.action_dispatch.perform_deep_munge = false
 
     routes.default_url_options = {
-      protocol: ENV['PROTOCOL'] || 'https',
-      host: ENV['HOST_NAME'] || "localhost:#{ENV['PORT']}",
+      protocol: ENV.fetch('PROTOCOL', 'https'),
+      host: ENV.fetch('HOST_NAME', "localhost:#{ENV.fetch('PORT', '1201')}"),
     }
 
     config.ssh_private_key = ENV['SSH_PRIVATE_KEY']
