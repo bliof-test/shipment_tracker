@@ -110,7 +110,7 @@ class GitRepository
     walker = get_walker(main_branch.target_id, parent_commit.oid, true)
 
     begin
-      walker.first.oid == commit_oid
+      walker.first.oid.start_with? commit_oid
     rescue NoMethodError => error
       Honeybadger.context(target_commit: commit_oid,
                           master_head: main_branch.target_id,
