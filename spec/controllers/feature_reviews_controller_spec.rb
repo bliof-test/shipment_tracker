@@ -180,10 +180,14 @@ RSpec.describe FeatureReviewsController do
 
   describe 'POST #link_ticket', :logged_in do
     let(:ticket_id) { 'JIRA-123' }
-    subject(:link_ticket) { post :link_ticket, return_to: feature_review_path, jira_key: ticket_id }
+    let(:apps_with_versions) { { 'frontend' => 'abc', 'backend' => 'def' } }
+    subject(:link_ticket) {
+      post :link_ticket, return_to: feature_review_path(apps_with_versions), jira_key: ticket_id
+    }
+    let(:expected_comment) {
+      "[Feature ready for review|http://test.host#{feature_review_path(apps_with_versions)}]"
+    }
 
-    let(:expected_comment) { "[Feature ready for review|http://test.host#{feature_review_path}]" }
-    let(:feature_review_path) { '/feature_reviews?some=app' }
     before do
       allow(JiraClient).to receive(:post_comment)
     end
@@ -195,7 +199,7 @@ RSpec.describe FeatureReviewsController do
 
     it 'redirects to the return path' do
       link_ticket
-      expect(response).to redirect_to(feature_review_path)
+      expect(response).to redirect_to(feature_review_path(apps_with_versions))
     end
 
     context 'when the key is invalid' do
@@ -205,7 +209,7 @@ RSpec.describe FeatureReviewsController do
       it 'shows flash error asking to check ticker ID' do
         link_ticket
         expect(flash[:error]).to eq(expected_flash_error)
-        expect(response).to redirect_to(feature_review_path)
+        expect(response).to redirect_to(feature_review_path(apps_with_versions))
       end
     end
 
@@ -226,7 +230,7 @@ RSpec.describe FeatureReviewsController do
           link_ticket
 
           expect(flash[:error]).to eq(expected_flash_error)
-          expect(response).to redirect_to(feature_review_path)
+          expect(response).to redirect_to(feature_review_path(apps_with_versions))
         end
       end
 
@@ -238,7 +242,7 @@ RSpec.describe FeatureReviewsController do
         it 'shows a basic flash error' do
           link_ticket
           expect(flash[:error]).to eq(expected_flash_error)
-          expect(response).to redirect_to(feature_review_path)
+          expect(response).to redirect_to(feature_review_path(apps_with_versions))
         end
       end
     end
