@@ -418,10 +418,21 @@ RSpec.describe GitRepository do
 
     context 'the requested commit is on master' do
       let(:git_diagram) { '-o-A-o' }
-      let(:sha) { version('A') }
 
-      it 'returns true' do
-        expect(repo.commit_on_master?(sha)).to be true
+      context 'when using complete commit SHA' do
+        let(:sha) { version('A') }
+
+        it 'returns true' do
+          expect(repo.commit_on_master?(sha)).to be true
+        end
+      end
+
+      context 'when using short SHA version' do
+        let(:short_sha) { short_version('A') }
+
+        it 'returns true' do
+          expect(repo.commit_on_master?(short_sha)).to be true
+        end
       end
     end
   end
@@ -430,5 +441,9 @@ RSpec.describe GitRepository do
 
   def version(pretend_version)
     test_git_repo.commit_for_pretend_version(pretend_version)
+  end
+
+  def short_version(pretend_version)
+    test_git_repo.commit_for_pretend_version(pretend_version)[0..6]
   end
 end
