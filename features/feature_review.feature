@@ -25,7 +25,7 @@ Scenario: Preparing a Feature Review
   And I can see the UAT environment "http://www.some.url"
 
 @logged_in
-Scenario: Editing a feature review not yet linked to a ticket
+Scenario: Editing a Feature Review not yet linked to a ticket
   Given an application called "frontend"
     And an application called "backend"
 
@@ -46,6 +46,23 @@ Scenario: Editing a feature review not yet linked to a ticket
     | backend  | #def    |
     And I can see the UAT environment "http://www.some.url"
 
+@logged_in @disable_jira_client
+Scenario: Linking a Feature Review
+  Given an application called "frontend"
+    And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
+    And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
+    And developer prepares review known as "FR_view" for UAT "uat.fundingcircle.com" with apps
+      | app_name | version |
+      | frontend | #abc    |
+
+  When I visit the feature review known as "FR_view"
+  When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
+  Then I should see an alert: "Feature Review was linked to JIRA-123. Refresh this page in a moment and the ticket will appear."
+
+  When I reload the page after a while
+  Then I should see the tickets
+    | Ticket   | Summary       | Status      |
+    | JIRA-123 | Urgent ticket | In Progress |
 
 @logged_in
 Scenario: Viewing User Acceptance Tests results on a Feature review

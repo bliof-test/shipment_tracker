@@ -12,8 +12,11 @@
     - panel(heading: feature_status(@feature_review_with_statuses), status: @feature_review_with_statuses.authorisation_status, klass: 'feature-status', help_url: wiki_links(:approve), align_right: true) do
       - if @feature_review_with_statuses.tickets.empty?
         .panel-body
-          No tickets found
-          - help_link_icon(wiki_links(:adding_tickets), false)
+          = form_tag(link_ticket_feature_reviews_path(return_to: @return_to), method: 'post', class: 'form-inline') do
+            .form-group
+              = label_tag('jira_key', 'Link Jira Ticket:', class: 'control-label')
+              = text_field_tag('jira_key', '', placeholder: 'e.g: ENG-123', class: 'form-control input-sm', required: true)
+            = submit_tag('Link', class: 'btn btn-primary btn-sm')
       - else
         - table(headers: %w(Ticket Summary Status)) do
           - @feature_review_with_statuses.tickets.each do |ticket|

@@ -40,4 +40,37 @@ RSpec.describe ApplicationController, :logged_in do
       end
     end
   end
+
+  describe '#path_from_url' do
+    subject(:path_from_url) { ApplicationController.new.path_from_url(argument) }
+
+    context 'when URL is given' do
+      let(:argument) { 'http://example.com/with-path?some=param' }
+      it 'returns the path' do
+        expect(path_from_url).to eq('/with-path?some=param')
+      end
+    end
+
+    context 'when PATH is given' do
+      let(:argument) { '/just-path?some=param' }
+
+      it 'returns the path' do
+        expect(path_from_url).to eq('/just-path?some=param')
+      end
+    end
+
+    context 'when called with unparseable string' do
+      let(:argument) { 'any old string' }
+      it 'returns nil' do
+        expect(path_from_url).to be_nil
+      end
+    end
+
+    context 'when called with nil' do
+      let(:argument) { nil }
+      it 'returns nil' do
+        expect(path_from_url).to be_nil
+      end
+    end
+  end
 end

@@ -6,6 +6,7 @@ RSpec.describe FeatureReviewsController do
     it { is_expected.to require_authentication_on(:get, :show) }
     it { is_expected.to require_authentication_on(:post, :create) }
     it { is_expected.to require_authentication_on(:get, :search) }
+    it { is_expected.to require_authentication_on(:post, :link_ticket) }
   end
 
   describe 'GET #new', :logged_in do
@@ -174,6 +175,72 @@ RSpec.describe FeatureReviewsController do
 
       expect(assigns(:links)).to eq(expected_links)
       expect(assigns(:applications)).to eq(applications)
+    end
+  end
+
+  describe 'POST #link_ticket', :logged_in do
+    let(:ticket_id) { 'JIRA-123' }
+    subject(:link_ticket) { post :link_ticket, return_to: feature_review_path, jira_key: ticket_id }
+
+    let(:expected_comment) { "[Feature ready for review|http://test.host#{feature_review_path}]" }
+    let(:feature_review_path) { '/feature_reviews?some=app' }
+    before do
+      allow(JiraClient).to receive(:post_comment)
+    end
+
+    it 'posts a comment to Jira' do
+      expect(JiraClient).to receive(:post_comment).with('JIRA-123', expected_comment)
+      link_ticket
+    end
+
+    it 'redirects to the return path' do
+      link_ticket
+      expect(response).to redirect_to(feature_review_path)
+    end
+
+    context 'when the key is invalid' do
+      let(:ticket_id) { 'INVALID' }
+      let(:expected_flash_error) { 'Failed to link INVALID. Please check that the ticket ID is correct.' }
+
+      it 'shows flash error asking to check ticker ID' do
+        link_ticket
+        expect(flash[:error]).to eq(expected_flash_error)
+        expect(response).to redirect_to(feature_review_path)
+      end
+    end
+
+    context 'when posting to Jira fails' do
+      let(:error) { JiraClient::InvalidKeyError }
+
+      before do
+        allow(JiraClient).to receive(:post_comment).and_raise(error)
+      end
+
+      context 'because of HTTP not found' do
+        let(:response) { double('response', message: 'Not found', code: '404') }
+        let(:expected_flash_error) {
+          'Failed to link JIRA-123. Please check that the ticket ID is correct.'
+        }
+
+        it 'shows a flash error asking the user to check the ticket ID' do
+          link_ticket
+
+          expect(flash[:error]).to eq(expected_flash_error)
+          expect(response).to redirect_to(feature_review_path)
+        end
+      end
+
+      context 'because of an other error' do
+        let(:error) { JIRA::HTTPError.new(response) }
+        let(:response) { double('response', message: 'Bad request', code: '400') }
+        let(:expected_flash_error) { 'Failed to link JIRA-123. Something went wrong.' }
+
+        it 'shows a basic flash error' do
+          link_ticket
+          expect(flash[:error]).to eq(expected_flash_error)
+          expect(response).to redirect_to(feature_review_path)
+        end
+      end
     end
   end
 end

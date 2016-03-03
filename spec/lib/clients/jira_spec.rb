@@ -32,5 +32,27 @@ RSpec.describe JiraClient do
       expect(comment_mock).to receive(:save).with(body: 'comment text')
       JiraClient.post_comment('ISSUE-ID', 'comment text')
     end
+
+    context 'when posting fails' do
+      context 'because of HTTP 404' do
+        let(:error) { JIRA::HTTPError.new(response) }
+        let(:response) { double('response', message: 'Not Found', code: '404') }
+
+        it 'raises InvalidKeyError' do
+          allow(JIRA::Client).to receive(:new).and_raise(error)
+          expect { JiraClient.post_comment('key', 'msg') }.to raise_error(JiraClient::InvalidKeyError)
+        end
+      end
+
+      context 'because of not HTTP 404' do
+        let(:error) { JIRA::HTTPError.new(response) }
+        let(:response) { double('response', message: 'Server error', code: '500') }
+
+        it 'raises InvalidKeyError' do
+          allow(JIRA::Client).to receive(:new).and_raise(error)
+          expect { JiraClient.post_comment('key', 'msg') }.to raise_error(error)
+        end
+      end
+    end
   end
 end
