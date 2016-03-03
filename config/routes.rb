@@ -13,9 +13,7 @@ Rails.application.routes.draw do
   # Projections
   resource :feature_reviews, only: [:new, :show, :create] do
     get 'search'
-    member do
-      post 'link_ticket'
-    end
+    post 'link_ticket'
   end
 
   resources :releases, only: [:index, :show]
