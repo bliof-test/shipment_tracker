@@ -53,53 +53,75 @@ RSpec.describe HandlePushEvent do
       end
     end
 
-    context 'when there is one previously linked ticket' do
-      let(:tickets) { [instance_double(Ticket, key: 'ISSUE-ID', paths: paths)] }
+    context 'when there are previously linked tickets' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, key: 'ISSUE-1', paths: paths_issue1),
+          instance_double(Ticket, key: 'ISSUE-2', paths: paths_issue2),
+        ]
+      }
 
       context 'with multiple Feature Reviews' do
         context 'with one app per Feature Review' do
-          let(:paths) {
+          let(:paths_issue1) {
             [
-              feature_review_path(foo: 'before'),
-              feature_review_path(bar: 'unrelated'),
+              feature_review_path(app1: 'abc'),
+              feature_review_path(app1: 'def'),
+            ]
+          }
+
+          let(:paths_issue2) {
+            [
+              feature_review_path(app1: 'uvw'),
+              feature_review_path(app1: 'xyz'),
             ]
           }
 
           it 'posts linking comment to JIRA with relevant Feature Review' do
             expect(JiraClient).to receive(:post_comment).once.with(
               tickets.first.key,
-              "[Feature ready for review|#{feature_review_url(foo: 'after')}]",
+              "[Feature ready for review|#{feature_review_url(app1: 'ghi')}]",
             )
 
             github_payload = instance_double(
               Payloads::Github,
-              full_repo_name: 'owner/foo',
-              before_sha: 'before',
-              after_sha: 'after',
+              full_repo_name: 'owner/app1',
+              before_sha: 'def',
+              after_sha: 'ghi',
             )
             HandlePushEvent.run(github_payload)
           end
         end
 
         context 'with multiple apps per Feature Review' do
-          let(:paths) {
+          let(:paths_issue1) {
             [
-              feature_review_path(foo: 'abc123', bar: 'efg324'),
-              feature_review_path(bar: 'bcd123'),
+              feature_review_path(app1: 'abc', app2: 'def'),
+              feature_review_path(app3: 'ghi', app4: 'klm'),
+            ]
+          }
+
+          let(:paths_issue2) {
+            [
+              feature_review_path(app2: 'def', app5: 'uvw'),
             ]
           }
 
           it 'posts linking comment to JIRA with relevant Feature Review' do
-            expect(JiraClient).to receive(:post_comment).once.with(
+            expect(JiraClient).to receive(:post_comment).once.ordered.with(
               tickets.first.key,
-              "[Feature ready for review|#{feature_review_url(foo: 'def456', bar: 'efg324')}]",
+              "[Feature ready for review|#{feature_review_url(app1: 'abc', app2: 'xyz')}]",
+            )
+            expect(JiraClient).to receive(:post_comment).once.ordered.with(
+              tickets.second.key,
+              "[Feature ready for review|#{feature_review_url(app2: 'xyz', app5: 'uvw')}]",
             )
 
             github_payload = instance_double(
               Payloads::Github,
-              full_repo_name: 'owner/foo',
-              before_sha: 'abc123',
-              after_sha: 'def456',
+              full_repo_name: 'owner/app2',
+              before_sha: 'def',
+              after_sha: 'xyz',
             )
             HandlePushEvent.run(github_payload)
           end

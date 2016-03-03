@@ -17,7 +17,7 @@ class HandlePushEvent
   def relink_tickets(payload)
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(payload.before_sha)
-    return fail :no_linked_tickets if linked_tickets.empty?
+    return fail :no_previously_linked_tickets if linked_tickets.empty?
 
     linked_tickets.each do |ticket|
       ticket.paths.each do |feature_review_path|
