@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'pull_request_status'
 
-RSpec.describe PullRequestStatus do
+RSpec.describe CommitStatus do
   before do
     stub_const('ShipmentTracker::GITHUB_REPO_STATUS_WRITE_TOKEN', 'token')
     allow(GithubClient).to receive(:new).and_return(client)
@@ -40,7 +40,7 @@ RSpec.describe PullRequestStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
           )
 
-          PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
         end
       end
 
@@ -65,7 +65,7 @@ RSpec.describe PullRequestStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc',
           )
 
-          PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc')
+          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc')
         end
       end
     end
@@ -98,7 +98,7 @@ RSpec.describe PullRequestStatus do
             target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
           )
 
-          PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
         end
       end
 
@@ -125,7 +125,7 @@ RSpec.describe PullRequestStatus do
             target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
           )
 
-          PullRequestStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
         end
       end
     end
@@ -149,7 +149,7 @@ RSpec.describe PullRequestStatus do
           target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
         )
 
-        PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+        CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
       end
 
       context 'when there is a staging deploy for the software version under review' do
@@ -164,7 +164,7 @@ RSpec.describe PullRequestStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
           )
 
-          PullRequestStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
         end
       end
     end
@@ -180,7 +180,7 @@ RSpec.describe PullRequestStatus do
         target_url: nil,
       )
 
-      PullRequestStatus.new.reset(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new.reset(full_repo_name: 'owner/repo', sha: 'abc123')
     end
   end
 
@@ -194,7 +194,7 @@ RSpec.describe PullRequestStatus do
       target_url: nil,
       )
 
-      PullRequestStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
     end
   end
 
@@ -208,7 +208,7 @@ RSpec.describe PullRequestStatus do
       target_url: nil,
       )
 
-      PullRequestStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
     end
   end
 end

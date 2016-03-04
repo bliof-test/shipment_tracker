@@ -102,7 +102,7 @@ module Repositories
 
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
-        PullRequestUpdateJob.perform_later(
+        CommitStatusUpdateJob.perform_later(
           full_repo_name: repository_location.full_repo_name,
           sha: version,
         ) if repository_location

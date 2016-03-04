@@ -19,7 +19,7 @@ class HandlePushEvent
   def reset_commit_status(payload)
     status_options = { full_repo_name: payload.full_repo_name, sha: payload.head_sha }
 
-    PullRequestStatus.new.reset(status_options)
+    CommitStatus.new.reset(status_options)
 
     continue(payload)
   end

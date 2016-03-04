@@ -18,16 +18,9 @@ class RelinkTicketJob < ActiveJob::Base
         link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
     end
-
-    update_status(args)
   end
 
   private
-
-  def update_status(args)
-    status_options = { full_repo_name: args[:full_repo_name], sha: args[:head_sha] }
-    PullRequestUpdateJob.set(wait: 10.seconds).perform_later(status_options)
-  end
 
   def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
@@ -41,5 +34,14 @@ class RelinkTicketJob < ActiveJob::Base
 
   def feature_review_url(feature_review_path)
     Rails.application.routes.url_helpers.root_url.chomp('/') + feature_review_path
+  end
+
+  def post_not_found_status(args)
+    status_options = { full_repo_name: args[:full_repo_name], sha: args[:head_sha] }
+    send_notification(status_options)
+  end
+
+  def post_error_status(args)
+    
   end
 end

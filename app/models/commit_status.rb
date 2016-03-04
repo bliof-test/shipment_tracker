@@ -7,7 +7,7 @@ require 'feature_review_with_statuses'
 require 'repositories/deploy_repository'
 require 'repositories/ticket_repository'
 
-class PullRequestStatus
+class CommitStatus
   def initialize
     @routes = Rails.application.routes.url_helpers
   end

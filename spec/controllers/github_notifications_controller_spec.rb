@@ -2,18 +2,6 @@ require 'rails_helper'
 
 RSpec.describe GithubNotificationsController do
   describe 'POST #create', :logged_in do
-    context 'when event is a pull request notification' do
-      before do
-        request.env['HTTP_X_GITHUB_EVENT'] = 'pull_request'
-      end
-
-      it 'runs HandlePullRequestEvent use case' do
-        expect(HandlePullRequestEvent).to receive(:run).with(anything)
-
-        post :create, github_notification: {}
-      end
-    end
-
     context 'when event is a push notification' do
       before do
         request.env['HTTP_X_GITHUB_EVENT'] = 'push'
