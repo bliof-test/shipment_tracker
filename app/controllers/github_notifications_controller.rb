@@ -4,10 +4,7 @@ class GithubNotificationsController < ApplicationController
   skip_before_action :verify_authenticity_token
 
   def create
-    if pull_request?
-      HandlePullRequestEvent.run(payload)
-      head :ok
-    elsif push?
+    if push?
       HandlePushEvent.run(payload)
       head :ok
     else
@@ -24,10 +21,6 @@ class GithubNotificationsController < ApplicationController
 
   def github_event
     request.env['HTTP_X_GITHUB_EVENT']
-  end
-
-  def pull_request?
-    github_event == 'pull_request'
   end
 
   def push?
