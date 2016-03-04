@@ -66,13 +66,14 @@ namespace :jobs do
     end
 
     loader = GitRepositoryLoader.from_rails_config
+    repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+    repos_hash_before = repos_hash_changed.dup
 
     loop do
       start_time = Time.current
-      puts "[#{start_time}] Updating all git repositories"
+      puts "[#{start_time}] Updating #{repos_hash_changed.size} git repositories"
 
-      app_names = GitRepositoryLocation.pluck(:name)
-      app_names.in_groups(4).map { |group|
+      repos_hash_changed.keys.in_groups(4).map { |group|
         Thread.new do # Limited to 4 threads to avoid running out of memory.
           group.compact.each do |app_name|
             break if @shutdown
@@ -81,8 +82,14 @@ namespace :jobs do
         end
       }.each(&:join)
 
+      repos_hash_after = GitRepositoryLocation.app_remote_head_hash
+      repos_hash_changed = repos_hash_after.select { |name, remote_head|
+        remote_head != repos_hash_before[name]
+      }
+      repos_hash_before = repos_hash_after.dup
+
       end_time = Time.current
-      puts "[#{end_time}] Updated #{app_names.size} repositories in #{end_time - start_time} seconds"
+      puts "[#{end_time}] Updated git repositories in #{end_time - start_time} seconds"
       sleep 5
     end
   end
