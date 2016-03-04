@@ -2,6 +2,26 @@ require 'rails_helper'
 require 'handle_push_event'
 
 RSpec.describe HandlePushEvent do
+  before do
+    allow_any_instance_of(CommitStatus).to receive(:reset)
+    allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(true)
+  end
+
+  describe 'validation' do
+    it 'fails if repo not audited' do
+      allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(false)
+
+      payload = instance_double(
+        Payloads::Github,
+        full_repo_name: 'owner/repo',
+      )
+
+      result = HandlePushEvent.run(payload)
+
+      expect(result).to fail_with(:repo_not_under_audit)
+    end
+  end
+
   describe 'updating remote head' do
     it 'updates the corresponding repository location' do
       github_payload = instance_double(
@@ -9,6 +29,7 @@ RSpec.describe HandlePushEvent do
         full_repo_name: 'owner/repo',
         before_sha: 'abc123',
         after_sha: 'def456',
+        head_sha: 'def456',
       )
 
       git_repository_location = instance_double(GitRepositoryLocation)
@@ -24,7 +45,30 @@ RSpec.describe HandlePushEvent do
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
 
       result = HandlePushEvent.run(github_payload)
-      expect(result).to be_failure
+      expect(result).to fail_with(:repo_not_found)
+    end
+  end
+
+  describe 'resetting commit status' do
+    it 'resets the GitHub commit status' do
+      github_payload = instance_double(
+        Payloads::Github,
+        full_repo_name: 'owner/repo',
+        before_sha: 'abc123',
+        after_sha: 'def456',
+        head_sha: 'def456',
+      )
+
+      git_repository_location = instance_double(GitRepositoryLocation)
+      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
+      allow(git_repository_location).to receive(:update)
+
+      expect_any_instance_of(CommitStatus).to receive(:reset).with(
+        full_repo_name: github_payload.full_repo_name,
+        sha: github_payload.head_sha
+      )
+
+      HandlePushEvent.run(github_payload)
     end
   end
 
@@ -48,6 +92,7 @@ RSpec.describe HandlePushEvent do
           full_repo_name: 'owner/repo',
           before_sha: 'abc123',
           after_sha: 'def456',
+          head_sha: 'def456'
         )
 
         HandlePushEvent.run(github_payload)
@@ -89,6 +134,7 @@ RSpec.describe HandlePushEvent do
               full_repo_name: 'owner/app1',
               before_sha: 'def',
               after_sha: 'ghi',
+              head_sha: 'ghi',
             )
             HandlePushEvent.run(github_payload)
           end
@@ -123,6 +169,7 @@ RSpec.describe HandlePushEvent do
               full_repo_name: 'owner/app2',
               before_sha: 'def',
               after_sha: 'xyz',
+              head_sha: 'xyz',
             )
             HandlePushEvent.run(github_payload)
           end
@@ -161,6 +208,7 @@ RSpec.describe HandlePushEvent do
           full_repo_name: 'owner/app1',
           before_sha: 'abc',
           after_sha: 'uvw',
+          head_sha: 'uvw',
         )
 
         expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)

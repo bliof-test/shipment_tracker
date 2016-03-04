@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 require 'clients/github'
 
 RSpec.describe GithubClient do
@@ -13,6 +13,14 @@ RSpec.describe GithubClient do
       github.create_status(
         repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo', target_url: 'url',
       )
+    end
+
+    it 'does not raise if status failed to be created' do
+      expect_any_instance_of(Octokit::Client).to receive(:create_status).and_raise(Octokit::NotFound)
+
+      expect {
+        github.create_status(repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo')
+      }.to_not raise_error
     end
   end
 

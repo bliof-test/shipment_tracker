@@ -36,7 +36,7 @@ class GitRepositoryLocation < ActiveRecord::Base
     all.each_with_object({}) { |repo, repo_hash| repo_hash[repo.name] = repo.remote_head }
   end
 
-  def self.repo_exists?(full_repo_name)
+  def self.repo_tracked?(full_repo_name)
     uris.any? { |uri| uri.include?(full_repo_name) }
   end
 

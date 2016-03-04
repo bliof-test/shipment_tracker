@@ -13,6 +13,8 @@ class GithubClient
       description: description,
       target_url: target_url
     )
+  rescue Octokit::NotFound
+    Rails.logger.warn "Failed to set #{state} commit status for #{repo} at #{sha}"
   end
 
   def repo_accessible?(uri)
