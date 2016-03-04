@@ -30,7 +30,7 @@ class HandlePushEvent
       full_repo_name: payload.full_repo_name,
       before_sha: payload.before_sha,
       after_sha: payload.after_sha,
-      head_sha: payload.head_sha
+      head_sha: payload.head_sha,
     )
 
     continue(payload)

@@ -42,8 +42,8 @@ RSpec.describe Payloads::Github do
     context 'with pull_request data' do
       it 'returns sha' do
         data = { 'head_commit' => {
-            'id' => 'abc123'
-          }
+          'id' => 'abc123',
+        },
         }
         payload = Payloads::Github.new(data)
 

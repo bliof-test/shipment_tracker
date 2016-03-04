@@ -19,7 +19,7 @@ class CommitStatus
 
     target_url = target_url_for(full_repo_name: full_repo_name, sha: sha, feature_reviews: feature_reviews)
 
-    post_status(full_repo_name, sha, {status: status, description: description}, target_url)
+    post_status(full_repo_name, sha, { status: status, description: description }, target_url)
   end
 
   def reset(full_repo_name:, sha:)
@@ -38,11 +38,11 @@ class CommitStatus
 
   def post_status(full_repo_name, sha, notification, target_url = nil)
     github.create_status(
-    repo: full_repo_name,
-    sha: sha,
-    state: notification[:status],
-    description: notification[:description],
-    target_url: target_url,
+      repo: full_repo_name,
+      sha: sha,
+      state: notification[:status],
+      description: notification[:description],
+      target_url: target_url,
     )
   end
 

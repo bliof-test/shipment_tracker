@@ -24,6 +24,8 @@ RSpec.describe HandlePushEvent do
 
   describe 'updating remote head' do
     it 'updates the corresponding repository location' do
+      allow_any_instance_of(CommitStatus).to receive(:not_found)
+
       github_payload = instance_double(
         Payloads::Github,
         full_repo_name: 'owner/repo',
@@ -51,6 +53,8 @@ RSpec.describe HandlePushEvent do
 
   describe 'resetting commit status' do
     it 'resets the GitHub commit status' do
+      allow_any_instance_of(CommitStatus).to receive(:not_found)
+
       github_payload = instance_double(
         Payloads::Github,
         full_repo_name: 'owner/repo',
@@ -65,7 +69,7 @@ RSpec.describe HandlePushEvent do
 
       expect_any_instance_of(CommitStatus).to receive(:reset).with(
         full_repo_name: github_payload.full_repo_name,
-        sha: github_payload.head_sha
+        sha: github_payload.head_sha,
       )
 
       HandlePushEvent.run(github_payload)
@@ -84,7 +88,9 @@ RSpec.describe HandlePushEvent do
     context 'when there are no previously linked tickets' do
       let(:tickets) { [] }
 
-      it 'does nothing' do
+      it 'does not post a JIRA comment' do
+        allow_any_instance_of(CommitStatus).to receive(:not_found)
+
         expect(JiraClient).not_to receive(:post_comment)
 
         github_payload = instance_double(
@@ -92,7 +98,24 @@ RSpec.describe HandlePushEvent do
           full_repo_name: 'owner/repo',
           before_sha: 'abc123',
           after_sha: 'def456',
-          head_sha: 'def456'
+          head_sha: 'def456',
+        )
+
+        HandlePushEvent.run(github_payload)
+      end
+
+      it 'posts a "failure" commit status to GitHub' do
+        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+          full_repo_name: 'owner/repo',
+          sha: 'def456',
+        )
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/repo',
+          before_sha: 'abc123',
+          after_sha: 'def456',
+          head_sha: 'def456',
         )
 
         HandlePushEvent.run(github_payload)
@@ -199,7 +222,8 @@ RSpec.describe HandlePushEvent do
         ]
       }
 
-      it 'should rescue and continue to link other tickets' do
+      it 'rescues and continues to link other tickets' do
+        allow_any_instance_of(CommitStatus).to receive(:error)
         allow(JiraClient).to receive(:post_comment).with(tickets.first.key, anything)
           .and_raise(JiraClient::InvalidKeyError)
 
@@ -212,6 +236,44 @@ RSpec.describe HandlePushEvent do
         )
 
         expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)
+
+        HandlePushEvent.run(github_payload)
+      end
+
+      it 'posts "error" status to GitHub on InvalidKeyError' do
+        allow(JiraClient).to receive(:post_comment).and_raise(JiraClient::InvalidKeyError)
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/app1',
+          before_sha: 'abc',
+          after_sha: 'uvw',
+          head_sha: 'uvw',
+        )
+
+        expect_any_instance_of(CommitStatus).to receive(:error).once.with(
+          full_repo_name: 'owner/app1',
+          sha: 'uvw',
+        )
+
+        HandlePushEvent.run(github_payload)
+      end
+
+      it 'posts "error" status to GitHub on any other error' do
+        allow(JiraClient).to receive(:post_comment).and_raise
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/app1',
+          before_sha: 'abc',
+          after_sha: 'uvw',
+          head_sha: 'uvw',
+        )
+
+        expect_any_instance_of(CommitStatus).to receive(:error).once.with(
+          full_repo_name: 'owner/app1',
+          sha: 'uvw',
+        )
 
         HandlePushEvent.run(github_payload)
       end

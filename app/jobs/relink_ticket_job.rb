@@ -8,6 +8,8 @@ class RelinkTicketJob < ActiveJob::Base
   def perform(args)
     before_sha = args.delete(:before_sha)
     after_sha = args.delete(:after_sha)
+    full_repo_name = args.delete(:full_repo_name)
+    head_sha = args.delete(:head_sha)
 
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
@@ -18,6 +20,9 @@ class RelinkTicketJob < ActiveJob::Base
         link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
     end
+
+    post_not_found_status(full_repo_name: full_repo_name, sha: head_sha) if linked_tickets.empty?
+    post_error_status(full_repo_name: full_repo_name, sha: head_sha) if @send_error_status
   end
 
   private
@@ -27,8 +32,10 @@ class RelinkTicketJob < ActiveJob::Base
     message = "[Feature ready for review|#{feature_review_url(new_feature_review_path)}]"
     JiraClient.post_comment(ticket_key, message)
   rescue JiraClient::InvalidKeyError
+    @send_error_status = true
     Rails.logger.warn "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."
   rescue StandardError => error
+    @send_error_status = true
     Honeybadger.notify(error)
   end
 
@@ -36,12 +43,11 @@ class RelinkTicketJob < ActiveJob::Base
     Rails.application.routes.url_helpers.root_url.chomp('/') + feature_review_path
   end
 
-  def post_not_found_status(args)
-    status_options = { full_repo_name: args[:full_repo_name], sha: args[:head_sha] }
-    send_notification(status_options)
+  def post_not_found_status(status_options)
+    CommitStatus.new.not_found(status_options)
   end
 
-  def post_error_status(args)
-    
+  def post_error_status(status_options)
+    CommitStatus.new.error(status_options)
   end
 end

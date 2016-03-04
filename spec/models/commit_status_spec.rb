@@ -1,5 +1,5 @@
 require 'rails_helper'
-require 'pull_request_status'
+require 'commit_status'
 
 RSpec.describe CommitStatus do
   before do
@@ -187,11 +187,11 @@ RSpec.describe CommitStatus do
   describe '#error' do
     it 'posts status "error" with description and no link' do
       expect(client).to receive(:create_status).with(
-      repo: 'owner/repo',
-      sha: 'abc123',
-      state: 'error',
-      description: 'Something went wrong while relinking your PR to FR.',
-      target_url: nil,
+        repo: 'owner/repo',
+        sha: 'abc123',
+        state: 'error',
+        description: 'Something went wrong while relinking your PR to FR.',
+        target_url: nil,
       )
 
       CommitStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
@@ -201,11 +201,11 @@ RSpec.describe CommitStatus do
   describe '#not_found' do
     it 'posts status "error" with description and no link' do
       expect(client).to receive(:create_status).with(
-      repo: 'owner/repo',
-      sha: 'abc123',
-      state: 'failure',
-      description: "No Feature Review found. Click 'Details' to create one.",
-      target_url: nil,
+        repo: 'owner/repo',
+        sha: 'abc123',
+        state: 'failure',
+        description: "No Feature Review found. Click 'Details' to create one.",
+        target_url: nil,
       )
 
       CommitStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
