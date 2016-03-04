@@ -14,7 +14,7 @@ class DeployAlert
 
     github_repo = GitRepositoryLoader.from_rails_config.load(deploy.app_name)
 
-    alert_not_on_master(deploy) unless github_repo.commit_on_master?(deploy.version)
+    alert_not_on_master(deploy) if deploy.version.nil? || !github_repo.commit_on_master?(deploy.version)
 
     # @deploy_repo = Repositories::DeployRepository.new
     # deploy_region = deploy_vo.region
@@ -25,6 +25,6 @@ class DeployAlert
   def self.alert_not_on_master(deploy)
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
     "Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
-    "deployed version #{deploy.version} not on master branch."
+    "deployed version #{deploy.version || 'unknown'} not on master branch."
   end
 end
