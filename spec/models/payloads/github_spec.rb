@@ -41,7 +41,10 @@ RSpec.describe Payloads::Github do
   describe '#head_sha' do
     context 'with pull_request data' do
       it 'returns sha' do
-        data = { 'pull_request' => { 'head' => { 'sha' => 'abc123' } } }
+        data = { 'head_commit' => {
+            'id' => 'abc123'
+          }
+        }
         payload = Payloads::Github.new(data)
 
         expect(payload.head_sha).to eq('abc123')
@@ -61,12 +64,8 @@ RSpec.describe Payloads::Github do
     context 'with pull_request data' do
       it 'returns html url' do
         data = {
-          'pull_request' => {
-            'base' => {
-              'repo' => {
-                'html_url' => 'https://github.com/foo/bar',
-              },
-            },
+          'repository' => {
+            'html_url' => 'https://github.com/foo/bar',
           },
         }
         payload = Payloads::Github.new(data)
@@ -99,24 +98,6 @@ RSpec.describe Payloads::Github do
         payload = Payloads::Github.new('some_key' => 'some_value')
 
         expect(payload.full_repo_name).to be_nil
-      end
-    end
-  end
-
-  describe '#action' do
-    context 'when the payload has an action' do
-      it 'returns the action' do
-        payload = Payloads::Github.new('action' => 'opened')
-
-        expect(payload.action).to eq('opened')
-      end
-    end
-
-    context 'when the payload has no action' do
-      it 'returns nil' do
-        payload = Payloads::Github.new('some_key' => 'some_value')
-
-        expect(payload.action).to be_nil
       end
     end
   end

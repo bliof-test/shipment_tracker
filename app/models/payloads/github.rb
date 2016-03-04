@@ -13,19 +13,15 @@ module Payloads
     end
 
     def head_sha
-      @data.dig('pull_request', 'head', 'sha')
+      @data.dig('head_commit', 'id')
     end
 
     def base_repo_url
-      @data.dig('pull_request', 'base', 'repo', 'html_url')
+      @data.dig('repository', 'html_url')
     end
 
     def full_repo_name
       @data.dig('repository', 'full_name')
-    end
-
-    def action
-      @data['action']
     end
   end
 end
