@@ -64,6 +64,9 @@ Scenario: Linking a Feature Review
     | Ticket   | Summary       | Status      |
     | JIRA-123 | Urgent ticket | In Progress |
 
+  When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
+  Then I should see an alert: "Failed to link JIRA-123. Duplicate tickets should not be added."
+
 @logged_in
 Scenario: Viewing User Acceptance Tests results on a Feature review
   Given an application called "frontend"
