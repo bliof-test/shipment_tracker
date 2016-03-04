@@ -19,25 +19,32 @@ class PullRequestStatus
 
     target_url = target_url_for(full_repo_name: full_repo_name, sha: sha, feature_reviews: feature_reviews)
 
-    github.create_status(
-      repo: full_repo_name,
-      sha: sha,
-      state: status,
-      description: description,
-      target_url: target_url,
-    )
+    post_status(full_repo_name, sha, {status: status, description: description}, target_url)
   end
 
   def reset(full_repo_name:, sha:)
-    github.create_status(
-      repo: full_repo_name,
-      sha: sha,
-      state: searching_status[:status],
-      description: searching_status[:description],
-    )
+    post_status(full_repo_name, sha, searching_status)
+  end
+
+  def error(full_repo_name:, sha:)
+    post_status(full_repo_name, sha, error_status)
+  end
+
+  def not_found(full_repo_name:, sha:)
+    post_status(full_repo_name, sha, not_found_status)
   end
 
   private
+
+  def post_status(full_repo_name, sha, notification, target_url = nil)
+    github.create_status(
+    repo: full_repo_name,
+    sha: sha,
+    state: notification[:status],
+    description: notification[:description],
+    target_url: target_url,
+    )
+  end
 
   attr_reader :routes
 
@@ -104,6 +111,13 @@ class PullRequestStatus
     {
       status: 'failure',
       description: "No Feature Review found. Click 'Details' to create one.",
+    }
+  end
+
+  def error_status
+    {
+      status: 'error',
+      description: 'Something went wrong while relinking your PR to FR.',
     }
   end
 

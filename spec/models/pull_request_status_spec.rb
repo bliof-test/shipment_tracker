@@ -177,9 +177,38 @@ RSpec.describe PullRequestStatus do
         sha: 'abc123',
         state: 'pending',
         description: 'Searching for Feature Review',
+        target_url: nil,
       )
 
       PullRequestStatus.new.reset(full_repo_name: 'owner/repo', sha: 'abc123')
+    end
+  end
+
+  describe '#error' do
+    it 'posts status "error" with description and no link' do
+      expect(client).to receive(:create_status).with(
+      repo: 'owner/repo',
+      sha: 'abc123',
+      state: 'error',
+      description: 'Something went wrong while relinking your PR to FR.',
+      target_url: nil,
+      )
+
+      PullRequestStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
+    end
+  end
+
+  describe '#not_found' do
+    it 'posts status "error" with description and no link' do
+      expect(client).to receive(:create_status).with(
+      repo: 'owner/repo',
+      sha: 'abc123',
+      state: 'failure',
+      description: "No Feature Review found. Click 'Details' to create one.",
+      target_url: nil,
+      )
+
+      PullRequestStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
     end
   end
 end
