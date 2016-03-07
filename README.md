@@ -131,6 +131,17 @@ This is to disable GitHub status notifications and to tell the user that some da
 To enable maintenance mode, set an environment variable called `DATA_MAINTENANCE=true`.
 The application will require a reboot before taking effect.
 
+### Configure alerts
+
+Shipment Tracker can send alerts when deployment rules are violated.
+[More information](https://github.com/FundingCircle/shipment_tracker/wiki/Alerting) can be found in the wiki.
+
+To configure Slack alerts
+
+1. Create a Slack webhook for a specific channel and copy the webhook URL
+1. Set the environment variable `SLACK_WEBHOOK` with the webhook URL
+
+
 ## License
 
 Copyright © 2015-2016 Funding Circle Ltd.
