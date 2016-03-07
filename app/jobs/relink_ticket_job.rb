@@ -9,7 +9,8 @@ class RelinkTicketJob < ActiveJob::Base
     before_sha = args.delete(:before_sha)
     after_sha = args.delete(:after_sha)
     full_repo_name = args.delete(:full_repo_name)
-    head_sha = args.delete(:head_sha)
+
+    return if branch_off_master?(before_sha, after_sha, full_repo_name)
 
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
@@ -21,11 +22,20 @@ class RelinkTicketJob < ActiveJob::Base
       end
     end
 
-    post_not_found_status(full_repo_name: full_repo_name, sha: head_sha) if linked_tickets.empty?
-    post_error_status(full_repo_name: full_repo_name, sha: head_sha) if @send_error_status
+    post_not_found_status(full_repo_name: full_repo_name, sha: after_sha) if linked_tickets.empty?
+    post_error_status(full_repo_name: full_repo_name, sha: after_sha) if @send_error_status
   end
 
   private
+
+  def branch_off_master?(before_sha, after_sha, full_repo_name)
+    repo_name = full_repo_name.split('/').last
+    repo = GitRepositoryLoader.from_rails_config.load(repo_name)
+    return false unless repo.commit_on_master?(before_sha)
+
+    post_not_found_status(full_repo_name: full_repo_name, sha: after_sha)
+    true
+  end
 
   def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
