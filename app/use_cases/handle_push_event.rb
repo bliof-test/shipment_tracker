@@ -7,7 +7,7 @@ class HandlePushEvent
   steps :validate, :update_remote_head, :reset_commit_status, :relink_tickets
 
   def validate(payload)
-    return fail :invalid_sha unless valid_sha?(payload.after_sha)
+    return fail :branch_deleted if payload.branch_deleted?
     return fail :repo_not_under_audit unless GitRepositoryLocation.repo_tracked?(payload.full_repo_name)
     continue(payload)
   end
@@ -15,7 +15,7 @@ class HandlePushEvent
   def update_remote_head(payload)
     git_repository_location = GitRepositoryLocation.find_by_full_repo_name(payload.full_repo_name)
     return fail :repo_not_found unless git_repository_location
-    git_repository_location.update(remote_head: payload.after_sha)
+    git_repository_location.update(remote_head: payload.head_sha)
     continue(payload)
   end
 
@@ -32,16 +32,9 @@ class HandlePushEvent
       full_repo_name: payload.full_repo_name,
       before_sha: payload.before_sha,
       after_sha: payload.after_sha,
+      branch_created: payload.branch_created?,
     )
 
     continue(payload)
-  end
-
-  private
-
-  def valid_sha?(sha)
-    return false unless /\b[0-9a-f]{7,40}\b/ =~ sha
-    return false if /\b0+\b/ =~ sha
-    true
   end
 end

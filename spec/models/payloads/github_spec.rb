@@ -61,6 +61,28 @@ RSpec.describe Payloads::Github do
     end
   end
 
+  describe '#head_sha' do
+    context 'with pull_request data' do
+      it 'returns sha' do
+        data = { 'head_commit' => {
+          'id' => 'abc123',
+        },
+        }
+        payload = Payloads::Github.new(data)
+
+        expect(payload.head_sha).to eq('abc123')
+      end
+    end
+
+    context 'with no pull_request data' do
+      it 'returns nil' do
+        payload = Payloads::Github.new('some_key' => 'some_value')
+
+        expect(payload.head_sha).to be_nil
+      end
+    end
+  end
+
   describe '#full_repo_name' do
     context 'with repository data' do
       it 'returns the full repository name' do

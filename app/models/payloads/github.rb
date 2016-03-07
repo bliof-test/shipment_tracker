@@ -12,6 +12,10 @@ module Payloads
       @data['after']
     end
 
+    def head_sha
+      @data.dig('head_commit', 'id')
+    end
+
     def base_repo_url
       @data.dig('repository', 'html_url')
     end
@@ -22,6 +26,14 @@ module Payloads
 
     def push_to_master?
       @data['ref'] == 'refs/heads/master'
+    end
+
+    def branch_created?
+      @data['created']
+    end
+
+    def branch_deleted?
+      @data['deleted']
     end
   end
 end
