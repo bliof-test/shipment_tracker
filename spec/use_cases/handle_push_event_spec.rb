@@ -2,9 +2,15 @@ require 'rails_helper'
 require 'handle_push_event'
 
 RSpec.describe HandlePushEvent do
+  let(:loader) { double }
+  let(:repository) { double }
+
   before do
     allow_any_instance_of(CommitStatus).to receive(:reset)
     allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(true)
+    allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(loader)
+    allow(loader).to receive(:load).and_return(repository)
+    allow(repository).to receive(:commit_on_master?).and_return(false)
   end
 
   describe 'validation' do
@@ -14,11 +20,24 @@ RSpec.describe HandlePushEvent do
       payload = instance_double(
         Payloads::Github,
         full_repo_name: 'owner/repo',
+        after_sha: 'abc1234',
       )
 
       result = HandlePushEvent.run(payload)
 
       expect(result).to fail_with(:repo_not_under_audit)
+    end
+
+    it 'fails if after commit SHA is "0000000"' do
+      payload = instance_double(
+        Payloads::Github,
+        full_repo_name: 'owner/repo',
+        before_sha: 'abc1234',
+        after_sha: '000000000000000000000000000000000000000000',
+      )
+
+      result = HandlePushEvent.run(payload)
+      expect(result).to fail_with(:invalid_sha)
     end
   end
 
@@ -29,20 +48,20 @@ RSpec.describe HandlePushEvent do
       github_payload = instance_double(
         Payloads::Github,
         full_repo_name: 'owner/repo',
-        before_sha: 'abc123',
-        after_sha: 'def456',
-        head_sha: 'def456',
+        before_sha: 'abc1234',
+        after_sha: 'def4567',
+        push_to_master?: false,
       )
 
       git_repository_location = instance_double(GitRepositoryLocation)
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
 
-      expect(git_repository_location).to receive(:update).with(remote_head: 'def456')
+      expect(git_repository_location).to receive(:update).with(remote_head: 'def4567')
       HandlePushEvent.run(github_payload)
     end
 
     it 'fails when repo not found' do
-      github_payload = instance_double(Payloads::Github, full_repo_name: 'owner/repo', after_sha: 'abc123')
+      github_payload = instance_double(Payloads::Github, full_repo_name: 'owner/repo', after_sha: 'abc1234')
 
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
 
@@ -52,27 +71,45 @@ RSpec.describe HandlePushEvent do
   end
 
   describe 'resetting commit status' do
+    before do
+      git_repository_location = instance_double(GitRepositoryLocation)
+      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
+      allow(git_repository_location).to receive(:update)
+    end
+
     it 'resets the GitHub commit status' do
       allow_any_instance_of(CommitStatus).to receive(:not_found)
 
       github_payload = instance_double(
         Payloads::Github,
         full_repo_name: 'owner/repo',
-        before_sha: 'abc123',
-        after_sha: 'def456',
-        head_sha: 'def456',
+        before_sha: 'abc1234',
+        after_sha: 'def4567',
+        push_to_master?: false,
       )
-
-      git_repository_location = instance_double(GitRepositoryLocation)
-      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
-      allow(git_repository_location).to receive(:update)
 
       expect_any_instance_of(CommitStatus).to receive(:reset).with(
         full_repo_name: github_payload.full_repo_name,
-        sha: github_payload.head_sha,
+        sha: github_payload.after_sha,
       )
 
       HandlePushEvent.run(github_payload)
+    end
+
+    context 'commit is pushed to master' do
+      it 'fails with :protected_branch' do
+        payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/repo',
+          before_sha: 'def123',
+          after_sha: 'abc1234',
+          push_to_master?: true,
+        )
+        expect_any_instance_of(CommitStatus).not_to receive(:reset)
+
+        result = HandlePushEvent.run(payload)
+        expect(result).to fail_with(:protected_branch)
+      end
     end
   end
 
@@ -84,6 +121,47 @@ RSpec.describe HandlePushEvent do
     end
 
     let(:ticket_repo) { instance_double(Repositories::TicketRepository, tickets_for_versions: tickets) }
+    let(:tickets) { [] }
+
+    context 'when branching off master' do
+      before do
+        allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(loader)
+        allow(loader).to receive(:load).with('app1').and_return(repository)
+        allow(repository).to receive(:commit_on_master?).with('abc1234').and_return(true)
+        allow_any_instance_of(CommitStatus).to receive(:not_found)
+      end
+
+      it 'does not re-link' do
+        expect(JiraClient).not_to receive(:post_comment)
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/app1',
+          before_sha: 'abc1234',
+          after_sha: 'def4567',
+          push_to_master?: false,
+        )
+
+        HandlePushEvent.run(github_payload)
+      end
+
+      it 'posts not found status' do
+        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+          full_repo_name: 'owner/app1',
+          sha: 'def4567',
+        )
+
+        github_payload = instance_double(
+          Payloads::Github,
+          full_repo_name: 'owner/app1',
+          before_sha: 'abc1234',
+          after_sha: 'def4567',
+          push_to_master?: false,
+        )
+
+        HandlePushEvent.run(github_payload)
+      end
+    end
 
     context 'when there are no previously linked tickets' do
       let(:tickets) { [] }
@@ -96,9 +174,9 @@ RSpec.describe HandlePushEvent do
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/repo',
-          before_sha: 'abc123',
-          after_sha: 'def456',
-          head_sha: 'def456',
+          before_sha: 'abc1234',
+          after_sha: 'def4567',
+          push_to_master?: false,
         )
 
         HandlePushEvent.run(github_payload)
@@ -107,15 +185,15 @@ RSpec.describe HandlePushEvent do
       it 'posts a "failure" commit status to GitHub' do
         expect_any_instance_of(CommitStatus).to receive(:not_found).with(
           full_repo_name: 'owner/repo',
-          sha: 'def456',
+          sha: 'def4567',
         )
 
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/repo',
-          before_sha: 'abc123',
-          after_sha: 'def456',
-          head_sha: 'def456',
+          before_sha: 'abc1234',
+          after_sha: 'def4567',
+          push_to_master?: false,
         )
 
         HandlePushEvent.run(github_payload)
@@ -134,30 +212,30 @@ RSpec.describe HandlePushEvent do
         context 'with one app per Feature Review' do
           let(:paths_issue1) {
             [
-              feature_review_path(app1: 'abc'),
-              feature_review_path(app1: 'def'),
+              feature_review_path(app1: 'abc5678'),
+              feature_review_path(app1: 'def1234'),
             ]
           }
 
           let(:paths_issue2) {
             [
-              feature_review_path(app1: 'uvw'),
-              feature_review_path(app1: 'xyz'),
+              feature_review_path(app1: 'bcd1234'),
+              feature_review_path(app1: 'ced1234'),
             ]
           }
 
           it 'posts linking comment to JIRA with relevant Feature Review' do
             expect(JiraClient).to receive(:post_comment).once.with(
               tickets.first.key,
-              "[Feature ready for review|#{feature_review_url(app1: 'ghi')}]",
+              "[Feature ready for review|#{feature_review_url(app1: 'abc1234')}]",
             )
 
             github_payload = instance_double(
               Payloads::Github,
               full_repo_name: 'owner/app1',
-              before_sha: 'def',
-              after_sha: 'ghi',
-              head_sha: 'ghi',
+              before_sha: 'def1234',
+              after_sha: 'abc1234',
+              push_to_master?: false,
             )
             HandlePushEvent.run(github_payload)
           end
@@ -166,33 +244,33 @@ RSpec.describe HandlePushEvent do
         context 'with multiple apps per Feature Review' do
           let(:paths_issue1) {
             [
-              feature_review_path(app1: 'abc', app2: 'def'),
-              feature_review_path(app3: 'ghi', app4: 'klm'),
+              feature_review_path(app1: 'bcd1234', app2: 'def1234'),
+              feature_review_path(app3: 'abc1234', app4: 'ced1234'),
             ]
           }
 
           let(:paths_issue2) {
             [
-              feature_review_path(app2: 'def', app5: 'uvw'),
+              feature_review_path(app2: 'def1234', app5: 'fdc1234'),
             ]
           }
 
           it 'posts linking comment to JIRA with relevant Feature Review' do
             expect(JiraClient).to receive(:post_comment).once.ordered.with(
               tickets.first.key,
-              "[Feature ready for review|#{feature_review_url(app1: 'abc', app2: 'xyz')}]",
+              "[Feature ready for review|#{feature_review_url(app1: 'bcd1234', app2: 'ffd1234')}]",
             )
             expect(JiraClient).to receive(:post_comment).once.ordered.with(
               tickets.second.key,
-              "[Feature ready for review|#{feature_review_url(app2: 'xyz', app5: 'uvw')}]",
+              "[Feature ready for review|#{feature_review_url(app2: 'ffd1234', app5: 'fdc1234')}]",
             )
 
             github_payload = instance_double(
               Payloads::Github,
               full_repo_name: 'owner/app2',
-              before_sha: 'def',
-              after_sha: 'xyz',
-              head_sha: 'xyz',
+              before_sha: 'def1234',
+              after_sha: 'ffd1234',
+              push_to_master?: false,
             )
             HandlePushEvent.run(github_payload)
           end
@@ -210,15 +288,15 @@ RSpec.describe HandlePushEvent do
 
       let(:paths_issue1) {
         [
-          feature_review_path(app1: 'abc'),
-          feature_review_path(app1: 'def'),
+          feature_review_path(app1: 'abc1234'),
+          feature_review_path(app1: 'def1234'),
         ]
       }
 
       let(:paths_issue2) {
         [
-          feature_review_path(app1: 'abc'),
-          feature_review_path(app1: 'xyz'),
+          feature_review_path(app1: 'abc1234'),
+          feature_review_path(app1: 'caa1234'),
         ]
       }
 
@@ -230,9 +308,9 @@ RSpec.describe HandlePushEvent do
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/app1',
-          before_sha: 'abc',
-          after_sha: 'uvw',
-          head_sha: 'uvw',
+          before_sha: 'abc1234',
+          after_sha: 'faa1234',
+          push_to_master?: false,
         )
 
         expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)
@@ -246,14 +324,14 @@ RSpec.describe HandlePushEvent do
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/app1',
-          before_sha: 'abc',
-          after_sha: 'uvw',
-          head_sha: 'uvw',
+          before_sha: 'abc1234',
+          after_sha: 'faa1234',
+          push_to_master?: false,
         )
 
         expect_any_instance_of(CommitStatus).to receive(:error).once.with(
           full_repo_name: 'owner/app1',
-          sha: 'uvw',
+          sha: 'faa1234',
         )
 
         HandlePushEvent.run(github_payload)
@@ -265,14 +343,14 @@ RSpec.describe HandlePushEvent do
         github_payload = instance_double(
           Payloads::Github,
           full_repo_name: 'owner/app1',
-          before_sha: 'abc',
-          after_sha: 'uvw',
-          head_sha: 'uvw',
+          before_sha: 'abc1234',
+          after_sha: 'faa1234',
+          push_to_master?: false,
         )
 
         expect_any_instance_of(CommitStatus).to receive(:error).once.with(
           full_repo_name: 'owner/app1',
-          sha: 'uvw',
+          sha: 'faa1234',
         )
 
         HandlePushEvent.run(github_payload)

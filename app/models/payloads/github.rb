@@ -12,16 +12,16 @@ module Payloads
       @data['after']
     end
 
-    def head_sha
-      @data.dig('head_commit', 'id')
-    end
-
     def base_repo_url
       @data.dig('repository', 'html_url')
     end
 
     def full_repo_name
       @data.dig('repository', 'full_name')
+    end
+
+    def push_to_master?
+      @data['ref'] == 'refs/heads/master'
     end
   end
 end
