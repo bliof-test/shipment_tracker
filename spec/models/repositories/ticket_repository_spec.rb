@@ -33,11 +33,11 @@ RSpec.describe Repositories::TicketRepository do
         summary: 'JIRA-B summary',
         status: 'Done',
         paths: [
-          feature_review_path(frontend: 'def', backend: 'abc'),
+          feature_review_path(frontend: 'def', backend: 'NON4'),
           feature_review_path(frontend: 'NON3', backend: 'ghi'),
         ],
         event_created_at: 7.days.ago,
-        versions: %w(def abc NON3 ghi) }
+        versions: %w(def NON4 NON3 ghi) }
     }
 
     let(:attrs_c) {
@@ -109,16 +109,28 @@ RSpec.describe Repositories::TicketRepository do
     end
 
     describe '#tickets_for_versions' do
-      subject { repository.tickets_for_versions(versions) }
-      let(:versions) { %w(abc def) }
+      context 'when given an array' do
+        it 'returns all tickets containing the versions' do
+          tickets = repository.tickets_for_versions(%w(abc def))
 
-      it {
-        is_expected.to match_array([
-          Ticket.new(attrs_a),
-          Ticket.new(attrs_b),
-          Ticket.new(attrs_e2),
-        ])
-      }
+          expect(tickets).to match_array([
+            Ticket.new(attrs_a),
+            Ticket.new(attrs_b),
+            Ticket.new(attrs_e2),
+          ])
+        end
+      end
+
+      context 'when given a string' do
+        it 'returns all tickets containing the versions' do
+          tickets = repository.tickets_for_versions('abc')
+
+          expect(tickets).to match_array([
+            Ticket.new(attrs_a),
+            Ticket.new(attrs_e2),
+          ])
+        end
+      end
     end
   end
 
@@ -132,7 +144,7 @@ RSpec.describe Repositories::TicketRepository do
 
     before do
       allow(git_repo_location).to receive(:find_by_name).and_return(repository_location)
-      allow(PullRequestUpdateJob).to receive(:perform_later)
+      allow(CommitStatusUpdateJob).to receive(:perform_later)
     end
 
     it 'projects latest associated tickets' do
@@ -271,7 +283,7 @@ RSpec.describe Repositories::TicketRepository do
 
     describe 'updating Github pull requests' do
       before do
-        allow(PullRequestUpdateJob).to receive(:perform_later)
+        allow(CommitStatusUpdateJob).to receive(:perform_later)
         allow(Rails.configuration).to receive(:data_maintenance_mode).and_return(false)
         allow(git_repo_location).to receive(:find_by_name)
           .with('frontend')
@@ -284,7 +296,7 @@ RSpec.describe Repositories::TicketRepository do
         end
 
         it 'does not schedule pull request updates' do
-          expect(PullRequestUpdateJob).to_not receive(:perform_later)
+          expect(CommitStatusUpdateJob).to_not receive(:perform_later)
 
           event = build(:jira_event, comment_body: feature_review_url(frontend: 'abc'))
           repository.apply(event)
@@ -302,11 +314,11 @@ RSpec.describe Repositories::TicketRepository do
           }
 
           it 'schedules an update to the pull request for each version' do
-            expect(PullRequestUpdateJob).to receive(:perform_later).with(
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
               full_repo_name: 'owner/frontend',
               sha: 'abc',
             )
-            expect(PullRequestUpdateJob).to receive(:perform_later).with(
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
               full_repo_name: 'owner/frontend',
               sha: 'def',
             )
@@ -335,7 +347,7 @@ RSpec.describe Repositories::TicketRepository do
           end
 
           it 'does not schedule an update to the pull request' do
-            expect(PullRequestUpdateJob).to_not receive(:perform_later)
+            expect(CommitStatusUpdateJob).to_not receive(:perform_later)
             repository.apply(event)
           end
         end
@@ -355,7 +367,7 @@ RSpec.describe Repositories::TicketRepository do
         end
 
         it 'schedules an update to the pull request for each version' do
-          expect(PullRequestUpdateJob).to receive(:perform_later).with(
+          expect(CommitStatusUpdateJob).to receive(:perform_later).with(
             full_repo_name: 'owner/frontend',
             sha: 'abc',
           )
@@ -377,7 +389,7 @@ RSpec.describe Repositories::TicketRepository do
         end
 
         it 'schedules an update to the pull request for each version' do
-          expect(PullRequestUpdateJob).to receive(:perform_later).with(
+          expect(CommitStatusUpdateJob).to receive(:perform_later).with(
             full_repo_name: 'owner/frontend',
             sha: 'abc',
           )
@@ -399,7 +411,7 @@ RSpec.describe Repositories::TicketRepository do
         end
 
         it 'does not schedule an update to the pull request for each version' do
-          expect(PullRequestUpdateJob).not_to receive(:perform_later)
+          expect(CommitStatusUpdateJob).not_to receive(:perform_later)
           repository.apply(event)
         end
       end
@@ -419,7 +431,7 @@ RSpec.describe Repositories::TicketRepository do
         end
 
         it 'does not schedule an update to the pull request' do
-          expect(PullRequestUpdateJob).to_not receive(:perform_later)
+          expect(CommitStatusUpdateJob).to_not receive(:perform_later)
           repository.apply(event)
         end
       end

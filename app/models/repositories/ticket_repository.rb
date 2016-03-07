@@ -41,7 +41,7 @@ module Repositories
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
       store.create!(new_ticket)
 
-      update_pull_requests_for(new_ticket) if update_pull_request?(event, feature_reviews)
+      update_github_status_for(new_ticket) if update_github_status?(event, feature_reviews)
     end
 
     private
@@ -53,7 +53,7 @@ module Repositories
       attrs.except!('id')
     end
 
-    def update_pull_request?(event, feature_reviews)
+    def update_github_status?(event, feature_reviews)
       return false if Rails.configuration.data_maintenance_mode
       event.approval? || event.unapproval? || feature_reviews.present?
     end
@@ -96,13 +96,13 @@ module Repositories
       last_ticket['approved_at'] || event.created_at
     end
 
-    def update_pull_requests_for(ticket_hash)
+    def update_github_status_for(ticket_hash)
       ticket = Ticket.new(ticket_hash)
       array_of_app_versions = feature_review_factory.create_from_tickets([ticket]).map(&:app_versions)
 
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
-        PullRequestUpdateJob.perform_later(
+        CommitStatusUpdateJob.perform_later(
           full_repo_name: repository_location.full_repo_name,
           sha: version,
         ) if repository_location

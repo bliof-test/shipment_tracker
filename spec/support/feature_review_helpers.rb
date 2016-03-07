@@ -25,7 +25,7 @@ module Support
         new.build(*args)
       end
 
-      def initialize(host = 'http://test.host')
+      def initialize(host = 'https://localhost')
         @host = URI.parse(host)
       end
 

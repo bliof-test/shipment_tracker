@@ -35,7 +35,7 @@ module ShipmentTracker
 
     routes.default_url_options = {
       protocol: ENV.fetch('PROTOCOL', 'https'),
-      host: ENV.fetch('HOST_NAME', "localhost:#{ENV.fetch('PORT', '1201')}"),
+      host: ENV.fetch('HOST_NAME', ENV['PORT'] ? "localhost:#{ENV['PORT']}" : 'localhost'),
     }
 
     config.ssh_private_key = ENV['SSH_PRIVATE_KEY']
