@@ -205,7 +205,7 @@ RSpec.describe CommitStatus do
         sha: 'abc123',
         state: 'failure',
         description: "No Feature Review found. Click 'Details' to create one.",
-        target_url: nil,
+        target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
       )
 
       CommitStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')

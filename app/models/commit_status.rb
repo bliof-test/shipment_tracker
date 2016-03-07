@@ -31,7 +31,10 @@ class CommitStatus
   end
 
   def not_found(full_repo_name:, sha:)
-    post_status(full_repo_name, sha, not_found_status)
+    feature_reviews = decorated_feature_reviews(sha)
+    target_url = target_url_for(full_repo_name: full_repo_name, sha: sha, feature_reviews: feature_reviews)
+
+    post_status(full_repo_name, sha, not_found_status, target_url)
   end
 
   private
