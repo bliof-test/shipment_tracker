@@ -88,17 +88,20 @@ for example, after you clear the event snapshots with the `db:clear_snapshots` r
 
 *Warning:* This recurring task should only run on **one** server.
 
-### Enabling periodic git fetching
+### Enable Git fetching
 
-It's important to keep the Shipment Tracker git cache reasonably up-to-date to avoid request timeouts.
+It's important to keep the repositories tracked by Shipment Tracker reasonably up-to-date.
 
-Please make sure the following command runs every few minutes:
+Please make sure the following command runs as a background task:
 
 ```
 bundle exec rake jobs:update_git_loop
 ```
 
 *Warning:* This recurring task should run on **every** server that your application is running on.
+
+In addition to the `update_git_loop` task, you can set `ALLOW_GIT_FETCH_ON_REQUEST` to `true` if you also want
+the tracked repositories to be updated on web request (e.g. when preparing a Feature Review).
 
 ### Enable GitHub Webhooks
 
