@@ -39,7 +39,7 @@ RSpec.describe ReleasesController do
 
     before do
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
-      allow(repository_loader).to receive(:load).with('frontend').and_return(repository)
+      allow(repository_loader).to receive(:load).with(app_name).and_return(repository)
       allow(GitRepositoryLocation).to receive(:github_url_for_app).with(app_name).and_return(github_url)
       allow(Queries::ReleasesQuery).to receive(:new).with(
         per_page: 50,
