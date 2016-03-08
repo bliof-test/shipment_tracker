@@ -41,6 +41,30 @@ RSpec.describe Repositories::Updater do
       expect(Snapshots::EventCount.find_by(snapshot_name: repository_2.table_name).event_id).to eq(last_id)
     end
 
+    context 'when given a hash with snapshot names and event ids' do
+      let(:events) {
+        [
+          build(:jira_event),
+          build(:jira_event),
+          build(:jira_event),
+        ]
+      }
+
+      it 'only snapshots up to the given event id for each repository' do
+        allow(repository_1).to receive(:apply)
+        allow(repository_2).to receive(:apply)
+
+        events.each(&:save!)
+
+        updater.run(repository_1.table_name => events[0].id, repository_2.table_name => events[1].id)
+
+        expect(Snapshots::EventCount.find_by(snapshot_name: repository_1.table_name).event_id)
+          .to eq(events[0].id)
+        expect(Snapshots::EventCount.find_by(snapshot_name: repository_2.table_name).event_id)
+          .to eq(events[1].id)
+      end
+    end
+
     context 'when the application is updated and we have different repositories specified' do
       let(:events) { [build(:jira_event), build(:jira_event)] }
       let(:new_events) { [build(:jira_event)] }

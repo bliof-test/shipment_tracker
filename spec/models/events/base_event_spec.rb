@@ -19,7 +19,7 @@ RSpec.describe Events::BaseEvent do
       events.each(&:save!)
     end
 
-    context 'when nil is specified' do
+    context 'when 0 is specified' do
       it 'returns all events' do
         expect(Events::BaseEvent.between(0).to_a).to eq(events)
       end
@@ -28,6 +28,12 @@ RSpec.describe Events::BaseEvent do
     context 'when an integer is specified' do
       it 'returns events greater than that id' do
         expect(Events::BaseEvent.between(events.second.id).to_a).to eq(events[2..-1])
+      end
+    end
+
+    context 'when to_id is also specified' do
+      it 'returns all events up to the id specified' do
+        expect(Events::BaseEvent.between(0, to_id: events.first.id).to_a).to eq(events[0, 1])
       end
     end
 

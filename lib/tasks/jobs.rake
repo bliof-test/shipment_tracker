@@ -24,13 +24,18 @@ namespace :jobs do
     File.expand_path("#{name}.pid", Dir.tmpdir)
   end
 
-  desc 'Update event cache'
-  task update_events: :environment do
-    manage_pid pid_path_for('jobs_update_events')
+  desc 'Reset and recreate event snapshots (new events received during execution are not snapshotted)'
+  task recreate_snapshots: :environment do
+    manage_pid pid_path_for('jobs_recreate_snapshots')
 
-    puts "[#{Time.current}] Running update_events"
-    Repositories::Updater.from_rails_config.run
-    puts "[#{Time.current}] Completed update_events"
+    puts "[#{Time.current}] Running recreate_snapshots"
+    updater = Repositories::Updater.from_rails_config
+
+    repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
+    updater.reset
+
+    updater.run(repo_event_id_hash)
+    puts "[#{Time.current}] Completed recreate_snapshots"
   end
 
   desc 'Continuously updates event cache'
