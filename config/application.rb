@@ -14,6 +14,7 @@ Bundler.require(*Rails.groups)
 Dotenv.load
 
 module ShipmentTracker
+  DEPLOY_ALERT_SLACK_CHANNEL ||= ENV.fetch('DEPLOY_ALERT_SLACK_CHANNEL', 'general')
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
   JIRA_FQDN ||= ENV.fetch('JIRA_FQDN', nil)

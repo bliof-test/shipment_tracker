@@ -10,6 +10,6 @@ class DeployAlertJob < ActiveJob::Base
     message = DeployAlert.audit(deploy)
     return unless message
     Rails.logger.warn message
-    SlackNotifier.send(message, '#blackbat')
+    SlackNotifier.send(message, ShipmentTracker::DEPLOY_ALERT_SLACK_CHANNEL)
   end
 end
