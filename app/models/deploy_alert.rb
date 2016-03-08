@@ -24,7 +24,7 @@ class DeployAlert
 
   def self.alert_not_on_master(deploy)
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
-    "deployed version #{deploy.version || 'unknown'} not on master branch."
+    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
+    "deployed #{deploy.version || 'unknown'} not on master branch."
   end
 end

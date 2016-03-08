@@ -77,12 +77,13 @@ RSpec.describe DeployAlert do
       let(:deploy) {
         Deploy.new(
           version: sha, environment: 'production', app_name: app_name,
-          deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'))
+          deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'),
+          region: 'uk')
       }
 
       let(:expected_message) {
-        'Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
-        "user1 deployed version #{sha} not on master branch."
+        'UK Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
+        "user1 deployed #{sha} not on master branch."
       }
 
       it 'returns a message' do
@@ -94,13 +95,14 @@ RSpec.describe DeployAlert do
       let(:deploy) {
         Deploy.new(
           version: nil, environment: 'production', app_name: app_name,
-          deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'))
+          deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'),
+          region: 'us')
       }
       let(:git_diagram) { '-A' }
 
       let(:expected_message) {
-        'Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
-        'user1 deployed version unknown not on master branch.'
+        'US Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
+        'user1 deployed unknown not on master branch.'
       }
 
       it 'returns a message' do
