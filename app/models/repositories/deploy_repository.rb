@@ -25,15 +25,14 @@ module Repositories
       }
     end
 
-    # TODO: will be used for further DeployAlerting
-    # def deploys_ordered_by_id(order:, environment:, region:)
-    #   query = store.select('*')
-    #   query = query.where(environment: environment)
-    #   query = query.where(region: region)
-    #   query.order("id #{order}").map { |deploy_record|
-    #     Deploy.new(deploy_record.attributes)
-    #   }
-    # end
+    def deploys_ordered_by_id(order:, environment:, region:)
+      query = store.select('*')
+      query = query.where(environment: environment)
+      query = query.where(region: region)
+      query.order("id #{order}").map { |deploy_record|
+        Deploy.new(deploy_record.attributes)
+      }
+    end
 
     def last_staging_deploy_for_version(version)
       last_matching_non_prod_deploy = store.where.not(environment: 'production').where(version: version).last

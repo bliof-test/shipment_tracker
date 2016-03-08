@@ -265,4 +265,52 @@ RSpec.describe Repositories::DeployRepository do
       end
     end
   end
+
+  describe '#deploys_ordered_by_id' do
+    let(:defaults) {
+      {
+        app_name: 'frontend',
+        server: 'server',
+        deployed_by: 'Bob',
+        version: 'abc',
+        locale: 'gb',
+        environment: 'uat',
+      }
+    }
+
+    context 'when there are 5 deploys' do
+      before do
+        [
+          build(:deploy_event, defaults.merge(server: 'a', environment: 'production', version: 'abc123')),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'production', version: 'bcd123')),
+          build(:deploy_event, defaults.merge(server: 'b', version: 'cde123')),
+          build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: 'def123')),
+        ].each do |deploy|
+          repository.apply(deploy)
+        end
+      end
+
+      it 'returns them in ASC id order' do
+        deploys = repository.deploys_ordered_by_id(order: 'asc', environment: 'production', region: 'gb')
+        versions = deploys.map { |deploy| deploy.version }
+        expect(versions).to eq ['abc123', 'bcd123', 'def123']
+      end
+
+      it 'returns them in DESC id order' do
+        deploys = repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'gb')
+        versions = deploys.map { |deploy| deploy.version }
+        expect(versions).to eq ['def123', 'bcd123', 'abc123']
+      end
+
+      it 'returns empty list for us region' do
+        expect( repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'us') ).to eq []
+      end
+    end
+
+    context 'when there are no deploys' do
+      it 'returns an empty list' do
+        expect( repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'gb') ).to eq []
+      end
+    end
+  end
 end
