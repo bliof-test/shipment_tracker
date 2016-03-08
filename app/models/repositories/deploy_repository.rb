@@ -53,7 +53,7 @@ module Repositories
         event_created_at: event.created_at,
       )
 
-      audit_deploy(deploy.attributes)
+      audit_deploy(deploy.attributes) unless Rails.configuration.data_maintenance_mode
     end
 
     private
