@@ -25,10 +25,11 @@ module Repositories
       }
     end
 
-    def deploys_ordered_by_id(order:, environment:, region:)
+    def deploys_ordered_by_id(order:, environment:, region:, limit: nil)
       query = store.select('*')
       query = query.where(environment: environment)
       query = query.where(region: region)
+      query = query.limit(limit)
       query.order("id #{order}").map { |deploy_record|
         Deploy.new(deploy_record.attributes)
       }

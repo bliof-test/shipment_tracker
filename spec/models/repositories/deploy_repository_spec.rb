@@ -278,7 +278,9 @@ RSpec.describe Repositories::DeployRepository do
       }
     }
 
-    context 'when there are 5 deploys' do
+    let(:criteria) {{order: 'asc', environment: 'production', region: 'gb'}}
+
+    context 'when there are 4 deploys' do
       before do
         [
           build(:deploy_event, defaults.merge(server: 'a', environment: 'production', version: 'abc123')),
@@ -291,25 +293,33 @@ RSpec.describe Repositories::DeployRepository do
       end
 
       it 'returns them in ASC id order' do
-        deploys = repository.deploys_ordered_by_id(order: 'asc', environment: 'production', region: 'gb')
+        deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'asc'))
         versions = deploys.map { |deploy| deploy.version }
         expect(versions).to eq ['abc123', 'bcd123', 'def123']
       end
 
       it 'returns them in DESC id order' do
-        deploys = repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'gb')
+        deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'desc'))
         versions = deploys.map { |deploy| deploy.version }
         expect(versions).to eq ['def123', 'bcd123', 'abc123']
       end
 
-      it 'returns empty list for us region' do
-        expect( repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'us') ).to eq []
+      context 'when there are no deploys for a given region' do
+        let(:criteria) {{order: 'desc', environment: 'production'}}
+
+        it 'returns empty list' do
+          expect( repository.deploys_ordered_by_id(criteria.merge(region: 'us')) ).to eq []
+        end
+      end
+
+      it 'returns a limited list for a specified amount' do
+        expect(repository.deploys_ordered_by_id(criteria.merge(limit: 2)).size).to eq(2)
       end
     end
 
     context 'when there are no deploys' do
       it 'returns an empty list' do
-        expect( repository.deploys_ordered_by_id(order: 'desc', environment: 'production', region: 'gb') ).to eq []
+        expect( repository.deploys_ordered_by_id(criteria.merge(order: 'desc')) ).to eq []
       end
     end
   end
