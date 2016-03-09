@@ -14,18 +14,16 @@ class DeployAlert
 
     return alert_not_on_master(new_deploy) if unknown_or_not_on_master?(new_deploy, github_repo)
 
-    repo_loader = GitRepositoryLoader.from_rails_config
-    git_repo = repo_loader.load(new_deploy.app_name)
     auditable_commits = if old_deploy
-                          git_repo.recent_commits_between(old_deploy.version, new_deploy.version)
+                          github_repo.recent_commits_between(old_deploy.version, new_deploy.version)
                         else
-                          [git_repo.commit_for_version(new_deploy.version)]
+                          [github_repo.commit_for_version(new_deploy.version)]
                         end
 
     projection = Queries::ReleasesQuery.new(
       per_page: auditable_commits.size,
       region: new_deploy.region,
-      git_repo: git_repo,
+      git_repo: github_repo,
       app_name: new_deploy.app_name,
       commits: auditable_commits,
     )
