@@ -29,6 +29,7 @@ class GitRepositoryLocationsController < ApplicationController
 
   def git_repo_location_params
     permitted = params.require(:repository_locations_form).permit(:uri)
+    permitted[:uri] = permitted[:uri].strip
     permitted[:token_types] = params[:token_types] if params[:token_types].present?
     permitted
   end
