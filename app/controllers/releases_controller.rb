@@ -1,4 +1,6 @@
 class ReleasesController < ApplicationController
+  before_action :force_html_format, only: :show
+
   def index
     @app_names = GitRepositoryLocation.app_names
   end
@@ -26,7 +28,11 @@ class ReleasesController < ApplicationController
   end
 
   def app_name
-    params[:id]
+    if request.path_parameters[:format]
+      "#{params[:id]}.#{request.path_parameters[:format]}"
+    else
+      params[:id]
+    end
   end
 
   def region
@@ -40,5 +46,9 @@ class ReleasesController < ApplicationController
 
   def git_repository
     git_repository_loader.load(app_name)
+  end
+
+  def force_html_format
+    request.format = 'html'
   end
 end
