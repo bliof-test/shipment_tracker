@@ -43,7 +43,9 @@ module Repositories
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
 
-      deploy = store.create!(
+      old_deploy = store.where(region: event.locale).last
+
+      new_deploy = store.create!(
         app_name: event.app_name,
         server: event.server,
         region: event.locale,
@@ -53,7 +55,11 @@ module Repositories
         event_created_at: event.created_at,
       )
 
+<<<<<<< b872729ee840121033725ff1a46c944417d13705
       audit_deploy(deploy.attributes) unless Rails.configuration.data_maintenance_mode
+=======
+      audit_deploy(new_deploy: new_deploy.attributes, old_deploy: old_deploy&.attributes)
+>>>>>>> Add integration tests for unapproved deploy
     end
 
     private
@@ -61,7 +67,8 @@ module Repositories
     attr_reader :store
 
     def audit_deploy(deploy_attrs)
-      deploy_attrs['event_created_at'] = deploy_attrs['event_created_at'].to_s
+      deploy_attrs[:new_deploy]['event_created_at'] = deploy_attrs[:new_deploy]['event_created_at'].to_s
+      deploy_attrs[:old_deploy]['event_created_at'] = deploy_attrs[:old_deploy]['event_created_at'].to_s if deploy_attrs[:old_deploy]
       DeployAlertJob.perform_later(deploy_attrs)
     end
 

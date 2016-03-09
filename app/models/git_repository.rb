@@ -44,6 +44,19 @@ class GitRepository
     build_commits(walker.take(count))
   end
 
+  def recent_commits_between(from, to)
+    validate_commit!(from) unless from.nil?
+    validate_commit!(to)
+
+    walker = Rugged::Walker.new(rugged_repository)
+    walker.sorting(Rugged::SORT_TOPO)
+    walker.push(to)
+    walker.hide(from) if from
+    walker.simplify_first_parent
+
+    build_commits(walker)
+  end
+
   # Returns "dependent commits" given a commit sha from a topic branch.
   # Dependent commits are the merge commit plus any commits between the given
   # commit and the "fork commit" on master (i.e. commit the branch is based
