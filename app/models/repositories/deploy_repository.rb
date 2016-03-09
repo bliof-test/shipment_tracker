@@ -55,11 +55,8 @@ module Repositories
         event_created_at: event.created_at,
       )
 
-<<<<<<< b872729ee840121033725ff1a46c944417d13705
-      audit_deploy(deploy.attributes) unless Rails.configuration.data_maintenance_mode
-=======
-      audit_deploy(new_deploy: new_deploy.attributes, old_deploy: old_deploy&.attributes)
->>>>>>> Add integration tests for unapproved deploy
+      audit_deploy(new_deploy: new_deploy.attributes, old_deploy: old_deploy&.attributes) unless Rails.configuration.data_maintenance_mode
+
     end
 
     private

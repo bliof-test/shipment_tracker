@@ -9,16 +9,18 @@ class DeployAlert
     new_deploy.environment == 'production' && GitRepositoryLocation.app_names.include?(new_deploy.app_name)
   end
 
-  def self.audit(old_deploy, new_deploy)
-    return unless auditable?(new_deploy)
-
+  def self.audit(new_deploy, old_deploy = nil)
     github_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
 
-    alert_not_on_master(new_deploy) if new_deploy.version.nil? || !github_repo.commit_on_master?(new_deploy.version)
+    return alert_not_on_master(new_deploy) if unknown_or_not_on_master?(new_deploy, github_repo)
 
     repo_loader = GitRepositoryLoader.from_rails_config
     git_repo = repo_loader.load(new_deploy.app_name)
-    auditable_commits = git_repo.recent_commits_between(old_deploy.version, new_deploy.version)
+    auditable_commits = if old_deploy
+                          git_repo.recent_commits_between(old_deploy.version, new_deploy.version)
+                        else
+                          [git_repo.commit_for_version(new_deploy.version)]
+                        end
 
     projection = Queries::ReleasesQuery.new(
       per_page: auditable_commits.size,
@@ -43,5 +45,9 @@ class DeployAlert
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
     "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
     "deployed #{deploy.version || 'unknown'} not on master branch."
+  end
+
+  def self.unknown_or_not_on_master?(deploy, github_repo)
+    deploy.version.nil? || !github_repo.commit_on_master?(deploy.version)
   end
 end

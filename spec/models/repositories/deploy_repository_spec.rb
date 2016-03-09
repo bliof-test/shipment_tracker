@@ -21,14 +21,17 @@ RSpec.describe Repositories::DeployRepository do
     }
     let(:expected_attrs) {
       {
-        'id' => a_value > 0,
-        'app_name' => 'frontend',
-        'server' => 'test.com',
-        'version' => 'xyz',
-        'deployed_by' => 'Bob',
-        'event_created_at' => '',
-        'environment' => environment,
-        'region' => 'us',
+        new_deploy: {
+          'id' => a_value > 0,
+          'app_name' => 'frontend',
+          'server' => 'test.com',
+          'version' => 'xyz',
+          'deployed_by' => 'Bob',
+          'event_created_at' => '',
+          'environment' => environment,
+          'region' => 'us',
+        },
+        old_deploy: nil,
       }
     }
 
@@ -278,7 +281,7 @@ RSpec.describe Repositories::DeployRepository do
       }
     }
 
-    let(:criteria) {{order: 'asc', environment: 'production', region: 'gb'}}
+    let(:criteria) { { order: 'asc', environment: 'production', region: 'gb' } }
 
     context 'when there are 4 deploys' do
       before do
@@ -294,21 +297,21 @@ RSpec.describe Repositories::DeployRepository do
 
       it 'returns them in ASC id order' do
         deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'asc'))
-        versions = deploys.map { |deploy| deploy.version }
-        expect(versions).to eq ['abc123', 'bcd123', 'def123']
+        versions = deploys.map(&:version)
+        expect(versions).to eq %w(abc123 bcd123 def123)
       end
 
       it 'returns them in DESC id order' do
         deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'desc'))
-        versions = deploys.map { |deploy| deploy.version }
-        expect(versions).to eq ['def123', 'bcd123', 'abc123']
+        versions = deploys.map(&:version)
+        expect(versions).to eq %w(def123 bcd123 abc123)
       end
 
       context 'when there are no deploys for a given region' do
-        let(:criteria) {{order: 'desc', environment: 'production'}}
+        let(:criteria) { { order: 'desc', environment: 'production' } }
 
         it 'returns empty list' do
-          expect( repository.deploys_ordered_by_id(criteria.merge(region: 'us')) ).to eq []
+          expect(repository.deploys_ordered_by_id(criteria.merge(region: 'us'))).to eq []
         end
       end
 
@@ -319,7 +322,7 @@ RSpec.describe Repositories::DeployRepository do
 
     context 'when there are no deploys' do
       it 'returns an empty list' do
-        expect( repository.deploys_ordered_by_id(criteria.merge(order: 'desc')) ).to eq []
+        expect(repository.deploys_ordered_by_id(criteria.merge(order: 'desc'))).to eq []
       end
     end
   end

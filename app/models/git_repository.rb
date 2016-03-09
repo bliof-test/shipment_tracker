@@ -57,6 +57,10 @@ class GitRepository
     build_commits(walker)
   end
 
+  def commit_for_version(sha)
+    build_commit(lookup(sha))
+  end
+
   # Returns "dependent commits" given a commit sha from a topic branch.
   # Dependent commits are the merge commit plus any commits between the given
   # commit and the "fork commit" on master (i.e. commit the branch is based
