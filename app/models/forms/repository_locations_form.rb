@@ -19,9 +19,8 @@ module Forms
 
     attr_reader :uri, :token_types
 
-    def initialize(uri, token_types)
+    def initialize(uri)
       @uri = uri
-      @token_types = token_types
     end
 
     def valid?
@@ -30,7 +29,7 @@ module Forms
 
     def self.default_token_types
       @default_token_types ||= Token.sources.map { |token_src|
-        value = DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
+        value = DEFAULT_SELECTED_TOKENS.include?(token_src.endpoint)
         { id: token_src.endpoint, name: token_src.name, value: value }
       }
     end

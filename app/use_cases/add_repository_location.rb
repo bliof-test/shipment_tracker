@@ -6,10 +6,7 @@ class AddRepositoryLocation
   steps :validate, :add_repo, :generate_tokens
 
   def validate(args)
-    validation_form = Forms::RepositoryLocationsForm.new(
-      args[:uri],
-      args[:token_types],
-    )
+    validation_form = Forms::RepositoryLocationsForm.new(args[:uri])
 
     return fail :invalid_uri, message: errors_for(validation_form) unless validation_form.valid?
     continue(args)
