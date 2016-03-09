@@ -10,7 +10,6 @@ class GitRepositoryLocationsController < ApplicationController
     AddRepositoryLocation.run(git_repo_location_params).match do
       success do |repo_name|
         flash[:success] = success_msg(repo_name)
-
         redirect_to :git_repository_locations
       end
 
