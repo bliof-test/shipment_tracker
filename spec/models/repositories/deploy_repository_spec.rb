@@ -32,11 +32,21 @@ RSpec.describe Repositories::DeployRepository do
       }
     }
 
-    it 'scheduled a DeployAlertJob' do
-      allow(DeployAlert).to receive(:auditable?).and_return(true)
+    it 'schedules a DeployAlertJob' do
       expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)
 
       repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'production')))
+    end
+
+    context 'when in data maintenance mode' do
+      before do
+        allow(Rails.configuration).to receive(:data_maintenance_mode).and_return(true)
+      end
+
+      it 'does not schedule a DeployAlertJob' do
+        expect(DeployAlertJob).not_to receive(:perform_later)
+        repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'production')))
+      end
     end
   end
 

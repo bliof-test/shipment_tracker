@@ -94,9 +94,7 @@ end
 
 When 'snapshots are regenerated' do
   Rails.application.load_tasks
-  Rake::Task['db:clear_snapshots'].reenable
-  Rake::Task['db:clear_snapshots'].invoke
 
-  Rake::Task['jobs:update_events'].reenable
-  Rake::Task['jobs:update_events'].invoke
+  Rake::Task['jobs:recreate_snapshots'].reenable
+  Rake::Task['jobs:recreate_snapshots'].invoke
 end

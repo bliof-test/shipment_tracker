@@ -77,14 +77,11 @@ You can also use Foreman to start the server and use settings from Heroku:
 bin/boot_with_heroku_settings
 ```
 
-### Running event snapshots
+### Snapshotting events
 
-In order to return results from recent events, Shipment Tracker needs to continuously record snapshots.
-There is a rake task `jobs:update_events_loop` which continuously updates the event cache.
-We suggest that you have this running in the background (e.g. using Supervisor or a Heroku worker).
-
-There is also a rake task `jobs:update_events` for running the snapshotting manually,
-for example, after you clear the event snapshots with the `db:clear_snapshots` rake task.
+Shipment Tracker needs to continuously record snapshots for incoming events that it processes.  
+The rake task `jobs:update_events_loop` should be used to do this.  
+We suggest running it as a background job (e.g. using Supervisor or a Heroku worker).
 
 *Warning:* This recurring task should only run on **one** server.
 
@@ -100,8 +97,9 @@ bundle exec rake jobs:update_git_loop
 
 *Warning:* This recurring task should run on **every** server that your application is running on.
 
-In addition to the `update_git_loop` task, you can set `ALLOW_GIT_FETCH_ON_REQUEST` to `true` if you also want
-the tracked repositories to be updated on web request (e.g. when preparing a Feature Review).
+In addition to the `update_git_loop` task, you can set the environment variable
+`ALLOW_GIT_FETCH_ON_REQUEST=true` if you also want the git repositories to be updated on web request
+(e.g. when preparing a Feature Review).
 
 ### Enable GitHub Webhooks
 
@@ -123,13 +121,17 @@ There are two environment variables for GitHub tokens.
 Recommended to use two different tokens, from two different users (one with READ access, one with WRITE),
 instead of one super token.
 
-### Maintenance Mode
+### Maintenance mode
 
-When recreating snapshots, you may want to put the application in maintenance mode.
-This is to disable GitHub status notifications and to tell the user that some data may appear out of date.
+There is a rake task `jobs:recreate_snapshots` for recreating snapshots.
+You'll want to recreate snapshots if you changed the schema of a snapshots database table for example.
 
-To enable maintenance mode, set an environment variable called `DATA_MAINTENANCE=true`.
-The application will require a reboot before taking effect.
+When recreating snapshots, you can put the application into maintenance mode.
+This temporarily disables GitHub status notifications, deploy alerts,
+and notifies users that some data may appear out of date.
+
+To enable maintenance mode, set the environment variable `DATA_MAINTENANCE=true` and reboot the application.  
+To disable maintenance mode, set the environment variable to `false` and reboot the application.
 
 ### Configure alerts
 

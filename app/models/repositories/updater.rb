@@ -13,9 +13,9 @@ module Repositories
       @repositories = repositories
     end
 
-    def run
+    def run(repo_event_id_hash = {})
       repositories.each do |repository|
-        run_for(repository)
+        run_for(repository, repo_event_id_hash[repository.table_name])
       end
     end
 
@@ -31,10 +31,10 @@ module Repositories
 
     attr_reader :repositories
 
-    def run_for(repository)
+    def run_for(repository, ceiling_id)
       ActiveRecord::Base.transaction do
         last_id = 0
-        new_events_for(repository).each do |event|
+        new_events_for(repository, ceiling_id).each do |event|
           last_id = event.id
           repository.apply(event)
         end
@@ -42,8 +42,8 @@ module Repositories
       end
     end
 
-    def new_events_for(repository)
-      Events::BaseEvent.between(last_id_for(repository))
+    def new_events_for(repository, ceiling_id)
+      Events::BaseEvent.between(last_id_for(repository), to_id: ceiling_id)
     end
 
     def last_id_for(repository)
