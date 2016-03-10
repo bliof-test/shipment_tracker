@@ -25,11 +25,12 @@ RSpec.describe Forms::RepositoryLocationsForm do
           aggregate_failures do
             expect(repo_form('git@github.com:owner/repo.git')).to be_valid
             expect(repo_form('ssh://git@github.com/owner/repo.git')).to be_valid
+            expect(repo_form('ssh://git@github.com:8080/owner/repo.git')).to be_valid
             expect(repo_form('git://git@github.com/owner/repo.git')).to be_valid
             expect(repo_form('http://github.com/owner/repo.git')).to be_valid
             expect(repo_form('https://github.com/owner/repo.git')).to be_valid
             expect(repo_form('https://github.com/owner/repo')).to be_valid
-            expect(repo_form('file:///path/to/repo')).to be_valid
+            expect(repo_form('file:///path/to/repo/')).to be_valid
           end
         end
       end
@@ -37,6 +38,9 @@ RSpec.describe Forms::RepositoryLocationsForm do
       context 'when the input is not a valid Git URI' do
         it 'is not valid' do
           aggregate_failures do
+            expect(repo_form('git@github.com:owner/repo~name.git')).to_not be_valid
+            expect(repo_form('foo git@github.com:owner/repo.git')).to_not be_valid
+            expect(repo_form('ssh://git@github.com:no/port.git')).to_not be_valid
             expect(repo_form('github.com\user\repo.git')).to_not be_valid
             expect(repo_form('repo')).to_not be_valid
             expect(repo_form('')).to_not be_valid

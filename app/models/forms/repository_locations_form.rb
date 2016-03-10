@@ -14,7 +14,8 @@ module Forms
     end
 
     WHITELIST_DOMAINS = %w(github.com).freeze
-    REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
+    REPO_GIT_URI_REGEX = %r{(git)@([\w\.]+):([\w\.\/\-]+)(\.git)$}
+    REPO_VCS_URI_REGEX = %r{(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?/([\w\.\-]+)(\.git)?(/)?}
     DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
 
     attr_reader :uri, :token_types
@@ -48,7 +49,7 @@ module Forms
         return false
       end
 
-      unless uri =~ REPO_URI_REGEX
+      unless valid_uri_format?
         errors.add(:git_uri, 'must be valid Git URI, e.g. git@github.com:owner/repo.git')
         return false
       end
@@ -68,6 +69,14 @@ module Forms
       end
 
       true
+    end
+
+    def valid_uri_format?
+      if uri.start_with?('git@')
+        (REPO_GIT_URI_REGEX =~ uri) == 0
+      else
+        (REPO_VCS_URI_REGEX =~ uri) == 0
+      end
     end
 
     def valid_hostname?
