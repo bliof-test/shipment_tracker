@@ -218,7 +218,6 @@ RSpec.describe Repositories::DeployRepository do
 
   describe '#last_staging_deploy_for_version' do
     let(:version) { 'abc' }
-    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', region: 'de', environment: 'uat' } }
     let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de', environment: 'uat' } }
 
     context 'when no deploy exist' do
@@ -273,60 +272,40 @@ RSpec.describe Repositories::DeployRepository do
     end
   end
 
-  describe '#deploys_ordered_by_id' do
+  describe '#second_last_production_deploy' do
     let(:defaults) {
       {
+        server: 'a',
         app_name: 'frontend',
-        server: 'server',
         deployed_by: 'Bob',
-        version: 'abc',
         locale: 'gb',
-        environment: 'uat',
+        environment: 'production',
       }
     }
 
-    let(:criteria) { { order: 'asc', environment: 'production', region: 'gb' } }
+    context 'when no deploy exist' do
+      it 'returns nil' do
+        expect(repository.second_last_production_deploy('frontend', 'gb')).to be nil
+      end
+    end
 
-    context 'when there are 4 deploys' do
+    context 'when a deploy exists for the app and region' do
       before do
         [
-          build(:deploy_event, defaults.merge(server: 'a', environment: 'production', version: 'abc123')),
-          build(:deploy_event, defaults.merge(server: 'b', environment: 'production', version: 'bcd123')),
-          build(:deploy_event, defaults.merge(server: 'b', version: 'cde123')),
-          build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: 'def123')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'ccc')),
+          build(:deploy_event, defaults.merge(version: 'bbb')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'def', locale: 'us')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'eee')),
+          build(:deploy_event, defaults.merge(version: 'ccc')),
         ].each do |deploy|
           repository.apply(deploy)
         end
       end
 
-      it 'returns them in ASC id order' do
-        deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'asc'))
-        versions = deploys.map(&:version)
-        expect(versions).to eq %w(abc123 bcd123 def123)
-      end
-
-      it 'returns them in DESC id order' do
-        deploys = repository.deploys_ordered_by_id(criteria.merge(order: 'desc'))
-        versions = deploys.map(&:version)
-        expect(versions).to eq %w(def123 bcd123 abc123)
-      end
-
-      context 'when there are no deploys for a given region' do
-        let(:criteria) { { order: 'desc', environment: 'production' } }
-
-        it 'returns empty list' do
-          expect(repository.deploys_ordered_by_id(criteria.merge(region: 'us'))).to eq []
-        end
-      end
-
-      it 'returns a limited list for a specified amount' do
-        expect(repository.deploys_ordered_by_id(criteria.merge(limit: 2)).size).to eq(2)
-      end
-    end
-
-    context 'when there are no deploys' do
-      it 'returns an empty list' do
-        expect(repository.deploys_ordered_by_id(criteria.merge(order: 'desc'))).to eq []
+      it 'returns the second latest production deploy for the app_name and region' do
+        deploy = repository.second_last_production_deploy('backend', 'gb')
+        expect(deploy.version).to eq 'ccc'
+        expect(deploy.region).to eq 'gb'
       end
     end
   end

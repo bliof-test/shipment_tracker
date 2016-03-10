@@ -25,16 +25,6 @@ module Repositories
       }
     end
 
-    def deploys_ordered_by_id(order:, environment:, region:, limit: nil)
-      query = store.select('*')
-      query = query.where(environment: environment)
-      query = query.where(region: region)
-      query = query.limit(limit)
-      query.order("id #{order}").map { |deploy_record|
-        Deploy.new(deploy_record.attributes)
-      }
-    end
-
     def last_staging_deploy_for_version(version)
       last_matching_non_prod_deploy = store.where.not(environment: 'production').where(version: version).last
       Deploy.new(last_matching_non_prod_deploy.attributes) if last_matching_non_prod_deploy
@@ -42,19 +32,27 @@ module Repositories
 
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
-      new_deploy = new_deploy_event(event)
+      new_deploy = create_deploy_event(event)
 
       if DeployAlert.auditable?(new_deploy) && !Rails.configuration.data_maintenance_mode
-        previous_deploy = previous_deploy(new_deploy.region)
+        previous_deploy = second_last_production_deploy(new_deploy.app_name, new_deploy.region)
         audit_deploy(new_deploy: new_deploy.attributes, previous_deploy: previous_deploy&.attributes)
       end
+    end
+
+    def second_last_production_deploy(app_name, region)
+      store.where(app_name: app_name, environment: 'production', region: region)
+           .order(id: 'desc')
+           .limit(1)
+           .offset(1)
+           .first
     end
 
     private
 
     attr_reader :store
 
-    def new_deploy_event(event)
+    def create_deploy_event(event)
       store.create(
         app_name: event.app_name,
         server: event.server,
@@ -64,10 +62,6 @@ module Repositories
         deployed_by: event.deployed_by,
         event_created_at: event.created_at,
       )
-    end
-
-    def previous_deploy(region)
-      store.where(environment: 'production', region: region).limit(1).offset(1).first
     end
 
     def audit_deploy(deploys_attrs)
