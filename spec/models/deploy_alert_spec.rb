@@ -37,7 +37,7 @@ RSpec.describe DeployAlert do
     end
   end
 
-  describe '#audit' do
+  describe '#audit_message' do
     let(:repository_loader) { instance_double(GitRepositoryLoader) }
 
     context 'deployed commit on master' do
@@ -60,7 +60,7 @@ RSpec.describe DeployAlert do
       end
 
       it 'returns nil' do
-        expect(DeployAlert.audit(deploy)).to eq(nil)
+        expect(DeployAlert.audit_message(deploy)).to eq(nil)
       end
     end
 
@@ -81,11 +81,11 @@ RSpec.describe DeployAlert do
         Deploy.new(
           version: sha, environment: 'production', app_name: app_name,
           deployed_by: 'user1', event_created_at: DateTime.parse('2016-02-15T15:57:25+01:00'),
-          region: 'uk')
+          region: 'gb')
       }
 
       let(:expected_message) {
-        'UK Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
+        "GB Deploy Alert for frontend at 2016-02-15 15:57+01:00.\n" \
         "user1 deployed #{sha} not on master branch."
       }
 
@@ -96,7 +96,7 @@ RSpec.describe DeployAlert do
       end
 
       it 'returns a message' do
-        expect(DeployAlert.audit(deploy)).to eq(expected_message)
+        expect(DeployAlert.audit_message(deploy)).to eq(expected_message)
       end
     end
 
@@ -113,7 +113,7 @@ RSpec.describe DeployAlert do
       let(:git_diagram) { '-A' }
 
       let(:expected_message) {
-        'US Deploy Alert for frontend at 2016-02-15 15:57+01:00. ' \
+        "US Deploy Alert for frontend at 2016-02-15 15:57+01:00.\n" \
         'user1 deployed unknown not on master branch.'
       }
 
@@ -124,7 +124,7 @@ RSpec.describe DeployAlert do
       end
 
       it 'returns a message' do
-        expect(DeployAlert.audit(deploy)).to eq(expected_message)
+        expect(DeployAlert.audit_message(deploy)).to eq(expected_message)
       end
     end
 
@@ -133,7 +133,7 @@ RSpec.describe DeployAlert do
       let(:new_deploy) {
         instance_double(
           Deploy, app_name: 'fca',
-                  version: '#abc', region: 'foo',
+                  version: '#abc', region: 'us',
                   event_created_at: time,
                   deployed_by: 'deployer'
         )
@@ -154,12 +154,12 @@ RSpec.describe DeployAlert do
         let(:release) { instance_double(Release, authorised?: false) }
 
         let(:expected_message) {
-          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}. "\
+          "US Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
           'deployer deployed #abc, release not authorised.'
         }
 
         it 'returns an alert message' do
-          expect(DeployAlert.audit(new_deploy)).to eq(expected_message)
+          expect(DeployAlert.audit_message(new_deploy)).to eq(expected_message)
         end
       end
 
@@ -167,7 +167,7 @@ RSpec.describe DeployAlert do
         let(:release) { instance_double(Release, authorised?: true) }
 
         it 'returns nil' do
-          expect(DeployAlert.audit(new_deploy)).to be nil
+          expect(DeployAlert.audit_message(new_deploy)).to be nil
         end
       end
     end
@@ -213,12 +213,12 @@ RSpec.describe DeployAlert do
         let(:release) { instance_double(Release, authorised?: false) }
 
         let(:expected_message) {
-          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}. "\
+          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
           'deployer deployed #abc, release not authorised.'
         }
 
         it 'returns an alert message' do
-          expect(DeployAlert.audit(new_deploy, previous_deploy)).to eq(expected_message)
+          expect(DeployAlert.audit_message(new_deploy, previous_deploy)).to eq(expected_message)
         end
       end
 
@@ -226,7 +226,7 @@ RSpec.describe DeployAlert do
         let(:release) { instance_double(Release, authorised?: true) }
 
         it 'returns nil' do
-          expect(DeployAlert.audit(new_deploy, previous_deploy)).to be_nil
+          expect(DeployAlert.audit_message(new_deploy, previous_deploy)).to be_nil
         end
       end
     end

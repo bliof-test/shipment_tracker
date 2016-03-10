@@ -23,8 +23,8 @@ RSpec.describe DeployAlertJob do
       Deploy.new(deploy_attrs[:new_deploy].merge(event_created_at: time))
     }
 
-    it 'runs DeployAlertJob.audit with correct arguments' do
-      expect(DeployAlert).to receive(:audit).with(expected_deploy, nil)
+    it 'runs DeployAlert.audit_message with correct arguments' do
+      expect(DeployAlert).to receive(:audit_message).with(expected_deploy, nil)
 
       DeployAlertJob.perform_now(deploy_attrs)
     end

@@ -9,7 +9,7 @@ class DeployAlert
     new_deploy.environment == 'production' && GitRepositoryLocation.app_names.include?(new_deploy.app_name)
   end
 
-  def self.audit(new_deploy, previous_deploy = nil)
+  def self.audit_message(new_deploy, previous_deploy = nil)
     github_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
 
     deploy_auditor = DeployAuditor.new(github_repo, new_deploy, previous_deploy)
@@ -21,13 +21,13 @@ class DeployAlert
 
   def self.alert_not_authorised(deploy)
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
+    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
     "deployed #{deploy.version || 'unknown'}, release not authorised."
   end
 
   def self.alert_not_on_master(deploy)
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}. #{deploy.deployed_by} " \
+    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
     "deployed #{deploy.version || 'unknown'} not on master branch."
   end
 
