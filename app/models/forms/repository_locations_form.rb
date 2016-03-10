@@ -14,14 +14,14 @@ module Forms
     end
 
     WHITELIST_DOMAINS = %w(github.com).freeze
-    REPO_URI_REGEX = %r{((file|git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?}
+    REPO_GIT_URI_REGEX = %r{(git)@([\w\.]+):([\w\.\/\-]+)(\.git)$}
+    REPO_VCS_URI_REGEX = %r{(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?/([\w\.\-]+)(\.git)?(/)?}
     DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
 
     attr_reader :uri, :token_types
 
-    def initialize(uri, token_types)
+    def initialize(uri)
       @uri = uri
-      @token_types = token_types
     end
 
     def valid?
@@ -30,7 +30,7 @@ module Forms
 
     def self.default_token_types
       @default_token_types ||= Token.sources.map { |token_src|
-        value = DEFAULT_SELECTED_TOKENS.include? token_src.endpoint
+        value = DEFAULT_SELECTED_TOKENS.include?(token_src.endpoint)
         { id: token_src.endpoint, name: token_src.name, value: value }
       }
     end
@@ -45,17 +45,17 @@ module Forms
 
     def valid_uri?
       if uri.blank?
-        errors.add(:git_uri, 'cannot be empty')
+        errors.add(:base, 'Git URI cannot be empty')
         return false
       end
 
-      unless uri =~ REPO_URI_REGEX
-        errors.add(:git_uri, 'must be valid Git URI, e.g. git@github.com:owner/repo.git')
+      unless valid_uri_format?
+        errors.add(:base, "Not a valid Git URI '#{uri}'")
         return false
       end
 
       unless valid_hostname?
-        errors.add(:git_uri, "domain should be one of #{WHITELIST_DOMAINS.join(', ')}")
+        errors.add(:base, "Git URI did not contain a whitelisted domain: #{WHITELIST_DOMAINS.join(', ')}")
         return false
       end
 
@@ -69,6 +69,14 @@ module Forms
       end
 
       true
+    end
+
+    def valid_uri_format?
+      if uri.start_with?('git@')
+        (REPO_GIT_URI_REGEX =~ uri) == 0
+      else
+        (REPO_VCS_URI_REGEX =~ uri) == 0
+      end
     end
 
     def valid_hostname?

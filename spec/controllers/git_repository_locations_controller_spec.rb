@@ -28,6 +28,13 @@ RSpec.describe GitRepositoryLocationsController do
       it { is_expected.to set_flash.now[:error] }
     end
 
+    context 'when the GitRepositoryLocation is valid but contains whitespace' do
+      let(:params) { { repository_locations_form: { uri: ' ssh://git@github.com/some/repo.git ' } } }
+
+      it { is_expected.to set_flash[:success] }
+      it { is_expected.to redirect_to(git_repository_locations_path) }
+    end
+
     context 'when the GitRepositoryLocation is valid' do
       let(:params) { { repository_locations_form: { uri: 'ssh://git@github.com/some/repo.git' } } }
 

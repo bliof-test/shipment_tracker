@@ -6,6 +6,11 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       location = GitRepositoryLocation.create(uri: 'git@github.com/owner/repo.git')
       expect(location.name).to eq('repo')
     end
+
+    it 'strips whitespace from the URI' do
+      location = GitRepositoryLocation.create(uri: '  git@github.com/owner/repo.git  ')
+      expect(location.uri).to eq('git@github.com/owner/repo.git')
+    end
   end
 
   describe 'validations' do

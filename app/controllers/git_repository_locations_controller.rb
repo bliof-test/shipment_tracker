@@ -10,7 +10,6 @@ class GitRepositoryLocationsController < ApplicationController
     AddRepositoryLocation.run(git_repo_location_params).match do
       success do |repo_name|
         flash[:success] = success_msg(repo_name)
-
         redirect_to :git_repository_locations
       end
 
@@ -30,6 +29,7 @@ class GitRepositoryLocationsController < ApplicationController
 
   def git_repo_location_params
     permitted = params.require(:repository_locations_form).permit(:uri)
+    permitted[:uri] = permitted[:uri].strip
     permitted[:token_types] = params[:token_types] if params[:token_types].present?
     permitted
   end
