@@ -10,9 +10,9 @@ class DeployAlert
   end
 
   def self.audit_message(new_deploy, previous_deploy = nil)
-    github_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
+    git_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
 
-    deploy_auditor = DeployAuditor.new(github_repo, new_deploy, previous_deploy)
+    deploy_auditor = DeployAuditor.new(git_repo, new_deploy, previous_deploy)
 
     return alert_not_on_master(new_deploy) if deploy_auditor.unknown_or_not_on_master?
 
@@ -32,24 +32,22 @@ class DeployAlert
   end
 
   class DeployAuditor
-    def initialize(github_repo, new_deploy, previous_deploy = nil)
-      @github_repo = github_repo
+    def initialize(git_repo, new_deploy, previous_deploy = nil)
+      @git_repo = git_repo
       @new_deploy = new_deploy
       @previous_deploy = previous_deploy
     end
 
     def unknown_or_not_on_master?
-      @new_deploy.version.nil? || !@github_repo.commit_on_master?(@new_deploy.version)
+      @new_deploy.version.nil? || !@git_repo.commit_on_master?(@new_deploy.version)
     end
 
     def all_releases_authorised?
-      auditable_commits = auditable_commits_list
-
       return false unless auditable_commits
       release_query = release_query_for(
         auditable_commits,
         @new_deploy.region,
-        @github_repo,
+        @git_repo,
         @new_deploy.app_name,
       )
 
@@ -60,20 +58,22 @@ class DeployAlert
 
     private
 
-    def release_query_for(auditable_commits, region, github_repo, app_name)
+    def release_query_for(auditable_commits, region, git_repo, app_name)
       Queries::ReleasesQuery.new(
         per_page: auditable_commits.size,
         region: region,
-        git_repo: github_repo,
+        git_repo: git_repo,
         app_name: app_name,
         commits: auditable_commits,
       )
     end
 
-    def auditable_commits_list
-      return [@github_repo.commit_for_version(@new_deploy.version)] unless @previous_deploy
-
-      @github_repo.commits_between(@previous_deploy.version, @new_deploy.version, true)
+    def auditable_commits
+      @commits ||= if @previous_deploy
+                     @git_repo.commits_between(@previous_deploy.version, @new_deploy.version, simplify: true)
+                   else
+                     [@git_repo.commit_for_version(@new_deploy.version)]
+                   end
     end
   end
 end

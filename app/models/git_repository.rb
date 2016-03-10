@@ -21,12 +21,12 @@ class GitRepository
     false
   end
 
-  def commits_between(from, to, simplified = false)
+  def commits_between(from, to, simplify: false)
     instrument('commits_between') do
       validate_commit!(from) unless from.nil?
       validate_commit!(to)
 
-      walker = get_walker(to, from, simplified)
+      walker = get_walker(to, from, simplify)
       build_commits(walker)
     end
   end
