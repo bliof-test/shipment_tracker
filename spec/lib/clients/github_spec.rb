@@ -44,5 +44,11 @@ RSpec.describe GithubClient do
         expect(github.repo_accessible?('git@bitbucket.com:owner/repo.git')).to be_nil
       end
     end
+
+    context 'when the format is not owner/repo' do
+      it 'returns false' do
+        expect(github.repo_accessible?('https://github.com/foo')).to be false
+      end
+    end
   end
 end

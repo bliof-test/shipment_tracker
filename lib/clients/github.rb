@@ -24,6 +24,9 @@ class GithubClient
     path = parsed_uri.path
     repo_path = path.start_with?('/') ? path[1..-1] : path
     client.repository?(repo_path.chomp('.git'))
+  rescue ArgumentError => error
+    Rails.logger.warn(error)
+    false
   end
 
   private
