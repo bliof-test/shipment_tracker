@@ -45,17 +45,17 @@ module Forms
 
     def valid_uri?
       if uri.blank?
-        errors.add(:git_uri, 'cannot be empty')
+        errors.add(:base, 'Git URI cannot be empty')
         return false
       end
 
       unless valid_uri_format?
-        errors.add(:git_uri, 'must be valid Git URI, e.g. git@github.com:owner/repo.git')
+        errors.add(:base, "Not a valid Git URI '#{uri}'")
         return false
       end
 
       unless valid_hostname?
-        errors.add(:git_uri, "domain should be one of #{WHITELIST_DOMAINS.join(', ')}")
+        errors.add(:base, "Git URI did not contain a whitelisted domain: #{WHITELIST_DOMAINS.join(', ')}")
         return false
       end
 
