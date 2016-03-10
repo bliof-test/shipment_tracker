@@ -21,16 +21,12 @@ class GitRepository
     false
   end
 
-  def commits_between(from, to)
+  def commits_between(from, to, simplified = false)
     instrument('commits_between') do
       validate_commit!(from) unless from.nil?
       validate_commit!(to)
 
-      walker = Rugged::Walker.new(rugged_repository)
-      walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE) # optional
-      walker.push(to)
-      walker.hide(from) if from
-
+      walker = get_walker(to, from, simplified)
       build_commits(walker)
     end
   end
@@ -42,19 +38,6 @@ class GitRepository
     walker.simplify_first_parent
 
     build_commits(walker.take(count))
-  end
-
-  def recent_commits_between(from, to)
-    validate_commit!(from) unless from.nil?
-    validate_commit!(to)
-
-    walker = Rugged::Walker.new(rugged_repository)
-    walker.sorting(Rugged::SORT_TOPO)
-    walker.push(to)
-    walker.hide(from) if from
-    walker.simplify_first_parent
-
-    build_commits(walker)
   end
 
   def commit_for_version(sha)

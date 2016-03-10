@@ -42,10 +42,20 @@ module Repositories
 
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
+      new_deploy = new_deploy_event(event)
 
-      old_deploy = store.where(region: event.locale).last
+      if DeployAlert.auditable?(new_deploy) && !Rails.configuration.data_maintenance_mode
+        previous_deploy = previous_deploy(new_deploy.region)
+        audit_deploy(new_deploy: new_deploy.attributes, previous_deploy: previous_deploy&.attributes)
+      end
+    end
 
-      new_deploy = store.create!(
+    private
+
+    attr_reader :store
+
+    def new_deploy_event(event)
+      store.create(
         app_name: event.app_name,
         server: event.server,
         region: event.locale,
@@ -54,19 +64,20 @@ module Repositories
         deployed_by: event.deployed_by,
         event_created_at: event.created_at,
       )
-
-      audit_deploy(new_deploy: new_deploy.attributes, old_deploy: old_deploy&.attributes) unless Rails.configuration.data_maintenance_mode
-
     end
 
-    private
+    def previous_deploy(region)
+      store.where(environment: 'production', region: region).limit(1).offset(1).first
+    end
 
-    attr_reader :store
+    def audit_deploy(deploys_attrs)
+      deploy_time_to_s(deploys_attrs[:new_deploy])
+      deploy_time_to_s(deploys_attrs[:previous_deploy])
+      DeployAlertJob.perform_later(deploys_attrs)
+    end
 
-    def audit_deploy(deploy_attrs)
-      deploy_attrs[:new_deploy]['event_created_at'] = deploy_attrs[:new_deploy]['event_created_at'].to_s
-      deploy_attrs[:old_deploy]['event_created_at'] = deploy_attrs[:old_deploy]['event_created_at'].to_s if deploy_attrs[:old_deploy]
-      DeployAlertJob.perform_later(deploy_attrs)
+    def deploy_time_to_s(deploy_attrs)
+      deploy_attrs['event_created_at'] = deploy_attrs['event_created_at'].to_s if deploy_attrs
     end
 
     def deploys(apps, server, at)

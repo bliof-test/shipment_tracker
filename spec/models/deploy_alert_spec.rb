@@ -128,33 +128,106 @@ RSpec.describe DeployAlert do
       end
     end
 
-    context 'deploy is unauthorised' do
+    context 'first deploy to production' do
       let(:time) { Time.current.change(usec: 0) }
       let(:new_deploy) {
         instance_double(
           Deploy, app_name: 'fca',
                   version: '#abc', region: 'foo',
                   event_created_at: time,
-                  deployed_by: 'shrek'
+                  deployed_by: 'deployer'
         )
       }
-      let(:git_commits) { [] }
-      let(:projection) { instance_double(Queries::ReleasesQuery, deployed_releases: [release]) }
-      let(:git_repository) { instance_double(GitRepository, commit_for_version: git_commits, commit_on_master?: true) }
-      let(:release) { instance_double(Release, authorised?: false) }
 
-      let(:expected_message) {
-        "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}. "\
-        'shrek deployed #abc, release not authorised.'
+      let(:projection) { instance_double(Queries::ReleasesQuery, deployed_releases: [release]) }
+      let(:git_repository) { instance_double(GitRepository, commit_for_version: [], commit_on_master?: true) }
+
+      before do
+        allow(Queries::ReleasesQuery).to receive(:new).and_return(projection)
+        allow(GitRepositoryLoader).to receive_message_chain(
+          :from_rails_config,
+          :load,
+        ).and_return(git_repository)
+      end
+
+      context 'is not authorized' do
+        let(:release) { instance_double(Release, authorised?: false) }
+
+        let(:expected_message) {
+          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}. "\
+          'deployer deployed #abc, release not authorised.'
+        }
+
+        it 'returns an alert message' do
+          expect(DeployAlert.audit(new_deploy)).to eq(expected_message)
+        end
+      end
+
+      context 'is authorized' do
+        let(:release) { instance_double(Release, authorised?: true) }
+
+        it 'returns nil' do
+          expect(DeployAlert.audit(new_deploy)).to be nil
+        end
+      end
+    end
+
+    context 'when there are previous deploys to production' do
+      let(:time) { Time.current.change(usec: 0) }
+      let(:new_deploy) {
+        instance_double(
+          Deploy, app_name: 'fca',
+                  version: '#abc', region: 'foo',
+                  event_created_at: time,
+                  deployed_by: 'deployer'
+        )
+      }
+      let(:previous_deploy) {
+        instance_double(
+          Deploy, app_name: 'fca',
+                  version: '#aaa', region: 'foo',
+                  event_created_at: time,
+                  deployed_by: 'deployer'
+        )
+      }
+
+      let(:projection) { instance_double(Queries::ReleasesQuery, deployed_releases: [release]) }
+      let(:git_repository) {
+        instance_double(
+          GitRepository,
+          commit_for_version: [],
+          commits_between: [],
+          commit_on_master?: true,
+        )
       }
 
       before do
         allow(Queries::ReleasesQuery).to receive(:new).and_return(projection)
-        allow(GitRepositoryLoader).to receive_message_chain(:from_rails_config, :load).and_return(git_repository)
+        allow(GitRepositoryLoader).to receive_message_chain(
+          :from_rails_config,
+          :load,
+        ).and_return(git_repository)
       end
 
-      it 'sends an alert' do
-        expect(DeployAlert.audit(new_deploy)).to eq(expected_message)
+      context 'a not authorized release is deployed' do
+        let(:release) { instance_double(Release, authorised?: false) }
+
+        let(:expected_message) {
+          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}. "\
+          'deployer deployed #abc, release not authorised.'
+        }
+
+        it 'returns an alert message' do
+          expect(DeployAlert.audit(new_deploy, previous_deploy)).to eq(expected_message)
+        end
+      end
+
+      context 'an authorized release is deployed' do
+        let(:release) { instance_double(Release, authorised?: true) }
+
+        it 'returns nil' do
+          expect(DeployAlert.audit(new_deploy, previous_deploy)).to be_nil
+        end
       end
     end
   end

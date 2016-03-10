@@ -31,9 +31,13 @@ RSpec.describe Repositories::DeployRepository do
           'environment' => environment,
           'region' => 'us',
         },
-        old_deploy: nil,
+        previous_deploy: nil,
       }
     }
+
+    before do
+      allow(DeployAlert).to receive(:auditable?).and_return(true)
+    end
 
     it 'schedules a DeployAlertJob' do
       expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)

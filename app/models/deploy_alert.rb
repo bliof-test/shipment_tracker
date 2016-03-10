@@ -9,28 +9,14 @@ class DeployAlert
     new_deploy.environment == 'production' && GitRepositoryLocation.app_names.include?(new_deploy.app_name)
   end
 
-  def self.audit(new_deploy, old_deploy = nil)
+  def self.audit(new_deploy, previous_deploy = nil)
     github_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
 
-    return alert_not_on_master(new_deploy) if unknown_or_not_on_master?(new_deploy, github_repo)
+    deploy_auditor = DeployAuditor.new(github_repo, new_deploy, previous_deploy)
 
-    auditable_commits = if old_deploy
-                          github_repo.recent_commits_between(old_deploy.version, new_deploy.version)
-                        else
-                          [github_repo.commit_for_version(new_deploy.version)]
-                        end
+    return alert_not_on_master(new_deploy) if deploy_auditor.unknown_or_not_on_master?
 
-    projection = Queries::ReleasesQuery.new(
-      per_page: auditable_commits.size,
-      region: new_deploy.region,
-      git_repo: github_repo,
-      app_name: new_deploy.app_name,
-      commits: auditable_commits,
-    )
-
-    auditable_releases = projection.deployed_releases
-
-    alert_not_authorised(new_deploy) unless auditable_releases.all?(&:authorised?)
+    alert_not_authorised(new_deploy) unless deploy_auditor.all_releases_authorised?
   end
 
   def self.alert_not_authorised(deploy)
@@ -45,7 +31,49 @@ class DeployAlert
     "deployed #{deploy.version || 'unknown'} not on master branch."
   end
 
-  def self.unknown_or_not_on_master?(deploy, github_repo)
-    deploy.version.nil? || !github_repo.commit_on_master?(deploy.version)
+  class DeployAuditor
+    def initialize(github_repo, new_deploy, previous_deploy = nil)
+      @github_repo = github_repo
+      @new_deploy = new_deploy
+      @previous_deploy = previous_deploy
+    end
+
+    def unknown_or_not_on_master?
+      @new_deploy.version.nil? || !@github_repo.commit_on_master?(@new_deploy.version)
+    end
+
+    def all_releases_authorised?
+      auditable_commits = auditable_commits_list
+
+      return false unless auditable_commits
+      release_query = release_query_for(
+        auditable_commits,
+        @new_deploy.region,
+        @github_repo,
+        @new_deploy.app_name,
+      )
+
+      auditable_releases = release_query.deployed_releases
+
+      auditable_releases.all?(&:authorised?)
+    end
+
+    private
+
+    def release_query_for(auditable_commits, region, github_repo, app_name)
+      Queries::ReleasesQuery.new(
+        per_page: auditable_commits.size,
+        region: region,
+        git_repo: github_repo,
+        app_name: app_name,
+        commits: auditable_commits,
+      )
+    end
+
+    def auditable_commits_list
+      return [@github_repo.commit_for_version(@new_deploy.version)] unless @previous_deploy
+
+      @github_repo.commits_between(@previous_deploy.version, @new_deploy.version, true)
+    end
   end
 end
