@@ -130,7 +130,7 @@ class GitRepository
     walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE)
     walker.simplify_first_parent if simplify
     walker.push(push_commit_oid)
-    walker.hide(hide_commit_oid)
+    walker.hide(hide_commit_oid) if hide_commit_oid
     walker
   end
 
