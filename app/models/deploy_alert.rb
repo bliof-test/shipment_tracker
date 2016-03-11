@@ -43,7 +43,6 @@ class DeployAlert
     end
 
     def all_releases_authorised?
-      return false unless auditable_commits
       release_query = release_query_for(
         auditable_commits,
         @new_deploy.region,
