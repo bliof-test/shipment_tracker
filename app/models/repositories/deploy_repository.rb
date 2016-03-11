@@ -40,7 +40,7 @@ module Repositories
 
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
-      current_deploy = create_deploy_snapshot(event)
+      current_deploy = create_deploy_snapshot!(event)
 
       if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
         previous_deploy = second_last_production_deploy(current_deploy.app_name, current_deploy.region)
@@ -52,7 +52,7 @@ module Repositories
 
     attr_reader :store
 
-    def create_deploy_snapshot(event)
+    def create_deploy_snapshot!(event)
       store.create!(
         app_name: event.app_name,
         server: event.server,
