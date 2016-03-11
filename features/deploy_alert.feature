@@ -33,3 +33,33 @@ Scenario: Alert dispatched for unauthorised deploy: Release has no approved Feat
     | app_name | version | time                   | deployer | message                                             |
     | frontend | #merge1 | 2016-01-22 17:34+00:00 | Jeff     | release not authorised, Feature Review not approved |
 
+Scenario: Alert dispatched for unauthorised deploy: Rollback to an older software version
+  Given an application called "frontend"
+
+  # An authorised deploy
+  And a commit "#master1" with message "first commit" is created at "2016-01-18 09:10:57"
+  And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
+  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version  |
+    | frontend | #master1 |
+  And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
+  And ticket "JIRA-ONE" is approved by "bob@fundingcircle.com" at "2016-01-21 15:20:34"
+  When commit "#master1" of "frontend" is deployed by "Jeff" to production at "2016-01-21 16:34:20"
+  Then a deploy alert should not be dispatched
+
+  # An authorised deploy
+  And a commit "#master2" with message "second commit" is created at "2016-02-18 09:10:57"
+  And a ticket "JIRA-TWO" with summary "Ticket TWO" is started at "2016-02-18 09:13:00"
+  And developer prepares review known as "FR_TWO" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version  |
+    | frontend | #master2 |
+  And at time "2016-02-20 14:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"
+  And ticket "JIRA-TWO" is approved by "bob@fundingcircle.com" at "2016-02-21 15:20:34"
+  When commit "#master2" of "frontend" is deployed by "Jeff" to production at "2016-02-21 16:34:20"
+  Then a deploy alert should not be dispatched
+
+  # An unauthorised rollback deploy
+  When commit "#master1" of "frontend" is deployed by "Jeff" to production at "2016-03-21 16:34:20"
+  Then a deploy alert should be dispatched for
+    | app_name | version  | time                      | deployer | message             |
+    | frontend | #master1 | 2016-03-21 16:34:20+00:00 | Jeff     | production rollback |
