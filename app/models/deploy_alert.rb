@@ -10,15 +10,13 @@ class DeployAlert
   end
 
   def self.audit_message(new_deploy, previous_deploy = nil)
-    git_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
-
-    deploy_auditor = DeployAuditor.new(git_repo, new_deploy, previous_deploy)
+    deploy_auditor = DeployAuditor.new(new_deploy, previous_deploy)
 
     if deploy_auditor.unknown_version?
       alert_unknown_version(new_deploy)
     elsif deploy_auditor.not_on_master?
       alert_not_on_master(new_deploy)
-    elsif !deploy_auditor.all_releases_authorised?
+    elsif !deploy_auditor.recent_releases_authorised?
       alert_not_authorised(new_deploy)
     end
   end
@@ -48,21 +46,22 @@ class DeployAlert
   private_class_method :alert_header
 
   class DeployAuditor
-    def initialize(git_repo, new_deploy, previous_deploy = nil)
-      @git_repo = git_repo
+    def initialize(new_deploy, previous_deploy = nil)
       @new_deploy = new_deploy
       @previous_deploy = previous_deploy
+      @git_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
     end
 
     def not_on_master?
-      !@git_repo.commit_on_master?(@new_deploy.version)
+      !git_repo.commit_on_master?(new_deploy.version)
     end
 
     def unknown_version?
-      @new_deploy.version.nil?
+      new_deploy.version.nil?
     end
 
-    def all_releases_authorised?
+<<<<<<< 279c3f6e8d745d675a9791266308179fee4bd4d5
+    def recent_releases_authorised?
       release_query = release_query_for(
         auditable_commits,
         @new_deploy.region,
@@ -70,10 +69,19 @@ class DeployAlert
         @new_deploy.app_name,
       )
 
+=======
+
+
+    def recent_releases_authorised?
+      return false unless auditable_commits
+      release_query = release_query_for(auditable_commits, new_deploy.region, git_repo, new_deploy.app_name)
+>>>>>>> :art: Minor refactor
       release_query.deployed_releases.all?(&:authorised?)
     end
 
     private
+
+    attr_reader :new_deploy, :previous_deploy, :git_repo
 
     def release_query_for(auditable_commits, region, git_repo, app_name)
       Queries::ReleasesQuery.new(
@@ -86,10 +94,10 @@ class DeployAlert
     end
 
     def auditable_commits
-      @commits ||= if @previous_deploy
-                     @git_repo.commits_between(@previous_deploy.version, @new_deploy.version, simplify: true)
+      @commits ||= if previous_deploy
+                     git_repo.commits_between(previous_deploy.version, new_deploy.version, simplify: true)
                    else
-                     [@git_repo.commit_for_version(@new_deploy.version)]
+                     [git_repo.commit_for_version(new_deploy.version)]
                    end
     end
   end

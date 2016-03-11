@@ -132,7 +132,7 @@ RSpec.describe DeployAlert do
       let(:time) { Time.current.change(usec: 0) }
       let(:new_deploy) {
         instance_double(
-          Deploy, app_name: 'fca',
+          Deploy, app_name: 'some_app',
                   version: '#abc', region: 'us',
                   event_created_at: time,
                   deployed_by: 'deployer'
@@ -154,7 +154,7 @@ RSpec.describe DeployAlert do
         let(:release) { instance_double(Release, authorised?: false) }
 
         let(:expected_message) {
-          "US Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
+          "US Deploy Alert for some_app at #{time.strftime('%F %H:%M%:z')}.\n"\
           'deployer deployed #abc, release not authorised, Feature Review not approved.'
         }
 
@@ -176,16 +176,16 @@ RSpec.describe DeployAlert do
       let(:time) { Time.current.change(usec: 0) }
       let(:new_deploy) {
         instance_double(
-          Deploy, app_name: 'fca',
-                  version: '#abc', region: 'foo',
+          Deploy, app_name: 'some_app',
+                  version: '#abc', region: 'gb',
                   event_created_at: time,
                   deployed_by: 'deployer'
         )
       }
       let(:previous_deploy) {
         instance_double(
-          Deploy, app_name: 'fca',
-                  version: '#aaa', region: 'foo',
+          Deploy, app_name: 'some_app',
+                  version: '#aaa', region: 'gb',
                   event_created_at: time,
                   deployed_by: 'deployer'
         )
@@ -209,11 +209,11 @@ RSpec.describe DeployAlert do
         ).and_return(git_repository)
       end
 
-      context 'a not authorized release is deployed' do
+      context 'an unauthorized release is deployed' do
         let(:release) { instance_double(Release, authorised?: false) }
 
         let(:expected_message) {
-          "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
+          "GB Deploy Alert for some_app at #{time.strftime('%F %H:%M%:z')}.\n"\
           'deployer deployed #abc, release not authorised, Feature Review not approved.'
         }
 
