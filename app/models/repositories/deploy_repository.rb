@@ -30,6 +30,14 @@ module Repositories
       Deploy.new(last_matching_non_prod_deploy.attributes) if last_matching_non_prod_deploy
     end
 
+    def second_last_production_deploy(app_name, region)
+      store.where(app_name: app_name, environment: 'production', region: region)
+           .order(id: 'desc')
+           .limit(1)
+           .offset(1)
+           .first
+    end
+
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
       new_deploy = create_deploy_snapshot(event)
@@ -40,20 +48,12 @@ module Repositories
       end
     end
 
-    def second_last_production_deploy(app_name, region)
-      store.where(app_name: app_name, environment: 'production', region: region)
-           .order(id: 'desc')
-           .limit(1)
-           .offset(1)
-           .first
-    end
-
     private
 
     attr_reader :store
 
     def create_deploy_snapshot(event)
-      store.create(
+      store.create!(
         app_name: event.app_name,
         server: event.server,
         region: event.locale,

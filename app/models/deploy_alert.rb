@@ -50,9 +50,7 @@ class DeployAlert
         @new_deploy.app_name,
       )
 
-      auditable_releases = release_query.deployed_releases
-
-      auditable_releases.all?(&:authorised?)
+      release_query.deployed_releases.all?(&:authorised?)
     end
 
     private
