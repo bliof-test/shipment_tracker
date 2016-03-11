@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160212113505) do
+ActiveRecord::Schema.define(version: 20160311131953) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,7 @@ ActiveRecord::Schema.define(version: 20160212113505) do
     t.string   "region"
   end
 
+  add_index "deploys", ["app_name"], name: "index_deploys_on_app_name", using: :btree
   add_index "deploys", ["server", "app_name"], name: "index_deploys_on_server_and_app_name", using: :btree
   add_index "deploys", ["version"], name: "index_deploys_on_version", using: :btree
 
