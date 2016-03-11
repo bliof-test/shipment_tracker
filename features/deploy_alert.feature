@@ -1,10 +1,10 @@
 @mock_slack_notifier
-Feature: Alerting Unauthorised Releases
+Feature: Alerting deploys of unauthorised Releases
   As a user
   I should see slack notifications when deployment rules are violated
   So that appropriate actions can be taken
 
-Scenario: Alert dispatched for unauthorised deploy: Release has no approved Feature Reviews
+Scenario: Release has no approved Feature Reviews
   Given an application called "frontend"
 
   # An authorised deploy
@@ -28,12 +28,12 @@ Scenario: Alert dispatched for unauthorised deploy: Release has no approved Feat
   And at time "2016-01-21 18:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"
   And the branch "master" is checked out
   And the branch "feature1" is merged with merge commit "#merge1" at "2016-01-22 16:14:39"
-  When commit "#merge1" of "frontend" is deployed by "Jeff" to production at "2016-01-22 17:34:20"
+  When commit "#merge1" of "frontend" is deployed by "Joe" to production at "2016-01-22 17:34:20"
   Then a deploy alert should be dispatched for
-    | app_name | version | time                   | deployer | message                                             |
-    | frontend | #merge1 | 2016-01-22 17:34+00:00 | Jeff     | release not authorised, Feature Review not approved |
+    | app_name | version | time                   | deployer | message                                              |
+    | frontend | #merge1 | 2016-01-22 17:34+00:00 | Joe      | Release not authorised; Feature Review not approved. |
 
-Scenario: Alert dispatched for unauthorised deploy: Rollback to an older software version
+Scenario: Rollback to an older software version
   Given an application called "frontend"
 
   # An authorised deploy
@@ -59,7 +59,7 @@ Scenario: Alert dispatched for unauthorised deploy: Rollback to an older softwar
   Then a deploy alert should not be dispatched
 
   # An unauthorised rollback deploy
-  When commit "#master1" of "frontend" is deployed by "Jeff" to production at "2016-03-21 16:34:20"
+  When commit "#master1" of "frontend" is deployed by "Joe" to production at "2016-03-21 16:34:20"
   Then a deploy alert should be dispatched for
-    | app_name | version  | time                      | deployer | message             |
-    | frontend | #master1 | 2016-03-21 16:34:20+00:00 | Jeff     | production rollback |
+    | app_name | version  | time                   | deployer | message                                             |
+    | frontend | #master1 | 2016-03-21 16:34+00:00 | Joe      | Old release deployed. Was the rollback intentional? |

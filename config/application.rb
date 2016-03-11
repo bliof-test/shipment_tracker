@@ -22,9 +22,9 @@ module ShipmentTracker
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
-  DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # Needed for older events without locale
-  DEFAULT_HEROKU_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us') # Not all Heroku apps have locale prefixed
-  # TODO: Move Rails config constants here
+  DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # For older events without locale
+  DEFAULT_HEROKU_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us') # When locale not prefixed
+  # TODO: Move our constants here. Keep Rails config for actual Rails configuration.
 
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.

@@ -6,7 +6,7 @@ RSpec.describe DeployAlertJob do
 
     let(:deploy_attrs) {
       {
-        new_deploy: {
+        current_deploy: {
           'id' => 1,
           'app_name' => 'frontend',
           'server' => 'test.com',
@@ -20,7 +20,7 @@ RSpec.describe DeployAlertJob do
     }
 
     let(:expected_deploy) {
-      Deploy.new(deploy_attrs[:new_deploy].merge(event_created_at: time))
+      Deploy.new(deploy_attrs[:current_deploy].merge(event_created_at: time))
     }
 
     it 'runs DeployAlert.audit_message with correct arguments' do

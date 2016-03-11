@@ -21,7 +21,7 @@ RSpec.describe Repositories::DeployRepository do
     }
     let(:expected_attrs) {
       {
-        new_deploy: {
+        current_deploy: {
           'id' => a_value > 0,
           'app_name' => 'frontend',
           'server' => 'test.com',

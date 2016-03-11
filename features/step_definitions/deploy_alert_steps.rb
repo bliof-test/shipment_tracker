@@ -4,7 +4,7 @@ Then 'a deploy alert should be dispatched for' do |table|
 
     expect(SlackNotifier).to have_received(:send).with(
       "GB Deploy Alert for #{app} at #{time}.\n"\
-      "#{deployer} deployed #{scenario_context.resolve_version(version)}, #{msg}.",
+      "#{deployer} deployed #{scenario_context.resolve_version(version)}. #{msg}",
       'general',
     )
   end

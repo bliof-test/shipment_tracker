@@ -6,13 +6,10 @@ class DeployAlertJob < ActiveJob::Base
   queue_as :default
 
   def perform(deploy_attrs)
-    new_deploy = Deploy.new(deploy_attrs[:new_deploy])
-    old_deploy = Deploy.new(deploy_attrs[:old_deploy]) if deploy_attrs[:old_deploy]
+    current_deploy = Deploy.new(deploy_attrs[:current_deploy])
+    previous_deploy = Deploy.new(deploy_attrs[:previous_deploy]) if deploy_attrs[:previous_deploy]
 
-    message = DeployAlert.audit_message(new_deploy, old_deploy)
-
-    return unless message
-
-    SlackNotifier.send(message, ShipmentTracker::DEPLOY_ALERT_SLACK_CHANNEL)
+    message = DeployAlert.audit_message(current_deploy, previous_deploy)
+    SlackNotifier.send(message, ShipmentTracker::DEPLOY_ALERT_SLACK_CHANNEL) if message
   end
 end

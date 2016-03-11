@@ -21,6 +21,10 @@ Metrics/LineLength:
 Metrics/MethodLength:
   Max: 15
 
+Metrics/ClassLength:
+  Exclude:
+    - 'app/models/git_repository.rb'
+
 Metrics/AbcSize:
   Max: 20
 
