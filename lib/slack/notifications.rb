@@ -17,7 +17,7 @@ class SlackNotifier
   private_class_method :attachment_for
 
   def self.prepend_hash(channel)
-    channel.start_with?('#') ? channel : channel.prepend('#')
+    channel.start_with?('#') ? channel : "##{channel}"
   end
   private_class_method :prepend_hash
 end
