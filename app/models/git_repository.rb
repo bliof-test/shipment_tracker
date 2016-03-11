@@ -21,6 +21,12 @@ class GitRepository
     false
   end
 
+  def ancestor_of?(ancestor, descendant)
+    rugged_repository.descendant_of?(descendant, ancestor)
+  rescue Rugged::ReferenceError
+    raise CommitNotFound
+  end
+
   def commits_between(from, to, simplify: false)
     instrument('commits_between') do
       validate_commit!(from) unless from.nil?
@@ -65,7 +71,8 @@ class GitRepository
     end
 
     dependent_commits + commits_between(common_ancestor_oid, commit_oid)[0...-1]
-  rescue CommitNotValid; []
+  rescue CommitNotValid
+    []
   end
 
   # Returns all commits that are children of the given commit
@@ -159,7 +166,8 @@ class GitRepository
 
   def validate_commit!(commit_oid)
     fail CommitNotFound, commit_oid unless rugged_repository.exists?(commit_oid)
-  rescue Rugged::InvalidError; raise CommitNotValid, commit_oid
+  rescue Rugged::InvalidError
+    raise CommitNotValid, commit_oid
   end
 
   def instrument(name, &block)
