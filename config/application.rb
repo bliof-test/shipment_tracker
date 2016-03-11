@@ -22,6 +22,8 @@ module ShipmentTracker
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
+  DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # Needed for older events without locale
+  DEFAULT_HEROKU_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us') # Not all Heroku apps have locale prefixed
   # TODO: Move Rails config constants here
 
   class Application < Rails::Application
@@ -48,12 +50,6 @@ module ShipmentTracker
     config.git_repository_cache_dir = Dir.tmpdir
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
     config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
-
-    # default value needed for older events without locale
-    config.default_deploy_locale = ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb')
-
-    # default value needed as not all heroku app names have the local as perfix
-    config.default_heroku_deploy_locale = ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us')
 
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
 

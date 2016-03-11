@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'events/deploy_event'
 
 RSpec.describe Events::DeployEvent do
   subject { Events::DeployEvent.new(details: payload) }

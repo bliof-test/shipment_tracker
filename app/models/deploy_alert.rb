@@ -14,22 +14,38 @@ class DeployAlert
 
     deploy_auditor = DeployAuditor.new(git_repo, new_deploy, previous_deploy)
 
-    return alert_not_on_master(new_deploy) if deploy_auditor.unknown_or_not_on_master?
-
-    alert_not_authorised(new_deploy) unless deploy_auditor.all_releases_authorised?
+    if deploy_auditor.unknown_version?
+      alert_unknown_version(new_deploy)
+    elsif deploy_auditor.not_on_master?
+      alert_not_on_master(new_deploy)
+    elsif !deploy_auditor.all_releases_authorised?
+      alert_not_authorised(new_deploy)
+    end
   end
 
   def self.alert_not_authorised(deploy)
-    time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
-    "deployed #{deploy.version || 'unknown'}, release not authorised."
+    alert_header(deploy).concat(
+      "#{deploy.deployed_by} deployed #{deploy.version}, release not authorised, Feature Review not approved."
+    )
   end
 
   def self.alert_not_on_master(deploy)
-    time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
-    "deployed #{deploy.version || 'unknown'} not on master branch."
+    alert_header(deploy).concat(
+      "#{deploy.deployed_by} deployed #{deploy.version} which is not on GitHub master branch."
+    )
   end
+
+  def self.alert_unknown_version(deploy)
+    alert_header(deploy).concat(
+      "#{deploy.deployed_by} deployed but deploy event did not contain a software version."
+    )
+  end
+
+  def self.alert_header(deploy)
+    time = deploy.event_created_at.strftime('%F %H:%M%:z')
+    "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n"
+  end
+  private_class_method :alert_header
 
   class DeployAuditor
     def initialize(git_repo, new_deploy, previous_deploy = nil)
@@ -38,8 +54,12 @@ class DeployAlert
       @previous_deploy = previous_deploy
     end
 
-    def unknown_or_not_on_master?
-      @new_deploy.version.nil? || !@git_repo.commit_on_master?(@new_deploy.version)
+    def not_on_master?
+      !@git_repo.commit_on_master?(@new_deploy.version)
+    end
+
+    def unknown_version?
+      @new_deploy.version.nil?
     end
 
     def all_releases_authorised?

@@ -86,7 +86,7 @@ RSpec.describe DeployAlert do
 
       let(:expected_message) {
         "GB Deploy Alert for frontend at 2016-02-15 15:57+01:00.\n" \
-        "user1 deployed #{sha} not on master branch."
+        "user1 deployed #{sha} which is not on GitHub master branch."
       }
 
       before do
@@ -114,7 +114,7 @@ RSpec.describe DeployAlert do
 
       let(:expected_message) {
         "US Deploy Alert for frontend at 2016-02-15 15:57+01:00.\n" \
-        'user1 deployed unknown not on master branch.'
+        'user1 deployed but deploy event did not contain a software version.'
       }
 
       before do
@@ -155,7 +155,7 @@ RSpec.describe DeployAlert do
 
         let(:expected_message) {
           "US Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
-          'deployer deployed #abc, release not authorised.'
+          'deployer deployed #abc, release not authorised, Feature Review not approved.'
         }
 
         it 'returns an alert message' do
@@ -214,7 +214,7 @@ RSpec.describe DeployAlert do
 
         let(:expected_message) {
           "FOO Deploy Alert for fca at #{time.strftime('%F %H:%M%:z')}.\n"\
-          'deployer deployed #abc, release not authorised.'
+          'deployer deployed #abc, release not authorised, Feature Review not approved.'
         }
 
         it 'returns an alert message' do
