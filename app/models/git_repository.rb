@@ -21,16 +21,12 @@ class GitRepository
     false
   end
 
-  def commits_between(from, to)
+  def commits_between(from, to, simplify: false)
     instrument('commits_between') do
       validate_commit!(from) unless from.nil?
       validate_commit!(to)
 
-      walker = Rugged::Walker.new(rugged_repository)
-      walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE) # optional
-      walker.push(to)
-      walker.hide(from) if from
-
+      walker = get_walker(to, from, simplify)
       build_commits(walker)
     end
   end
@@ -42,6 +38,10 @@ class GitRepository
     walker.simplify_first_parent
 
     build_commits(walker.take(count))
+  end
+
+  def commit_for_version(sha)
+    build_commit(lookup(sha))
   end
 
   # Returns "dependent commits" given a commit sha from a topic branch.
@@ -130,7 +130,7 @@ class GitRepository
     walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE)
     walker.simplify_first_parent if simplify
     walker.push(push_commit_oid)
-    walker.hide(hide_commit_oid)
+    walker.hide(hide_commit_oid) if hide_commit_oid
     walker
   end
 

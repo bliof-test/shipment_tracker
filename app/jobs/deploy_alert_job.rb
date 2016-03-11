@@ -6,10 +6,13 @@ class DeployAlertJob < ActiveJob::Base
   queue_as :default
 
   def perform(deploy_attrs)
-    deploy = Deploy.new(deploy_attrs)
-    message = DeployAlert.audit(deploy)
+    new_deploy = Deploy.new(deploy_attrs[:new_deploy])
+    old_deploy = Deploy.new(deploy_attrs[:old_deploy]) if deploy_attrs[:old_deploy]
+
+    message = DeployAlert.audit_message(new_deploy, old_deploy)
+
     return unless message
-    Rails.logger.warn message
-    SlackNotifier.send(message, '#blackbat')
+
+    SlackNotifier.send(message, ShipmentTracker::DEPLOY_ALERT_SLACK_CHANNEL)
   end
 end

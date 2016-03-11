@@ -144,6 +144,16 @@ RSpec.describe GitRepository do
     end
   end
 
+  describe '#commit_for_version' do
+    let(:git_diagram) { '-A' }
+
+    it 'returns a GitCommit object for a given sha' do
+      commit = subject.commit_for_version(version('A'))
+      expect(commit).to be_kind_of(GitCommit)
+      expect(commit.id).to eq version('A')
+    end
+  end
+
   describe '#get_descendant_commits_of_branch' do
     context "when given commit is part of a branch that's merged into master" do
       let(:git_diagram) do

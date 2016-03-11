@@ -4,7 +4,8 @@ module Queries
   class ReleasesQuery
     attr_reader :pending_releases, :deployed_releases
 
-    def initialize(per_page:, region:, git_repo:, app_name:)
+    def initialize(per_page:, region:, git_repo:, app_name:, commits: nil)
+      @commits = commits
       @per_page = per_page
       @region = region
       @git_repository = git_repo

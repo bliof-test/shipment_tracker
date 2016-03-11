@@ -4,6 +4,7 @@ Feature: Viewing Releases
   I want to view all releases for a given application
   So I know which versions are safe to deploy and which versions have already been deployed
 
+@mock_slack_notifier
 Scenario: Viewing releases for an app
   # 2014-09-28 - application creation
   Given an application called "frontend"

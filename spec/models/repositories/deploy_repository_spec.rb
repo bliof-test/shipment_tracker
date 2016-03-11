@@ -21,16 +21,23 @@ RSpec.describe Repositories::DeployRepository do
     }
     let(:expected_attrs) {
       {
-        'id' => a_value > 0,
-        'app_name' => 'frontend',
-        'server' => 'test.com',
-        'version' => 'xyz',
-        'deployed_by' => 'Bob',
-        'event_created_at' => '',
-        'environment' => environment,
-        'region' => 'us',
+        new_deploy: {
+          'id' => a_value > 0,
+          'app_name' => 'frontend',
+          'server' => 'test.com',
+          'version' => 'xyz',
+          'deployed_by' => 'Bob',
+          'event_created_at' => '',
+          'environment' => environment,
+          'region' => 'us',
+        },
+        previous_deploy: nil,
       }
     }
+
+    before do
+      allow(DeployAlert).to receive(:auditable?).and_return(true)
+    end
 
     it 'schedules a DeployAlertJob' do
       expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)
@@ -211,7 +218,6 @@ RSpec.describe Repositories::DeployRepository do
 
   describe '#last_staging_deploy_for_version' do
     let(:version) { 'abc' }
-    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', region: 'de', environment: 'uat' } }
     let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de', environment: 'uat' } }
 
     context 'when no deploy exist' do
@@ -262,6 +268,44 @@ RSpec.describe Repositories::DeployRepository do
         expect(repository.last_staging_deploy_for_version(version)).to eq(
           Deploy.new(defaults.merge(server: 'c', version: version, region: 'de')),
         )
+      end
+    end
+  end
+
+  describe '#second_last_production_deploy' do
+    let(:defaults) {
+      {
+        server: 'a',
+        app_name: 'frontend',
+        deployed_by: 'Bob',
+        locale: 'gb',
+        environment: 'production',
+      }
+    }
+
+    context 'when no deploy exist' do
+      it 'returns nil' do
+        expect(repository.second_last_production_deploy('frontend', 'gb')).to be nil
+      end
+    end
+
+    context 'when a deploy exists for the app and region' do
+      before do
+        [
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'ccc')),
+          build(:deploy_event, defaults.merge(version: 'bbb')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'def', locale: 'us')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'eee')),
+          build(:deploy_event, defaults.merge(version: 'ccc')),
+        ].each do |deploy|
+          repository.apply(deploy)
+        end
+      end
+
+      it 'returns the second latest production deploy for the app_name and region' do
+        deploy = repository.second_last_production_deploy('backend', 'gb')
+        expect(deploy.version).to eq 'ccc'
+        expect(deploy.region).to eq 'gb'
       end
     end
   end
