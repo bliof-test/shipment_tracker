@@ -1,5 +1,5 @@
-require 'slack/notifications'
+require 'clients/slack'
 
 Before('@mock_slack_notifier') do
-  allow(SlackNotifier).to receive(:send)
+  allow(SlackClient).to receive(:send_deploy_alert)
 end
