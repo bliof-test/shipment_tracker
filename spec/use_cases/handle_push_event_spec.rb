@@ -32,6 +32,13 @@ RSpec.describe HandlePushEvent do
       expect(result).to fail_with(:repo_not_under_audit)
     end
 
+    it 'fails if event is for pushing an annotated tag' do
+      github_payload = instance_double(Payloads::Github, push_annotated_tag?: true, branch_deleted?: false)
+
+      result = HandlePushEvent.run(github_payload)
+      expect(result).to fail_with(:annotated_tag)
+    end
+
     context 'when branch is deleted' do
       let(:payload_data) { default_payload_data.merge('deleted' => true) }
 

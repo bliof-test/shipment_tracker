@@ -24,6 +24,10 @@ module Payloads
       @data.dig('repository', 'full_name')
     end
 
+    def push_annotated_tag?
+      !!(ref&.start_with?('refs/tags/') && base_ref.nil?)
+    end
+
     def push_to_master?
       @data['ref'] == 'refs/heads/master'
     end
@@ -34,6 +38,16 @@ module Payloads
 
     def branch_deleted?
       @data['deleted']
+    end
+
+    private
+
+    def ref
+      @data['ref']
+    end
+
+    def base_ref
+      @data['base_ref']
     end
   end
 end
