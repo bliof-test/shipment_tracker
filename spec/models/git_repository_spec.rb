@@ -38,6 +38,37 @@ RSpec.describe GitRepository do
     end
   end
 
+  describe '#ancestor_of?' do
+    let(:git_diagram) { '-A-B-C-o' }
+
+    context 'when commit is an ancestor' do
+      it 'returns true' do
+        expect(repo.ancestor_of?(version('A'), version('C'))).to be true
+      end
+    end
+
+    context 'when commit is not an ancestor' do
+      it 'returns false' do
+        expect(repo.ancestor_of?(version('C'), version('A'))).to be false
+      end
+    end
+
+    context 'when given the same commit' do
+      it 'returns false' do
+        expect(repo.ancestor_of?(version('B'), version('B'))).to be false
+      end
+    end
+
+    context 'when either commit does not exist in repository' do
+      it 'raises' do
+        aggregate_failures do
+          expect { repo.ancestor_of?('unknown', version('C')) }.to raise_error(GitRepository::CommitNotFound)
+          expect { repo.ancestor_of?(version('A'), 'unknown') }.to raise_error(GitRepository::CommitNotFound)
+        end
+      end
+    end
+  end
+
   describe '#commits_between' do
     let(:git_diagram) { '-A-B-C-o' }
 

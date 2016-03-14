@@ -40,9 +40,9 @@ module Events
 
     def default_locale
       if deployed_to_heroku?
-        Rails.configuration.default_heroku_deploy_locale
+        ShipmentTracker::DEFAULT_HEROKU_DEPLOY_LOCALE
       else
-        Rails.configuration.default_deploy_locale
+        ShipmentTracker::DEFAULT_DEPLOY_LOCALE
       end
     end
 

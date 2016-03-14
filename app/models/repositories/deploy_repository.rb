@@ -40,11 +40,11 @@ module Repositories
 
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
-      new_deploy = create_deploy_snapshot(event)
+      current_deploy = create_deploy_snapshot!(event)
 
-      if DeployAlert.auditable?(new_deploy) && !Rails.configuration.data_maintenance_mode
-        previous_deploy = second_last_production_deploy(new_deploy.app_name, new_deploy.region)
-        audit_deploy(new_deploy: new_deploy.attributes, previous_deploy: previous_deploy&.attributes)
+      if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
+        previous_deploy = second_last_production_deploy(current_deploy.app_name, current_deploy.region)
+        audit_deploy(current_deploy: current_deploy.attributes, previous_deploy: previous_deploy&.attributes)
       end
     end
 
@@ -52,7 +52,7 @@ module Repositories
 
     attr_reader :store
 
-    def create_deploy_snapshot(event)
+    def create_deploy_snapshot!(event)
       store.create!(
         app_name: event.app_name,
         server: event.server,
@@ -65,7 +65,7 @@ module Repositories
     end
 
     def audit_deploy(deploys_attrs)
-      deploy_time_to_s(deploys_attrs[:new_deploy])
+      deploy_time_to_s(deploys_attrs[:current_deploy])
       deploy_time_to_s(deploys_attrs[:previous_deploy])
       DeployAlertJob.perform_later(deploys_attrs)
     end

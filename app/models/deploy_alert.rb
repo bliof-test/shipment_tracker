@@ -5,57 +5,78 @@ require 'git_repository_location'
 class DeployAlert
   attr_reader :deploy_env
 
-  def self.auditable?(new_deploy)
-    new_deploy.environment == 'production' && GitRepositoryLocation.app_names.include?(new_deploy.app_name)
+  def self.auditable?(current_deploy)
+    return false unless current_deploy.environment == 'production'
+    GitRepositoryLocation.app_names.include?(current_deploy.app_name)
   end
 
-  def self.audit_message(new_deploy, previous_deploy = nil)
-    git_repo = GitRepositoryLoader.from_rails_config.load(new_deploy.app_name)
+  def self.audit_message(current_deploy, previous_deploy = nil)
+    deploy_auditor = DeployAuditor.new(current_deploy, previous_deploy)
 
-    deploy_auditor = DeployAuditor.new(git_repo, new_deploy, previous_deploy)
-
-    return alert_not_on_master(new_deploy) if deploy_auditor.unknown_or_not_on_master?
-
-    alert_not_authorised(new_deploy) unless deploy_auditor.all_releases_authorised?
+    if deploy_auditor.unknown_version?
+      alert_unknown_version(current_deploy)
+    elsif deploy_auditor.not_on_master?
+      alert_not_on_master(current_deploy)
+    elsif deploy_auditor.rollback?
+      alert_rollback(current_deploy)
+    elsif !deploy_auditor.recent_releases_authorised?
+      alert_not_authorised(current_deploy)
+    end
   end
 
   def self.alert_not_authorised(deploy)
-    time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
-    "deployed #{deploy.version || 'unknown'}, release not authorised."
+    alert_header(deploy).concat('Release not authorised; Feature Review not approved.')
   end
 
   def self.alert_not_on_master(deploy)
-    time = deploy.event_created_at.strftime('%F %H:%M%:z')
-    "#{deploy.region&.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n#{deploy.deployed_by} " \
-    "deployed #{deploy.version || 'unknown'} not on master branch."
+    alert_header(deploy).concat('Version does not exist on GitHub master branch.')
   end
 
+  def self.alert_unknown_version(deploy)
+    alert_header(deploy).concat('Deploy event sent to Shipment Tracker is missing the software version.')
+  end
+
+  def self.alert_rollback(deploy)
+    alert_header(deploy).concat('Old release deployed. Was the rollback intentional?')
+  end
+
+  def self.alert_header(deploy)
+    time = deploy.event_created_at.strftime('%F %H:%M%:z')
+    "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n" \
+    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}. "
+  end
+  private_class_method :alert_header
+
   class DeployAuditor
-    def initialize(git_repo, new_deploy, previous_deploy = nil)
-      @git_repo = git_repo
-      @new_deploy = new_deploy
+    def initialize(current_deploy, previous_deploy = nil)
+      @current_deploy = current_deploy
       @previous_deploy = previous_deploy
+      @git_repo = GitRepositoryLoader.from_rails_config.load(current_deploy.app_name)
     end
 
-    def unknown_or_not_on_master?
-      @new_deploy.version.nil? || !@git_repo.commit_on_master?(@new_deploy.version)
+    def not_on_master?
+      !git_repo.commit_on_master?(current_deploy.version)
     end
 
-    def all_releases_authorised?
-      release_query = release_query_for(
-        auditable_commits,
-        @new_deploy.region,
-        @git_repo,
-        @new_deploy.app_name,
-      )
+    def unknown_version?
+      current_deploy.version.nil?
+    end
 
+    def rollback?
+      return false unless previous_deploy
+      git_repo.ancestor_of?(current_deploy.version, previous_deploy.version)
+    end
+
+    def recent_releases_authorised?
+      release_query = release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name)
       release_query.deployed_releases.all?(&:authorised?)
     end
 
     private
 
-    def release_query_for(auditable_commits, region, git_repo, app_name)
+    attr_reader :current_deploy, :previous_deploy, :git_repo
+
+    def release_query_for(auditable_commits, region, app_name)
       Queries::ReleasesQuery.new(
         per_page: auditable_commits.size,
         region: region,
@@ -66,10 +87,10 @@ class DeployAlert
     end
 
     def auditable_commits
-      @commits ||= if @previous_deploy
-                     @git_repo.commits_between(@previous_deploy.version, @new_deploy.version, simplify: true)
+      @commits ||= if previous_deploy
+                     git_repo.commits_between(previous_deploy.version, current_deploy.version, simplify: true)
                    else
-                     [@git_repo.commit_for_version(@new_deploy.version)]
+                     [git_repo.commit_for_version(current_deploy.version)]
                    end
     end
   end
