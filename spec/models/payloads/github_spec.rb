@@ -102,23 +102,56 @@ RSpec.describe Payloads::Github do
     end
   end
 
+  describe '#push_annotated_tag?' do
+    context 'when payload has insufficient data' do
+      it 'returns false' do
+        payload = Payloads::Github.new('some_key' => 'some_value')
+
+        expect(payload.push_annotated_tag?).to be false
+      end
+    end
+
+    context 'when payload is for a commit' do
+      it 'returns false' do
+        data = { 'ref' => 'refs/heads/some-branch', 'base_ref' => nil }
+        payload = Payloads::Github.new(data)
+
+        expect(payload.push_annotated_tag?).to be false
+      end
+    end
+
+    context 'when payload is for a lightweight tag' do
+      it 'returns false' do
+        data = { 'ref' => 'refs/tags/lightweight-tag', 'base_ref' => 'refs/heads/master' }
+        payload = Payloads::Github.new(data)
+
+        expect(payload.push_annotated_tag?).to be false
+      end
+    end
+
+    context 'when payload is for an annotated tag' do
+      it 'returns true' do
+        data = { 'ref' => 'refs/tags/annotated-tag', 'base_ref' => nil }
+        payload = Payloads::Github.new(data)
+
+        expect(payload.push_annotated_tag?).to be true
+      end
+    end
+  end
+
   describe '#push_to_master?' do
     context 'when payload references master branch' do
       it 'returns true' do
-        data = {
-          'ref' => 'refs/heads/master',
-        }
-        payload = Payloads::Github.new(data)
+        payload = Payloads::Github.new('ref' => 'refs/heads/master')
+
         expect(payload.push_to_master?).to be true
       end
     end
 
     context 'when payload does not reference master branch' do
-      it 'returns true' do
-        data = {
-          'ref' => 'refs/heads/changes',
-        }
-        payload = Payloads::Github.new(data)
+      it 'returns false' do
+        payload = Payloads::Github.new('ref' => 'refs/heads/topic-branch')
+
         expect(payload.push_to_master?).to be false
       end
     end

@@ -62,4 +62,7 @@ Style/SignalException:
 Style/FrozenStringLiteralComment:
   Enabled: false  # TODO: Enable in separate PR.
 
+Style/DoubleNegation:
+  Enabled: false
+
 inherit_from: .rubocop_todo.yml
