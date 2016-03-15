@@ -52,8 +52,8 @@ module Support
       @application
     end
 
-    def create_and_start_ticket(key:, summary:, time: nil)
-      ticket_details1 = { key: key, summary: summary, status: 'To Do' }
+    def create_and_start_ticket(key:, summary:, description: '', time: Time.current.to_s)
+      ticket_details1 = { key: key, summary: summary, description: description, status: 'To Do' }
       ticket_details2 = ticket_details1.merge(status: 'In Progress')
 
       [ticket_details1, ticket_details2].each do |ticket_details|

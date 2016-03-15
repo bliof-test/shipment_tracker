@@ -6,6 +6,16 @@ Given 'a ticket "$key" with summary "$summary" is started at "$time"' do |key, s
   )
 end
 
+Given 'the following tickets are created:' do |tickets_table|
+  tickets_table.hashes.each do |ticket_row|
+    scenario_context.create_and_start_ticket(
+      key: ticket_row['Jira Key'],
+      summary: ticket_row['Summary'],
+      description: ticket_row['Description'],
+    )
+  end
+end
+
 Given 'at time "$a" adds link for review "$b" to comment for ticket "$c"' do |time, nickname, jira_key|
   scenario_context.link_ticket_and_feature_review(
     jira_key: jira_key,

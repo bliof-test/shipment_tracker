@@ -1,0 +1,22 @@
+- title 'Manifest'
+%p
+  Find releases.
+%form.form-inline{"accept-charset" => "UTF-8", :action => "/", :method => "get"}
+  %input{:name => "preview", :type => "hidden", :value => "true"}/
+  .form-group
+    %label.control-label.sr-only{:for => "q"} Search for deployed tickets:
+    %input#jira_key.form-control{:name => "q", :placeholder => "keywords in ticket description", :required => "required", :style => "width:700px;", :type => "text", :value => @query}/
+  %input.btn.btn-primary{:type => "submit", :value => "Search"}/
+
+%h2= "Results for '#{@query}'"
+- @results.in_groups_of(3) do | results_row |
+  .row
+    - results_row.compact.each do | result |
+      .col-md-4
+        .panel.panel-default.result
+          .panel-heading.summary= result['Summary']
+          .panel-body
+            = simple_format(result['Description'], class: 'description')
+            %p
+            %p.key
+              %a{:href => "#"}= result["Jira Key"]
