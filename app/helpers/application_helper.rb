@@ -43,7 +43,7 @@ module ApplicationHelper
 
   def help_link_icon(url, align_right)
     classes = 'a.glyphicon.glyphicon-question-sign'
-    classes << '.pull-right' if align_right
+    classes = "#{classes}.pull-right" if align_right
     haml_tag(
       classes,
       href: url, target: '_blank', title: 'Help',
