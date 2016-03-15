@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Before do
   OmniAuth.config.test_mode = true
 end

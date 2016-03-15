@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class EventTypeRepository
   def initialize(event_types)
     @event_types = event_types

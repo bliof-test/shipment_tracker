@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 When 'I look up feature reviews for "$version" on "$app"' do |version, app|
   sha = scenario_context.resolve_version(version)
   feature_review_search_page.search_for(app: app, version: sha)

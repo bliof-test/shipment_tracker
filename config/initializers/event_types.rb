@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Rails.application.config.event_types = [
   EventType.new(
     name: 'CircleCI (webhook)',

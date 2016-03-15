@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module FeatureReviewsHelper
   def table(headers: [], classes: nil, &block)
     haml_tag('table.table.table-striped', class: classes) do

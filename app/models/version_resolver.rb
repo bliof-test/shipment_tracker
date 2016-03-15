@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class VersionResolver
   def initialize(git_repository)
     @git_repository = git_repository
