@@ -5,5 +5,6 @@ module Snapshots
     store_accessor :version_timestamps
 
     include PgSearch
+    pg_search_scope :search_for, against: [:summary, :status]
   end
 end
