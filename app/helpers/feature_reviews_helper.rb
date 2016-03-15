@@ -46,7 +46,7 @@ module FeatureReviewsHelper
 
   def feature_status(feature_review)
     status = "Feature Status: #{feature_review.authorisation_status.to_s.humanize}"
-    status << " at #{feature_review.tickets_approved_at}" if feature_review.authorised?
+    status = "#{status} at #{feature_review.tickets_approved_at}" if feature_review.authorised?
     status
   end
 
