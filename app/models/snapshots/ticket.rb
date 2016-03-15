@@ -5,6 +5,19 @@ module Snapshots
     store_accessor :version_timestamps
 
     include PgSearch
-    pg_search_scope :search_for, against: [:summary, :status]
+
+    IGNORE_DOCUMENT_LENGTH = 0
+
+    pg_search_scope :search_for,
+                    against: { summary: 'A', status: 'D' },
+                    using: {
+                      tsearch: {
+                        prefix: true,
+                        negation: true,
+                        dictionary: 'english',
+                        normalization: IGNORE_DOCUMENT_LENGTH,
+                        any_world: false, # false is default
+                      }
+                    }
   end
 end
