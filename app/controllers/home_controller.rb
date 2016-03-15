@@ -3,7 +3,8 @@ class HomeController < ApplicationController
 
   def index
     @query = params[:q]
-    @results = released_ticket_repo.tickets_for_query(@query)
+    # TODO: remove filter selection below [..]
+    @tickets = released_ticket_repo.tickets_for_query(@query)[1..2].reverse
     render 'dashboard' if params[:preview] == 'true'
   end
 

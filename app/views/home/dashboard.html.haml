@@ -9,14 +9,14 @@
   %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
 %h2= "Results for '#{@query}'"
-- @results.in_groups_of(3) do | results_row |
+- @tickets.in_groups_of(3) do | tickets_row |
   .row
-    - results_row.compact.each do | result |
+    - tickets_row.compact.each do | ticket |
       .col-md-4
         .panel.panel-default.result
-          .panel-heading.summary= result['Summary']
+          .panel-heading.summary= ticket.summary
           .panel-body
-            = simple_format(result['Description'], class: 'description')
+            = simple_format(ticket.description, class: 'description')
             %p
             %p.key
-              %a{:href => "#"}= result["Jira Key"]
+              %a{:href => "#"}= ticket.key
