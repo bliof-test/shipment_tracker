@@ -3,12 +3,13 @@ class HomeController < ApplicationController
 
   def index
     @query = params[:q]
-    @results = [
-      { 'Jira Key' => 'ENG-2', 'Summary' => 'Make another task',
-        'Description' => "As a User\r\n implement another task" },
-      { 'Jira Key' => 'ENG-2', 'Summary' => 'Make another story',
-        'Description' => "As a User\r\n implement another story" },
-    ]
+    @results = released_ticket_repo.tickets_for_query(@query)
     render 'dashboard' if params[:preview] == 'true'
+  end
+
+  private
+
+  def released_ticket_repo
+    Repositories::ReleasedTicketRepository.new
   end
 end
