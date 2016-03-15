@@ -8,15 +8,19 @@
     %input#jira_key.form-control{:name => "q", :placeholder => "keywords in ticket description", :required => "required", :style => "width:700px;", :type => "text", :value => @query}/
   %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
-%h2= "Results for '#{@query}'"
-- @tickets.in_groups_of(3) do | tickets_row |
-  .row
-    - tickets_row.compact.each do | ticket |
-      .col-md-4
-        .panel.panel-default.result
-          .panel-heading.summary= ticket.summary
-          .panel-body
-            = simple_format(ticket.description, class: 'description')
-            %p
-            %p.key
-              %a{:href => "#"}= ticket.key
+- if @query
+  - if @tickets.any?
+    %h2= "Results for '#{@query}'"
+  -else
+    %h2= "No results for '#{@query}' :/"
+  - @tickets.in_groups_of(3) do | tickets_row |
+    .row
+      - tickets_row.compact.each do | ticket |
+        .col-md-4
+          .panel.panel-default.result
+            .panel-heading.summary= ticket.summary
+            .panel-body
+              = simple_format(ticket.description, class: 'description')
+              %p
+              %p.key
+                = jira_link(ticket.key)

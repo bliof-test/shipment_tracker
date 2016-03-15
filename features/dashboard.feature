@@ -1,3 +1,4 @@
+@logged_in
 Feature: Searching for releases on Dashboard
 
   As a user,

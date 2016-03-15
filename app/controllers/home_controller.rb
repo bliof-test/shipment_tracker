@@ -1,11 +1,10 @@
 class HomeController < ApplicationController
-  skip_before_action :require_authentication
-
   def index
+    return unless params[:preview] == 'true'
+
     @query = params[:q]
-    # TODO: remove filter selection below [..]
-    @tickets = released_ticket_repo.tickets_for_query(@query)[1..2].reverse
-    render 'dashboard' if params[:preview] == 'true'
+    @tickets = released_ticket_repo.tickets_for_query(@query)
+    render 'dashboard'
   end
 
   private
