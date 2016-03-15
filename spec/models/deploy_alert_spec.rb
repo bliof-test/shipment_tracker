@@ -198,7 +198,7 @@ RSpec.describe DeployAlert do
   def message(deploy, reason)
     "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} " \
     "at #{deploy.event_created_at.strftime('%F %H:%M%:z')}.\n"\
-    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}. " << reason
+    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}. #{reason}"
   end
 
   def version(pretend_version)
