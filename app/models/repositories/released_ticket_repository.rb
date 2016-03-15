@@ -12,10 +12,10 @@ module Repositories
 
     delegate :table_name, to: :store
 
-    def tickets_for_query(_query)
-      results = store.all.map { |t| Ticket.new(t.attributes) }
-      # TODO: remove filter selection below [..]
-      results.any? ? results[1..2].reverse : results
+    def tickets_for_query(query)
+      store.search_for(query).map {|t|
+        Ticket.new(t.attributes)
+      }
     end
 
     def apply(event)
