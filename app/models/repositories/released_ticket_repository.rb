@@ -13,9 +13,7 @@ module Repositories
     delegate :table_name, to: :store
 
     def tickets_for_query(query)
-      store.search_for(query).map {|t|
-        Ticket.new(t.attributes)
-      }
+      store.search_for(query).map { |t| Ticket.new(t.attributes) }
     end
 
     def apply(event)

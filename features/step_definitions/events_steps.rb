@@ -13,6 +13,30 @@ Given 'the following tickets are created:' do |tickets_table|
       summary: ticket_row['Summary'],
       description: ticket_row['Description'],
     )
+
+    deploys = ticket_row['Deploys']
+    unless deploys.empty?
+      date, time, app_name, sha = deploys.split
+      datetime = Time.zone.parse("#{date} #{time}")
+      fr = "FR_#{app_name}"
+      ticket = ticket_row['Jira Key']
+
+      steps %Q{
+        Given an application called "#{app_name}"
+
+        And a commit "#{sha}" by "Alice" is created at "#{(datetime - 3.hours).to_s}" for app "#{app_name}"
+
+        And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
+          | app_name    | version |
+          | #{app_name} | #{sha}  |
+
+        And at time "#{(datetime - 2.hours).to_s}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
+
+        And ticket "#{ticket}" is approved by "bob@fundingcircle.com" at "#{(datetime - 1.hour).to_s}"
+
+        And commit "#{sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime.to_s}"
+      }
+    end
   end
 end
 
