@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'rugged'
 require 'active_support/inflector/transliterate'
 

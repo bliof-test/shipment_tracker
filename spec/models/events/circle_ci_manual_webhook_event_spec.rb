@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'rails_helper'
 require 'support/shared_examples/test_build_examples'
 

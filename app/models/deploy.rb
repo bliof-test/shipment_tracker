@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 class Deploy
   include Virtus.value_object
 

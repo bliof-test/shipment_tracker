@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 class ReleasesController < ApplicationController
   before_action :force_html_format, only: :show
 

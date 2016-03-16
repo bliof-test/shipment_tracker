@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'support/git_test_repository'
 require 'time'
 

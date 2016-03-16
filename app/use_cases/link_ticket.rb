@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'repositories/ticket_repository'
 require 'clients/jira'
 

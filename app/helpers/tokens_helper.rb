@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module TokensHelper
   def token_link(source:, token:)
     if source == 'github_notifications'

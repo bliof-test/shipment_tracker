@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 Given 'a ticket "$key" with summary "$summary" is started at "$time"' do |key, summary, time|
   scenario_context.create_and_start_ticket(
     key: key,

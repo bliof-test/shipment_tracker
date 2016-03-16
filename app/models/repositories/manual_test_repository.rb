@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'events/manual_test_event'
 require 'qa_submission'
 require 'snapshots/manual_test'

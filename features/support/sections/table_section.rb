@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Sections
   class TableSection
     def initialize(table_element, icon_translations: {})

@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'events/deploy_event'
 require 'snapshots/deploy'
 require 'deploy'

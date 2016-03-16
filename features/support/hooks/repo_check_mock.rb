@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'clients/github'
 
 Before('@disable_repo_verification') do

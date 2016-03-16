@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 Rails.configuration.repositories = [
   Repositories::DeployRepository.new,
   Repositories::BuildRepository.new,

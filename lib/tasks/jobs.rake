@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 namespace :jobs do
   def already_running?(pid_path)
     pid = File.read(pid_path)

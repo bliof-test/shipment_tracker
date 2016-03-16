@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'support/git_test_repository'
 require 'support/feature_review_helpers'
 require 'git_repository_location'

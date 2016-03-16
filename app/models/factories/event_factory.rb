@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Factories
   class EventFactory
     def initialize(event_type_repository)
