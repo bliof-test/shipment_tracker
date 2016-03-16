@@ -21,9 +21,8 @@ module Repositories
     def apply(event)
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
-      last_ticket = previous_ticket_data(event.key)
-      new_ticket = build_ticket(last_ticket, event)
-      store.create_or_update(new_ticket)
+      record = store.find_or_create_by('key' => event.key)
+      record.update_attributes(build_ticket(record.attributes, event))
     end
 
     private
