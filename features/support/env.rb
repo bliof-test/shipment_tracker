@@ -66,7 +66,7 @@ end
 # https://github.com/cucumber/cucumber-rails/blob/master/features/choose_javascript_database_strategy.feature
 Cucumber::Rails::Database.javascript_strategy = :deletion
 
-Around do |scenario, block|
+Around do |_scenario, block|
   DatabaseCleaner.cleaning(&block)
 end
 
