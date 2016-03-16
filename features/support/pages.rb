@@ -20,6 +20,13 @@ module Pages
     )
   end
 
+  def dashboard_page
+    Pages::DashboardPage.new(
+      page: page,
+      url_helpers: Rails.application.routes.url_helpers,
+    )
+  end
+
   def feature_review_search_page
     Pages::FeatureReviewSearchPage.new(
       page: page,

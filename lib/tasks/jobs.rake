@@ -28,14 +28,35 @@ namespace :jobs do
   task recreate_snapshots: :environment do
     manage_pid pid_path_for('jobs_recreate_snapshots')
 
-    puts "[#{Time.current}] Running recreate_snapshots"
-    updater = Repositories::Updater.from_rails_config
+    repos = Rails.configuration.repositories.dup
+    released_tickets_repo = repos.select {|repo| repo.table_name == 'released_tickets'}.first
+    repos.delete(released_tickets_repo)
 
-    repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
-    updater.reset
+    t1=Thread.new{
+      puts "[#{Time.current}] Running recreate_snapshots for #{repos.map(&:table_name)}"
+      updater = Repositories::Updater.new(repos)
 
-    updater.run(repo_event_id_hash)
-    puts "[#{Time.current}] Completed recreate_snapshots"
+      repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
+      updater.reset
+
+      updater.run(repo_event_id_hash)
+      puts "[#{Time.current}] Completed recreate_snapshots for #{repos.map(&:table_name)}"
+
+    }
+
+    t2=Thread.new{
+      puts "[#{Time.current}] Running recreate_snapshots for #{released_tickets_repo.table_name}"
+      updater = Repositories::Updater.new([released_tickets_repo])
+
+      repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
+      updater.reset
+
+      updater.run(repo_event_id_hash)
+      puts "[#{Time.current}] Completed recreate_snapshots for #{released_tickets_repo.table_name}"
+    }
+
+    t1.join
+    t2.join
   end
 
   desc 'Continuously updates event cache'

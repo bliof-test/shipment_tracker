@@ -7,6 +7,7 @@ FactoryGirl.define do
       sequence(:key) { |n| "JIRA-#{n}" }
 
       summary ''
+      description ''
       display_name 'joe'
       user_email 'joe.bloggs@example.com'
       status 'To Do'
@@ -27,6 +28,7 @@ FactoryGirl.define do
             'key' => key,
             'fields' => {
               'summary' => summary,
+              'description' => description,
               'status' => { 'name' => status },
               'updated' => updated,
             },
