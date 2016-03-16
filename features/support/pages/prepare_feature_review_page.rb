@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Pages
   class PrepareFeatureReviewPage
     def initialize(page:, url_helpers:)

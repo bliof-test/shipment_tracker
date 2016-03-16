@@ -59,6 +59,9 @@ Style/SignalException:
   Exclude:
     - 'app/use_cases/link_ticket.rb'
 
+Style/FrozenStringLiteralComment:
+  Enabled: false  # TODO: Enable in separate PR.
+
 Style/DoubleNegation:
   Enabled: false
 

@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'events/circle_ci_manual_webhook_event'
 
 FactoryGirl.define do

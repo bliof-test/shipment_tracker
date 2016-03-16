@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'repositories/deploy_repository'
 require 'snapshots/uatest'
 require 'events/uat_event'

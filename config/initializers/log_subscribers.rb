@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'log_subscribers/git_controller_runtime'
 require 'log_subscribers/git_repository_loader_subscriber'
 require 'log_subscribers/git_repository_subscriber'

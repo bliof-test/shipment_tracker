@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'git_commit'
 
 FactoryGirl.define do

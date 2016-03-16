@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'git_repository_location'
 require 'relink_ticket_job'
 

@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'events/jira_event'
 require 'factories/feature_review_factory'
 require 'git_repository_location'

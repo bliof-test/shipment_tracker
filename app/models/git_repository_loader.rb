@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'git_clone_url'
 require 'git_repository'
 

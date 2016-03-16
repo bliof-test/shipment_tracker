@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 class FeatureReviewsController < ApplicationController
   def new
     @app_names = GitRepositoryLocation.app_names

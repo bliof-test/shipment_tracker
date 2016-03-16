@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'build'
 require 'deploy'
 require 'git_repository_location'

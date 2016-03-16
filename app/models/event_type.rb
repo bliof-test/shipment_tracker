@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 class EventType
   include Virtus.value_object
 

@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'clients/github'
 require 'git_clone_url'
 require 'token'

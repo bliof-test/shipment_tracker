@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 When 'I view the releases for "$app"' do |app|
   releases_page.visit(app)
 end

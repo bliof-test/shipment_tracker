@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module LogSubscribers
   class GitRepositorySubscriber < ActiveSupport::LogSubscriber
     def self.runtime=(value)

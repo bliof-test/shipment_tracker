@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 module Pages
   class ReleasesPage
     def initialize(page:, url_helpers:)

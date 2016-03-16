@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 require 'rails_helper'
 require 'add_repository_location'
 require 'forms/repository_locations_form'

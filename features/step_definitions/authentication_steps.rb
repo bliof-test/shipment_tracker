@@ -1,4 +1,3 @@
-# frozen_string_literal: true
 Given 'I am logged in as "$email"' do |email|
   OmniAuth.config.mock_auth[:auth0] = OmniAuth::AuthHash.new(
     provider: 'auth0',
