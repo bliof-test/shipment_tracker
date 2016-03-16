@@ -15,7 +15,9 @@ class AddTsvectorToTickets < ActiveRecord::Migration
     SQL
 
     execute <<-SQL
-      CREATE TRIGGER released_tickets_tsv_update BEFORE INSERT OR UPDATE ON released_tickets FOR EACH ROW EXECUTE PROCEDURE released_tickets_trigger();
+      CREATE TRIGGER released_tickets_tsv_update
+      BEFORE INSERT OR UPDATE ON released_tickets
+      FOR EACH ROW EXECUTE PROCEDURE released_tickets_trigger();
     SQL
 
     now = Time.current.to_s(:db)
@@ -27,7 +29,7 @@ class AddTsvectorToTickets < ActiveRecord::Migration
     remove_column :released_tickets, :tsv
 
     execute <<-SQL
-      DROP TRIGGER released_tickets_tsv_update
+      DROP TRIGGER IF EXISTS released_tickets_tsv_update
       ON released_tickets
     SQL
 
