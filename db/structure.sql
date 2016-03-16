@@ -48,8 +48,12 @@ CREATE FUNCTION released_tickets_trigger() RETURNS trigger
     AS $$
       begin
         new.tsv :=
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.summary, '')), 'A') ||
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'D');
+          setweight(to_tsvector(coalesce('app1 app2', '')), 'A') ||
+          -- setweight(to_tsvector(coalesce(my_function(new.deploys), '')), 'A') ||
+          -- setweight(to_tsvector(coalesce(new.deploys->>0, '')), 'A') ||
+          -- setweight(to_tsvector(coalesce(new.deployed_apps, '')), 'A') ||
+          setweight(to_tsvector(coalesce(new.summary, '')), 'B') ||
+          setweight(to_tsvector(coalesce(new.description, '')), 'D');
         return new;
       end
       $$;
@@ -304,7 +308,8 @@ CREATE TABLE released_tickets (
     description text,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    tsv tsvector
+    tsv tsvector,
+    deploys json DEFAULT '[]'::json
 );
 
 
@@ -756,6 +761,10 @@ INSERT INTO schema_migrations (version) VALUES ('20150823124740');
 
 INSERT INTO schema_migrations (version) VALUES ('20150823124742');
 
+INSERT INTO schema_migrations (version) VALUES ('20150908100119');
+
+INSERT INTO schema_migrations (version) VALUES ('20150910115332');
+
 INSERT INTO schema_migrations (version) VALUES ('20150910135208');
 
 INSERT INTO schema_migrations (version) VALUES ('20150915150206');
@@ -767,6 +776,8 @@ INSERT INTO schema_migrations (version) VALUES ('20150915161859');
 INSERT INTO schema_migrations (version) VALUES ('20150921110831');
 
 INSERT INTO schema_migrations (version) VALUES ('20150921115023');
+
+INSERT INTO schema_migrations (version) VALUES ('20150921115024');
 
 INSERT INTO schema_migrations (version) VALUES ('20150928130626');
 
@@ -781,4 +792,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160311131953');
 INSERT INTO schema_migrations (version) VALUES ('20160315155037');
 
 INSERT INTO schema_migrations (version) VALUES ('20160315165607');
+
+INSERT INTO schema_migrations (version) VALUES ('20160316154428');
 
