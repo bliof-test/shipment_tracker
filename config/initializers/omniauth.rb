@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'omniauth/strategies/api_token'
 
 Rails.configuration.login_url          = '/auth/auth0'

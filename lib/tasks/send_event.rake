@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 namespace :send do
   desc 'Sends a sample UAT event'
   task :uat_event, [:success, :test_suite_version, :server, :url] do |_, args|

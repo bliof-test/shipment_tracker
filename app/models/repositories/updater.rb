@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'events/base_event'
 require 'snapshots/event_count'
 

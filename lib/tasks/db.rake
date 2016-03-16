@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 desc 'create database.yml based on database.yml.erb'
 task 'db:create_database_yml' do
   require 'dotenv'

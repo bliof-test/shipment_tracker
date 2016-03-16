@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'git_clone_url'
 
 class GitRepositoryLocation < ActiveRecord::Base

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.shared_examples 'a test build interface' do
   it { is_expected.to respond_to(:source) }
   it { is_expected.to respond_to(:version) }

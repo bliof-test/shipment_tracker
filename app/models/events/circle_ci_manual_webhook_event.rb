@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'events/base_event'
 require 'events/circle_ci_event'
 
