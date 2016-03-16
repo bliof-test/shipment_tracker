@@ -4,6 +4,7 @@ class CreateReleasedTickets < ActiveRecord::Migration
       t.string :key
       t.string :summary
       t.text :description
+      t.timestamps null: false
     end
   end
 end
