@@ -1,7 +1,6 @@
 require 'events/jira_event'
 require 'factories/feature_review_factory'
-require 'git_repository_location'
-require 'snapshots/ticket'
+require 'snapshots/released_ticket'
 require 'ticket'
 
 module Repositories
@@ -17,15 +16,18 @@ module Repositories
     end
 
     def apply(event)
-      return unless event.is_a?(Events::JiraEvent) && event.issue?
-
-      record = store.find_or_create_by('key' => event.key)
-      record.update_attributes(build_ticket(record.attributes, event))
+      if event.is_a?(Events::JiraEvent) && event.issue?
+        record = store.find_or_create_by('key' => event.key)
+        # TODO: create FR from ticket, extract and store versions present in ticket
+        record.update_attributes(build_ticket(record.attributes, event))
+      elsif event.is_a?(Events::DeployEvent) && event.environment == 'production'
+        # TODO: find correct released_ticket record(s) to populate the deploys column
+      end
     end
 
     private
 
-    attr_reader :store, :git_repository_location, :feature_review_factory
+    attr_reader :store, :feature_review_factory
 
     def previous_ticket_data(key)
       store.where(key: key).last.try(:attributes) || {}

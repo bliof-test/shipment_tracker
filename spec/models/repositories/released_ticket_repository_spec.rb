@@ -73,12 +73,29 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
     end
 
-    context 'when event is not JiraEvent' do
-      let(:event) { build(:deploy_event) }
+    describe 'event filtering' do
+      context 'when event is for a JIRA issue' do
+        let(:event) { build(:jira_event) }
 
-      it 'does not create a record' do
-        ticket_repo.apply(event)
-        expect(Snapshots::ReleasedTicket.count).to eq 0
+        it 'applies the event' do
+          expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
+        end
+      end
+
+      xcontext 'when event is for a production deploy' do
+        let(:event) { build(:deploy_event, environment: 'production') }
+
+        it 'applies the event' do
+          expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
+        end
+      end
+
+      context 'when event is not relevant' do
+        let(:event) { build(:uat_event) }
+
+        it 'does not apply the event' do
+          expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }
+        end
       end
     end
   end
