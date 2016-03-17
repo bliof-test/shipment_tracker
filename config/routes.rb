@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   root 'home#index'
 
+  get '/heartbeat', to: 'heart_beat#index'
+
   get '/auth/auth0/callback', to: 'sessions#auth0_success_callback'
   post '/auth/developer/callback', to: 'sessions#auth0_success_callback'
 
