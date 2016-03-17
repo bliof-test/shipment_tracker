@@ -2,38 +2,46 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
   def up
     add_column :released_tickets, :deploys, :json, default: []
 
-    # Note: JSON index for app name on deploys column needs to be of type int
-    # to get JSON array element. Using `deploys->>'app'` does not work
-    # because it tries to get JSON object field.
-    # http://www.postgresql.org/docs/9.4/static/functions-json.html
     execute <<-SQL
-      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS trigger AS $$
-      begin
-        new.tsv :=
-          -- setweight(to_tsvector(coalesce('#{app_names}', '')), 'A') ||
-          -- setweight(to_tsvector(coalesce(my_function(new.deploys), '')), 'A') ||
-          -- setweight(to_tsvector(coalesce(new.deployed_apps, '')), 'A') ||
-          setweight(to_tsvector(coalesce(new.deploys->>0, '')), 'A') ||
-          setweight(to_tsvector(coalesce(new.summary, '')), 'B') ||
-          setweight(to_tsvector(coalesce(new.description, '')), 'D');
-        return new;
-      end
+      CREATE OR REPLACE FUNCTION deployed_apps(deploys json) RETURNS VARCHAR AS $$
+      BEGIN
+        RETURN (SELECT string_agg(elem::json->>'app', ' ')
+                FROM json_array_elements_text(deploys) elem);
+      END
       $$ LANGUAGE plpgsql;
     SQL
+
+    execute <<-SQL
+      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS TRIGGER AS $$
+      BEGIN
+        new.tsv :=
+          setweight(to_tsvector(coalesce(deployed_apps(new.deploys), '')), 'A') ||
+          setweight(to_tsvector(coalesce(new.summary, '')), 'B') ||
+          setweight(to_tsvector(coalesce(new.description, '')), 'D');
+        RETURN new;
+      END
+      $$ LANGUAGE plpgsql;
+    SQL
+
+    # Trigger the re-indexing.
+    update("UPDATE released_tickets SET updated_at = '#{Time.current.to_s(:db)}'")
   end
 
   def down
     remove_column :released_tickets, :deploys
 
     execute <<-SQL
-      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS trigger AS $$
-      begin
+      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS TRIGGER AS $$
+      BEGIN
         new.tsv :=
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.summary, '')), 'A') ||
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'D');
-        return new;
-      end
+          setweight(to_tsvector(coalesce(new.summary, '')), 'A') ||
+          setweight(to_tsvector(coalesce(new.description, '')), 'D');
+        RETURN new;
+      END
       $$ LANGUAGE plpgsql;
     SQL
+
+    # Trigger the re-indexing.
+    update("UPDATE released_tickets SET updated_at = '#{Time.current.to_s(:db)}'")
   end
 end

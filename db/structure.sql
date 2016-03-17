@@ -40,22 +40,33 @@ COMMENT ON EXTENSION hstore IS 'data type for storing sets of (key, value) pairs
 SET search_path = public, pg_catalog;
 
 --
+-- Name: deployed_apps(json); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deployed_apps(deploys json) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+      BEGIN
+        RETURN (SELECT string_agg(elem::json->>'app', ' ')
+                FROM json_array_elements_text(deploys) elem);
+      END
+      $$;
+
+
+--
 -- Name: released_tickets_trigger(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION released_tickets_trigger() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-      begin
+      BEGIN
         new.tsv :=
-          setweight(to_tsvector(coalesce('app1 app2', '')), 'A') ||
-          -- setweight(to_tsvector(coalesce(my_function(new.deploys), '')), 'A') ||
-          -- setweight(to_tsvector(coalesce(new.deploys->>0, '')), 'A') ||
-          -- setweight(to_tsvector(coalesce(new.deployed_apps, '')), 'A') ||
+          setweight(to_tsvector(coalesce(deployed_apps(new.deploys), '')), 'A') ||
           setweight(to_tsvector(coalesce(new.summary, '')), 'B') ||
           setweight(to_tsvector(coalesce(new.description, '')), 'D');
-        return new;
-      end
+        RETURN new;
+      END
       $$;
 
 
