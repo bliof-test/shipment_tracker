@@ -22,9 +22,6 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
       END
       $$ LANGUAGE plpgsql;
     SQL
-
-    # Trigger the re-indexing.
-    update("UPDATE released_tickets SET updated_at = '#{Time.current.to_s(:db)}'")
   end
 
   def down
@@ -40,8 +37,5 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
       END
       $$ LANGUAGE plpgsql;
     SQL
-
-    # Trigger the re-indexing.
-    update("UPDATE released_tickets SET updated_at = '#{Time.current.to_s(:db)}'")
   end
 end

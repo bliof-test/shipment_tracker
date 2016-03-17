@@ -19,9 +19,6 @@ class AddTsvectorToTickets < ActiveRecord::Migration
       BEFORE INSERT OR UPDATE ON released_tickets
       FOR ROW EXECUTE PROCEDURE released_tickets_trigger();
     SQL
-
-    now = Time.current.to_s(:db)
-    update("UPDATE released_tickets SET updated_at = '#{now}'")
   end
 
   def down
