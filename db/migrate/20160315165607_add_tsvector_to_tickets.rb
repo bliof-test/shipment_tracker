@@ -1,23 +1,23 @@
 class AddTsvectorToTickets < ActiveRecord::Migration
   def up
-    add_column :released_tickets, :tsv, 'tsvector'
-    add_index :released_tickets, :tsv, using: 'gin'
+    add_column :released_tickets, :tsv, :tsvector
+    add_index :released_tickets, :tsv, using: :gin
 
     execute <<-SQL
-      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS trigger AS $$
-      begin
+      CREATE OR REPLACE FUNCTION released_tickets_trigger() RETURNS TRIGGER AS $$
+      BEGIN
         new.tsv :=
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.summary, '')), 'A') ||
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'D');
-        return new;
-      end
+          setweight(to_tsvector(coalesce(new.summary, '')), 'A') ||
+          setweight(to_tsvector(coalesce(new.description, '')), 'D');
+        RETURN new;
+      END
       $$ LANGUAGE plpgsql;
     SQL
 
     execute <<-SQL
       CREATE TRIGGER released_tickets_tsv_update
       BEFORE INSERT OR UPDATE ON released_tickets
-      FOR EACH ROW EXECUTE PROCEDURE released_tickets_trigger();
+      FOR ROW EXECUTE PROCEDURE released_tickets_trigger();
     SQL
 
     now = Time.current.to_s(:db)
