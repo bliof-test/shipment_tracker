@@ -29,10 +29,10 @@ namespace :jobs do
     manage_pid pid_path_for('jobs_recreate_snapshots')
 
     repos = Rails.configuration.repositories.dup
-    released_tickets_repo = repos.select {|repo| repo.table_name == 'released_tickets'}.first
+    released_tickets_repo = repos.find { |repo| repo.table_name == 'released_tickets' }
     repos.delete(released_tickets_repo)
 
-    t1=Thread.new{
+    t1 = Thread.new{
       puts "[#{Time.current}] Running recreate_snapshots for #{repos.map(&:table_name)}"
       updater = Repositories::Updater.new(repos)
 
@@ -41,10 +41,9 @@ namespace :jobs do
 
       updater.run(repo_event_id_hash)
       puts "[#{Time.current}] Completed recreate_snapshots for #{repos.map(&:table_name)}"
-
     }
 
-    t2=Thread.new{
+    t2 = Thread.new{
       puts "[#{Time.current}] Running recreate_snapshots for #{released_tickets_repo.table_name}"
       updater = Repositories::Updater.new([released_tickets_repo])
 
