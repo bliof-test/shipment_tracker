@@ -88,30 +88,9 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
     end
 
-    describe 'event filtering' do
-      context 'when event is for a JIRA issue with Feature Review' do
-        let(:event) { build(:jira_event, comment_body: feature_review_url(app: 'abc')) }
-
-        it 'applies the event' do
-          expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
-        end
-      end
-
-      xcontext 'when event is for a production deploy' do
-        let(:event) { build(:deploy_event, environment: 'production') }
-
-        it 'applies the event' do
-          expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
-        end
-      end
-
-      context 'when event is not relevant' do
-        let(:event) { build(:uat_event) }
-
-        it 'does not apply the event' do
-          expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }
-        end
-      end
+    it 'does not apply the event when it is irrelevant' do
+      event = build(:uat_event)
+      expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }
     end
   end
 end

@@ -18,26 +18,32 @@ module Repositories
 
     def apply(event)
       if jira_issue?(event)
-        feature_reviews = feature_review_factory.create_from_text(event.comment)
-        return if feature_reviews.empty?
-
-        if (record = store.find_by(key: event.key))
-          record.update(build_ticket(record.attributes, event, feature_reviews))
-        else
-          store.create!(build_ticket({}, event, feature_reviews))
-        end
+        snapshot_jira_event(event)
       elsif production_deploy?(event)
-        records = tickets_for_version(event.version)
-
-        records.each do |record|
-          record.update(build_ticket_for_deploy(record.attributes, event))
-        end
+        snapshot_deploy_event(event)
       end
     end
 
     private
 
     attr_reader :store, :feature_review_factory
+
+    def snapshot_jira_event(event)
+      feature_reviews = feature_review_factory.create_from_text(event.comment)
+      return if feature_reviews.empty?
+
+      if (record = store.find_by(key: event.key))
+        record.update(build_ticket(record.attributes, event, feature_reviews))
+      else
+        store.create!(build_ticket({}, event, feature_reviews))
+      end
+    end
+
+    def snapshot_deploy_event(event)
+      tickets_for_version(event.version).each do |record|
+        record.update(build_ticket_for_deploy(record.attributes, event))
+      end
+    end
 
     def jira_issue?(event)
       event.is_a?(Events::JiraEvent) && event.issue?
@@ -69,9 +75,9 @@ module Repositories
     def merge_deploys(ticket_attrs, deploy_event)
       old_deploys = ticket_attrs.fetch('deploys', [])
       new_deploy = {
-        'app' => deploy_event.app_name,
-        'version' => deploy_event.version,
-        'deployed_at' => deploy_event.created_at.strftime('%F %H:%M%:z'),
+        app: deploy_event.app_name,
+        version: deploy_event.version,
+        deployed_at: deploy_event.created_at.strftime('%F %H:%M%:z'),
       }
 
       old_deploys << new_deploy
