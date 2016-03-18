@@ -14,7 +14,6 @@ class AddTsvectorToTickets < ActiveRecord::Migration
       $$ LANGUAGE plpgsql;
     SQL
 
-    # TODO: verify each does not do every record
     execute <<-SQL
       CREATE TRIGGER released_tickets_tsv_update
       BEFORE INSERT OR UPDATE ON released_tickets

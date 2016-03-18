@@ -48,7 +48,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     }
 
     context 'when ticket exists' do
-      it 'updates existing ticket' do
+      it 'updates existing ticket when FR is being linked' do
         Snapshots::ReleasedTicket.create(key: 'JIRA-1', summary: 'foo', description: 'bar', versions: ['abc'])
         event = build(
           :jira_event,
@@ -64,6 +64,25 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           'summary' => 'new title',
           'description' => 'new description',
           'versions' => %w(abc def ghi),
+        }
+        expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attributes)
+      end
+
+      it 'updates existing ticket for any JIRA event' do
+        Snapshots::ReleasedTicket.create(key: 'JIRA-1', summary: 'foo', description: 'bar', versions: ['abc'])
+        event = build(
+          :jira_event,
+          key: 'JIRA-1',
+          summary: 'new title',
+          description: 'new description',
+        )
+        expect { ticket_repo.apply(event) }.to_not change { Snapshots::ReleasedTicket.count }
+
+        expected_attributes = {
+          'key' => 'JIRA-1',
+          'summary' => 'new title',
+          'description' => 'new description',
+          'versions' => %w(abc),
         }
         expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attributes)
       end
