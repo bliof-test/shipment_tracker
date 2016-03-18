@@ -20,6 +20,10 @@ class AddTsvectorToTickets < ActiveRecord::Migration
       BEFORE INSERT OR UPDATE ON released_tickets
       FOR ROW EXECUTE PROCEDURE released_tickets_trigger();
     SQL
+
+    say '**********Ensure tsv column is updated!**********'
+    say 'Either by running bundle exec rake jobs:recreate_snapshots', true
+    say 'Or by updating each row in this table', true
   end
 
   def down

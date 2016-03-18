@@ -24,6 +24,10 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
       END
       $$ LANGUAGE plpgsql;
     SQL
+
+    say '**********Ensure tsv column is updated!**********'
+    say 'Either by running bundle exec rake jobs:recreate_snapshots', true
+    say 'Or by updating each row in this table', true
   end
 
   def down
@@ -41,5 +45,9 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
       END
       $$ LANGUAGE plpgsql;
     SQL
+
+    say '**********Ensure tsv column is updated!**********'
+    say 'Either by running bundle exec rake jobs:recreate_snapshots', true
+    say 'Or by updating each row in this table', true
   end
 end
