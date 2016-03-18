@@ -88,6 +88,101 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
     end
 
+    describe 'applying deploy events' do
+      let(:deploy_event) {
+        build :deploy_event, environment: 'production', version: version, created_at: time_string
+      }
+      let(:version) { 'abc123' }
+      let(:time) { Time.current.change(usec: 0) }
+      let(:time_string) { time.strftime('%F %H:%M%:z') }
+
+      context 'when deploy is to production' do
+        context 'when deploy version is linked to some tickets' do
+          let!(:released_ticket) {
+            Snapshots::ReleasedTicket
+              .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
+                      versions: [version],
+                      deploys: [
+                        { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
+                      ]
+                     )
+          }
+
+          let(:expected_deploys) {
+            [
+              { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => time_string },
+              { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
+            ]
+          }
+
+          it 'updates related tickets with the deploy info' do
+            ticket_repo.apply(deploy_event)
+            record = store.find_by_key('JIRA-1')
+            expect(record.deploys).to match_array(expected_deploys)
+          end
+
+          context 'when the version was deployed already' do
+            let(:yesterday_str) { (time - 1.day).strftime('%F %H:%M%:z') }
+            let!(:released_ticket) {
+              Snapshots::ReleasedTicket
+                .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
+                        versions: [version],
+                        deploys: [
+                          { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str },
+                        ]
+                       )
+            }
+
+            let(:expected_deploys) {
+              [
+                { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str },
+              ]
+            }
+
+            it 'updates related tickets with the deploy info' do
+              ticket_repo.apply(deploy_event)
+              record = store.find_by_key('JIRA-1')
+              expect(record.deploys).to match_array(expected_deploys)
+            end
+          end
+        end
+
+        context 'when deploy version is not linked to any ticket' do
+          let!(:released_ticket) {
+            Snapshots::ReleasedTicket
+              .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
+                      versions: ['def123'],
+                      deploys: [
+                        { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
+                      ]
+                     )
+          }
+          it 'does nothing' do
+            ticket_repo.apply(deploy_event)
+            expect { ticket_repo.apply(deploy_event) }.to_not change { Snapshots::ReleasedTicket.count }
+            expect(released_ticket.deploys).to eq(Snapshots::ReleasedTicket.last.deploys)
+          end
+        end
+      end
+      context 'when deploy is not to production' do
+        let(:deploy_event) {
+          build :deploy_event, environment: 'uat', version: version, created_at: time_string
+        }
+        let!(:released_ticket) {
+          Snapshots::ReleasedTicket
+            .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
+                    versions: [version, 'def123'],
+                    deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }]
+                   )
+        }
+        it 'does nothing' do
+          ticket_repo.apply(deploy_event)
+          expect { ticket_repo.apply(deploy_event) }.to_not change { Snapshots::ReleasedTicket.count }
+          expect(released_ticket.deploys).to eq(Snapshots::ReleasedTicket.last.deploys)
+        end
+      end
+    end
+
     it 'does not apply the event when it is irrelevant' do
       event = build(:uat_event)
       expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }

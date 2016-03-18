@@ -41,8 +41,19 @@ module Repositories
 
     def snapshot_deploy_event(event)
       tickets_for_version(event.version).each do |record|
-        record.update(build_ticket_for_deploy(record.attributes, event))
+        old_deploys = record.attributes.fetch('deploys', [])
+        next if old_deploys.map { |deploy| deploy['version'] }.include?(event.version)
+
+        record.update(deploys: old_deploys << build_deploy_hash(event))
       end
+    end
+
+    def build_deploy_hash(event)
+      {
+        app: event.app_name,
+        version: event.version,
+        deployed_at: event.created_at.strftime('%F %H:%M%:z'),
+      }
     end
 
     def jira_issue?(event)
@@ -62,26 +73,10 @@ module Repositories
       )
     end
 
-    def build_ticket_for_deploy(ticket_attrs, deploy_event)
-      ticket_attrs.merge(deploys: merge_deploys(ticket_attrs, deploy_event))
-    end
-
     def merge_ticket_versions(ticket_attrs, feature_reviews)
       old_versions = ticket_attrs.fetch('versions', [])
       new_versions = feature_reviews.flat_map(&:versions)
       old_versions.concat(new_versions).uniq
-    end
-
-    def merge_deploys(ticket_attrs, deploy_event)
-      old_deploys = ticket_attrs.fetch('deploys', [])
-      new_deploy = {
-        app: deploy_event.app_name,
-        version: deploy_event.version,
-        deployed_at: deploy_event.created_at.strftime('%F %H:%M%:z'),
-      }
-
-      old_deploys << new_deploy
-      old_deploys.uniq
     end
 
     def tickets_for_version(version)
