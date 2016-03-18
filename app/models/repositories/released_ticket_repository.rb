@@ -45,7 +45,7 @@ module Repositories
       event.is_a?(Events::DeployEvent) && event.environment == 'production'
     end
 
-    def build_ticket(ticket_attrs, jira_event)
+    def build_ticket(ticket_attrs, jira_event, feature_reviews)
       ticket_attrs.merge(
         key: jira_event.key,
         summary: jira_event.summary,
