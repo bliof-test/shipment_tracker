@@ -15,28 +15,27 @@ Given 'the following tickets are created:' do |tickets_table|
     )
 
     deploys = ticket_row['Deploys']
-    unless deploys.empty?
-      date, time, app_name, sha = deploys.split
-      datetime = Time.zone.parse("#{date} #{time}")
-      fr = "FR_#{app_name}"
-      ticket = ticket_row['Jira Key']
+    next if deploys.empty?
+    date, time, app_name, sha = deploys.split
+    datetime = Time.zone.parse("#{date} #{time}")
+    fr = "FR_#{app_name}"
+    ticket = ticket_row['Jira Key']
 
-      steps %Q{
-        Given an application called "#{app_name}"
+    steps %(
+      Given an application called "#{app_name}"
 
-        And a commit "#{sha}" by "Alice" is created at "#{(datetime - 3.hours).to_s}" for app "#{app_name}"
+      And a commit "#{sha}" by "Alice" is created at "#{(datetime - 3.hours)}" for app "#{app_name}"
 
-        And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
-          | app_name    | version |
-          | #{app_name} | #{sha}  |
+      And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
+        | app_name    | version |
+        | #{app_name} | #{sha}  |
 
-        And at time "#{(datetime - 2.hours).to_s}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
+      And at time "#{(datetime - 2.hours)}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
 
-        And ticket "#{ticket}" is approved by "bob@fundingcircle.com" at "#{(datetime - 1.hour).to_s}"
+      And ticket "#{ticket}" is approved by "bob@fundingcircle.com" at "#{(datetime - 1.hour)}"
 
-        And commit "#{sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime.to_s}"
-      }
-    end
+      And commit "#{sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime}"
+    )
   end
 end
 

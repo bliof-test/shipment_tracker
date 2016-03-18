@@ -73,7 +73,7 @@ module Repositories
       new_deploy = {
         'app' => deploy_event.app_name,
         'version' => deploy_event.version,
-        'deployed_at' => deploy_event.created_at.strftime('%F %H:%M%:z')
+        'deployed_at' => deploy_event.created_at.strftime('%F %H:%M%:z'),
       }
 
       old_deploys << new_deploy
@@ -81,7 +81,7 @@ module Repositories
     end
 
     def tickets_for_version(version)
-      #TODO put unique clause on the key column and index
+      # TODO: put unique clause on the key column and index
       store.where('versions @> ARRAY[?]::varchar[]', version)
     end
   end
