@@ -52,7 +52,7 @@ module Repositories
       {
         app: event.app_name,
         version: event.version,
-        deployed_at: event.created_at.strftime('%F %H:%M%:z'),
+        deployed_at: event.created_at.strftime('%F %H:%M %Z'),
       }
     end
 
