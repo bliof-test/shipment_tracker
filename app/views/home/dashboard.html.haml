@@ -24,3 +24,5 @@
               %p
               %p.key
                 = jira_link(ticket.key)
+              - ticket.deploys.each do |deploy|
+                %p.deploy= "#{deploy['deployed_at']} #{deploy['app']}"

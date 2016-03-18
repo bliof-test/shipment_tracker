@@ -29,7 +29,11 @@ module Repositories
           store.create!(build_ticket({}, event, feature_reviews))
         end
       elsif production_deploy?(event)
-        # TODO: find correct released_ticket record(s) to populate the deploys column
+        records = tickets_for_version(event.version)
+
+        records.each do |record|
+          record.update(build_ticket_for_deploy(record.attributes, event))
+        end
       end
     end
 
@@ -54,10 +58,31 @@ module Repositories
       )
     end
 
+    def build_ticket_for_deploy(ticket_attrs, deploy_event)
+      ticket_attrs.merge(deploys: merge_deploys(ticket_attrs, deploy_event))
+    end
+
     def merge_ticket_versions(ticket_attrs, feature_reviews)
       old_versions = ticket_attrs.fetch('versions', [])
       new_versions = feature_reviews.flat_map(&:versions)
       old_versions.concat(new_versions).uniq
+    end
+
+    def merge_deploys(ticket_attrs, deploy_event)
+      old_deploys = ticket_attrs.fetch('deploys', [])
+      new_deploy = {
+        'app' => deploy_event.app_name,
+        'version' => deploy_event.version,
+        'deployed_at' => deploy_event.created_at.strftime('%F %H:%M%:z')
+      }
+
+      old_deploys << new_deploy
+      old_deploys.uniq
+    end
+
+    def tickets_for_version(version)
+      #TODO put unique clause on the key column and index
+      store.where('versions @> ARRAY[?]::varchar[]', version)
     end
   end
 end

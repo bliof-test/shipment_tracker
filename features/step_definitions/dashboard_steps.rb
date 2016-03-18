@@ -4,5 +4,11 @@ end
 
 Then 'I should find the following tickets on the dashboard:' do |tickets_table|
   result_tickets = dashboard_page.results
-  expect(result_tickets).to eq tickets_table.hashes
+  hashes = tickets_table.hashes
+
+  hashes.each do |hash|
+    hash['Deploys'] = [hash['Deploys']]
+  end
+
+  expect(result_tickets).to eq hashes
 end

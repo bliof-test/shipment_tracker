@@ -25,4 +25,4 @@ Scenario: User finds tickets by deployed app name
   When I search tickets with keywords "app_1"
   Then I should find the following tickets on the dashboard:
     | Jira Key | Summary     | Description | Deploys                |
-    | ENG-2    | Second task | Something   | 2016-03-21 12:02 app_1 |
+    | ENG-2    | Second task | Something   | 2016-03-21 12:02+00:00 app_1 |
