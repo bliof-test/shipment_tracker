@@ -18,8 +18,6 @@ module Repositories
 
     def apply(event)
       if jira_issue?(event)
-        # TODO: assert comment and title exist in new comment
-        # TODO: assert edit/new comment contains all previous comments
         feature_reviews = feature_review_factory.create_from_text(event.comment)
         return if feature_reviews.empty?
 

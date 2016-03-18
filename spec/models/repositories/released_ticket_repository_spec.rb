@@ -38,49 +38,59 @@ RSpec.describe Repositories::ReleasedTicketRepository do
   end
 
   describe '#apply' do
-    let(:event) { build(:jira_event, key: 'JIRA-123', summary: 'My old ticket', description: 'Some words') }
     let(:store) { Snapshots::ReleasedTicket }
-    let(:event_hash) {
+    let(:event_attrs) {
       {
-        'key' => event.key,
-        'summary' => event.summary,
-        'description' => event.description,
+        'key' => 'JIRA-123',
+        'summary' => 'some summary',
+        'description' => 'some description',
       }
     }
 
     context 'when ticket exists' do
-      let!(:existing_ticket_key) do
-        Snapshots::ReleasedTicket.create('key' => 'JIRA-1', 'summary' => 'My old ticket').key
-      end
-
-      let(:event) { build(:jira_event, key: existing_ticket_key, summary: 'My new title') }
-
       it 'updates existing ticket' do
-        expect(Snapshots::ReleasedTicket.count).to eq 1
-        ticket_repo.apply(event)
-        expect(Snapshots::ReleasedTicket.count).to eq 1
-        attributes = Snapshots::ReleasedTicket.last.attributes.select { |k, _v| event_hash.keys.include?(k) }
-        expect(attributes).to eq(event_hash)
+        Snapshots::ReleasedTicket.create(key: 'JIRA-1', summary: 'foo', description: 'bar', versions: ['abc'])
+        event = build(
+          :jira_event,
+          key: 'JIRA-1',
+          summary: 'new title',
+          description: 'new description',
+          comment_body: feature_review_url(app1: 'def', app2: 'ghi'),
+        )
+        expect { ticket_repo.apply(event) }.to_not change { Snapshots::ReleasedTicket.count }
+
+        expected_attributes = {
+          'key' => 'JIRA-1',
+          'summary' => 'new title',
+          'description' => 'new description',
+          'versions' => %w(abc def ghi),
+        }
+        expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attributes)
       end
     end
 
     context 'when ticket is new' do
       context 'when ticket has Feature Reviews' do
         it 'snapshots' do
+          event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
           expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
-          attributes = Snapshots::ReleasedTicket.last.attributes.select { |k, _v| event_hash.keys.include?(k) }
-          expect(attributes).to eq(event_hash)
+
+          expected_attrs = event_attrs.merge('versions' => ['abc'])
+          expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attrs)
         end
       end
 
       context 'when ticket has no Feature Reviews' do
-        it 'does not snapshot'
+        it 'does not snapshot' do
+          event = build(:jira_event, event_attrs)
+          expect { ticket_repo.apply(event) }.to_not change { Snapshots::ReleasedTicket.count }
+        end
       end
     end
 
     describe 'event filtering' do
-      context 'when event is for a JIRA issue' do
-        let(:event) { build(:jira_event) }
+      context 'when event is for a JIRA issue with Feature Review' do
+        let(:event) { build(:jira_event, comment_body: feature_review_url(app: 'abc')) }
 
         it 'applies the event' do
           expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
