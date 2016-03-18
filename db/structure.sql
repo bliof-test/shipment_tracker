@@ -670,6 +670,13 @@ CREATE INDEX index_manual_tests_on_versions ON manual_tests USING gin (versions)
 
 
 --
+-- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_released_tickets_on_key ON released_tickets USING btree (key);
+
+
+--
 -- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -807,4 +814,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160315155037');
 INSERT INTO schema_migrations (version) VALUES ('20160315165607');
 
 INSERT INTO schema_migrations (version) VALUES ('20160316154428');
+
+INSERT INTO schema_migrations (version) VALUES ('20160318164129');
 

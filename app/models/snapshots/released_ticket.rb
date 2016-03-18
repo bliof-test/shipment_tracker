@@ -4,6 +4,8 @@ module Snapshots
   class ReleasedTicket < ActiveRecord::Base
     include PgSearch
 
+    validates :key, uniqueness: true
+
     IGNORE_DOCUMENT_LENGTH = 0
 
     pg_search_scope :search_for,

@@ -80,7 +80,6 @@ module Repositories
     end
 
     def tickets_for_version(version)
-      # TODO: put unique clause on the key column and index
       store.where('versions @> ARRAY[?]::varchar[]', version)
     end
   end
