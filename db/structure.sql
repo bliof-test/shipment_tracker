@@ -320,7 +320,8 @@ CREATE TABLE released_tickets (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     tsv tsvector,
-    deploys json DEFAULT '[]'::json
+    deploys json DEFAULT '[]'::json,
+    versions character varying[]
 );
 
 
@@ -676,6 +677,13 @@ CREATE INDEX index_released_tickets_on_tsv ON released_tickets USING gin (tsv);
 
 
 --
+-- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_released_tickets_on_versions ON released_tickets USING gin (versions);
+
+
+--
 -- Name: index_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
@@ -772,10 +780,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150823124740');
 
 INSERT INTO schema_migrations (version) VALUES ('20150823124742');
 
-INSERT INTO schema_migrations (version) VALUES ('20150908100119');
-
-INSERT INTO schema_migrations (version) VALUES ('20150910115332');
-
 INSERT INTO schema_migrations (version) VALUES ('20150910135208');
 
 INSERT INTO schema_migrations (version) VALUES ('20150915150206');
@@ -787,8 +791,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150915161859');
 INSERT INTO schema_migrations (version) VALUES ('20150921110831');
 
 INSERT INTO schema_migrations (version) VALUES ('20150921115023');
-
-INSERT INTO schema_migrations (version) VALUES ('20150921115024');
 
 INSERT INTO schema_migrations (version) VALUES ('20150928130626');
 
