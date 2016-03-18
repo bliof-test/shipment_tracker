@@ -1,6 +1,8 @@
 class AddDeploysToReleasedTickets < ActiveRecord::Migration
   def up
     add_column :released_tickets, :deploys, :json, default: []
+    add_column :released_tickets, :versions, :string, array: true
+    add_index :released_tickets, :versions, using: :gin
 
     execute <<-SQL
       CREATE OR REPLACE FUNCTION deployed_apps(deploys json) RETURNS VARCHAR AS $$
@@ -25,6 +27,8 @@ class AddDeploysToReleasedTickets < ActiveRecord::Migration
   end
 
   def down
+    remove_index :released_tickets, :versions
+    remove_column :released_tickets, :versions
     remove_column :released_tickets, :deploys
 
     execute <<-SQL

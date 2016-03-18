@@ -7,6 +7,7 @@ module Repositories
   class ReleasedTicketRepository
     def initialize(store = Snapshots::ReleasedTicket)
       @store = store
+      @feature_review_factory = Factories::FeatureReviewFactory.new
     end
 
     delegate :table_name, to: :store
@@ -16,11 +17,18 @@ module Repositories
     end
 
     def apply(event)
-      if event.is_a?(Events::JiraEvent) && event.issue?
-        record = store.find_or_create_by('key' => event.key)
-        # TODO: create FR from ticket, extract and store versions present in ticket
-        record.update_attributes(build_ticket(record.attributes, event))
-      elsif event.is_a?(Events::DeployEvent) && event.environment == 'production'
+      if jira_issue?(event)
+        # TODO: assert comment and title exist in new comment
+        # TODO: assert edit/new comment contains all previous comments
+        feature_reviews = feature_review_factory.create_from_text(event.comment)
+        return if feature_reviews.empty?
+
+        if (record = store.find_by(key: event.key))
+          record.update(build_ticket(record.attributes, event, feature_reviews))
+        else
+          store.create!(build_ticket({}, event, feature_reviews))
+        end
+      elsif production_deploy?(event)
         # TODO: find correct released_ticket record(s) to populate the deploys column
       end
     end
@@ -29,16 +37,27 @@ module Repositories
 
     attr_reader :store, :feature_review_factory
 
-    def previous_ticket_data(key)
-      store.where(key: key).last.try(:attributes) || {}
+    def jira_issue?(event)
+      event.is_a?(Events::JiraEvent) && event.issue?
     end
 
-    def build_ticket(last_ticket, event)
-      last_ticket.merge(
-        'key' => event.key,
-        'summary' => event.summary,
-        'description' => event.description,
+    def production_deploy?(event)
+      event.is_a?(Events::DeployEvent) && event.environment == 'production'
+    end
+
+    def build_ticket(ticket_attrs, jira_event)
+      ticket_attrs.merge(
+        key: jira_event.key,
+        summary: jira_event.summary,
+        description: jira_event.description,
+        versions: merge_ticket_versions(ticket_attrs, feature_reviews),
       )
+    end
+
+    def merge_ticket_versions(ticket_attrs, feature_reviews)
+      old_versions = ticket_attrs.fetch('versions', [])
+      new_versions = feature_reviews.flat_map(&:versions)
+      old_versions.concat(new_versions).uniq
     end
   end
 end

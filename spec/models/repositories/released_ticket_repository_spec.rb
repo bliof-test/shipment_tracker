@@ -5,8 +5,9 @@ require 'ticket'
 
 RSpec.describe Repositories::ReleasedTicketRepository do
   subject(:ticket_repo) { Repositories::ReleasedTicketRepository.new(store) }
-  let(:store) { double }
+
   describe '#tickets_for_query' do
+    let(:store) { double }
     let(:query) { double }
     let(:ticket) { double(Snapshots::Ticket, attributes: {}) }
 
@@ -64,12 +65,16 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     context 'when ticket is new' do
-      it 'creates new record' do
-        expect(Snapshots::ReleasedTicket.count).to eq 0
-        ticket_repo.apply(event)
-        expect(Snapshots::ReleasedTicket.count).to eq 1
-        attributes = Snapshots::ReleasedTicket.last.attributes.select { |k, _v| event_hash.keys.include?(k) }
-        expect(attributes).to eq(event_hash)
+      context 'when ticket has Feature Reviews' do
+        it 'snapshots' do
+          expect { ticket_repo.apply(event) }.to change { Snapshots::ReleasedTicket.count }.by(1)
+          attributes = Snapshots::ReleasedTicket.last.attributes.select { |k, _v| event_hash.keys.include?(k) }
+          expect(attributes).to eq(event_hash)
+        end
+      end
+
+      context 'when ticket has no Feature Reviews' do
+        it 'does not snapshot'
       end
     end
 
