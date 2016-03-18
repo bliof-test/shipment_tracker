@@ -126,8 +126,8 @@ end
 # rubocop:enable LineLength
 
 When 'snapshots are regenerated' do
-  Rails.application.load_tasks
-
-  Rake::Task['jobs:recreate_snapshots'].reenable
-  Rake::Task['jobs:recreate_snapshots'].invoke
+  repos = Rails.configuration.repositories
+  updater = Repositories::Updater.new(repos)
+  updater.reset
+  updater.run
 end
