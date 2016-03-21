@@ -16,7 +16,7 @@ Given 'the following tickets are created:' do |tickets_table|
 
     deploys = ticket_row['Deploys']
     next if deploys.empty?
-    date, time, app_name, sha = deploys.split
+    date, time, app_name, deploy_sha = deploys.split
     datetime = Time.zone.parse("#{date} #{time}")
     fr = "FR_#{app_name}"
     ticket = ticket_row['Jira Key']
@@ -24,17 +24,21 @@ Given 'the following tickets are created:' do |tickets_table|
     steps %(
       Given an application called "#{app_name}"
 
-      And a commit "#{sha}" by "Alice" is created at "#{(datetime - 3.hours)}" for app "#{app_name}"
+      And a commit "#master_1" by "Alice" is created at "#{(datetime - 5.hours)}" for app "#{app_name}"
+      And the branch "feature" is checked out
+      And a commit "#feat_1" with message "some commit" is created at "#{(datetime - 4.hours)}"
+      And the branch "master" is checked out
+      And the branch "feature" is merged with merge commit "#{deploy_sha}" at "#{(datetime - 3.hours)}"
 
       And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
         | app_name    | version |
-        | #{app_name} | #{sha}  |
+        | #{app_name} | #feat_1 |
 
       And at time "#{(datetime - 2.hours)}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
 
       And ticket "#{ticket}" is approved by "bob@fundingcircle.com" at "#{(datetime - 1.hour)}"
 
-      And commit "#{sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime}"
+      And commit "#{deploy_sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime}"
     )
   end
 end

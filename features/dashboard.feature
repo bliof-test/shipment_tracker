@@ -17,6 +17,7 @@ Scenario: User finds deployed tickets by description
     | ENG-3    | Another story | As a User implement another story | 2016-03-21 12:02 UTC app_1 #ghi |
     | ENG-2    | Another task  | As a User implement another task  | 2016-03-21 12:02 UTC app_1 #def |
 
+@mock_slack_notifier
 Scenario: User finds tickets by deployed app name
   Given the following tickets are created:
     | Jira Key | Summary     | Description | Deploys                     |
