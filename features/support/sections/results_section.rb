@@ -19,12 +19,12 @@ module Sections
 
     attr_reader :panel_elements
 
-    def jira_element(panel_element, klass)
-      panel_element.first(".#{klass}")
+    def jira_element(panel_element, css_class)
+      panel_element.first(".#{css_class}")
     end
 
-    def jira_elements(panel_element, klass)
-      panel_element.all(".#{klass}")
+    def jira_elements(panel_element, css_class)
+      panel_element.all(".#{css_class}")
     end
   end
 end
