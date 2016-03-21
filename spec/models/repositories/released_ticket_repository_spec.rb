@@ -47,7 +47,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       }
     }
 
-    context 'when ticket exists' do
+    context 'when ticket snapshot exists' do
       it 'updates existing ticket when FR is being linked' do
         Snapshots::ReleasedTicket.create(key: 'JIRA-1', summary: 'foo', description: 'bar', versions: ['abc'])
         event = build(
@@ -88,7 +88,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
     end
 
-    context 'when ticket is new' do
+    context 'when no ticket snapshot exists' do
       context 'when ticket has Feature Reviews' do
         it 'snapshots' do
           event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
@@ -109,22 +109,22 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     describe 'applying deploy events' do
       let(:deploy_event) {
-        build :deploy_event, environment: 'production', version: version, created_at: time_string
+        build(:deploy_event, environment: 'production', version: version, created_at: time_string)
       }
       let(:version) { 'abc123' }
-      let(:time) { Time.current.change(usec: 0) }
-      let(:time_string) { time.strftime('%F %H:%M%:z') }
+      let(:time) { Time.current }
+      let(:time_string) { time.strftime('%F %H:%M %Z') }
 
       context 'when deploy is to production' do
         context 'when deploy version is linked to some tickets' do
           let!(:released_ticket) {
-            Snapshots::ReleasedTicket
-              .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
-                      versions: [version],
-                      deploys: [
-                        { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
-                      ]
-                     )
+            Snapshots::ReleasedTicket.create(
+              key: 'JIRA-1',
+              summary: 'foo',
+              description: 'bar',
+              versions: [version],
+              deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }],
+            )
           }
 
           let(:expected_deploys) {
@@ -141,15 +141,15 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           end
 
           context 'when the version was deployed already' do
-            let(:yesterday_str) { (time - 1.day).strftime('%F %H:%M%:z') }
+            let(:yesterday_str) { (time - 1.day).strftime('%F %H:%M %Z') }
             let!(:released_ticket) {
-              Snapshots::ReleasedTicket
-                .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
-                        versions: [version],
-                        deploys: [
-                          { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str },
-                        ]
-                       )
+              Snapshots::ReleasedTicket.create(
+                key: 'JIRA-1',
+                summary: 'foo',
+                description: 'bar',
+                versions: [version],
+                deploys: [{ 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str }],
+              )
             }
 
             let(:expected_deploys) {
@@ -168,14 +168,15 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
         context 'when deploy version is not linked to any ticket' do
           let!(:released_ticket) {
-            Snapshots::ReleasedTicket
-              .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
-                      versions: ['def123'],
-                      deploys: [
-                        { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
-                      ]
-                     )
+            Snapshots::ReleasedTicket.create(
+              key: 'JIRA-1',
+              summary: 'foo',
+              description: 'bar',
+              versions: ['def123'],
+              deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }],
+            )
           }
+
           it 'does nothing' do
             ticket_repo.apply(deploy_event)
             expect { ticket_repo.apply(deploy_event) }.to_not change { Snapshots::ReleasedTicket.count }
@@ -183,6 +184,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           end
         end
       end
+
       context 'when deploy is not to production' do
         let(:deploy_event) {
           build :deploy_event, environment: 'uat', version: version, created_at: time_string

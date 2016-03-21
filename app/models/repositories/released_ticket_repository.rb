@@ -32,9 +32,9 @@ module Repositories
       feature_reviews = feature_review_factory.create_from_text(event.comment)
 
       if (record = store.find_by(key: event.key))
-        record.update(build_ticket(record.attributes, event, feature_reviews))
+        record.update(build_ticket(event, feature_reviews, record.attributes))
       else
-        store.create!(build_ticket({}, event)) unless feature_reviews.empty?
+        store.create!(build_ticket(event, feature_reviews)) unless feature_reviews.empty?
       end
     end
 
@@ -63,7 +63,7 @@ module Repositories
       event.is_a?(Events::DeployEvent) && event.environment == 'production'
     end
 
-    def build_ticket(ticket_attrs, jira_event, feature_reviews = [])
+    def build_ticket(jira_event, feature_reviews = [], ticket_attrs = {})
       ticket_attrs.merge(
         key: jira_event.key,
         summary: jira_event.summary,
