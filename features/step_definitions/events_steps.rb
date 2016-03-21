@@ -13,6 +13,29 @@ Given 'the following tickets are created:' do |tickets_table|
       summary: ticket_row['Summary'],
       description: ticket_row['Description'],
     )
+
+    deploys = ticket_row['Deploys']
+    next if deploys.empty?
+    date, time, app_name, sha = deploys.split
+    datetime = Time.zone.parse("#{date} #{time}")
+    fr = "FR_#{app_name}"
+    ticket = ticket_row['Jira Key']
+
+    steps %(
+      Given an application called "#{app_name}"
+
+      And a commit "#{sha}" by "Alice" is created at "#{(datetime - 3.hours)}" for app "#{app_name}"
+
+      And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
+        | app_name    | version |
+        | #{app_name} | #{sha}  |
+
+      And at time "#{(datetime - 2.hours)}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
+
+      And ticket "#{ticket}" is approved by "bob@fundingcircle.com" at "#{(datetime - 1.hour)}"
+
+      And commit "#{sha}" of "#{app_name}" is deployed by "Jeff" to production at "#{datetime}"
+    )
   end
 end
 
@@ -103,8 +126,8 @@ end
 # rubocop:enable LineLength
 
 When 'snapshots are regenerated' do
-  Rails.application.load_tasks
-
-  Rake::Task['jobs:recreate_snapshots'].reenable
-  Rake::Task['jobs:recreate_snapshots'].invoke
+  repos = Rails.configuration.repositories
+  updater = Repositories::Updater.new(repos)
+  updater.reset
+  updater.run
 end

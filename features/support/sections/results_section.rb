@@ -10,6 +10,7 @@ module Sections
           'Jira Key' => jira_element(panel_element, 'key')&.text,
           'Summary' =>  jira_element(panel_element, 'summary')&.text,
           'Description' => jira_element(panel_element, 'description')&.text,
+          'Deploys' => jira_elements(panel_element, 'deploy').map(&:text),
         }
       }
     end
@@ -18,8 +19,12 @@ module Sections
 
     attr_reader :panel_elements
 
-    def jira_element(panel_element, klass)
-      panel_element.first(".#{klass}")
+    def jira_element(panel_element, css_class)
+      panel_element.first(".#{css_class}")
+    end
+
+    def jira_elements(panel_element, css_class)
+      panel_element.all(".#{css_class}")
     end
   end
 end

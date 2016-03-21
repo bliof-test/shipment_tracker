@@ -40,18 +40,33 @@ COMMENT ON EXTENSION hstore IS 'data type for storing sets of (key, value) pairs
 SET search_path = public, pg_catalog;
 
 --
+-- Name: deployed_apps(json); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION deployed_apps(deploys json) RETURNS character varying
+    LANGUAGE plpgsql
+    AS $$
+      BEGIN
+        RETURN (SELECT string_agg(elem::json->>'app', ' ')
+                FROM json_array_elements_text(deploys) elem);
+      END
+      $$;
+
+
+--
 -- Name: released_tickets_trigger(); Type: FUNCTION; Schema: public; Owner: -
 --
 
 CREATE FUNCTION released_tickets_trigger() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
-      begin
+      BEGIN
         new.tsv :=
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.summary, '')), 'A') ||
-          setweight(to_tsvector('pg_catalog.english', coalesce(new.description, '')), 'D');
-        return new;
-      end
+          setweight(to_tsvector(coalesce(deployed_apps(new.deploys), '')), 'A') ||
+          setweight(to_tsvector(coalesce(new.summary, '')), 'B') ||
+          setweight(to_tsvector(coalesce(new.description, '')), 'D');
+        RETURN new;
+      END
       $$;
 
 
@@ -304,7 +319,9 @@ CREATE TABLE released_tickets (
     description text,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    tsv tsvector
+    tsv tsvector,
+    deploys json DEFAULT '[]'::json,
+    versions character varying[]
 );
 
 
@@ -653,10 +670,24 @@ CREATE INDEX index_manual_tests_on_versions ON manual_tests USING gin (versions)
 
 
 --
+-- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE UNIQUE INDEX index_released_tickets_on_key ON released_tickets USING btree (key);
+
+
+--
 -- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_released_tickets_on_tsv ON released_tickets USING gin (tsv);
+
+
+--
+-- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_released_tickets_on_versions ON released_tickets USING gin (versions);
 
 
 --
@@ -781,4 +812,8 @@ INSERT INTO schema_migrations (version) VALUES ('20160311131953');
 INSERT INTO schema_migrations (version) VALUES ('20160315155037');
 
 INSERT INTO schema_migrations (version) VALUES ('20160315165607');
+
+INSERT INTO schema_migrations (version) VALUES ('20160316154428');
+
+INSERT INTO schema_migrations (version) VALUES ('20160318164129');
 
