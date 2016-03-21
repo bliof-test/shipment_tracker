@@ -33,14 +33,14 @@ namespace :jobs do
     repos.delete(released_tickets_repo)
 
     t1 = Thread.new{
-      puts "[#{Time.current}] Running recreate_snapshots for #{repos.map(&:table_name)}"
+      puts "[#{Time.current}] Running recreate_snapshots for #{repos.map(&:table_name).join(', ')}"
       updater = Repositories::Updater.new(repos)
 
       repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
       updater.reset
 
       updater.run(repo_event_id_hash)
-      puts "[#{Time.current}] Completed recreate_snapshots for #{repos.map(&:table_name)}"
+      puts "[#{Time.current}] Completed recreate_snapshots for #{repos.map(&:table_name).join(', ')}"
     }
 
     t2 = Thread.new{
