@@ -52,6 +52,7 @@ module Repositories
         app: event.app_name,
         version: event.version,
         deployed_at: event.created_at.strftime('%F %H:%M %Z'),
+        github_url: GitRepositoryLocation.github_url_for_app(event.app_name),
       }
     end
 

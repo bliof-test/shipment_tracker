@@ -7,7 +7,14 @@ Then 'I should find the following tickets on the dashboard:' do |tickets_table|
   hashes = tickets_table.hashes
 
   hashes.each do |hash|
-    hash['Deploys'] = hash['Deploys'].split(',').map(&:strip)
+    hash['Deploys'] = hash['Deploys'].split(',').map { |deploy_string|
+      deploy_string_without_version, pretend_version = deploy_string.split('#')
+
+      real_version = scenario_context.resolve_version("##{pretend_version}")
+      short_version = real_version.slice(0..6)
+
+      (deploy_string_without_version + short_version).strip
+    }
   end
 
   expect(result_tickets).to eq hashes

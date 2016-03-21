@@ -47,6 +47,10 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       }
     }
 
+    before do
+      allow(GitRepositoryLocation).to receive(:github_url_for_app)
+    end
+
     context 'when ticket snapshot exists' do
       it 'updates existing ticket when FR is being linked' do
         Snapshots::ReleasedTicket.create(key: 'JIRA-1', summary: 'foo', description: 'bar', versions: ['abc'])
@@ -114,6 +118,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       let(:version) { 'abc123' }
       let(:time) { Time.current }
       let(:time_string) { time.strftime('%F %H:%M %Z') }
+      let(:gurl) { 'https://github.com/owner/hello_world' }
 
       context 'when deploy is to production' do
         context 'when deploy version is linked to some tickets' do
@@ -123,14 +128,33 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               summary: 'foo',
               description: 'bar',
               versions: [version],
-              deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }],
+              deploys: [{
+                'app' => 'hello_world',
+                'version' => 'def123',
+                'deployed_at' => time_string,
+                'github_url' => gurl,
+              }],
             )
           }
 
+          before do
+            allow(GitRepositoryLocation).to receive(:github_url_for_app).with('hello_world').and_return(gurl)
+          end
+
           let(:expected_deploys) {
             [
-              { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => time_string },
-              { 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string },
+              {
+                'app' => 'hello_world',
+                'version' => 'abc123',
+                'deployed_at' => time_string,
+                'github_url' => gurl,
+              },
+              {
+                'app' => 'hello_world',
+                'version' => 'def123',
+                'deployed_at' => time_string,
+                'github_url' => gurl,
+              },
             ]
           }
 
