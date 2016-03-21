@@ -40,10 +40,10 @@ module Repositories
 
     def snapshot_deploy_event(event)
       tickets_for_version(event.version).each do |record|
-        old_deploys = record.attributes.fetch('deploys', [])
-        next if old_deploys.map { |deploy| deploy['version'] }.include?(event.version)
+        next if record.deploys.map { |deploy| deploy['version'] }.include?(event.version)
 
-        record.update(deploys: old_deploys << build_deploy_hash(event))
+        record.deploys << build_deploy_hash(event)
+        record.save!
       end
     end
 
