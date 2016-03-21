@@ -18,14 +18,17 @@
       - tickets_row.compact.each do | ticket |
         .col-md-4
           .panel.panel-default.result
-            .panel-heading.summary= ticket.summary
+            .panel-heading.summary
+              = jira_link(ticket.key)
+              %strong= ticket.summary
             .panel-body
-              = simple_format(ticket.description, class: 'description')
+              = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
               %p
-              %p.key
-                = jira_link(ticket.key)
+              - if !ticket.deploys.empty?
+                %br
+                %h2 Deploys
               - ticket.deploys.each do |deploy|
                 %p.deploy
                   = flag_icon(deploy['region'].to_sym)
                   = "#{deploy['deployed_at']} #{deploy['app']}"
-                  = "#{commit_link(deploy['version'], deploy['github_url'])}".html_safe
+                  = commit_link(deploy['version'], deploy['github_url'])
