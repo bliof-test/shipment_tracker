@@ -24,7 +24,7 @@
             .panel-body
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
               %p
-              - if !ticket.deploys.empty?
+              - if ticket.deploys.any?
                 %br
                 %h2 Deploys
               - ticket.deploys.each do |deploy|
