@@ -1,5 +1,6 @@
 require 'events/jira_event'
 require 'factories/feature_review_factory'
+require 'git_repository_loader'
 require 'snapshots/released_ticket'
 require 'ticket'
 
@@ -28,6 +29,10 @@ module Repositories
 
     attr_reader :store, :feature_review_factory
 
+    def git_repository(app_name)
+      GitRepositoryLoader.from_rails_config.load(app_name)
+    end
+
     def snapshot_jira_event(event)
       feature_reviews = feature_review_factory.create_from_text(event.comment)
 
@@ -39,7 +44,10 @@ module Repositories
     end
 
     def snapshot_deploy_event(event)
-      tickets_for_version(event.version).each do |record|
+      git_repo = git_repository(event.app_name)
+      commit = git_repo.commit_for_version(event.version)
+
+      tickets_for_versions(commit.associated_ids).each do |record|
         next if record.deploys.map { |deploy| deploy['version'] }.include?(event.version)
 
         record.deploys << build_deploy_hash(event)
@@ -79,8 +87,8 @@ module Repositories
       old_versions.concat(new_versions).uniq
     end
 
-    def tickets_for_version(version)
-      store.where('versions @> ARRAY[?]::varchar[]', version)
+    def tickets_for_versions(versions)
+      store.where('versions && ARRAY[?]::varchar[]', versions)
     end
   end
 end
