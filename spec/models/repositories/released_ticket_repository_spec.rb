@@ -39,6 +39,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
   describe '#apply' do
     let(:store) { Snapshots::ReleasedTicket }
+    let(:time) { Time.current }
     let(:event_attrs) {
       {
         'key' => 'JIRA-123',
@@ -48,6 +49,14 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     }
 
     before do
+      commit = instance_double(GitCommit, associated_ids: %w(abc def))
+      repository = instance_double(GitRepository)
+      repository_loader = instance_double(GitRepositoryLoader)
+
+      allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
+      allow(repository_loader).to receive(:load).and_return(repository)
+      allow(repository).to receive(:commit_for_version).and_return(commit)
+
       allow(GitRepositoryLocation).to receive(:github_url_for_app)
     end
 
@@ -115,8 +124,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       let(:deploy_event) {
         build(:deploy_event, environment: 'production', version: version, created_at: time_string)
       }
-      let(:version) { 'abc123' }
-      let(:time) { Time.current }
+      let(:version) { 'abc' }
       let(:time_string) { time.strftime('%F %H:%M %Z') }
       let(:gurl) { 'https://github.com/owner/hello_world' }
 
@@ -145,7 +153,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             [
               {
                 'app' => 'hello_world',
-                'version' => 'abc123',
+                'version' => 'abc',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
               },
@@ -172,13 +180,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 summary: 'foo',
                 description: 'bar',
                 versions: [version],
-                deploys: [{ 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str }],
+                deploys: [{ 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str }],
               )
             }
 
             let(:expected_deploys) {
               [
-                { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str },
+                { 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str },
               ]
             }
 
@@ -230,7 +238,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     context 'when Feature Review is for topic branch commit' do
       before do
-        commit = instance_double(GitCommit, associated_ids: ['abc', 'def'])
+        commit = instance_double(GitCommit, associated_ids: %w(abc def))
         repository = instance_double(GitRepository)
         repository_loader = instance_double(GitRepositoryLoader)
 
@@ -241,7 +249,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
       it 'snapshots' do
         jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
-        deploy_event = build(:deploy_event, environment: 'production', version: 'def', created_at: Time.current)
+        deploy_event = build(:deploy_event, environment: 'production', version: 'def', created_at: time)
 
         ticket_repo.apply(jira_event)
         ticket_repo.apply(deploy_event)
