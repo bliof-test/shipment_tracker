@@ -141,6 +141,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'version' => 'def123',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
+                'region' => 'gb',
               }],
             )
           }
@@ -156,12 +157,14 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'version' => 'abc',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
+                'region' => 'us',
               },
               {
                 'app' => 'hello_world',
                 'version' => 'def123',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
+                'region' => 'gb',
               },
             ]
           }
@@ -180,18 +183,76 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 summary: 'foo',
                 description: 'bar',
                 versions: [version],
-                deploys: [{ 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str }],
+                deploys: [{
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => yesterday_str,
+                  'region' => 'us',
+                }],
               )
             }
 
             let(:expected_deploys) {
               [
-                { 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str },
+                {
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => yesterday_str,
+                  'region' => 'us',
+                },
               ]
             }
 
             it 'updates related tickets with the deploy info' do
               ticket_repo.apply(deploy_event)
+              record = store.find_by_key('JIRA-1')
+              expect(record.deploys).to match_array(expected_deploys)
+            end
+          end
+
+          context 'when deploying to different regons' do
+            let(:deploy_event_gb) {
+              build(:deploy_event, environment: 'production', version: version, created_at: time_string,
+                                   locale: 'gb'
+                   )
+            }
+            let(:deploy_event_us) {
+              build(:deploy_event, environment: 'production', version: version, created_at: time_string,
+                                   locale: 'us'
+                   )
+            }
+            let!(:released_ticket) {
+              Snapshots::ReleasedTicket.create(
+                key: 'JIRA-1',
+                summary: 'foo',
+                description: 'bar',
+                versions: [version],
+                deploys: [],
+              )
+            }
+
+            let(:expected_deploys) {
+              [
+                {
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => time_string,
+                  'github_url' => gurl,
+                  'region' => 'us',
+                },
+                {
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => time_string,
+                  'github_url' => gurl,
+                  'region' => 'gb',
+                },
+              ]
+            }
+
+            it 'updates related tickets with the deploy info' do
+              ticket_repo.apply(deploy_event_gb)
+              ticket_repo.apply(deploy_event_us)
               record = store.find_by_key('JIRA-1')
               expect(record.deploys).to match_array(expected_deploys)
             end
@@ -205,7 +266,12 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               summary: 'foo',
               description: 'bar',
               versions: ['def123'],
-              deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }],
+              deploys: [{
+                'app' => 'hello_world',
+                'version' => 'def123',
+                'deployed_at' => time_string,
+                'region' => 'gb',
+              }],
             )
           }
 
