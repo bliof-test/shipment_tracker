@@ -51,7 +51,7 @@ module Repositories
         commit = git_repository(event.app_name).commit_for_version(event.version)
 
         tickets_for_versions(commit.associated_ids).each do |record|
-          next if new_deploy_to_region(record.deploys, event)
+          next if duplicate_deploy?(record.deploys, event)
 
           record.deploys << build_deploy_hash(event)
           record.save!
@@ -66,7 +66,7 @@ module Repositories
       Rails.logger.warn error.message
     end
 
-    def new_deploy_to_region(deploys_for_record, event)
+    def duplicate_deploy?(deploys_for_record, event)
       deploys_for_record.any? { |deploy_hash|
         deploy_hash['version'] == event.version && deploy_hash['region'] == event.locale
       }
