@@ -8,9 +8,9 @@ RSpec.describe Events::DeployEvent do
   context 'given an expected payload' do
     let(:payload) {
       {
-        'app_name' => 'soMeApp',
+        'app_name' => 'some_app',
         'servers' => ['prod1.example.com', 'prod2.example.com'],
-        'version' => '123abc',
+        'version' => 'abc123',
         'deployed_by' => 'bob',
         'locale' => 'us',
         'environment' => 'staging',
@@ -18,9 +18,9 @@ RSpec.describe Events::DeployEvent do
     }
 
     it 'returns the correct values' do
-      expect(subject.app_name).to eq('someapp')
+      expect(subject.app_name).to eq('some_app')
       expect(subject.server).to eq('prod1.example.com')
-      expect(subject.version).to eq('123abc')
+      expect(subject.version).to eq('abc123')
       expect(subject.deployed_by).to eq('bob')
       expect(subject.environment).to eq('staging')
       expect(subject.locale).to eq('us')
@@ -36,23 +36,34 @@ RSpec.describe Events::DeployEvent do
       end
     end
 
-    context 'when the payload structure is deprecated' do
+    context 'when the payload contains uppercased values' do
       let(:payload) {
         {
-          'app_name' => 'soMeApp',
-          'server' => 'uat.example.com',
-          'version' => '123abc',
-          'deployed_by' => 'bob',
+          'app_name' => 'AwesomeApp',
+          'servers' => ['PROD.example.com'],
+          'version' => 'ABC123',
+          'deployed_by' => 'Johnny Five',
+          'locale' => 'GB',
           'environment' => 'UAT',
         }
       }
 
-      it 'returns the correct downcased values' do
-        expect(subject.app_name).to eq('someapp')
-        expect(subject.server).to eq('uat.example.com')
-        expect(subject.version).to eq('123abc')
-        expect(subject.deployed_by).to eq('bob')
+      it 'downcases the app_name, environment, and locale' do
+        expect(subject.app_name).to eq('awesomeapp')
         expect(subject.environment).to eq('uat')
+        expect(subject.locale).to eq('gb')
+
+        expect(subject.server).to eq('PROD.example.com')
+        expect(subject.version).to eq('ABC123')
+        expect(subject.deployed_by).to eq('Johnny Five')
+      end
+    end
+
+    context 'when the payload contains deprecated params' do
+      let(:payload) { { 'server' => 'uat.example.com' } }
+
+      it 'returns the correct values' do
+        expect(subject.server).to eq('uat.example.com')
       end
     end
   end
