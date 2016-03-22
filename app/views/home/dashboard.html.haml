@@ -26,5 +26,6 @@
                 = jira_link(ticket.key)
               - ticket.deploys.each do |deploy|
                 %p.deploy
+                  = flag_icon(deploy['region'].to_sym)
                   = "#{deploy['deployed_at']} #{deploy['app']}"
                   = "#{commit_link(deploy['version'], deploy['github_url'])}".html_safe

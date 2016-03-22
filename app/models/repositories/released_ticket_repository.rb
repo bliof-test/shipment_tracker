@@ -45,32 +45,40 @@ module Repositories
       end
     end
 
-    # rubocop:disable Metrics/AbcSize
     def snapshot_deploy_event(event)
       return unless event.version
       begin
-        git_repo = git_repository(event.app_name)
-        commit = git_repo.commit_for_version(event.version)
+        commit = git_repository(event.app_name).commit_for_version(event.version)
 
         tickets_for_versions(commit.associated_ids).each do |record|
-          next if record.deploys.map { |deploy| deploy['version'] }.include?(event.version)
+          next if duplicate_deploy?(record.deploys, event)
 
           record.deploys << build_deploy_hash(event)
           record.save!
         end
       rescue GitRepositoryLoader::NotFound => e
-        Rails.logger.warn "Could not find the repository '#{event.app_name}' locally"
-        Rails.logger.warn e.message
+        log_warning(e, event)
       end
     end
-    # rubocop:enable Metrics/AbcSize
+
+    def log_warning(error, event)
+      Rails.logger.warn "Could not find the repository '#{event.app_name}' locally"
+      Rails.logger.warn error.message
+    end
+
+    def duplicate_deploy?(deploys_for_record, event)
+      deploys_for_record.any? { |deploy_hash|
+        deploy_hash['version'] == event.version && deploy_hash['region'] == event.locale
+      }
+    end
 
     def build_deploy_hash(event)
       {
         app: event.app_name,
-        version: event.version,
         deployed_at: event.created_at.strftime('%F %H:%M %Z'),
         github_url: GitRepositoryLocation.github_url_for_app(event.app_name),
+        region: event.locale,
+        version: event.version,
       }
     end
 
