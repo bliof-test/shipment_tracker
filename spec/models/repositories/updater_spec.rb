@@ -15,9 +15,18 @@ RSpec.describe Repositories::Updater do
       expect(Repositories::Updater.from_rails_config).to eq(expected_updater)
     end
   end
-
-  let(:repository_1) { instance_double(Repositories::BuildRepository, 'repository_1', table_name: 'tbl_1') }
-  let(:repository_2) { instance_double(Repositories::DeployRepository, 'repository_2', table_name: 'tbl_2') }
+  let(:repository_1) {
+    instance_double(Repositories::BuildRepository,
+      'repository_1',
+      store: Snapshots::Build,
+      table_name: 'tbl_1')
+  }
+  let(:repository_2) {
+    instance_double(Repositories::DeployRepository,
+      'repository_2',
+      store: Snapshots::Deploy,
+      table_name: 'tbl_2')
+  }
   let(:repositories) { [repository_1, repository_2] }
 
   let(:events) { [build(:jira_event), build(:jira_event)] }

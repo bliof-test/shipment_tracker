@@ -12,6 +12,7 @@ module Repositories
       @feature_review_factory = Factories::FeatureReviewFactory.new
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def tickets_for_path(feature_review_path, at: nil)
@@ -46,7 +47,7 @@ module Repositories
 
     private
 
-    attr_reader :store, :git_repository_location, :feature_review_factory
+    attr_reader :git_repository_location, :feature_review_factory
 
     def previous_ticket_data(key)
       attrs = store.where(key: key).last.try(:attributes) || {}
