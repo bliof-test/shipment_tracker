@@ -9,6 +9,7 @@ module Repositories
       @store = store
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def apply(event)
@@ -29,8 +30,6 @@ module Repositories
     end
 
     private
-
-    attr_reader :store
 
     def builds(versions, at)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil

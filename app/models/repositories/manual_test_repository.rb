@@ -8,6 +8,7 @@ module Repositories
       @store = store
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def qa_submission_for(versions:, at: nil)
@@ -27,8 +28,6 @@ module Repositories
     end
 
     private
-
-    attr_reader :store
 
     def qa_submission(versions, at)
       query = at ? table['created_at'].lteq(at) : nil

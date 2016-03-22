@@ -10,6 +10,7 @@ module Repositories
       @deploy_repository = deploy_repository
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def uatest_for(versions:, server:, at: nil)
@@ -30,7 +31,7 @@ module Repositories
 
     private
 
-    attr_reader :store, :deploy_repository
+    attr_reader :deploy_repository
 
     def uatest(versions, server, at)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil

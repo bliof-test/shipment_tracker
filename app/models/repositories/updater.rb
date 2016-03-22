@@ -33,7 +33,7 @@ module Repositories
     attr_reader :repositories
 
     def run_for(repository, ceiling_id)
-      ActiveRecord::Base.transaction do
+      repository.store.transaction do
         last_id = 0
         new_events_for(repository, ceiling_id).each do |event|
           last_id = event.id
@@ -52,9 +52,11 @@ module Repositories
     end
 
     def update_count_for(repository, id)
-      record = Snapshots::EventCount.find_or_create_by(snapshot_name: repository.table_name)
-      record.event_id = id
-      record.save!
+      Snapshots::EventCount.transaction do
+        record = Snapshots::EventCount.find_or_create_by(snapshot_name: repository.table_name)
+        record.event_id = id
+        record.save!
+      end
     end
 
     def all_tables

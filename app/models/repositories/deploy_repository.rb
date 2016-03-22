@@ -9,6 +9,7 @@ module Repositories
       @store = store
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def deploys_for(apps: nil, server:, at: nil)
@@ -49,8 +50,6 @@ module Repositories
     end
 
     private
-
-    attr_reader :store
 
     def create_deploy_snapshot!(event)
       store.create!(

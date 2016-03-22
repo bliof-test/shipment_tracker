@@ -12,6 +12,7 @@ module Repositories
       @git_repository_loader = GitRepositoryLoader.from_rails_config
     end
 
+    attr_reader :store
     delegate :table_name, to: :store
 
     def tickets_for_query(query)
@@ -28,7 +29,7 @@ module Repositories
 
     private
 
-    attr_reader :store, :feature_review_factory, :git_repository_loader
+    attr_reader :feature_review_factory, :git_repository_loader
 
     def git_repository(app_name)
       git_repository_loader.load(app_name)
@@ -44,19 +45,25 @@ module Repositories
       end
     end
 
+    # rubocop:disable Metrics/AbcSize
     def snapshot_deploy_event(event)
       return unless event.version
+      begin
+        git_repo = git_repository(event.app_name)
+        commit = git_repo.commit_for_version(event.version)
 
-      git_repo = git_repository(event.app_name)
-      commit = git_repo.commit_for_version(event.version)
+        tickets_for_versions(commit.associated_ids).each do |record|
+          next if record.deploys.map { |deploy| deploy['version'] }.include?(event.version)
 
-      tickets_for_versions(commit.associated_ids).each do |record|
-        next if record.deploys.map { |deploy| deploy['version'] }.include?(event.version)
-
-        record.deploys << build_deploy_hash(event)
-        record.save!
+          record.deploys << build_deploy_hash(event)
+          record.save!
+        end
+      rescue GitRepositoryLoader::NotFound => e
+        Rails.logger.warn "Could not find the repository '#{event.app_name}' locally"
+        Rails.logger.warn e.message
       end
     end
+    # rubocop:enable Metrics/AbcSize
 
     def build_deploy_hash(event)
       {
