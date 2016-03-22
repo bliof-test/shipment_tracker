@@ -6,7 +6,11 @@ module Events
     ENVIRONMENTS = %w(uat staging production).freeze
 
     def app_name
-      (details['app_name'] || details['app'])&.downcase
+      if deployed_to_heroku?
+        details['app']&.downcase
+      else
+        details['app_name']&.downcase
+      end
     end
 
     def server
@@ -14,19 +18,35 @@ module Events
     end
 
     def version
-      details['version'] || details['head_long']
+      if deployed_to_heroku?
+        details['head_long']
+      else
+        details['version']
+      end
     end
 
     def deployed_by
-      details['deployed_by'] || details['user']
+      if deployed_to_heroku?
+        details['user']
+      else
+        details['deployed_by']
+      end
     end
 
     def environment
-      details.fetch('environment', heroku_environment).try(:downcase)
+      if deployed_to_heroku?
+        heroku_environment
+      else
+        details['environment']&.downcase
+      end
     end
 
     def locale
-      details.fetch('locale', heroku_locale).try(:downcase) || default_locale
+      if deployed_to_heroku?
+        heroku_locale || ShipmentTracker::DEFAULT_HEROKU_DEPLOY_LOCALE
+      else
+        details.fetch('locale', ShipmentTracker::DEFAULT_DEPLOY_LOCALE)&.downcase
+      end
     end
 
     private
@@ -39,26 +59,16 @@ module Events
       app_name_prefix if Rails.configuration.deploy_regions.include?(app_name_prefix)
     end
 
-    def default_locale
-      if deployed_to_heroku?
-        ShipmentTracker::DEFAULT_HEROKU_DEPLOY_LOCALE
-      else
-        ShipmentTracker::DEFAULT_DEPLOY_LOCALE
-      end
-    end
-
     def deployed_to_heroku?
-      details.fetch('url', '').split('.')[-2] == 'herokuapp'
+      @is_heroku_deploy ||= details.fetch('url', '').split('.')[-2] == 'herokuapp'
     end
 
     def app_name_extension
-      return nil unless app_name
-      app_name.split('-').last.downcase
+      app_name.split('-').last.downcase if app_name
     end
 
     def app_name_prefix
-      return nil unless app_name
-      app_name.split('-').first.downcase
+      app_name.split('-').first.downcase if app_name
     end
 
     def servers
@@ -66,7 +76,11 @@ module Events
     end
 
     def servers_fallback
-      [details['server'] || details['url']].compact
+      if deployed_to_heroku?
+        [details['url']]
+      else
+        [details['server']].compact
+      end
     end
   end
 end
