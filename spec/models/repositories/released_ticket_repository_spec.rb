@@ -22,7 +22,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     it 'returns Ticket objects' do
       tickets = ticket_repo.tickets_for_query(query)
-      expect(tickets.first).to be_a_kind_of(Ticket)
+      expect(tickets.first).to be_a(ReleasedTicket)
     end
 
     context 'when no tickets found' do
@@ -40,6 +40,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
   describe '#apply' do
     let(:store) { Snapshots::ReleasedTicket }
     let(:time) { Time.current }
+    let(:repository) { instance_double(GitRepository) }
     let(:event_attrs) {
       {
         'key' => 'JIRA-123',
@@ -50,7 +51,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     before do
       commit = instance_double(GitCommit, associated_ids: %w(abc def))
-      repository = instance_double(GitRepository)
       repository_loader = instance_double(GitRepositoryLoader)
 
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
@@ -237,16 +237,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     context 'when Feature Review is for topic branch commit' do
-      before do
-        commit = instance_double(GitCommit, associated_ids: %w(abc def))
-        repository = instance_double(GitRepository)
-        repository_loader = instance_double(GitRepositoryLoader)
-
-        allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
-        allow(repository_loader).to receive(:load).and_return(repository)
-        allow(repository).to receive(:commit_for_version).with('def').and_return(commit)
-      end
-
       it 'snapshots' do
         jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
         deploy_event = build(:deploy_event, environment: 'production', version: 'def', created_at: time)
@@ -256,6 +246,21 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
         deployed_versions = Snapshots::ReleasedTicket.last.deploys.map { |d| d['version'] }
         expect(deployed_versions).to contain_exactly('def')
+      end
+    end
+
+    context 'when deploy event does not contain a version' do
+      before do
+        allow(repository).to receive(:commit_for_version).with(nil).and_raise(TypeError)
+      end
+
+      it 'does not snapshot' do
+        jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
+        deploy_event = build(:deploy_event, environment: 'production', version: nil, created_at: time)
+
+        ticket_repo.apply(jira_event)
+
+        expect { ticket_repo.apply(deploy_event) }.not_to change { Snapshots::ReleasedTicket.count }
       end
     end
 

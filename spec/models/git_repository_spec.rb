@@ -180,8 +180,14 @@ RSpec.describe GitRepository do
 
     it 'returns a GitCommit object for a given sha' do
       commit = subject.commit_for_version(version('A'))
-      expect(commit).to be_kind_of(GitCommit)
+      expect(commit).to be_a(GitCommit)
       expect(commit.id).to eq version('A')
+    end
+
+    it 'returns an empty GitCommit when the lookup fails' do
+      commit = subject.commit_for_version('invalid_sha')
+      expect(commit).to be_a(GitCommit)
+      expect(commit.associated_ids).to be_empty
     end
   end
 

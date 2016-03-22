@@ -16,6 +16,12 @@ class GitCommit
   end
 
   def associated_ids
-    [id, parent_ids.second].compact
+    [id, merged_branch_head_commit].compact
+  end
+
+  private
+
+  def merged_branch_head_commit
+    parent_ids[1]
   end
 end

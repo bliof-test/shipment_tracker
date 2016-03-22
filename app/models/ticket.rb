@@ -12,7 +12,6 @@ class Ticket
     attribute :approved_at, DateTime
     attribute :version_timestamps, Hash[String => DateTime]
     attribute :versions, Array, default: []
-    attribute :deploys, Array, default: []
   end
 
   def authorisation_status(versions_under_review)

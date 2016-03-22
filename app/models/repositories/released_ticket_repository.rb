@@ -2,19 +2,20 @@ require 'events/jira_event'
 require 'factories/feature_review_factory'
 require 'git_repository_loader'
 require 'snapshots/released_ticket'
-require 'ticket'
+require 'released_ticket'
 
 module Repositories
   class ReleasedTicketRepository
     def initialize(store = Snapshots::ReleasedTicket)
       @store = store
       @feature_review_factory = Factories::FeatureReviewFactory.new
+      @git_repository_loader = GitRepositoryLoader.from_rails_config
     end
 
     delegate :table_name, to: :store
 
     def tickets_for_query(query)
-      store.search_for(query).map { |t| Ticket.new(t.attributes) }
+      store.search_for(query).map { |t| ReleasedTicket.new(t.attributes) }
     end
 
     def apply(event)
@@ -27,10 +28,10 @@ module Repositories
 
     private
 
-    attr_reader :store, :feature_review_factory
+    attr_reader :store, :feature_review_factory, :git_repository_loader
 
     def git_repository(app_name)
-      GitRepositoryLoader.from_rails_config.load(app_name)
+      git_repository_loader.load(app_name)
     end
 
     def snapshot_jira_event(event)
@@ -44,6 +45,8 @@ module Repositories
     end
 
     def snapshot_deploy_event(event)
+      return unless event.version
+
       git_repo = git_repository(event.app_name)
       commit = git_repo.commit_for_version(event.version)
 
