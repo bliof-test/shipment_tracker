@@ -151,6 +151,8 @@ class GitRepository
   end
 
   def build_commit(commit)
+    return GitCommit.new unless commit
+
     GitCommit.new(
       id: commit.oid,
       author_name: commit.author[:name],

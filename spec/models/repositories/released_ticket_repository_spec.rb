@@ -22,7 +22,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     it 'returns Ticket objects' do
       tickets = ticket_repo.tickets_for_query(query)
-      expect(tickets.first).to be_a_kind_of(Ticket)
+      expect(tickets.first).to be_a(ReleasedTicket)
     end
 
     context 'when no tickets found' do
@@ -39,6 +39,8 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
   describe '#apply' do
     let(:store) { Snapshots::ReleasedTicket }
+    let(:time) { Time.current }
+    let(:repository) { instance_double(GitRepository) }
     let(:event_attrs) {
       {
         'key' => 'JIRA-123',
@@ -48,6 +50,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     }
 
     before do
+      commit = instance_double(GitCommit, associated_ids: %w(abc def))
+      repository_loader = instance_double(GitRepositoryLoader)
+
+      allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
+      allow(repository_loader).to receive(:load).and_return(repository)
+      allow(repository).to receive(:commit_for_version).and_return(commit)
+
       allow(GitRepositoryLocation).to receive(:github_url_for_app)
     end
 
@@ -115,8 +124,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       let(:deploy_event) {
         build(:deploy_event, environment: 'production', version: version, created_at: time_string)
       }
-      let(:version) { 'abc123' }
-      let(:time) { Time.current }
+      let(:version) { 'abc' }
       let(:time_string) { time.strftime('%F %H:%M %Z') }
       let(:gurl) { 'https://github.com/owner/hello_world' }
 
@@ -145,7 +153,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             [
               {
                 'app' => 'hello_world',
-                'version' => 'abc123',
+                'version' => 'abc',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
               },
@@ -172,13 +180,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 summary: 'foo',
                 description: 'bar',
                 versions: [version],
-                deploys: [{ 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str }],
+                deploys: [{ 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str }],
               )
             }
 
             let(:expected_deploys) {
               [
-                { 'app' => 'hello_world', 'version' => 'abc123', 'deployed_at' => yesterday_str },
+                { 'app' => 'hello_world', 'version' => 'abc', 'deployed_at' => yesterday_str },
               ]
             }
 
@@ -225,6 +233,34 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           expect { ticket_repo.apply(deploy_event) }.to_not change { Snapshots::ReleasedTicket.count }
           expect(released_ticket.deploys).to eq(Snapshots::ReleasedTicket.last.deploys)
         end
+      end
+    end
+
+    context 'when Feature Review is for topic branch commit' do
+      it 'snapshots' do
+        jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
+        deploy_event = build(:deploy_event, environment: 'production', version: 'def', created_at: time)
+
+        ticket_repo.apply(jira_event)
+        ticket_repo.apply(deploy_event)
+
+        deployed_versions = Snapshots::ReleasedTicket.last.deploys.map { |d| d['version'] }
+        expect(deployed_versions).to contain_exactly('def')
+      end
+    end
+
+    context 'when deploy event does not contain a version' do
+      before do
+        allow(repository).to receive(:commit_for_version).with(nil).and_raise(TypeError)
+      end
+
+      it 'does not snapshot' do
+        jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
+        deploy_event = build(:deploy_event, environment: 'production', version: nil, created_at: time)
+
+        ticket_repo.apply(jira_event)
+
+        expect { ticket_repo.apply(deploy_event) }.not_to change { Snapshots::ReleasedTicket.count }
       end
     end
 

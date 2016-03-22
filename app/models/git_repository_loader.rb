@@ -9,12 +9,11 @@ class GitRepositoryLoader
   class BadLocation < RuntimeError; end
 
   def self.from_rails_config
-    config = Rails.configuration
-    new(
-      ssh_private_key: config.ssh_private_key,
-      ssh_public_key: config.ssh_public_key,
-      ssh_user: config.ssh_user,
-      cache_dir: config.git_repository_cache_dir,
+    @repo_loader ||= new(
+      ssh_private_key: Rails.configuration.ssh_private_key,
+      ssh_public_key: Rails.configuration.ssh_public_key,
+      ssh_user: Rails.configuration.ssh_user,
+      cache_dir: Rails.configuration.git_repository_cache_dir,
     )
   end
 

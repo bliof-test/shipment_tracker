@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
   before_action :data_maintenance_warning
 
   def git_repository_loader
-    @git_repository_loader ||= GitRepositoryLoader.from_rails_config
+    GitRepositoryLoader.from_rails_config
   end
 
   def event_factory
