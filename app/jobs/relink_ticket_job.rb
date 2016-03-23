@@ -12,11 +12,11 @@ class RelinkTicketJob < ActiveJob::Base
     full_repo_name = args.delete(:full_repo_name)
     branch_created = args.delete(:branch_created)
 
-    linked_tickets = relink_tickets(before_sha, after_sha) unless branch_created
-
-    post_not_found_status(full_repo_name: full_repo_name, sha: after_sha) \
-      if branch_created || linked_tickets&.empty?
-    post_error_status(full_repo_name: full_repo_name, sha: after_sha) if @send_error_status
+    if branch_created || relink_tickets(before_sha, after_sha).empty?
+      post_not_found_status(full_repo_name: full_repo_name, sha: after_sha)
+    elsif @send_error_status
+      post_error_status(full_repo_name: full_repo_name, sha: after_sha)
+    end
   end
 
   private
@@ -31,7 +31,6 @@ class RelinkTicketJob < ActiveJob::Base
         link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
     end
-    linked_tickets
   end
 
   def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
