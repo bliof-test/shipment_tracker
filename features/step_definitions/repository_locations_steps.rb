@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Given 'I am on the new repository location form' do
   git_repository_location_page.visit
 end

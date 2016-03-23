@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'rails_helper'
 require 'repositories/released_ticket_repository'
 require 'snapshots/released_ticket'

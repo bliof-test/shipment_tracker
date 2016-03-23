@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'clients/jira'
 require 'honeybadger'
 require 'repositories/ticket_repository'

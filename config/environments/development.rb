@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Dotenv.load!('.env.development')
 
 Rails.application.configure do

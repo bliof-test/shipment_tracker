@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'events/jenkins_event'
 
 FactoryGirl.define do

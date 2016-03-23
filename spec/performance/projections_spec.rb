@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'rails_helper'
 require 'support/git_test_repository'
 require 'support/repository_builder'
