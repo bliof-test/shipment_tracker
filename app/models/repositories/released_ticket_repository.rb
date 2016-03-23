@@ -16,8 +16,8 @@ module Repositories
     attr_reader :store
     delegate :table_name, to: :store
 
-    def tickets_for_query(query)
-      store.search_for(query).map { |t| ReleasedTicket.new(t.attributes) }
+    def tickets_for_query(query, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY)
+      store.search_for(query).limit(per_page).map { |t| ReleasedTicket.new(t.attributes) }
     end
 
     def apply(event)
