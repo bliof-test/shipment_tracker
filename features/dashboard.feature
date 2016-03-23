@@ -28,3 +28,16 @@ Scenario: User finds tickets by deployed app name
   Then I should find the following tickets on the dashboard:
     | Jira Key | Summary     | Description | Deploys                         |
     | ENG-2    | Second task | Something   | GB 2016-03-21 12:02 UTC app_1 #abc |
+
+@mock_slack_notifier
+Scenario: User finds ticket by title
+  Given the following tickets are created:
+    | Jira Key | Summary                 | Description                    | Deploys                     |
+    | ENG-1    | Make this task          | As a User\n make the task      | 2016-03-21 12:02 app_1 #abc |
+    | ENG-2    | Implement this critical | As a User\n do another task    | 2016-03-22 15:13 app_2 #def |
+    | ENG-3    | Perform that issue      | As a User\n perform some story | 2016-03-22 16:13 app_3 #ghj |
+  When I search tickets with keywords "implement issue"
+  Then I should find the following tickets on the dashboard:
+    | Jira Key | Summary                 | Description                  | Deploys                            |
+    | ENG-2    | Implement this critical | As a User do another task    | GB 2016-03-22 15:13 UTC app_2 #def |
+    | ENG-3    | Perform that issue      | As a User perform some story | GB 2016-03-22 16:13 UTC app_3 #ghj |

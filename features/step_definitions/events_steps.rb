@@ -26,13 +26,13 @@ Given 'the following tickets are created:' do |tickets_table|
 
       And a commit "#master_1" by "Alice" is created at "#{(datetime - 5.hours)}" for app "#{app_name}"
       And the branch "feature" is checked out
-      And a commit "#feat_1" with message "some commit" is created at "#{(datetime - 4.hours)}"
+      And a commit "#feat_1_#{app_name}" with message "some commit" is created at "#{(datetime - 4.hours)}"
       And the branch "master" is checked out
       And the branch "feature" is merged with merge commit "#{deploy_sha}" at "#{(datetime - 3.hours)}"
 
       And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
-        | app_name    | version |
-        | #{app_name} | #feat_1 |
+        | app_name    | version             |
+        | #{app_name} | #feat_1_#{app_name} |
 
       And at time "#{(datetime - 2.hours)}" adds link for review "#{fr}" to comment for ticket "#{ticket}"
 
