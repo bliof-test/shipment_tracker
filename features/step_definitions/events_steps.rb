@@ -25,7 +25,7 @@ Given 'the following tickets are created:' do |tickets_table|
     steps %(
       Given an application called "#{app_name}"
 
-      And a commit "#master_1" by "Alice" is created at "#{(datetime - 5.hours)}" for app "#{app_name}"
+      And a commit "#master_1_#{app_name}" by "Alice" is created at "#{(datetime - 5.hours)}" for app "#{app_name}"
       And the branch "feature" is checked out
       And a commit "#feat_1_#{app_name}" with message "some commit" is created at "#{(datetime - 4.hours)}"
       And the branch "master" is checked out

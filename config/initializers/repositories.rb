@@ -4,6 +4,8 @@ Rails.configuration.repositories = [
   Repositories::BuildRepository.new,
   Repositories::ManualTestRepository.new,
   Repositories::TicketRepository.new,
+
+  # ReleasedTickets repo depends on DeployRepository
   Repositories::ReleasedTicketRepository.new,
 
   # UatestRepository must always be last as it depends on DeployRepository.
