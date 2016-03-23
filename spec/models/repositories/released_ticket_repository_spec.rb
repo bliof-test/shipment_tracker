@@ -11,9 +11,11 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     let(:store) { double }
     let(:query) { double }
     let(:ticket) { double(Snapshots::Ticket, attributes: {}) }
+    let(:result) { double }
 
     before do
-      allow(store).to receive(:search_for).and_return([ticket])
+      allow(store).to receive(:search_for).and_return(result)
+      allow(result).to receive(:limit).and_return([ticket])
     end
 
     it 'delegates search to store' do
@@ -28,12 +30,28 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     context 'when no tickets found' do
       before do
-        allow(store).to receive(:search_for).and_return([])
+        allow(result).to receive(:limit).and_return([])
       end
 
       it 'returns empty array' do
         tickets = ticket_repo.tickets_for_query(query)
         expect(tickets).to be_empty
+      end
+    end
+
+    context 'when specifying a per_page amount' do
+      let(:specified_amount) { 3 }
+
+      before do
+        stub_const('ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY', specified_amount)
+        allow(result).to receive(:limit).and_return([ticket, ticket, ticket])
+      end
+
+      it 'returns results limited to the amount requested' do
+        tickets = ticket_repo.tickets_for_query(query)
+
+        expect(tickets.count).to eq(specified_amount)
+        expect(result).to have_received(:limit).with(specified_amount)
       end
     end
   end
