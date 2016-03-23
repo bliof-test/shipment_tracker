@@ -282,13 +282,11 @@ RSpec.describe Repositories::TicketRepository do
       end
     end
 
-    describe 'updating Github pull requests' do
+    describe 'GitHub Commit Statuses' do
       before do
         allow(CommitStatusUpdateJob).to receive(:perform_later)
         allow(Rails.configuration).to receive(:data_maintenance_mode).and_return(false)
-        allow(git_repo_location).to receive(:find_by_name)
-          .with('frontend')
-          .and_return(repository_location)
+        allow(git_repo_location).to receive(:find_by_name).with('frontend').and_return(repository_location)
       end
 
       context 'when in maintenance mode' do
@@ -296,7 +294,7 @@ RSpec.describe Repositories::TicketRepository do
           allow(Rails.configuration).to receive(:data_maintenance_mode).and_return(true)
         end
 
-        it 'does not schedule pull request updates' do
+        it 'does not schedule commit status updates' do
           expect(CommitStatusUpdateJob).to_not receive(:perform_later)
 
           event = build(:jira_event, comment_body: feature_review_url(frontend: 'abc'))
@@ -304,8 +302,8 @@ RSpec.describe Repositories::TicketRepository do
         end
       end
 
-      context 'given a comment event' do
-        context 'when it contains a link to a feature review' do
+      context 'when ticket event is for a comment' do
+        context 'when event contains a Feature Review link' do
           let(:event) {
             build(
               :jira_event,
@@ -314,7 +312,7 @@ RSpec.describe Repositories::TicketRepository do
             )
           }
 
-          it 'schedules an update to the pull request for each version' do
+          it 'schedules commit status updates for each version' do
             expect(CommitStatusUpdateJob).to receive(:perform_later).with(
               full_repo_name: 'owner/frontend',
               sha: 'abc',
@@ -327,7 +325,7 @@ RSpec.describe Repositories::TicketRepository do
           end
         end
 
-        context 'when it does not contain a link to a feature review' do
+        context 'when event does not contain a Feature Review link' do
           let(:event) {
             build(
               :jira_event,
@@ -347,14 +345,14 @@ RSpec.describe Repositories::TicketRepository do
             repository.apply(event)
           end
 
-          it 'does not schedule an update to the pull request' do
+          it 'does not schedule a commit status update' do
             expect(CommitStatusUpdateJob).to_not receive(:perform_later)
             repository.apply(event)
           end
         end
       end
 
-      context 'given an approval event' do
+      context 'when ticket event is for an approval' do
         let(:approval_event) { build(:jira_event, :approved, key: 'JIRA-XYZ', created_at: time) }
 
         before do
@@ -367,7 +365,7 @@ RSpec.describe Repositories::TicketRepository do
           repository.apply(event)
         end
 
-        it 'schedules an update to the pull request for each version' do
+        it 'schedules a commit status update for each version' do
           expect(CommitStatusUpdateJob).to receive(:perform_later).with(
             full_repo_name: 'owner/frontend',
             sha: 'abc',
@@ -376,7 +374,7 @@ RSpec.describe Repositories::TicketRepository do
         end
       end
 
-      context 'given an unapproval event' do
+      context 'when ticket event is for an unapproval' do
         let(:unapproval_event) { build(:jira_event, :rejected, key: 'JIRA-XYZ', created_at: time) }
 
         before do
@@ -389,7 +387,7 @@ RSpec.describe Repositories::TicketRepository do
           repository.apply(event)
         end
 
-        it 'schedules an update to the pull request for each version' do
+        it 'schedules a commit status update for each version' do
           expect(CommitStatusUpdateJob).to receive(:perform_later).with(
             full_repo_name: 'owner/frontend',
             sha: 'abc',
@@ -398,8 +396,8 @@ RSpec.describe Repositories::TicketRepository do
         end
       end
 
-      context 'given another event' do
-        let(:event) { build(:jira_event, key: 'JIRA-XYZ', created_at: time) }
+      context 'when ticket event is for any other activity' do
+        let(:random_event) { build(:jira_event, key: 'JIRA-XYZ', created_at: time) }
 
         before do
           event = build(
@@ -411,13 +409,13 @@ RSpec.describe Repositories::TicketRepository do
           repository.apply(event)
         end
 
-        it 'does not schedule an update to the pull request for each version' do
+        it 'does not schedule a commit status update' do
           expect(CommitStatusUpdateJob).not_to receive(:perform_later)
-          repository.apply(event)
+          repository.apply(random_event)
         end
       end
 
-      context 'given repository location can not be found' do
+      context 'when repository location can not be found' do
         let(:event) {
           build(
             :jira_event,
@@ -431,7 +429,7 @@ RSpec.describe Repositories::TicketRepository do
           allow(git_repo_location).to receive(:find_by_name).with('frontend').and_return(nil)
         end
 
-        it 'does not schedule an update to the pull request' do
+        it 'does not schedule a commit status update' do
           expect(CommitStatusUpdateJob).to_not receive(:perform_later)
           repository.apply(event)
         end
