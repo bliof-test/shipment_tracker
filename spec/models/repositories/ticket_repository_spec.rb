@@ -148,6 +148,14 @@ RSpec.describe Repositories::TicketRepository do
       allow(CommitStatusUpdateJob).to receive(:perform_later)
     end
 
+    it 'only snapshots tickets that contain a Feature Review' do
+      event = build(:jira_event)
+      expect { repository.apply(event) }.to_not change { repository.store.count }
+
+      event = build(:jira_event, comment_body: "Feature Review #{url}")
+      expect { repository.apply(event) }.to change { repository.store.count }
+    end
+
     it 'projects latest associated tickets' do
       jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
       ticket_1 = jira_1.merge(ticket_defaults)
