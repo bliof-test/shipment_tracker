@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'clients/jira'
 
 Before('@disable_jira_client') do

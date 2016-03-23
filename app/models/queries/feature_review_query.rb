@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'feature_review_with_statuses'
 require 'repositories/build_repository'
 require 'repositories/deploy_repository'

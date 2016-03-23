@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module Sections
   class ResultsSection
     def initialize(panel_elements)

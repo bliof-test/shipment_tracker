@@ -60,7 +60,7 @@ Style/SignalException:
     - 'app/use_cases/link_ticket.rb'
 
 Style/FrozenStringLiteralComment:
-  Enabled: false  # TODO: Enable in separate PR.
+  Enabled: enable
 
 Style/DoubleNegation:
   Enabled: false

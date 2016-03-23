@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 class CommitStatusUpdateJob < ActiveJob::Base
   queue_as :default
 

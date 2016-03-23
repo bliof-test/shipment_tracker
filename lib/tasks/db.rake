@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 namespace :db do
   desc 'create database.yml based on database.yml.erb'
   task 'create_database_yml' do
