@@ -5,7 +5,7 @@ Then 'a deploy alert should be dispatched for' do |table|
 
     expect(SlackClient).to have_received(:send_deploy_alert).with(
       "GB Deploy Alert for #{app} at #{time}.\n"\
-      "#{deployer} deployed #{scenario_context.resolve_version(version)}. #{msg}",
+      "#{deployer} deployed #{scenario_context.resolve_version(version)}.\n#{msg}",
       'https://localhost/releases/frontend?region=gb',
       app,
       deployer,

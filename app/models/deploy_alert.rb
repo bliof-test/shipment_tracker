@@ -26,25 +26,25 @@ class DeployAlert
   end
 
   def self.alert_not_authorised(deploy)
-    "#{alert_header(deploy)} Release not authorised; Feature Review not approved."
+    "#{alert_header(deploy)}Release not authorised; Feature Review not approved."
   end
 
   def self.alert_not_on_master(deploy)
-    "#{alert_header(deploy)} Version does not exist on GitHub master branch."
+    "#{alert_header(deploy)}Version does not exist on GitHub master branch."
   end
 
   def self.alert_unknown_version(deploy)
-    "#{alert_header(deploy)} Deploy event sent to Shipment Tracker is missing the software version."
+    "#{alert_header(deploy)}Deploy event sent to Shipment Tracker is missing the software version."
   end
 
   def self.alert_rollback(deploy)
-    "#{alert_header(deploy)} Old release deployed. Was the rollback intentional?"
+    "#{alert_header(deploy)}Old release deployed. Was the rollback intentional?"
   end
 
   def self.alert_header(deploy)
     time = deploy.event_created_at.strftime('%F %H:%M%:z')
     "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n" \
-    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}."
+    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}.\n"
   end
   private_class_method :alert_header
 
