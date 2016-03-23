@@ -7,14 +7,18 @@ module Events
 
     def app_name
       if deployed_to_heroku?
-        details['app']&.downcase
+        heroku_app_name.chomp("-#{heroku_environment}").downcase
       else
         details['app_name']&.downcase
       end
     end
 
     def server
-      servers.first
+      if deployed_to_heroku?
+        details['url']
+      else
+        servers.first
+      end
     end
 
     def version
@@ -51,36 +55,32 @@ module Events
 
     private
 
-    def heroku_environment
-      app_name_extension if ENVIRONMENTS.include?(app_name_extension)
-    end
-
-    def heroku_locale
-      app_name_prefix if Rails.configuration.deploy_regions.include?(app_name_prefix)
+    def servers
+      details.fetch('servers', [details['server']].compact)
     end
 
     def deployed_to_heroku?
       @is_heroku_deploy ||= details.fetch('url', '').split('.')[-2] == 'herokuapp'
     end
 
-    def app_name_extension
-      app_name.split('-').last.downcase if app_name
+    def heroku_app_name
+      details['app']
     end
 
-    def app_name_prefix
-      app_name.split('-').first.downcase if app_name
+    def heroku_environment
+      heroku_app_name_extension if ENVIRONMENTS.include?(heroku_app_name_extension)
     end
 
-    def servers
-      details.fetch('servers', servers_fallback)
+    def heroku_locale
+      heroku_app_name_prefix if Rails.configuration.deploy_regions.include?(heroku_app_name_prefix)
     end
 
-    def servers_fallback
-      if deployed_to_heroku?
-        [details['url']]
-      else
-        [details['server']].compact
-      end
+    def heroku_app_name_extension
+      heroku_app_name.split('-').last.downcase
+    end
+
+    def heroku_app_name_prefix
+      heroku_app_name.split('-').first.downcase
     end
   end
 end

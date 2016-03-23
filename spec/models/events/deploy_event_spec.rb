@@ -5,7 +5,7 @@ require 'events/deploy_event'
 RSpec.describe Events::DeployEvent do
   subject { Events::DeployEvent.new(details: payload) }
 
-  context 'given an expected payload' do
+  context 'given a custom payload' do
     let(:payload) {
       {
         'app_name' => 'some_app',
@@ -84,7 +84,7 @@ RSpec.describe Events::DeployEvent do
     }
 
     it 'returns the correct values' do
-      expect(subject.app_name).to eq('us-nameless-forest-uat')
+      expect(subject.app_name).to eq('us-nameless-forest')
       expect(subject.deployed_by).to eq('user@example.com')
       expect(subject.environment).to eq('uat')
       expect(subject.locale).to eq('us')
