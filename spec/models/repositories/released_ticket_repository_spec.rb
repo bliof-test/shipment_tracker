@@ -19,12 +19,12 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     it 'delegates search to store' do
-      ticket_repo.tickets_for_query(query)
+      ticket_repo.tickets_for_query(query_text: query, versions: [])
       expect(store).to have_received(:search_for).with(query)
     end
 
     it 'returns Ticket objects' do
-      tickets = ticket_repo.tickets_for_query(query)
+      tickets = ticket_repo.tickets_for_query(query_text: query, versions: [])
       expect(tickets.first).to be_a(ReleasedTicket)
     end
 
@@ -34,7 +34,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
 
       it 'returns empty array' do
-        tickets = ticket_repo.tickets_for_query(query)
+        tickets = ticket_repo.tickets_for_query(query_text: query, versions: [])
         expect(tickets).to be_empty
       end
     end
@@ -60,6 +60,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     let(:store) { Snapshots::ReleasedTicket }
     let(:time) { Time.current }
     let(:repository) { instance_double(GitRepository) }
+    let(:commit_version) { 'abc' }
     let(:event_attrs) {
       {
         'key' => 'JIRA-123',
@@ -69,7 +70,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     }
 
     before do
-      commit = instance_double(GitCommit, associated_ids: %w(abc def))
+      commit = instance_double(GitCommit, id: commit_version, associated_ids: %w(abc def))
       repository_loader = instance_double(GitRepositoryLoader)
 
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
@@ -322,7 +323,8 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     context 'when Feature Review is for topic branch commit' do
-      it 'snapshots' do
+      let(:commit_version) { 'def' }
+      it 'performs snapshotting' do
         jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
         deploy_event = build(:deploy_event, environment: 'production', version: 'def', created_at: time)
 
