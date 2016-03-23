@@ -7,14 +7,15 @@ require 'ticket'
 
 module Repositories
   class TicketRepository
+    attr_reader :store
+
+    delegate :table_name, to: :store
+
     def initialize(store = Snapshots::Ticket, git_repository_location: GitRepositoryLocation)
       @store = store
       @git_repository_location = git_repository_location
       @feature_review_factory = Factories::FeatureReviewFactory.new
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def tickets_for_path(feature_review_path, at: nil)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil
