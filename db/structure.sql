@@ -282,7 +282,7 @@ ALTER SEQUENCE git_repository_locations_id_seq OWNED BY git_repository_locations
 CREATE TABLE manual_tests (
     id integer NOT NULL,
     email character varying,
-    versions character varying[],
+    versions text[] DEFAULT '{}'::text[],
     accepted boolean,
     comment text,
     created_at timestamp without time zone
@@ -321,7 +321,7 @@ CREATE TABLE released_tickets (
     updated_at timestamp without time zone NOT NULL,
     tsv tsvector,
     deploys json DEFAULT '[]'::json,
-    versions character varying[]
+    versions text[] DEFAULT '{}'::text[]
 );
 
 
@@ -362,9 +362,9 @@ CREATE TABLE tickets (
     key character varying,
     summary character varying,
     status character varying,
-    paths text[],
+    paths text[] DEFAULT '{}'::text[],
     event_created_at timestamp without time zone,
-    versions character varying[],
+    versions text[] DEFAULT '{}'::text[],
     approved_at timestamp without time zone,
     version_timestamps hstore DEFAULT ''::hstore NOT NULL
 );
@@ -432,7 +432,7 @@ CREATE TABLE uatests (
     success boolean,
     test_suite_version character varying,
     event_created_at timestamp without time zone,
-    versions text[]
+    versions text[] DEFAULT '{}'::text[]
 );
 
 
@@ -816,4 +816,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160315165607');
 INSERT INTO schema_migrations (version) VALUES ('20160316154428');
 
 INSERT INTO schema_migrations (version) VALUES ('20160318164129');
+
+INSERT INTO schema_migrations (version) VALUES ('20160324142505');
 
