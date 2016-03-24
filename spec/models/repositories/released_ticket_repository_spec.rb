@@ -48,7 +48,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
 
       it 'returns results limited to the amount requested' do
-        tickets = ticket_repo.tickets_for_query(query)
+        tickets = ticket_repo.tickets_for_query(query_text: query, versions: [])
 
         expect(tickets.count).to eq(specified_amount)
         expect(result).to have_received(:limit).with(specified_amount)

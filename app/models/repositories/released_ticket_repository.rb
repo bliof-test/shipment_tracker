@@ -26,7 +26,7 @@ module Repositories
               end
 
       query = query.search_for(query_text) unless query_text.blank?
-      query.limit(per_page)
+      query = query.limit(per_page)
       query.map { |t| ReleasedTicket.new(t.attributes) }
     end
 
@@ -59,19 +59,22 @@ module Repositories
     def snapshot_deploy_event(event)
       return unless event.version
       begin
-        last_deployed_version = latest_production_deploy(event.app_name, event.locale, event.created_at)
-        released_commits = released_commits(event.app_name, event.version, last_deployed_version)
+        last_deploy = latest_production_deploy(event.app_name, event.locale, event.created_at)
+        released_commits = released_commits(event.app_name, event.version, last_deploy&.version)
         released_commits.each do |commit|
-          tickets_for_versions(commit.associated_ids).each do |ticket_record|
-            next if duplicate_deploy?(ticket_record.deploys, event)
-
-            ticket_record.deploys << build_deploy_hash(event, commit.id)
-            ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
-            ticket_record.save!
-          end
+          update_ticket_deploy_data(event, commit)
         end
       rescue GitRepositoryLoader::NotFound => e
         log_warning(e, event)
+      end
+    end
+
+    def update_ticket_deploy_data(event, commit)
+      tickets_for_versions(commit.associated_ids).each do |ticket_record|
+        next if duplicate_deploy?(ticket_record.deploys, event)
+        ticket_record.deploys << build_deploy_hash(event, commit.id)
+        ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
+        ticket_record.save!
       end
     end
 
@@ -134,10 +137,10 @@ module Repositories
 
     def latest_production_deploy(app_name, region, event_date)
       @deploy_store.where(app_name: app_name, environment: 'production', region: region)
-        .where('event_created_at < ?', event_date)
-           .order(id: 'desc')
-           .limit(1)
-           .first
+                   .where('event_created_at < ?', event_date)
+                   .order(id: 'desc')
+                   .limit(1)
+                   .first
     end
   end
 end
