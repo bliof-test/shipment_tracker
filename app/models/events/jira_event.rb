@@ -3,6 +3,10 @@ require 'events/base_event'
 
 module Events
   class JiraEvent < Events::BaseEvent
+    def datetime
+      Time.zone.at(timestamp)
+    end
+
     def key
       details.fetch('issue').fetch('key')
     end
@@ -33,8 +37,8 @@ module Events
 
     def approval?
       status_item &&
-        approved_status?(status_item['toString']) &&
-        !approved_status?(status_item['fromString'])
+        !approved_status?(status_item['fromString']) &&
+        approved_status?(status_item['toString'])
     end
 
     def unapproval?
@@ -44,6 +48,12 @@ module Events
     end
 
     private
+
+    MILLISECONDS = 1000
+
+    def timestamp
+      details['timestamp'] && details['timestamp'] / MILLISECONDS
+    end
 
     def status_item
       @status_item ||= changelog_items.find { |item| item['field'] == 'status' }

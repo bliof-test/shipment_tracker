@@ -7,6 +7,7 @@ FactoryGirl.define do
       sequence(:issue_id)
       sequence(:key) { |n| "JIRA-#{n}" }
 
+      timestamp DateTime.current.strftime('%Q').to_i
       summary ''
       description ''
       display_name 'joe'
@@ -19,6 +20,7 @@ FactoryGirl.define do
 
       default_details do
         {
+          'timestamp' => timestamp,
           'webhookEvent' => 'jira:issue_updated',
           'user' => {
             'displayName' => display_name,

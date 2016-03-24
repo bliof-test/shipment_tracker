@@ -2,6 +2,15 @@
 require 'rails_helper'
 
 RSpec.describe Events::JiraEvent do
+  describe '#datetime' do
+    it 'returns a UTC DateTime' do
+      event = build(:jira_event, timestamp: 1458842541458)
+      expected_time = Time.zone.parse('Thu, 24 Mar 2016 18:02:21 UTC')
+
+      expect(event.datetime).to eq(expected_time)
+    end
+  end
+
   describe '#approval?' do
     context 'when the status changes from unapproved to approved' do
       it 'returns true' do
