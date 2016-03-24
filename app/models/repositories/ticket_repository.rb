@@ -39,9 +39,10 @@ module Repositories
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
       feature_reviews = feature_review_factory.create_from_text(event.comment)
-      return if feature_reviews.empty?
-
       last_ticket = previous_ticket_data(event.key)
+
+      return if last_ticket.empty? && feature_reviews.empty?
+
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
       store.create!(new_ticket)
 

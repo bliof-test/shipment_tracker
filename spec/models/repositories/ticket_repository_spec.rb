@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'rails_helper'
+require 'repositories/ticket_repository'
 
 RSpec.describe Repositories::TicketRepository do
   subject(:repository) { Repositories::TicketRepository.new(git_repository_location: git_repo_location) }
@@ -7,12 +8,11 @@ RSpec.describe Repositories::TicketRepository do
   let(:git_repo_location) { class_double(GitRepositoryLocation) }
 
   describe '#table_name' do
-    let(:active_record_class) { class_double(Snapshots::Ticket, table_name: 'the_table_name') }
-
-    subject(:repository) { Repositories::TicketRepository.new(active_record_class) }
-
     it 'delegates to the active record class backing the repository' do
-      expect(repository.table_name).to eq('the_table_name')
+      active_record_class = class_double(Snapshots::Ticket, table_name: 'tickets')
+      repository = Repositories::TicketRepository.new(active_record_class)
+
+      expect(repository.table_name).to eq('tickets')
     end
   end
 
@@ -148,12 +148,54 @@ RSpec.describe Repositories::TicketRepository do
       allow(CommitStatusUpdateJob).to receive(:perform_later)
     end
 
-    it 'only snapshots tickets that contain a Feature Review' do
-      event = build(:jira_event)
-      expect { repository.apply(event) }.to_not change { repository.store.count }
+    describe 'event filtering' do
+      context 'when event is not a JIRA Issue' do
+        it 'does not snapshot' do
+          aggregate_failures do
+            event = build(:deploy_event)
+            expect { repository.apply(event) }.to_not change { repository.store.count }
 
-      event = build(:jira_event, comment_body: "Feature Review #{url}")
-      expect { repository.apply(event) }.to change { repository.store.count }
+            event = build(:jira_event_user_created)
+            expect { repository.apply(event) }.to_not change { repository.store.count }
+          end
+        end
+      end
+
+      context 'when there is no existing snapshot for the ticket' do
+        context 'when event does not contain a Feature Review' do
+          it 'does not snapshot' do
+            event = build(:jira_event)
+            expect { repository.apply(event) }.to_not change { repository.store.count }
+          end
+        end
+
+        context 'when event contains a Feature Review' do
+          it 'snapshots' do
+            event = build(:jira_event, comment_body: feature_review_url(app: 'sha'))
+            expect { repository.apply(event) }.to change { repository.store.count }
+          end
+        end
+      end
+
+      context 'when there is an existing snapshot for the ticket' do
+        before do
+          repository.store.create(key: 'JIRA-1')
+        end
+
+        context 'when event does not contain a Feature Review' do
+          it 'snapshots' do
+            event = build(:jira_event, key: 'JIRA-1')
+            expect { repository.apply(event) }.to change { repository.store.count }
+          end
+        end
+
+        context 'when event contains a Feature Review' do
+          it 'snapshots' do
+            event = build(:jira_event, key: 'JIRA-1', comment_body: feature_review_url(app: 'sha'))
+            expect { repository.apply(event) }.to change { repository.store.count }
+          end
+        end
+      end
     end
 
     it 'projects latest associated tickets' do
@@ -215,26 +257,18 @@ RSpec.describe Repositories::TicketRepository do
         build(:jira_event, :started, jira_4),
         build(:jira_event, :development_completed, jira_4.merge(comment_body: url)),
 
-        build(:jira_event, :deployed, jira_1.merge(created_at: time)),
+        build(:jira_event, :approved, jira_1.merge(created_at: time)),
+        build(:jira_event, :deployed, jira_1),
       ].each do |event|
         repository.apply(event)
       end
 
       expect(repository.tickets_for_path(path)).to match_array([
-        Ticket.new(
-          ticket_1.merge(
-            status: 'Done', approved_at: time, event_created_at: time,
-          ),
-        ),
+        Ticket.new(ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time)),
         Ticket.new(ticket_4.merge(status: 'Ready For Review')),
       ])
     end
 
-    it 'ignores events that are not JIRA issues' do
-      event = build(:jira_event_user_created)
-
-      expect { repository.apply(event) }.to_not change { repository.store.count }
-    end
 
     context 'when multiple feature reviews are referenced in the same JIRA ticket' do
       let(:url1) { feature_review_url(app1: 'one') }
