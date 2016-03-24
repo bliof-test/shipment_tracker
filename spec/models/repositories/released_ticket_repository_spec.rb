@@ -351,6 +351,42 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       end
     end
 
+    context 'when deploy event contains invalid commit version' do
+      let(:previous_deploy) { instance_double(Deploy, version: 'bcd') }
+      before do
+        allow(Snapshots::Deploy).to receive_message_chain(:where, :where, :order, :limit, :first)
+          .and_return(previous_deploy)
+        allow(repository).to receive(:commits_between).and_raise(GitRepository::CommitNotValid)
+      end
+
+      it 'does not snapshot' do
+        jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
+        deploy_event = build(:deploy_event, environment: 'production', version: 'invalid', created_at: time)
+
+        ticket_repo.apply(jira_event)
+
+        expect { ticket_repo.apply(deploy_event) }.not_to change { Snapshots::ReleasedTicket.count }
+      end
+    end
+
+    context 'when deploy event commit version can not be found' do
+      let(:previous_deploy) { instance_double(Deploy, version: 'bcd') }
+      before do
+        allow(Snapshots::Deploy).to receive_message_chain(:where, :where, :order, :limit, :first)
+          .and_return(previous_deploy)
+        allow(repository).to receive(:commits_between).and_raise(GitRepository::CommitNotFound)
+      end
+
+      it 'does not snapshot' do
+        jira_event = build(:jira_event, event_attrs.merge(comment_body: feature_review_url(app: 'abc')))
+        deploy_event = build(:deploy_event, environment: 'production', version: 'invalid', created_at: time)
+
+        ticket_repo.apply(jira_event)
+
+        expect { ticket_repo.apply(deploy_event) }.not_to change { Snapshots::ReleasedTicket.count }
+      end
+    end
+
     it 'does not apply the event when it is irrelevant' do
       event = build(:uat_event)
       expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }

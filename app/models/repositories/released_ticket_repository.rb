@@ -64,7 +64,9 @@ module Repositories
         released_commits.each do |commit|
           update_ticket_deploy_data(event, commit)
         end
-      rescue GitRepositoryLoader::NotFound => e
+      rescue GitRepositoryLoader::NotFound,
+             GitRepository::CommitNotValid,
+             GitRepository::CommitNotFound => e
         log_warning(e, event)
       end
     end
