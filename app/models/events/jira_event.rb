@@ -49,10 +49,16 @@ module Events
 
     private
 
-    MILLISECONDS = 1000
-
     def timestamp
-      details['timestamp'] && details['timestamp'] / MILLISECONDS
+      if details['timestamp']
+        seconds_since_epoch
+      else
+        created_at
+      end
+    end
+
+    def seconds_since_epoch
+      details['timestamp'] / 1000
     end
 
     def status_item

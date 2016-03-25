@@ -3,11 +3,18 @@ require 'rails_helper'
 
 RSpec.describe Events::JiraEvent do
   describe '#datetime' do
-    it 'returns a UTC DateTime' do
+    it 'returns a TimeWithZone in UTC' do
       event = build(:jira_event, timestamp: 1458842541458)
       expected_time = Time.zone.parse('Thu, 24 Mar 2016 18:02:21 UTC')
 
       expect(event.datetime).to eq(expected_time)
+    end
+
+    it 'falls back to created_at when timestamp missing' do
+      time = 1.hour.ago.change(usec: 0)
+      event = build(:jira_event, timestamp: nil, created_at: time)
+
+      expect(event.datetime).to eq(time)
     end
   end
 
