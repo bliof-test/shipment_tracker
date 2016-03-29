@@ -81,7 +81,7 @@ module Repositories
     end
 
     def log_warning(error, event)
-      Rails.logger.warn "Could not find the repository '#{event.app_name}' locally"
+      Rails.logger.warn "Could not snapshot deploy event ID '#{event.id}' for '#{event.app_name}' locally:"
       Rails.logger.warn error.message
     end
 
