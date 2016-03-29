@@ -15,7 +15,7 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#apply' do
-    let(:versions) { %w(abc def xyz jkl) }
+    let(:versions) { %w(abc def xyz jkl).map { |sha| expand_sha(sha) } }
     let(:environment) { 'production' }
     let(:defaults) {
       { app_name: 'frontend', server: 'test.com', deployed_by: 'Bob', environment: environment, locale: 'us' }
@@ -26,7 +26,7 @@ RSpec.describe Repositories::DeployRepository do
           'id' => a_value > 0,
           'app_name' => 'frontend',
           'server' => 'test.com',
-          'version' => 'xyz',
+          'version' => expand_sha('xyz'),
           'deployed_by' => 'Bob',
           'event_created_at' => '',
           'environment' => environment,
@@ -43,7 +43,9 @@ RSpec.describe Repositories::DeployRepository do
     it 'schedules a DeployAlertJob' do
       expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)
 
-      repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'production')))
+      repository.apply(build(:deploy_event,
+        defaults.merge(version: expand_sha('xyz'), environment: 'production')),
+                      )
     end
 
     context 'when in data maintenance mode' do
@@ -53,13 +55,15 @@ RSpec.describe Repositories::DeployRepository do
 
       it 'does not schedule a DeployAlertJob' do
         expect(DeployAlertJob).not_to receive(:perform_later)
-        repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'production')))
+        repository.apply(build(:deploy_event,
+          defaults.merge(version: expand_sha('xyz'), environment: 'production')),
+                        )
       end
     end
   end
 
   describe '#deploys_for_versions' do
-    let(:versions) { %w(abc def xyz jkl) }
+    let(:versions) { %w(abc def xyz jkl).map { |sha| expand_sha(sha) } }
     let(:environment) { 'production' }
     let(:defaults) {
       { app_name: 'frontend', server: 'test.com', deployed_by: 'Bob', environment: environment, locale: 'us' }
@@ -67,18 +71,18 @@ RSpec.describe Repositories::DeployRepository do
 
     context 'when deploy events exist' do
       before do
-        repository.apply(build(:deploy_event, defaults.merge(version: 'xyz', environment: 'uat')))
-        repository.apply(build(:deploy_event, defaults.merge(version: 'abc')))
-        repository.apply(build(:deploy_event, defaults.merge(version: 'abc', deployed_by: 'Carl')))
-        repository.apply(build(:deploy_event, defaults.merge(version: 'def')))
-        repository.apply(build(:deploy_event, defaults.merge(version: 'ghi')))
-        repository.apply(build(:deploy_event, defaults.merge(version: 'jkl', locale: 'gb')))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('xyz'), environment: 'uat')))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('abc'))))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('abc'), deployed_by: 'Car')))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('def'))))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('ghi'))))
+        repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('jkl'), locale: 'gb')))
       end
 
       it 'returns all deploys for given version, environment and region' do
         expect(repository.deploys_for_versions(versions, environment: environment, region: 'us'))
           .to match_array([
-            Deploy.new(defaults.merge(version: versions.first, deployed_by: 'Carl', region: 'us')),
+            Deploy.new(defaults.merge(version: versions.first, deployed_by: 'Car', region: 'us')),
             Deploy.new(defaults.merge(version: versions.second, region: 'us')),
           ])
       end
@@ -92,7 +96,7 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#deploys_for' do
-    let(:apps) { { 'frontend' => 'abc' } }
+    let(:apps) { { 'frontend' => expand_sha('abc') } }
     let(:server) { 'uat.fundingcircle.com' }
 
     let(:defaults) {
@@ -100,20 +104,24 @@ RSpec.describe Repositories::DeployRepository do
         app_name: 'frontend',
         server: server,
         deployed_by: 'Bob',
-        version: 'abc',
+        version: expand_sha('abc'),
         locale: 'gb',
         environment: 'uat',
       }
     }
 
     it 'projects last deploy' do
-      repository.apply(build(:deploy_event, defaults.merge(version: 'abc')))
+      repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('abc'))))
       results = repository.deploys_for(apps: apps, server: server)
-      expect(results).to eq([Deploy.new(defaults.merge(version: 'abc', correct: true, region: 'gb'))])
+      expect(results).to eq([
+        Deploy.new(defaults.merge(version: expand_sha('abc'), correct: true, region: 'gb')),
+      ])
 
-      repository.apply(build(:deploy_event, defaults.merge(version: 'def')))
+      repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('def'))))
       results = repository.deploys_for(apps: apps, server: server)
-      expect(results).to eq([Deploy.new(defaults.merge(version: 'def', correct: false, region: 'gb'))])
+      expect(results).to eq([
+        Deploy.new(defaults.merge(version: expand_sha('def'), correct: false, region: 'gb')),
+      ])
     end
 
     it 'is case insensitive when a repo name and the event app name do not match in case' do
@@ -139,12 +147,12 @@ RSpec.describe Repositories::DeployRepository do
       repository.apply(build(:deploy_event, defaults))
       expect(repository.deploys_for(apps: apps, server: server).map(&:correct)).to eq([true])
 
-      repository.apply(build(:deploy_event, defaults.merge(version: 'def')))
+      repository.apply(build(:deploy_event, defaults.merge(version: expand_sha('def'))))
       expect(repository.deploys_for(apps: apps, server: server).map(&:correct)).to eq([false])
     end
 
     context 'with multiple apps' do
-      let(:apps) { { 'frontend' => 'abc', 'backend' => 'abc' } }
+      let(:apps) { { 'frontend' => expand_sha('abc'), 'backend' => expand_sha('abc') } }
 
       it 'returns multiple deploys' do
         repository.apply(build(:deploy_event, defaults.merge(app_name: 'frontend')))
@@ -160,19 +168,28 @@ RSpec.describe Repositories::DeployRepository do
     context 'with no apps' do
       let(:defaults) { { deployed_by: 'dj', environment: 'uat' } }
       it 'returns deploys for all apps to that server' do
-        repository.apply(build(:deploy_event, defaults.merge(server: 'x.io', version: '1', app_name: 'a')))
-        repository.apply(build(:deploy_event, defaults.merge(server: 'x.io', version: '2', app_name: 'b')))
-        repository.apply(build(:deploy_event, defaults.merge(server: 'y.io', version: '3', app_name: 'c')))
+        repository.apply(build(:deploy_event,
+          defaults.merge(server: 'x.io', version: expand_sha('1'), app_name: 'a')),
+                        )
+        repository.apply(build(:deploy_event,
+          defaults.merge(server: 'x.io', version: expand_sha('2'), app_name: 'b')),
+                        )
+        repository.apply(build(:deploy_event,
+          defaults.merge(server: 'y.io', version: expand_sha('3'), app_name: 'c')),
+                        )
 
         results = repository.deploys_for(server: 'x.io')
 
         expect(results).to match_array([
           Deploy.new(
-            defaults.merge(app_name: 'a', server: 'x.io', version: '1', correct: false, region: 'us'),
-
+            defaults.merge(
+              app_name: 'a', server: 'x.io', version: expand_sha('1'), correct: false, region: 'us',
+            ),
           ),
           Deploy.new(
-            defaults.merge(app_name: 'b', server: 'x.io', version: '2', correct: false, region: 'us'),
+            defaults.merge(
+              app_name: 'b', server: 'x.io', version: expand_sha('2'), correct: false, region: 'us',
+            ),
           ),
         ])
       end
@@ -183,10 +200,16 @@ RSpec.describe Repositories::DeployRepository do
       let(:time) { (Time.current - 4.hours).change(usec: 0) }
       it 'returns the state at that moment' do
         events = [
-          build(:deploy_event, defaults.merge(version: 'abc', app_name: 'app1', created_at: time)),
+          build(:deploy_event,
+            defaults.merge(version: expand_sha('abc'), app_name: 'app1', created_at: time),
+               ),
           build(:deploy_event, defaults.merge(server: 'y.io', app_name: 'app1', created_at: time + 1.hour)),
-          build(:deploy_event, defaults.merge(version: 'def', app_name: 'app2', created_at: time + 2.hours)),
-          build(:deploy_event, defaults.merge(version: 'ghi', app_name: 'app1', created_at: time + 3.hours)),
+          build(:deploy_event,
+            defaults.merge(version: expand_sha('def'), app_name: 'app2', created_at: time + 2.hours),
+               ),
+          build(:deploy_event,
+            defaults.merge(version: expand_sha('ghi'), app_name: 'app1', created_at: time + 3.hours),
+               ),
         ]
 
         events.each do |event|
@@ -195,8 +218,8 @@ RSpec.describe Repositories::DeployRepository do
 
         results = repository.deploys_for(
           apps: {
-            'app1' => 'abc',
-            'app2' => 'def',
+            'app1' => expand_sha('abc'),
+            'app2' => expand_sha('def'),
           },
           server: 'x.io',
           at: time + 1.second,
@@ -205,7 +228,7 @@ RSpec.describe Repositories::DeployRepository do
         expect(results).to match_array([
           Deploy.new(app_name: 'app1',
                      server: 'x.io',
-                     version: 'abc',
+                     version: expand_sha('abc'),
                      deployed_by: 'dj',
                      region: 'us',
                      correct: true,
@@ -218,7 +241,7 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#last_staging_deploy_for_version' do
-    let(:version) { 'abc' }
+    let(:version) { expand_sha('abc') }
     let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'de', environment: 'uat' } }
 
     context 'when no deploy exist' do
@@ -230,9 +253,11 @@ RSpec.describe Repositories::DeployRepository do
     context 'when no deploys exist for the version under review' do
       before do
         [
-          build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: 'def')),
-          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: 'ghi')),
-          build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: 'xyz')),
+          build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: expand_sha('def'))),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: expand_sha('ghi'))),
+          build(:deploy_event,
+            defaults.merge(server: 'c', environment: 'production', version: expand_sha('xyz')),
+               ),
         ].each do |deploy|
           repository.apply(deploy)
         end
@@ -248,7 +273,7 @@ RSpec.describe Repositories::DeployRepository do
         [
           build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: version)),
           build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: version)),
-          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: 'def')),
+          build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: expand_sha('def'))),
           build(:deploy_event, defaults.merge(server: 'c', environment: 'production', version: version)),
         ].each do |deploy|
           repository.apply(deploy)
@@ -293,11 +318,11 @@ RSpec.describe Repositories::DeployRepository do
     context 'when a deploy exists for the app and region' do
       before do
         [
-          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'ccc')),
-          build(:deploy_event, defaults.merge(version: 'bbb')),
-          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'def', locale: 'us')),
-          build(:deploy_event, defaults.merge(app_name: 'backend', version: 'eee')),
-          build(:deploy_event, defaults.merge(version: 'ccc')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: expand_sha('ccc'))),
+          build(:deploy_event, defaults.merge(version: expand_sha('bbb'))),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: expand_sha('def'), locale: 'us')),
+          build(:deploy_event, defaults.merge(app_name: 'backend', version: expand_sha('eee'))),
+          build(:deploy_event, defaults.merge(version: expand_sha('ccc'))),
         ].each do |deploy|
           repository.apply(deploy)
         end
@@ -305,9 +330,13 @@ RSpec.describe Repositories::DeployRepository do
 
       it 'returns the second latest production deploy for the app_name and region' do
         deploy = repository.second_last_production_deploy('backend', 'gb')
-        expect(deploy.version).to eq 'ccc'
+        expect(deploy.version).to eq expand_sha('ccc')
         expect(deploy.region).to eq 'gb'
       end
     end
   end
+end
+
+def expand_sha(sha)
+  "#{sha}abcabcabcabcabcabcabcabcabcabcabcabcabc"[0..39]
 end

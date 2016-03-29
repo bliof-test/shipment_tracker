@@ -18,51 +18,63 @@ RSpec.describe Repositories::UatestRepository do
 
   describe '#uatest_for' do
     let(:server) { 'uat.example.com' }
-    let(:defaults) { { success: true, test_suite_version: '111', server: server } }
+    let(:defaults) { { success: true, test_suite_version: expand_sha('111'), server: server } }
 
     it 'projects last UaTest' do
       [
-        build(:deploy_event, server: server, version: 'abc', app_name: 'frontend'),
+        build(:deploy_event, server: server, version: expand_sha('abc'), app_name: 'frontend'),
         build(:uat_event, defaults),
       ].each do |event|
         deploy_repository.apply(event)
         repository.apply(event)
       end
 
-      result = repository.uatest_for(versions: ['abc'], server: server)
+      result = repository.uatest_for(versions: [expand_sha('abc')], server: server)
       expect(result).to eq(Uatest.new(defaults))
 
-      repository.apply(build(:uat_event, defaults.merge(test_suite_version: '999')))
+      repository.apply(build(:uat_event, defaults.merge(test_suite_version: expand_sha('999'))))
 
-      result = repository.uatest_for(versions: ['abc'], server: server)
-      expect(result).to eq(Uatest.new(defaults.merge(test_suite_version: '999')))
+      result = repository.uatest_for(versions: [expand_sha('abc')], server: server)
+      expect(result).to eq(Uatest.new(defaults.merge(test_suite_version: expand_sha('999'))))
     end
 
     context 'when the server matches' do
+      let(:expected_versions) { %w(abc def).map { |sha| expand_sha(sha) } }
+
       context 'when the app versions match' do
         before do
-          deploy_repository.apply(build(:deploy_event, server: server, app_name: 'frontend', version: 'old'))
-          deploy_repository.apply(build(:deploy_event, server: server, app_name: 'frontend', version: 'abc'))
-          deploy_repository.apply(build(:deploy_event, server: server, app_name: 'backend', version: 'def'))
+          deploy_repository.apply(build(:deploy_event,
+            server: server, app_name: 'frontend', version: expand_sha('old')),
+                                 )
+          deploy_repository.apply(build(:deploy_event,
+            server: server, app_name: 'frontend', version: expand_sha('abc')),
+                                 )
+          deploy_repository.apply(build(:deploy_event,
+            server: server, app_name: 'backend', version: expand_sha('def')),
+                                 )
         end
 
         it 'returns the relevant User Acceptance Tests details' do
-          repository.apply(build(:uat_event, test_suite_version: 'xyz', success: true, server: server))
+          repository.apply(build(:uat_event,
+            test_suite_version: expand_sha('xyz'), success: true, server: server),
+                          )
           repository.apply(build(:jira_event))
-          result = repository.uatest_for(versions: %w(abc def), server: server)
-          expect(result).to eq(Uatest.new(success: true, test_suite_version: 'xyz'))
+          result = repository.uatest_for(versions: %w(abc def).map { |sha| expand_sha(sha) }, server: server)
+          expect(result).to eq(Uatest.new(success: true, test_suite_version: expand_sha('xyz')))
 
-          repository.apply(build(:uat_event, test_suite_version: 'xyz', success: false, server: server))
-          result = repository.uatest_for(versions: %w(abc def), server: server)
-          expect(result).to eq(Uatest.new(success: false, test_suite_version: 'xyz'))
+          repository.apply(build(:uat_event,
+            test_suite_version: expand_sha('xyz'), success: false, server: server),
+                          )
+          result = repository.uatest_for(versions: %w(abc def).map { |sha| expand_sha(sha) }, server: server)
+          expect(result).to eq(Uatest.new(success: false, test_suite_version: expand_sha('xyz')))
         end
       end
 
       context 'when some of the versions match' do
         before do
           [
-            build(:deploy_event, server: server, app_name: 'frontend', version: 'abc'),
-            build(:deploy_event, server: server, app_name: 'backend', version: 'not_def'),
+            build(:deploy_event, server: server, app_name: 'frontend', version: expand_sha('abc')),
+            build(:deploy_event, server: server, app_name: 'backend', version: expand_sha('not_def')),
           ].each do |event|
             deploy_repository.apply(event)
           end
@@ -73,15 +85,15 @@ RSpec.describe Repositories::UatestRepository do
 
           repository.apply(uat_event)
 
-          expect(repository.uatest_for(versions: %w(abc def), server: server)).to be nil
+          expect(repository.uatest_for(versions: expected_versions, server: server)).to be nil
         end
       end
 
       context 'when none of the versions match' do
         before do
           [
-            build(:deploy_event, server: server, app_name: 'frontend', version: 'not_abc'),
-            build(:deploy_event, server: server, app_name: 'backend', version: 'not_def'),
+            build(:deploy_event, server: server, app_name: 'frontend', version: expand_sha('not_abc')),
+            build(:deploy_event, server: server, app_name: 'backend', version: expand_sha('not_def')),
           ].each do |event|
             deploy_repository.apply(event)
           end
@@ -92,33 +104,35 @@ RSpec.describe Repositories::UatestRepository do
 
           repository.apply(uat_event)
 
-          expect(repository.uatest_for(versions: %w(abc def), server: server)).to be nil
+          expect(repository.uatest_for(versions: expected_versions, server: server)).to be nil
         end
       end
     end
 
     context 'when the server does not match' do
       before do
-        deploy_repository.apply(build(:deploy_event, server: server, app_name: 'frontend', version: 'abc'))
+        deploy_repository.apply(build(:deploy_event,
+          server: server, app_name: 'frontend', version: expand_sha('abc')),
+                               )
       end
 
       it 'ignores the UAT event' do
         repository.apply(build(:uat_event, server: 'other.server'))
-        expect(repository.uatest_for(versions: ['abc'], server: server)).to be nil
+        expect(repository.uatest_for(versions: [expand_sha('abc')], server: server)).to be nil
       end
     end
 
     context 'when we receive deploy events for different servers' do
       it 'does not affect the result' do
         [
-          build(:deploy_event, server: server, app_name: 'frontend', version: 'abc'),
-          build(:deploy_event, server: 'other.server', app_name: 'frontend', version: 'zzz'),
+          build(:deploy_event, server: server, app_name: 'frontend', version: expand_sha('abc')),
+          build(:deploy_event, server: 'other.server', app_name: 'frontend', version: expand_sha('zzz')),
         ].each do |event|
           deploy_repository.apply(event)
         end
 
         repository.apply(build(:uat_event, server: server))
-        expect(repository.uatest_for(versions: ['abc'], server: server)).to be_present
+        expect(repository.uatest_for(versions: [expand_sha('abc')], server: server)).to be_present
       end
     end
 
@@ -129,20 +143,32 @@ RSpec.describe Repositories::UatestRepository do
         times = [2.hours.ago, 1.hour.ago].map { |t| t.change(usec: 0) }
 
         deploy_repository.apply(
-          build(:deploy_event, server: server, version: 'abc', app_name: 'frontend', created_at: times[0]),
+          build(:deploy_event,
+            server: server, version: expand_sha('abc'), app_name: 'frontend', created_at: times[0],
+               ),
         )
 
         [
-          build(:uat_event, test_suite_version: '1', server: server, success: false, created_at: times[0]),
-          build(:uat_event, test_suite_version: '1', server: 'other', success: true, created_at: times[0]),
-          build(:uat_event, test_suite_version: '2', server: server, success: true, created_at: times[1]),
+          build(:uat_event,
+            test_suite_version: expand_sha('1'), server: server, success: false, created_at: times[0],
+               ),
+          build(:uat_event,
+            test_suite_version: expand_sha('1'), server: 'other', success: true, created_at: times[0],
+               ),
+          build(:uat_event,
+            test_suite_version: expand_sha('2'), server: server, success: true, created_at: times[1],
+               ),
         ].each do |event|
           repository.apply(event)
         end
 
-        result = repository.uatest_for(versions: ['abc'], server: server, at: times[0])
-        expect(result).to eq(Uatest.new(success: false, test_suite_version: '1'))
+        result = repository.uatest_for(versions: [expand_sha('abc')], server: server, at: times[0])
+        expect(result).to eq(Uatest.new(success: false, test_suite_version: expand_sha('1')))
       end
     end
   end
+end
+
+def expand_sha(sha)
+  "#{sha}abcabcabcabcabcabcabcabcabcabcabcabcabc"[0..39]
 end

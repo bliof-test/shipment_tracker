@@ -16,7 +16,7 @@ module Repositories
 
     def run(repo_event_id_hash = {})
       repositories.each do |repository|
-        Rails.logger.info("[#{Time.current}] Running recreate_snapshots for repo #{repository.table_name}")
+        Rails.logger.info "[#{Time.current}] Running recreate_snapshots for repo #{repository.table_name}"
         run_for(repository, repo_event_id_hash[repository.table_name])
       end
     end

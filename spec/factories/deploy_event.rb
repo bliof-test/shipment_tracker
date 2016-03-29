@@ -5,7 +5,7 @@ FactoryGirl.define do
   factory :deploy_event, class: Events::DeployEvent do
     transient do
       server 'uat.example.com'
-      sequence(:version) { |n| "abc#{n}" }
+      sequence(:version) { |n| "#{n}abcabcabcabcabcabcabcabcabcabcabcabcabc"[0..39] }
       app_name 'hello_world'
       locale 'us'
       deployed_at { Time.now.utc.to_i }

@@ -7,7 +7,7 @@ RSpec.describe HomeController do
   end
 
   describe 'GET #index', :logged_in do
-    let(:tickets) { double }
+    let(:tickets) { [double] }
     let(:repo) { double }
 
     before do
@@ -19,11 +19,11 @@ RSpec.describe HomeController do
       get :index, preview: 'true'
 
       expect(response).to have_http_status(:success)
-      expect(assigns(:tickets)).to eq(tickets)
+      expect(assigns(:tickets)).to eq([])
     end
 
     it 'searches tickets for the given query' do
-      expect(repo).to receive(:tickets_for_query).with('dog').and_return(tickets)
+      expect(repo).to receive(:tickets_for_query).with(query_text: 'dog', versions: []).and_return(tickets)
 
       get :index, preview: 'true', q: 'dog'
 

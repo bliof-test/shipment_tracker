@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 require 'events/base_event'
+require 'git_repository_loader'
 
 module Events
   class DeployEvent < Events::BaseEvent
@@ -22,11 +23,11 @@ module Events
     end
 
     def version
-      if deployed_to_heroku?
-        details['head_long']
-      else
-        details['version']
-      end
+      @version ||= if deployed_to_heroku?
+                     details['head_long']
+                   else
+                     expand_sha(details['version'])
+                   end
     end
 
     def deployed_by
@@ -81,6 +82,13 @@ module Events
 
     def heroku_app_name_prefix
       heroku_app_name.split('-').first.downcase
+    end
+
+    def expand_sha(sha)
+      return sha unless sha.present? && sha.size < 40
+      git_repository_loader = GitRepositoryLoader.from_rails_config
+      repo = git_repository_loader.load(app_name)
+      repo.commit_for_version(sha).id
     end
   end
 end
