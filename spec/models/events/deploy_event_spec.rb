@@ -10,7 +10,7 @@ RSpec.describe Events::DeployEvent do
       {
         'app_name' => 'some_app',
         'servers' => ['prod1.example.com', 'prod2.example.com'],
-        'version' => 'abc123',
+        'version' => '1abcabcabcabcabcabcabcabcabcabcabcabcabc',
         'deployed_by' => 'bob',
         'locale' => 'us',
         'environment' => 'staging',
@@ -20,7 +20,7 @@ RSpec.describe Events::DeployEvent do
     it 'returns the correct values' do
       expect(subject.app_name).to eq('some_app')
       expect(subject.server).to eq('prod1.example.com')
-      expect(subject.version).to eq('abc123')
+      expect(subject.version).to eq('1abcabcabcabcabcabcabcabcabcabcabcabcabc')
       expect(subject.deployed_by).to eq('bob')
       expect(subject.environment).to eq('staging')
       expect(subject.locale).to eq('us')
@@ -41,7 +41,7 @@ RSpec.describe Events::DeployEvent do
         {
           'app_name' => 'AwesomeApp',
           'servers' => ['PROD.example.com'],
-          'version' => 'ABC123',
+          'version' => '1abcabcabcabcabcabcabcabcabcabcabcabcabc',
           'deployed_by' => 'Johnny Five',
           'locale' => 'GB',
           'environment' => 'UAT',
@@ -54,8 +54,32 @@ RSpec.describe Events::DeployEvent do
         expect(subject.locale).to eq('gb')
 
         expect(subject.server).to eq('PROD.example.com')
-        expect(subject.version).to eq('ABC123')
+        expect(subject.version).to eq('1abcabcabcabcabcabcabcabcabcabcabcabcabc')
         expect(subject.deployed_by).to eq('Johnny Five')
+      end
+    end
+
+    context 'when the payload contains a short SHA' do
+      let(:payload) {
+        {
+          'app_name' => 'some_app',
+          'servers' => ['prod1.example.com', 'prod2.example.com'],
+          'version' => 'abcabca',
+          'deployed_by' => 'bob',
+          'locale' => 'us',
+          'environment' => 'staging',
+        }
+      }
+      let(:repo) { double }
+      let(:commit) { double(GitCommit, id: '1abcabcabcabcabcabcabcabcabcabcabcabcabc') }
+
+      before do
+        allow(repo).to receive(:commit_for_version).and_return(commit)
+        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(repo)
+      end
+
+      it 'expands to full SHA' do
+        expect(subject.version).to eq('1abcabcabcabcabcabcabcabcabcabcabcabcabc')
       end
     end
 
