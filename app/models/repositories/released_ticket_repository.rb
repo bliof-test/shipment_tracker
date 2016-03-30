@@ -80,9 +80,12 @@ module Repositories
 
     def update_ticket_deploy_data(event, commit)
       tickets_for_versions(commit.associated_ids).each do |ticket_record|
-        next if duplicate_deploy?(ticket_record.deploys, event)
-        ticket_record.deploys << build_deploy_hash(event, commit.id)
-        ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
+        ticket_record.first_deployed_at = event.created_at if ticket_record.deploys.empty?
+        ticket_record.last_deployed_at = event.created_at
+        unless duplicate_deploy?(ticket_record.deploys, event)
+          ticket_record.deploys << build_deploy_hash(event, commit.id)
+          ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
+        end
         ticket_record.save!
       end
     end

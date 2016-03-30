@@ -127,7 +127,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
   describe '#apply' do
     let(:store) { Snapshots::ReleasedTicket }
-    let(:time) { Time.current }
+    let(:time) { Time.current.change(usec: 0) }
     let(:repository) { instance_double(GitRepository) }
     let(:commit_version) { 'abc' }
     let(:event_attrs) {
@@ -211,10 +211,12 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     describe 'applying deploy events' do
       let(:deploy_event) {
-        build(:deploy_event, environment: 'production', version: version, created_at: time_string)
+        build(:deploy_event, environment: 'production', version: version, created_at: second_time)
       }
       let(:version) { 'abc' }
       let(:time_string) { time.strftime('%F %H:%M %Z') }
+      let(:second_time) { time + 1.week }
+      let(:second_time_string) { second_time.strftime('%F %H:%M %Z') }
       let(:gurl) { 'https://github.com/owner/hello_world' }
 
       context 'when deploy is to production' do
@@ -227,11 +229,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               versions: [version],
               deploys: [{
                 'app' => 'hello_world',
-                'version' => 'def123',
+                'version' => 'def',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
                 'region' => 'gb',
               }],
+              first_deployed_at: time,
+              last_deployed_at: time,
             )
           }
 
@@ -244,13 +248,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               {
                 'app' => 'hello_world',
                 'version' => 'abc',
-                'deployed_at' => time_string,
+                'deployed_at' => second_time_string,
                 'github_url' => gurl,
                 'region' => 'us',
               },
               {
                 'app' => 'hello_world',
-                'version' => 'def123',
+                'version' => 'def',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
                 'region' => 'gb',
@@ -262,6 +266,8 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             ticket_repo.apply(deploy_event)
             record = store.find_by_key('JIRA-1')
             expect(record.deploys).to match_array(expected_deploys)
+            expect(record.first_deployed_at).to eq(time)
+            expect(record.last_deployed_at).to eq(second_time)
           end
 
           context 'when the version was deployed already' do
