@@ -672,10 +672,24 @@ CREATE INDEX index_manual_tests_on_versions ON manual_tests USING gin (versions)
 
 
 --
+-- Name: index_released_tickets_on_first_deployed_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_released_tickets_on_first_deployed_at ON released_tickets USING btree (first_deployed_at);
+
+
+--
 -- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_released_tickets_on_key ON released_tickets USING btree (key);
+
+
+--
+-- Name: index_released_tickets_on_last_deployed_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_released_tickets_on_last_deployed_at ON released_tickets USING btree (last_deployed_at);
 
 
 --
