@@ -56,14 +56,15 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     describe 'filter by date' do
+      let(:store) { Snapshots::ReleasedTicket }
       let(:time) { Time.current }
       subject(:ticket_repo) { Repositories::ReleasedTicketRepository.new }
       let!(:deployed_tickets) {
         [
-          Snapshots::ReleasedTicket.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 1.week),
-          Snapshots::ReleasedTicket.create(key: 'ENG-2', first_deployed_at: time - 1.week, last_deployed_at: time),
-          Snapshots::ReleasedTicket.create(key: 'ENG-3', first_deployed_at: time - 4.weeks, last_deployed_at: time - 3.weeks),
-        ].map{|record| ReleasedTicket.new(record.attributes)}
+          store.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 1.week),
+          store.create(key: 'ENG-2', first_deployed_at: time - 1.week, last_deployed_at: time),
+          store.create(key: 'ENG-3', first_deployed_at: time - 4.weeks, last_deployed_at: time - 3.weeks),
+        ].map { |record| ReleasedTicket.new(record.attributes) }
       }
 
       context "when 'from' date is selected" do
@@ -100,13 +101,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       context "when 'from' and 'to' dates are selected" do
         let!(:deployed_tickets) {
           [
-            Snapshots::ReleasedTicket.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 3.weeks),
-            Snapshots::ReleasedTicket.create(key: 'ENG-2', first_deployed_at: time - 5.weeks, last_deployed_at: time),
-            Snapshots::ReleasedTicket.create(key: 'ENG-3', first_deployed_at: time - 5.weeks, last_deployed_at: time - 3.weeks),
-            Snapshots::ReleasedTicket.create(key: 'ENG-4', first_deployed_at: time - 3.weeks, last_deployed_at: time),
-            Snapshots::ReleasedTicket.create(key: 'ENG-5', first_deployed_at: time - 6.weeks, last_deployed_at: time - 5.weeks),
-            Snapshots::ReleasedTicket.create(key: 'ENG-6', first_deployed_at: time - 1.week, last_deployed_at: time),
-          ].map{|record| ReleasedTicket.new(record.attributes)}
+            store.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 3.weeks),
+            store.create(key: 'ENG-2', first_deployed_at: time - 5.weeks, last_deployed_at: time),
+            store.create(key: 'ENG-3', first_deployed_at: time - 5.weeks, last_deployed_at: time - 3.weeks),
+            store.create(key: 'ENG-4', first_deployed_at: time - 3.weeks, last_deployed_at: time),
+            store.create(key: 'ENG-5', first_deployed_at: time - 6.weeks, last_deployed_at: time - 5.weeks),
+            store.create(key: 'ENG-6', first_deployed_at: time - 1.week, last_deployed_at: time),
+          ].map { |record| ReleasedTicket.new(record.attributes) }
         }
 
         let(:query) {
@@ -114,7 +115,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             query_text: '',
             versions: [],
             from_date: time - 4.weeks,
-            to_date: time - 2.week,
+            to_date: time - 2.weeks,
           }
         }
         it "returns tickets deployed between 'from' and 'to' dates" do

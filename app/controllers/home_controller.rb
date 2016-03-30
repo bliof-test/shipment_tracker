@@ -8,17 +8,11 @@ class HomeController < ApplicationController
     @from_date = params[:from]
     @to_date = params[:to]
 
-    if @query
-      query_hash = {}
-      query_hash[:versions] = @query.scan(SHA_REGEX)
-
-      query_hash[:query_text] = @query.gsub(SHA_REGEX, '')
-      query_hash[:from_date] = DateTime.parse(params[:from]).beginning_of_day if params[:from].present?
-      query_hash[:to_date] = DateTime.parse(params[:to]).end_of_day if params[:to].present?
-      @tickets = released_ticket_repo.tickets_for_query(query_hash)
-    else
-      @tickets = []
-    end
+    @tickets = if @query
+                 released_ticket_repo.tickets_for_query(build_query_hash(@query, params))
+               else
+                 []
+               end
 
     render 'dashboard'
   end
@@ -27,5 +21,15 @@ class HomeController < ApplicationController
 
   def released_ticket_repo
     Repositories::ReleasedTicketRepository.new
+  end
+
+  def build_query_hash(query, params)
+    query_hash = {}
+    query_hash[:versions] = query.scan(SHA_REGEX)
+
+    query_hash[:query_text] = query.gsub(SHA_REGEX, '')
+    query_hash[:from_date] = DateTime.parse(params[:from]).beginning_of_day if params[:from].present?
+    query_hash[:to_date] = DateTime.parse(params[:to]).end_of_day if params[:to].present?
+    query_hash
   end
 end

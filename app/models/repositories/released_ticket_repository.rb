@@ -18,12 +18,8 @@ module Repositories
     attr_reader :store
     delegate :table_name, to: :store
 
-    def tickets_for_query(
-        query_text:,
-        versions:,
-        per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY,
-        from_date: nil,
-        to_date: nil)
+    def tickets_for_query(query_text:, versions:, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY,
+      from_date: nil, to_date: nil)
       query = if versions.present?
                 tickets_for_versions(versions)
               else
@@ -71,23 +67,25 @@ module Repositories
         released_commits.each do |commit|
           update_ticket_deploy_data(event, commit)
         end
-      rescue GitRepositoryLoader::NotFound,
-             GitRepository::CommitNotValid,
-             GitRepository::CommitNotFound => e
+      rescue GitRepositoryLoader::NotFound, GitRepository::CommitNotValid, GitRepository::CommitNotFound => e
         log_warning(e, event)
       end
     end
 
     def update_ticket_deploy_data(event, commit)
       tickets_for_versions(commit.associated_ids).each do |ticket_record|
-        ticket_record.first_deployed_at = event.created_at if ticket_record.deploys.empty?
-        ticket_record.last_deployed_at = event.created_at
-        unless duplicate_deploy?(ticket_record.deploys, event)
-          ticket_record.deploys << build_deploy_hash(event, commit.id)
-          ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
-        end
-        ticket_record.save!
+        update_record(ticket_record, event, commit)
       end
+    end
+
+    def update_record(ticket_record, event, commit)
+      ticket_record.first_deployed_at = event.created_at if ticket_record.deploys.empty?
+      ticket_record.last_deployed_at = event.created_at
+      unless duplicate_deploy?(ticket_record.deploys, event)
+        ticket_record.deploys << build_deploy_hash(event, commit.id)
+        ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
+      end
+      ticket_record.save!
     end
 
     def log_warning(error, event)
