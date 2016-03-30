@@ -271,6 +271,40 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             expect(record.last_deployed_at).to eq(second_time)
           end
 
+          context 'when no previous deploys' do
+            let!(:released_ticket) {
+              Snapshots::ReleasedTicket.create(
+                key: 'JIRA-1',
+                summary: 'foo',
+                description: 'bar',
+                versions: [version],
+                deploys: [],
+                first_deployed_at: nil,
+                last_deployed_at: nil,
+              )
+            }
+
+            let(:expected_deploys) {
+              [
+                {
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => second_time_string,
+                  'github_url' => gurl,
+                  'region' => 'us',
+                },
+              ]
+            }
+
+            it 'sets the first and last deployed at time' do
+              ticket_repo.apply(deploy_event)
+              record = store.find_by_key('JIRA-1')
+              expect(record.deploys).to match_array(expected_deploys)
+              expect(record.first_deployed_at).to eq(second_time)
+              expect(record.last_deployed_at).to eq(second_time)
+            end
+          end
+
           context 'when the version was deployed already' do
             let(:yesterday_str) { (time - 1.day).strftime('%F %H:%M %Z') }
             let!(:released_ticket) {

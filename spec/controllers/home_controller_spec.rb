@@ -28,6 +28,7 @@ RSpec.describe HomeController do
       get :index, preview: 'true', q: 'dog'
 
       expect(response).to have_http_status(:success)
+      expect(assigns(:query)).to eq('dog')
       expect(assigns(:tickets)).to eq(tickets)
     end
 
@@ -44,6 +45,8 @@ RSpec.describe HomeController do
 
         expect(response).to have_http_status(:success)
         expect(assigns(:tickets)).to eq(tickets)
+        expect(assigns(:from_date)).to eq('2016-03-20')
+        expect(assigns(:to_date)).to eq('2016-03-30')
       end
     end
   end
