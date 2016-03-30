@@ -5,6 +5,8 @@ class HomeController < ApplicationController
   def index
     return unless params[:preview] == 'true'
     @query = params[:q]
+    @from_date = params[:from]
+    @to_date = params[:to]
 
     if @query
       query_hash = {}

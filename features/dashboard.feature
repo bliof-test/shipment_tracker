@@ -85,7 +85,7 @@ Scenario: User finds ticket by title filtered by date
     | ENG-1    | Make this task     | As a User\n make the task      | 2016-03-21 12:02 app_1 #abc |
     | ENG-2    | Implement this     | As a User\n do another task    | 2016-03-22 15:13 app_2 #def |
     | ENG-3    | Perform that issue | As a User\n perform some story | 2016-03-23 16:13 app_3 #ghj |
-    | ENG-4    | Perform that task  | As a User\n do another story   | 2016-03-24 16:13 app_3 #ghj |
+    | ENG-4    | Perform that task  | As a User\n do another story   | 2016-03-24 16:13 app_3 #ikl |
   When I search tickets with keywords:
     | Query                | From       | To         |
     | make implement story | 2016-03-22 | 2016-03-23 |
