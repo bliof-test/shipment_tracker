@@ -321,7 +321,9 @@ CREATE TABLE released_tickets (
     updated_at timestamp without time zone NOT NULL,
     tsv tsvector,
     deploys json DEFAULT '[]'::json,
-    versions character varying[]
+    versions character varying[],
+    first_deployed_at timestamp without time zone,
+    last_deployed_at timestamp without time zone
 );
 
 
@@ -816,4 +818,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160315165607');
 INSERT INTO schema_migrations (version) VALUES ('20160316154428');
 
 INSERT INTO schema_migrations (version) VALUES ('20160318164129');
+
+INSERT INTO schema_migrations (version) VALUES ('20160330092432');
 

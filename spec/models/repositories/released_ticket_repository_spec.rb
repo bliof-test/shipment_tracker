@@ -54,6 +54,75 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         expect(result).to have_received(:limit).with(specified_amount)
       end
     end
+
+    describe 'filter by date' do
+      let(:time) { Time.current }
+      subject(:ticket_repo) { Repositories::ReleasedTicketRepository.new }
+      let!(:deployed_tickets) {
+        [
+          Snapshots::ReleasedTicket.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 1.week),
+          Snapshots::ReleasedTicket.create(key: 'ENG-2', first_deployed_at: time - 1.week, last_deployed_at: time),
+          Snapshots::ReleasedTicket.create(key: 'ENG-3', first_deployed_at: time - 4.weeks, last_deployed_at: time - 3.weeks),
+        ].map{|record| ReleasedTicket.new(record.attributes)}
+      }
+
+      context "when 'from' date is selected" do
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: time - 2.weeks,
+            to_date: nil,
+          }
+        }
+
+        it "returns tickets deployed since 'from' date" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array(deployed_tickets[0..1])
+        end
+      end
+
+      context "when 'to' date is selected" do
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: nil,
+            to_date: time - 2.weeks,
+          }
+        }
+        it "returns tickets first deployed before 'to' date" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array([deployed_tickets.first, deployed_tickets.last])
+        end
+      end
+
+      context "when 'from' and 'to' dates are selected" do
+        let!(:deployed_tickets) {
+          [
+            Snapshots::ReleasedTicket.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 3.weeks),
+            Snapshots::ReleasedTicket.create(key: 'ENG-2', first_deployed_at: time - 5.weeks, last_deployed_at: time),
+            Snapshots::ReleasedTicket.create(key: 'ENG-3', first_deployed_at: time - 5.weeks, last_deployed_at: time - 3.weeks),
+            Snapshots::ReleasedTicket.create(key: 'ENG-4', first_deployed_at: time - 3.weeks, last_deployed_at: time),
+            Snapshots::ReleasedTicket.create(key: 'ENG-5', first_deployed_at: time - 6.weeks, last_deployed_at: time - 5.weeks),
+            Snapshots::ReleasedTicket.create(key: 'ENG-6', first_deployed_at: time - 1.week, last_deployed_at: time),
+          ].map{|record| ReleasedTicket.new(record.attributes)}
+        }
+
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: time - 4.weeks,
+            to_date: time - 2.week,
+          }
+        }
+        it "returns tickets deployed between 'from' and 'to' dates" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array(deployed_tickets[0..3])
+        end
+      end
+    end
   end
 
   describe '#apply' do

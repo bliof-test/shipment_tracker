@@ -18,7 +18,12 @@ module Repositories
     attr_reader :store
     delegate :table_name, to: :store
 
-    def tickets_for_query(query_text:, versions:, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY)
+    def tickets_for_query(
+        query_text:,
+        versions:,
+        per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY,
+        from_date: nil,
+        to_date: nil)
       query = if versions.present?
                 tickets_for_versions(versions)
               else
@@ -26,6 +31,8 @@ module Repositories
               end
 
       query = query.search_for(query_text) unless query_text.blank?
+      query = query.where('last_deployed_at >= ?', from_date) if from_date.present?
+      query = query.where('first_deployed_at <= ?', to_date) if to_date.present?
       query = query.limit(per_page)
       query.map { |t| ReleasedTicket.new(t.attributes) }
     end

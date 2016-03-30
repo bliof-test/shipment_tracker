@@ -7,10 +7,13 @@ class HomeController < ApplicationController
     @query = params[:q]
 
     if @query
-      versions = @query.scan(SHA_REGEX)
+      query_hash = {}
+      query_hash[:versions] = @query.scan(SHA_REGEX)
 
-      text = @query.gsub(SHA_REGEX, '')
-      @tickets = released_ticket_repo.tickets_for_query(query_text: text, versions: versions)
+      query_hash[:query_text] = @query.gsub(SHA_REGEX, '')
+      query_hash[:from_date] = DateTime.parse(params[:from]).beginning_of_day if params[:from].present?
+      query_hash[:to_date] = DateTime.parse(params[:to]).end_of_day if params[:to].present?
+      @tickets = released_ticket_repo.tickets_for_query(query_hash)
     else
       @tickets = []
     end

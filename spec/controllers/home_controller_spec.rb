@@ -15,7 +15,7 @@ RSpec.describe HomeController do
       allow(repo).to receive(:tickets_for_query).and_return(tickets)
     end
 
-    it 'displays the list of apps' do
+    it 'displays no tickets' do
       get :index, preview: 'true'
 
       expect(response).to have_http_status(:success)
@@ -29,6 +29,22 @@ RSpec.describe HomeController do
 
       expect(response).to have_http_status(:success)
       expect(assigns(:tickets)).to eq(tickets)
+    end
+
+    context "when params include 'to' and 'from'" do
+      it 'passes end of day for to and beginning of day for from to the query' do
+        expect(repo).to receive(:tickets_for_query).with(
+          query_text: '',
+          versions: [],
+          from_date: DateTime.parse('2016-03-20').beginning_of_day,
+          to_date: DateTime.parse('2016-03-30').end_of_day,
+        ).and_return(tickets)
+
+        get :index, preview: 'true', q: '', to: '2016-03-30', from: '2016-03-20'
+
+        expect(response).to have_http_status(:success)
+        expect(assigns(:tickets)).to eq(tickets)
+      end
     end
   end
 end
