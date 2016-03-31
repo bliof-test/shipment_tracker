@@ -321,9 +321,7 @@ CREATE TABLE released_tickets (
     updated_at timestamp without time zone NOT NULL,
     tsv tsvector,
     deploys json DEFAULT '[]'::json,
-    versions character varying[],
-    first_deployed_at timestamp without time zone,
-    last_deployed_at timestamp without time zone
+    versions character varying[]
 );
 
 
@@ -672,24 +670,10 @@ CREATE INDEX index_manual_tests_on_versions ON manual_tests USING gin (versions)
 
 
 --
--- Name: index_released_tickets_on_first_deployed_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_released_tickets_on_first_deployed_at ON released_tickets USING btree (first_deployed_at);
-
-
---
 -- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_released_tickets_on_key ON released_tickets USING btree (key);
-
-
---
--- Name: index_released_tickets_on_last_deployed_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_released_tickets_on_last_deployed_at ON released_tickets USING btree (last_deployed_at);
 
 
 --
@@ -832,6 +816,4 @@ INSERT INTO schema_migrations (version) VALUES ('20160315165607');
 INSERT INTO schema_migrations (version) VALUES ('20160316154428');
 
 INSERT INTO schema_migrations (version) VALUES ('20160318164129');
-
-INSERT INTO schema_migrations (version) VALUES ('20160330092432');
 
