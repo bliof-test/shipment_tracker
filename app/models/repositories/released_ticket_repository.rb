@@ -27,8 +27,9 @@ module Repositories
               end
 
       query = query.search_for(query_text) unless query_text.blank?
-      query = query.where('last_deployed_at >= ?', from_date) if from_date.present?
-      query = query.where('first_deployed_at <= ?', to_date) if to_date.present?
+
+      ticket_keys = filter_tickets_by_date(from_date, to_date)
+      query = query.where(key: ticket_keys) if ticket_keys
       query = query.limit(per_page)
       query.map { |t| ReleasedTicket.new(t.attributes) }
     end
@@ -44,6 +45,25 @@ module Repositories
     private
 
     attr_reader :feature_review_factory, :git_repository_loader
+
+    def filter_tickets_by_date(from_date, to_date)
+      query = build_query(from_date, to_date)
+      store.find_by_sql(query).map(&:key) if query
+    end
+
+    def build_query(from_date, to_date)
+      query_prefix =  'SELECT DISTINCT ON(key) key ' \
+                      'FROM released_tickets, json_array_elements(released_tickets.deploys) AS o ' \
+                      "WHERE (o->>'deployed_at')::date"
+
+      if from_date && to_date
+        ["#{query_prefix} BETWEEN ? AND ?", from_date, to_date]
+      elsif from_date
+        ["#{query_prefix} >= ?", from_date]
+      elsif to_date
+        ["#{query_prefix} <= ?", to_date]
+      end
+    end
 
     def git_repository(app_name)
       git_repository_loader.load(app_name)
@@ -79,8 +99,6 @@ module Repositories
     end
 
     def update_record(ticket_record, event, commit)
-      ticket_record.first_deployed_at = event.created_at if ticket_record.deploys.empty?
-      ticket_record.last_deployed_at = event.created_at
       unless duplicate_deploy?(ticket_record.deploys, event)
         ticket_record.deploys << build_deploy_hash(event, commit.id)
         ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)

@@ -28,8 +28,8 @@ class HomeController < ApplicationController
     query_hash[:versions] = query.scan(SHA_REGEX)
 
     query_hash[:query_text] = query.gsub(SHA_REGEX, '')
-    query_hash[:from_date] = DateTime.parse(params[:from]).beginning_of_day if params[:from].present?
-    query_hash[:to_date] = DateTime.parse(params[:to]).end_of_day if params[:to].present?
+    query_hash[:from_date] = Date.parse(params[:from]) if params[:from].present?
+    query_hash[:to_date] = Date.parse(params[:to]) if params[:to].present?
     query_hash
   end
 end

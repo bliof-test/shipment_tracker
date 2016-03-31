@@ -57,13 +57,16 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     describe 'filter by date' do
       let(:store) { Snapshots::ReleasedTicket }
-      let(:time) { Time.current }
+      let(:time) { Time.zone.today }
       subject(:ticket_repo) { Repositories::ReleasedTicketRepository.new }
       let!(:deployed_tickets) {
         [
-          store.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 1.week),
-          store.create(key: 'ENG-2', first_deployed_at: time - 1.week, last_deployed_at: time),
-          store.create(key: 'ENG-3', first_deployed_at: time - 4.weeks, last_deployed_at: time - 3.weeks),
+          store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks },
+                                               { app: 'app1', deployed_at: time - 1.week }].to_json),
+          store.create(key: 'ENG-2', deploys: [{ app: 'app1', deployed_at: time - 1.week },
+                                               { app: 'app1', deployed_at: time }].to_json),
+          store.create(key: 'ENG-3', deploys: [{ app: 'app1', deployed_at: time - 4.weeks },
+                                               { app: 'app1', deployed_at: time - 3.weeks }].to_json),
         ].map { |record| ReleasedTicket.new(record.attributes) }
       }
 
@@ -101,12 +104,17 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       context "when 'from' and 'to' dates are selected" do
         let!(:deployed_tickets) {
           [
-            store.create(key: 'ENG-1', first_deployed_at: time - 3.weeks, last_deployed_at: time - 3.weeks),
-            store.create(key: 'ENG-2', first_deployed_at: time - 5.weeks, last_deployed_at: time),
-            store.create(key: 'ENG-3', first_deployed_at: time - 5.weeks, last_deployed_at: time - 3.weeks),
-            store.create(key: 'ENG-4', first_deployed_at: time - 3.weeks, last_deployed_at: time),
-            store.create(key: 'ENG-5', first_deployed_at: time - 6.weeks, last_deployed_at: time - 5.weeks),
-            store.create(key: 'ENG-6', first_deployed_at: time - 1.week, last_deployed_at: time),
+            store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks }].to_json),
+            store.create(key: 'ENG-2', deploys: [{ app: 'app2', deployed_at: time - 5.weeks },
+                                                 { app: 'app2', deployed_at: time }].to_json),
+            store.create(key: 'ENG-3', deploys: [{ app: 'app3', deployed_at: time - 5.weeks },
+                                                 { app: 'app3', deployed_at: time - 3.weeks }].to_json),
+            store.create(key: 'ENG-4', deploys: [{ app: 'app4', deployed_at: time - 3.weeks },
+                                                 { app: 'app4', deployed_at: time }].to_json),
+            store.create(key: 'ENG-5', deploys: [{ app: 'app5', deployed_at: time - 6.weeks },
+                                                 { app: 'app5', deployed_at: time - 5.weeks }].to_json),
+            store.create(key: 'ENG-6', deploys: [{ app: 'app6', deployed_at: time - 1.week },
+                                                 { app: 'app6', deployed_at: time }].to_json),
           ].map { |record| ReleasedTicket.new(record.attributes) }
         }
 
@@ -120,7 +128,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         }
         it "returns tickets deployed between 'from' and 'to' dates" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array(deployed_tickets[0..3])
+          expect(tickets).to match_array([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
         end
       end
     end
@@ -235,8 +243,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'github_url' => gurl,
                 'region' => 'gb',
               }],
-              first_deployed_at: time,
-              last_deployed_at: time,
             )
           }
 
@@ -267,8 +273,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             ticket_repo.apply(deploy_event)
             record = store.find_by_key('JIRA-1')
             expect(record.deploys).to match_array(expected_deploys)
-            expect(record.first_deployed_at).to eq(time)
-            expect(record.last_deployed_at).to eq(second_time)
           end
 
           context 'when no previous deploys' do
@@ -279,8 +283,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 description: 'bar',
                 versions: [version],
                 deploys: [],
-                first_deployed_at: nil,
-                last_deployed_at: nil,
               )
             }
 
@@ -300,8 +302,6 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               ticket_repo.apply(deploy_event)
               record = store.find_by_key('JIRA-1')
               expect(record.deploys).to match_array(expected_deploys)
-              expect(record.first_deployed_at).to eq(second_time)
-              expect(record.last_deployed_at).to eq(second_time)
             end
           end
 
