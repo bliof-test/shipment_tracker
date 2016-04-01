@@ -100,3 +100,14 @@ h1 a.glyphicon {
 .panel-body {
     word-break: break-word;
 }
+
+.icon-arrow-left {
+  &:before {
+    content: "<";
+  }
+}
+.icon-arrow-right {
+  &:before {
+    content: ">";
+  }
+}
