@@ -6,9 +6,11 @@ module Pages
       @url_helpers = url_helpers
     end
 
-    def search_for(query:)
+    def search_for(query:, from: nil, to: nil)
       page.visit url_helpers.root_path(preview: 'true')
       page.fill_in('q', with: query)
+      page.fill_in('from_date', with: from)
+      page.fill_in('to_date', with: to)
       page.click_button('Search')
     end
 

@@ -18,7 +18,8 @@ module Repositories
     attr_reader :store
     delegate :table_name, to: :store
 
-    def tickets_for_query(query_text:, versions:, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY)
+    def tickets_for_query(query_text:, versions:, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY,
+      from_date: nil, to_date: nil)
       query = if versions.present?
                 tickets_for_versions(versions)
               else
@@ -26,6 +27,9 @@ module Repositories
               end
 
       query = query.search_for(query_text) unless query_text.blank?
+
+      ticket_keys = filter_tickets_by_date(from_date, to_date)
+      query = query.where(key: ticket_keys) if ticket_keys
       query = query.limit(per_page)
       query.map { |t| ReleasedTicket.new(t.attributes) }
     end
@@ -41,6 +45,25 @@ module Repositories
     private
 
     attr_reader :feature_review_factory, :git_repository_loader
+
+    def filter_tickets_by_date(from_date, to_date)
+      query = build_query(from_date, to_date)
+      store.find_by_sql(query).map(&:key) if query
+    end
+
+    def build_query(from_date, to_date)
+      query_prefix =  'SELECT DISTINCT ON(key) key ' \
+                      'FROM released_tickets, json_array_elements(released_tickets.deploys) AS o ' \
+                      "WHERE (o->>'deployed_at')::date"
+
+      if from_date && to_date
+        ["#{query_prefix} BETWEEN ? AND ?", from_date, to_date]
+      elsif from_date
+        ["#{query_prefix} >= ?", from_date]
+      elsif to_date
+        ["#{query_prefix} <= ?", to_date]
+      end
+    end
 
     def git_repository(app_name)
       git_repository_loader.load(app_name)
@@ -64,9 +87,7 @@ module Repositories
         released_commits.each do |commit|
           update_ticket_deploy_data(event, commit)
         end
-      rescue GitRepositoryLoader::NotFound,
-             GitRepository::CommitNotValid,
-             GitRepository::CommitNotFound => e
+      rescue GitRepositoryLoader::NotFound, GitRepository::CommitNotValid, GitRepository::CommitNotFound => e
         log_warning(e, event)
       end
     end
@@ -81,7 +102,7 @@ module Repositories
     end
 
     def log_warning(error, event)
-      Rails.logger.warn "Could not find the repository '#{event.app_name}' locally"
+      Rails.logger.warn "Could not snapshot deploy event ID '#{event.id}' for '#{event.app_name}' locally:"
       Rails.logger.warn error.message
     end
 

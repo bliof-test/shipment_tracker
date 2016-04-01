@@ -54,11 +54,89 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         expect(result).to have_received(:limit).with(specified_amount)
       end
     end
+
+    describe 'filter by date' do
+      let(:store) { Snapshots::ReleasedTicket }
+      let(:time) { Time.zone.today }
+      subject(:ticket_repo) { Repositories::ReleasedTicketRepository.new }
+      let!(:deployed_tickets) {
+        [
+          store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks },
+                                               { app: 'app1', deployed_at: time - 1.week }].to_json),
+          store.create(key: 'ENG-2', deploys: [{ app: 'app1', deployed_at: time - 1.week },
+                                               { app: 'app1', deployed_at: time }].to_json),
+          store.create(key: 'ENG-3', deploys: [{ app: 'app1', deployed_at: time - 4.weeks },
+                                               { app: 'app1', deployed_at: time - 3.weeks }].to_json),
+        ].map { |record| ReleasedTicket.new(record.attributes) }
+      }
+
+      context "when 'from' date is selected" do
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: time - 2.weeks,
+            to_date: nil,
+          }
+        }
+
+        it "returns tickets deployed since 'from' date" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array(deployed_tickets[0..1])
+        end
+      end
+
+      context "when 'to' date is selected" do
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: nil,
+            to_date: time - 2.weeks,
+          }
+        }
+        it "returns tickets first deployed before 'to' date" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array([deployed_tickets.first, deployed_tickets.last])
+        end
+      end
+
+      context "when 'from' and 'to' dates are selected" do
+        let!(:deployed_tickets) {
+          [
+            store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks }].to_json),
+            store.create(key: 'ENG-2', deploys: [{ app: 'app2', deployed_at: time - 5.weeks },
+                                                 { app: 'app2', deployed_at: time }].to_json),
+            store.create(key: 'ENG-3', deploys: [{ app: 'app3', deployed_at: time - 5.weeks },
+                                                 { app: 'app3', deployed_at: time - 3.weeks }].to_json),
+            store.create(key: 'ENG-4', deploys: [{ app: 'app4', deployed_at: time - 3.weeks },
+                                                 { app: 'app4', deployed_at: time }].to_json),
+            store.create(key: 'ENG-5', deploys: [{ app: 'app5', deployed_at: time - 6.weeks },
+                                                 { app: 'app5', deployed_at: time - 5.weeks }].to_json),
+            store.create(key: 'ENG-6', deploys: [{ app: 'app6', deployed_at: time - 1.week },
+                                                 { app: 'app6', deployed_at: time }].to_json),
+          ].map { |record| ReleasedTicket.new(record.attributes) }
+        }
+
+        let(:query) {
+          {
+            query_text: '',
+            versions: [],
+            from_date: time - 4.weeks,
+            to_date: time - 2.weeks,
+          }
+        }
+        it "returns tickets deployed between 'from' and 'to' dates" do
+          tickets = ticket_repo.tickets_for_query(query)
+          expect(tickets).to match_array([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
+        end
+      end
+    end
   end
 
   describe '#apply' do
     let(:store) { Snapshots::ReleasedTicket }
-    let(:time) { Time.current }
+    let(:time) { Time.current.change(usec: 0) }
     let(:repository) { instance_double(GitRepository) }
     let(:commit_version) { 'abc' }
     let(:event_attrs) {
@@ -142,10 +220,12 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     describe 'applying deploy events' do
       let(:deploy_event) {
-        build(:deploy_event, environment: 'production', version: version, created_at: time_string)
+        build(:deploy_event, environment: 'production', version: version, created_at: second_time)
       }
       let(:version) { 'abc' }
       let(:time_string) { time.strftime('%F %H:%M %Z') }
+      let(:second_time) { time + 1.week }
+      let(:second_time_string) { second_time.strftime('%F %H:%M %Z') }
       let(:gurl) { 'https://github.com/owner/hello_world' }
 
       context 'when deploy is to production' do
@@ -158,7 +238,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               versions: [version],
               deploys: [{
                 'app' => 'hello_world',
-                'version' => 'def123',
+                'version' => 'def',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
                 'region' => 'gb',
@@ -175,13 +255,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
               {
                 'app' => 'hello_world',
                 'version' => 'abc',
-                'deployed_at' => time_string,
+                'deployed_at' => second_time_string,
                 'github_url' => gurl,
                 'region' => 'us',
               },
               {
                 'app' => 'hello_world',
-                'version' => 'def123',
+                'version' => 'def',
                 'deployed_at' => time_string,
                 'github_url' => gurl,
                 'region' => 'gb',
@@ -193,6 +273,36 @@ RSpec.describe Repositories::ReleasedTicketRepository do
             ticket_repo.apply(deploy_event)
             record = store.find_by_key('JIRA-1')
             expect(record.deploys).to match_array(expected_deploys)
+          end
+
+          context 'when no previous deploys' do
+            let!(:released_ticket) {
+              Snapshots::ReleasedTicket.create(
+                key: 'JIRA-1',
+                summary: 'foo',
+                description: 'bar',
+                versions: [version],
+                deploys: [],
+              )
+            }
+
+            let(:expected_deploys) {
+              [
+                {
+                  'app' => 'hello_world',
+                  'version' => 'abc',
+                  'deployed_at' => second_time_string,
+                  'github_url' => gurl,
+                  'region' => 'us',
+                },
+              ]
+            }
+
+            it 'sets the first and last deployed at time' do
+              ticket_repo.apply(deploy_event)
+              record = store.find_by_key('JIRA-1')
+              expect(record.deploys).to match_array(expected_deploys)
+            end
           end
 
           context 'when the version was deployed already' do

@@ -5,15 +5,14 @@ class HomeController < ApplicationController
   def index
     return unless params[:preview] == 'true'
     @query = params[:q]
+    @from_date = params[:from]
+    @to_date = params[:to]
 
-    if @query
-      versions = @query.scan(SHA_REGEX)
-
-      text = @query.gsub(SHA_REGEX, '')
-      @tickets = released_ticket_repo.tickets_for_query(query_text: text, versions: versions)
-    else
-      @tickets = []
-    end
+    @tickets = if @query
+                 released_ticket_repo.tickets_for_query(build_query_hash(@query, params))
+               else
+                 []
+               end
 
     render 'dashboard'
   end
@@ -22,5 +21,15 @@ class HomeController < ApplicationController
 
   def released_ticket_repo
     Repositories::ReleasedTicketRepository.new
+  end
+
+  def build_query_hash(query, params)
+    query_hash = {}
+    query_hash[:versions] = query.scan(SHA_REGEX)
+
+    query_hash[:query_text] = query.gsub(SHA_REGEX, '')
+    query_hash[:from_date] = Date.parse(params[:from]) if params[:from].present?
+    query_hash[:to_date] = Date.parse(params[:to]) if params[:to].present?
+    query_hash
   end
 end

@@ -3,7 +3,12 @@
   %input{:name => "preview", :type => "hidden", :value => "true"}/
   .form-group
     %label.control-label.sr-only{:for => "q"} Search for deployed tickets:
-    %input#jira_key.form-control{:name => "q", :placeholder => "Search for app name, title, or description", :required => "required", :style => "width:700px;", :type => "text", :value => @query}/
+    %input#q.form-control{:name => "q", :placeholder => "keywords in ticket description", :required => "required", :style => "width:700px;", :type => "text", :value => @query}/
+    #datepicker.input-daterange.input-group
+      %span.input-group-addon from
+      %input#from_date.input-sm.form-control{:name => "from", :type => "text", :style => "width: 120px; height: 34px;", :value => @from_date}/
+      %span.input-group-addon to
+      %input#to_date.input-sm.form-control{:name => "to", :type => "text", :style => "width: 120px; height: 34px;", :value => @to_date}/
   %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
 - if @query
