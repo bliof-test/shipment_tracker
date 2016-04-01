@@ -3,6 +3,7 @@
 //= require bootstrap-sprockets
 //= require bootstrap-editable
 //= require bootstrap/tooltip
+//= require ./date_picker
 
 $(function() {
   $.fn.editable.defaults.ajaxOptions = {type: "PUT"};

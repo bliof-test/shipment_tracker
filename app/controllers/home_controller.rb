@@ -5,8 +5,8 @@ class HomeController < ApplicationController
   def index
     return unless params[:preview] == 'true'
     @query = params[:q]
-    @from_date = params[:from]
-    @to_date = params[:to]
+    @from_date = params[:from_date]
+    @to_date = params[:to_date]
 
     @tickets = if @query
                  released_ticket_repo.tickets_for_query(build_query_hash(@query, params))
