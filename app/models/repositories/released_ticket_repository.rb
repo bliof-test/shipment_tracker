@@ -94,16 +94,11 @@ module Repositories
 
     def update_ticket_deploy_data(event, commit)
       tickets_for_versions(commit.associated_ids).each do |ticket_record|
-        update_record(ticket_record, event, commit)
-      end
-    end
-
-    def update_record(ticket_record, event, commit)
-      unless duplicate_deploy?(ticket_record.deploys, event)
+        next if duplicate_deploy?(ticket_record.deploys, event)
         ticket_record.deploys << build_deploy_hash(event, commit.id)
         ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
+        ticket_record.save!
       end
-      ticket_record.save!
     end
 
     def log_warning(error, event)
