@@ -28,9 +28,23 @@ RSpec.describe GitRepository do
       it { is_expected.to be(false) }
     end
 
-    context 'when commit id is too short (even if it exists)' do
-      let(:sha) { version('A').slice(1..3) }
+    context 'when commit id is nil' do
+      let(:sha) { nil }
       it { is_expected.to be(false) }
+    end
+
+    context 'when commit id is too short (even if it exists)' do
+      let(:sha) { version('A').slice(0..6) }
+      it { is_expected.to be(false) }
+    end
+
+    context 'when allowing short shas' do
+      subject { repo.exists?(sha, allow_short_sha: true) }
+
+      context 'when commit id is too short (even if it exists)' do
+        let(:sha) { version('A').slice(0..6) }
+        it { is_expected.to be(true) }
+      end
     end
 
     context 'when commit id is invalid' do

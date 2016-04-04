@@ -16,8 +16,10 @@ class GitRepository
     @rugged_repository = rugged_repository
   end
 
-  def exists?(full_sha)
-    full_sha.length == 40 && rugged_repository.exists?(full_sha)
+  def exists?(sha, allow_short_sha: false)
+    return false if sha.nil?
+    return false if !allow_short_sha && sha.length != 40
+    sha.length.between?(7, 40) && rugged_repository.exists?(sha)
   rescue Rugged::InvalidError
     false
   end

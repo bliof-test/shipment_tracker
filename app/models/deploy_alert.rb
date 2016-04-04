@@ -51,8 +51,8 @@ class DeployAlert
   class DeployAuditor
     def initialize(current_deploy, previous_deploy = nil)
       @current_deploy = current_deploy
-      @previous_deploy = previous_deploy
       @git_repo = GitRepositoryLoader.from_rails_config.load(current_deploy.app_name)
+      @previous_deploy = previous_deploy if git_repo.exists?(previous_deploy&.version, allow_short_sha: true)
     end
 
     def not_on_master?
@@ -60,7 +60,7 @@ class DeployAlert
     end
 
     def unknown_version?
-      current_deploy.version.nil?
+      !git_repo.exists?(current_deploy.version, allow_short_sha: true)
     end
 
     def rollback?
