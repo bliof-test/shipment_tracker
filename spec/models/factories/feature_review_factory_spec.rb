@@ -7,8 +7,8 @@ RSpec.describe Factories::FeatureReviewFactory do
   subject(:factory) { described_class.new }
 
   describe '#create_from_text' do
-    let(:url1) { full_url('apps[app1]' => 'a', 'apps[app2]' => 'b') }
-    let(:url2) { full_url('apps[app1]' => 'a') }
+    let(:url1) { full_url('apps[app1]' => 'abc', 'apps[app2]' => 'def') }
+    let(:url2) { full_url('apps[app1]' => 'abc') }
 
     let(:text) {
       <<-EOS
@@ -19,25 +19,25 @@ RSpec.describe Factories::FeatureReviewFactory do
 
     let(:feature_review1) {
       FeatureReview.new(
-        path: '/feature_reviews?apps%5Bapp1%5D=a&apps%5Bapp2%5D=b',
-        versions: %w(a b),
+        path: '/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
+        versions: %w(abc def),
       )
     }
 
     let(:feature_review2) {
       FeatureReview.new(
-        path: '/feature_reviews?apps%5Bapp1%5D=a',
-        versions: %w(a),
+        path: '/feature_reviews?apps%5Bapp1%5D=abc',
+        versions: %w(abc),
       )
     }
 
     subject(:feature_reviews) { factory.create_from_text(text) }
 
-    it 'returns an array of Feature Reviews for each URL in the given text' do
+    it 'returns an array of Feature Reviews for each FR URL in the given text' do
       expect(feature_reviews).to match_array([feature_review1, feature_review2])
     end
 
-    context 'when the URL has a link with Jira markup' do
+    context 'when a FR URL contains JIRA link markup' do
       let(:text) { "please review [here|#{url1}]" }
 
       it 'parses the markup and returns a Feature Review' do
@@ -45,16 +45,13 @@ RSpec.describe Factories::FeatureReviewFactory do
       end
     end
 
-    context 'when a Feature Review URL contains a non-whitelisted query param' do
+    context 'when a FR URL contains non-whitelisted query params' do
       let(:url) { full_url('non-whitelisted' => 'ignoreme', 'apps[foo]' => 'bar') }
       let(:text) { "please review #{url}" }
 
-      it 'filters it out' do
+      it 'filters them out' do
         expect(feature_reviews).to match_array([
-          FeatureReview.new(
-            path: '/feature_reviews?apps%5Bfoo%5D=bar',
-            versions: %w(bar),
-          ),
+          FeatureReview.new(path: '/feature_reviews?apps%5Bfoo%5D=bar', versions: %w(bar)),
         ])
       end
     end
@@ -62,7 +59,7 @@ RSpec.describe Factories::FeatureReviewFactory do
     context 'when a URL has an irrelevant path' do
       let(:text) { 'irrelevant path http://localhost/not_important?apps[junk]=999' }
 
-      it 'ignores it' do
+      it 'ignores the URL' do
         expect(feature_reviews).to be_empty
       end
     end
@@ -70,7 +67,7 @@ RSpec.describe Factories::FeatureReviewFactory do
     context 'when a URL is unparseable' do
       let(:text) { 'unparseable http://foo.io/feature_reviews#bad[' }
 
-      it 'ignores it' do
+      it 'ignores the URL' do
         expect(feature_reviews).to be_empty
       end
     end
