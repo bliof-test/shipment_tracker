@@ -38,10 +38,18 @@ RSpec.describe Factories::FeatureReviewFactory do
     end
 
     context 'when a FR URL contains JIRA link markup' do
-      let(:text) { "please review [here|#{url1}]" }
+      let(:text) { "please review [FR|#{url1}]" }
 
-      it 'parses the markup and returns a Feature Review' do
+      it 'strips the markup' do
         expect(feature_reviews).to match_array([feature_review1])
+      end
+    end
+
+    context 'when a FR URL contains JIRA link markup, is between parentheses, and ends with a dot' do
+      let(:text) { "([FR|#{url2}])." }
+
+      it 'strips the trailing non-word characters' do
+        expect(feature_reviews).to match_array([feature_review2])
       end
     end
 
@@ -65,7 +73,7 @@ RSpec.describe Factories::FeatureReviewFactory do
     end
 
     context 'when a URL is unparseable' do
-      let(:text) { 'unparseable http://foo.io/feature_reviews#bad[' }
+      let(:text) { 'unparseable http://foo.io/feature_reviews#[bad[' }
 
       it 'ignores the URL' do
         expect(feature_reviews).to be_empty

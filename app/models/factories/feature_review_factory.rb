@@ -51,7 +51,8 @@ module Factories
     end
 
     def clean_uri(uri)
-      uri.chomp(']') # when parsing text with Jira markup we sometimes find a trailing ']'
+      trailing_junk = uri[/.*\w(\W*)$/, 1]
+      uri.chomp(trailing_junk)
     end
   end
 end
