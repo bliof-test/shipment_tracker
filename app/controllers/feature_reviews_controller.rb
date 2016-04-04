@@ -39,11 +39,7 @@ class FeatureReviewsController < ApplicationController
   end
 
   def link_ticket
-    LinkTicket.run(
-      jira_key: params['jira_key'],
-      feature_review_path: redirect_path,
-      root_url: root_url,
-    ).match do
+    LinkTicket.run(ticket_linking_options).match do
       success do |success_message|
         flash[:success] = success_message
       end
@@ -57,6 +53,10 @@ class FeatureReviewsController < ApplicationController
   end
 
   private
+
+  def ticket_linking_options
+    { jira_key: params['jira_key'], feature_review_path: redirect_path, root_url: root_url }
+  end
 
   def time
     # Add fraction of a second to work around microsecond time difference.
