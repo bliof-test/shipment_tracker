@@ -1,85 +1,41 @@
-%h1 What is Shipment Tracker?
-%p
-  Shipment Tracker is a tool that tracks relevant information during the shipment process of software.
-%p
-  The application has various endpoints to receive events for deploys, builds, tickets, QA review, and so on.
-%p
-  Each event is replayed for every information request.
-  This makes it possible to see state at any point in time.
-%p
-  For auditing purposes, stored events are never modified or deleted. Events are only appended.
+- title 'Feature Reviewed Tickets'
+%form.form-inline{"accept-charset" => "UTF-8", :action => "/", :method => "get"}
+  %input{:name => "preview", :type => "hidden", :value => "true"}/
+  .form-group
+    %label.control-label.sr-only{:for => "q"} Search for deployed tickets:
+    %input#q.form-control{:name => "q", :placeholder => "keywords in ticket description", :required => "required", :style => "width:700px;", :type => "text", :value => @query}/
+    #datepicker.input-daterange.input-group
+      %span.input-group-addon from
+      %input#from_date.input-sm.form-control{:name => "from", :type => "text", :style => "width: 120px; height: 34px;", :value => @from_date}/
+      %span.input-group-addon to
+      %input#to_date.input-sm.form-control{:name => "to", :type => "text", :style => "width: 120px; height: 34px;", :value => @to_date}/
+  %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
-%h1 Why use it?
-%p
-  The primary goal of Shipment Tracker is to help your firm prepare for a technical audit.
-%p
-  It records which processes your tech team are following to prove your compliance with regulations set by a
-  regulatory body such as the <abbr title="Financial Conduct Authority">FCA</abbr>.
-%p
-  By highlighting adequate controls in your development process, your firm will be better prepared for audits.
-%p
-  Product Owners also benefit by having an overview for new features that are ready for review.
-
-%h1 Who should use it and how?
-%h2 Developer
-%p
-  A developer can
-  = link_to "prepare a feature review", new_feature_reviews_url
-  for their <abbr title="Product Owner">PO</abbr> when their work is ready to be reviewed.
-%p
-  The developer specifies the version of each app that corresponds with their work.
-  The version is the full Git SHA &mdash; usually of the latest commit on their feature branch.
-  Any apps not touched by the developer while working on the feature should have their version left blank.
-%p
-  If an app is missing from the menu, it needs to be added as a
-  = succeed "." do
-    - link_to "new repository location", git_repository_locations_url
-%p
-  The developer also specifies the URL of the staging or <abbr title="User Acceptance Testing">UAT</abbr>
-  environment where their work has been deployed so it can be reviewed before going into production.
-%p
-  Once the review page has been created, the developer informs the PO by copying the page URL and
-  pasting it in a comment for every relevant JIRA ticket. The developer then drags the ticket to
-  "Ready for Review" (or equivalent status column) in JIRA.
-
-%h2 Quality Assurance (QA)
-%p QA can view a review page and either accept or reject the feature based on their manual testing.
-%p Multiple QA submissions can be made, but only the last one is taken into account.
-%p QA acceptance is optional, as not every change needs to be reviewed by QA.
-
-%h2 Product Owner (PO)
-%p
-  A PO can review features before they go into production.
-  To do so, they visit the URL that the developer prepared and posted in the JIRA ticket(s).
-%p
-  A review page contains information about specific applications at specific versions. A PO can use such a
-  review page during the acceptance process of a feature.
-%p
-  Information that's relevant to the PO is displayed, such as
-  %ul
-    %li which app versions have been deployed to the staging environment
-    %li the results of the test builds
-    %li any associated (JIRA) tickets
-    %li and whether QA has reviewed the change
-%p
-  Statuses are conveniently summarized in a "Summary" panel.
-  Possible statuses are <i>pass</i>, <i>fail</i>, and <i>warning</i>.
-%p Once the PO is satisfied, they can approve the work on JIRA.
-%p
-  When all associated tickets are accepted, the Feature Review locks, meaning any new events
-  (e.g. build results from Continuous Integration or Deploys) will not be shown.
-  The intention is to show what the Feature Review looked like at the moment of acceptance.
-  If a Feature Review is unlocked by "unaccepting" any of the tickets, any events since its last acceptance
-  will be shown.
-
-%h2 Deployer
-%p
-  A deployer can
-  =link_to "view pending and past deploys to production", releases_url
-  for a specific app. We call these "releases".
-%p
-  A release should have a review associated with it. A link to the review page
-  along with its current status appears in the right-most column.
-%p
-  A release will be flagged as red if it does not have a review, or it does but the work has not been
-  approved (i.e. status is not "Done").
+- if @query
+  - if @tickets.any?
+    %h2= "Results for '#{@query}'"
+  -else
+    %h2= "No results for '#{@query}' :/"
+  - @tickets.in_groups_of(3) do | tickets_row |
+    .row
+      - tickets_row.compact.each do | ticket |
+        .col-md-4
+          .panel.panel-default.result
+            .panel-heading
+              %span.key= jira_link(ticket.key)
+              %strong.summary= truncate(ticket.summary, length: 100, seperator: ' ')
+            .panel-body
+              - if ticket.description.nil?
+                %em.description No description found.
+              - else
+                = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
+              %p
+                %hr
+                %b Deploys
+              - if ticket.deploys.empty?
+                %p none
+              - ticket.deploys.each do |deploy|
+                %p.deploy
+                  = flag_icon(deploy['region'].to_sym)
+                  = "#{deploy['deployed_at']} #{deploy['app']}"
+                  = commit_link(deploy['version'], deploy['github_url'])

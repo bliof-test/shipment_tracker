@@ -3,7 +3,6 @@ class HomeController < ApplicationController
   SHA_REGEX = /\b[0-9a-f]{40}\b/
 
   def index
-    return unless params[:preview] == 'true'
     @query = params[:q]
     @from_date = params[:from]
     @to_date = params[:to]
@@ -13,8 +12,6 @@ class HomeController < ApplicationController
                else
                  []
                end
-
-    render 'dashboard'
   end
 
   private
