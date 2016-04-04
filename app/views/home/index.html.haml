@@ -11,11 +11,10 @@
       %input#to_date.input-sm.form-control{:name => "to", :type => "text", :style => "width: 120px; height: 34px;", :value => @to_date}/
   %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
-- if @query
-  - if @tickets.any?
-    %h2= "Results for '#{@query}'"
-  -else
-    %h2= "No results for '#{@query}' :/"
+- if @query || @from_date || @to_date
+  %br
+  %h3= result_message_for(query: @query, from_date: @from_date, to_date: @to_date, found: @tickets.any?).html_safe
+  %br
   - @tickets.in_groups_of(3) do | tickets_row |
     .row
       - tickets_row.compact.each do | ticket |
