@@ -52,6 +52,7 @@ RSpec.describe DeployAlert do
         ancestor_of?: false,
         commits_between: [],
         commit_for_version: [],
+        exists?: true,
       )
     }
 
@@ -112,6 +113,28 @@ RSpec.describe DeployAlert do
         }
 
         it 'returns an alert message for missing software version' do
+          allow(git_repo).to receive(:exists?).and_return(false)
+          actual = DeployAlert.audit_message(deploy)
+          expected = message(deploy, 'Deploy event sent to Shipment Tracker is missing the software version.')
+
+          expect(actual).to eq(expected)
+        end
+      end
+
+      context 'when deploy event has an gibberish version' do
+        let(:deploy) {
+          instance_double(
+            Deploy,
+            app_name: 'some_app',
+            version: 'asdfoim?asgd/adsg/\asdg\sd',
+            region: 'gb',
+            deployed_by: 'Devloper',
+            event_created_at: Time.current,
+          )
+        }
+
+        it 'returns an alert message for missing software version' do
+          allow(git_repo).to receive(:exists?).and_return(false)
           actual = DeployAlert.audit_message(deploy)
           expected = message(deploy, 'Deploy event sent to Shipment Tracker is missing the software version.')
 
@@ -174,6 +197,27 @@ RSpec.describe DeployAlert do
           expected = message(current_deploy, 'Old release deployed. Was the rollback intentional?')
 
           expect(actual).to eq(expected)
+        end
+
+        context 'when the previous deploy has an invalid version' do
+          let(:previous_deploy) {
+            instance_double(
+              Deploy,
+              app_name: 'some_app',
+              version: nil,
+              region: 'gb',
+              event_created_at: 1.hour.ago,
+              deployed_by: 'Devloper',
+            )
+          }
+
+          it 'does not return an alert message for rollback' do
+            allow(git_repo).to receive(:exists?).with(nil, allow_short_sha: true).and_return(false)
+            expect(git_repo).not_to receive(:ancestor_of?)
+
+            actual = DeployAlert.audit_message(current_deploy, previous_deploy)
+            expect(actual).to be_nil
+          end
         end
       end
 
