@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module DashboardHelper
   def result_message_for(query: nil, from_date: nil, to_date: nil, found: false)
     if found
@@ -7,6 +8,7 @@ module DashboardHelper
     end
   end
 
+  # rubocop:disable all
   def query_combined_message(query, from_date, to_date)
     if query.present? && from_date.present? && to_date.present?
       "<b>'#{query}'</b> in tickets deployed between <b>'#{from_date}'</b> and <b>'#{to_date}'</b>"
@@ -23,7 +25,8 @@ module DashboardHelper
     elsif to_date.present?
       "tickets deployed until <b>'#{to_date}'</b>"
     else
-      "all tickets"
+      'all tickets'
     end
   end
+  # rubocop:enable all
 end
