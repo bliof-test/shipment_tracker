@@ -23,21 +23,6 @@ class FeatureReviewsController < ApplicationController
                                                                .feature_review_with_statuses
   end
 
-  def search
-    @links = []
-    @applications = GitRepositoryLocation.app_names
-    @version = params[:version]
-    @application = params[:application]
-
-    return unless @version && @application
-
-    versions = VersionResolver.new(git_repository_for(@application)).related_versions(@version)
-    tickets = Repositories::TicketRepository.new.tickets_for_versions(versions)
-
-    @links = factory.create_from_tickets(tickets).map(&:path)
-    flash.now[:error] = 'No Feature Reviews found.' if @links.empty?
-  end
-
   def link_ticket
     LinkTicket.run(ticket_linking_options).match do
       success do |success_message|
