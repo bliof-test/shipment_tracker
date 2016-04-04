@@ -16,7 +16,7 @@ RSpec.describe HomeController do
     end
 
     it 'displays no tickets' do
-      get :index, preview: 'true'
+      get :index
 
       expect(response).to have_http_status(:success)
       expect(assigns(:tickets)).to eq([])
@@ -25,7 +25,7 @@ RSpec.describe HomeController do
     it 'searches tickets for the given query' do
       expect(repo).to receive(:tickets_for_query).with(query_text: 'dog', versions: []).and_return(tickets)
 
-      get :index, preview: 'true', q: 'dog'
+      get :index, q: 'dog'
 
       expect(response).to have_http_status(:success)
       expect(assigns(:query)).to eq('dog')
@@ -41,7 +41,7 @@ RSpec.describe HomeController do
           to_date: DateTime.parse('2016-03-30').end_of_day,
         ).and_return(tickets)
 
-        get :index, preview: 'true', q: '', to: '2016-03-30', from: '2016-03-20'
+        get :index, q: '', to: '2016-03-30', from: '2016-03-20'
 
         expect(response).to have_http_status(:success)
         expect(assigns(:tickets)).to eq(tickets)
