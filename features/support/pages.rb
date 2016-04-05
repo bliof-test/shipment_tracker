@@ -28,13 +28,6 @@ module Pages
     )
   end
 
-  def feature_review_search_page
-    Pages::FeatureReviewSearchPage.new(
-      page: page,
-      url_helpers: Rails.application.routes.url_helpers,
-    )
-  end
-
   def releases_page
     Pages::ReleasesPage.new(
       page: page,
