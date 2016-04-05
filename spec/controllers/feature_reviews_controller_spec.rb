@@ -6,7 +6,6 @@ RSpec.describe FeatureReviewsController do
     it { is_expected.to require_authentication_on(:get, :new) }
     it { is_expected.to require_authentication_on(:get, :show) }
     it { is_expected.to require_authentication_on(:post, :create) }
-    it { is_expected.to require_authentication_on(:get, :search) }
     it { is_expected.to require_authentication_on(:post, :link_ticket) }
   end
 
