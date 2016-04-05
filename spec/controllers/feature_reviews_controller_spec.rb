@@ -6,7 +6,6 @@ RSpec.describe FeatureReviewsController do
     it { is_expected.to require_authentication_on(:get, :new) }
     it { is_expected.to require_authentication_on(:get, :show) }
     it { is_expected.to require_authentication_on(:post, :create) }
-    it { is_expected.to require_authentication_on(:get, :search) }
     it { is_expected.to require_authentication_on(:post, :link_ticket) }
   end
 
@@ -143,39 +142,6 @@ RSpec.describe FeatureReviewsController do
 
         expect(assigns(:feature_review_with_statuses)).to eq(feature_review_with_statuses)
       end
-    end
-  end
-
-  describe 'GET #search', :logged_in do
-    let(:applications) { %w(frontend backend mobile) }
-
-    let(:version_resolver) { instance_double(VersionResolver) }
-    let(:repository) { instance_double(Repositories::TicketRepository) }
-    let(:git_repository_loader) { instance_double(GitRepositoryLoader) }
-    let(:repo) { instance_double(GitRepository) }
-    let(:related_versions) { %w(abc def ghi) }
-    let(:expected_links) { ['/feature_reviews?apps%5Bapp1%5D=a&apps%5Bapp2%5D=b'] }
-    let(:expected_tickets) { [instance_double(Ticket, paths: expected_links)] }
-    let(:version) { 'abc123' }
-
-    before do
-      allow(VersionResolver).to receive(:new).with(repo).and_return(version_resolver)
-      allow(version_resolver).to receive(:related_versions).with(version).and_return(related_versions)
-      allow(GitRepositoryLocation).to receive(:app_names).and_return(applications)
-      allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(git_repository_loader)
-      allow(Repositories::TicketRepository).to receive(:new).and_return(repository)
-      allow(repository).to receive(:tickets_for_versions)
-        .with(related_versions)
-        .and_return(expected_tickets)
-
-      allow(git_repository_loader).to receive(:load).with('frontend').and_return(repo)
-    end
-
-    it 'assigns links for found Feature Reviews' do
-      get :search, version: version, application: 'frontend'
-
-      expect(assigns(:links)).to eq(expected_links)
-      expect(assigns(:applications)).to eq(applications)
     end
   end
 

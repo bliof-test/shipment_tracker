@@ -23,27 +23,8 @@ class FeatureReviewsController < ApplicationController
                                                                .feature_review_with_statuses
   end
 
-  def search
-    @links = []
-    @applications = GitRepositoryLocation.app_names
-    @version = params[:version]
-    @application = params[:application]
-
-    return unless @version && @application
-
-    versions = VersionResolver.new(git_repository_for(@application)).related_versions(@version)
-    tickets = Repositories::TicketRepository.new.tickets_for_versions(versions)
-
-    @links = factory.create_from_tickets(tickets).map(&:path)
-    flash.now[:error] = 'No Feature Reviews found.' if @links.empty?
-  end
-
   def link_ticket
-    LinkTicket.run(
-      jira_key: params['jira_key'],
-      feature_review_path: redirect_path,
-      root_url: root_url,
-    ).match do
+    LinkTicket.run(ticket_linking_options).match do
       success do |success_message|
         flash[:success] = success_message
       end
@@ -57,6 +38,10 @@ class FeatureReviewsController < ApplicationController
   end
 
   private
+
+  def ticket_linking_options
+    { jira_key: params['jira_key'], feature_review_path: redirect_path, root_url: root_url }
+  end
 
   def time
     # Add fraction of a second to work around microsecond time difference.
