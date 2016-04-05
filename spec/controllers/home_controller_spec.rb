@@ -9,6 +9,7 @@ RSpec.describe HomeController do
   describe 'GET #index', :logged_in do
     let(:tickets) { [double] }
     let(:repo) { double }
+    let(:date) { Time.zone.today }
 
     before do
       allow(Repositories::ReleasedTicketRepository).to receive(:new).and_return(repo)
@@ -18,8 +19,7 @@ RSpec.describe HomeController do
     it 'displays no tickets' do
       get :index
 
-      expect(response).to have_http_status(:success)
-      expect(assigns(:tickets)).to eq([])
+      expect(response).to redirect_to(root_path(to: date, from: date))
     end
 
     it 'searches tickets for the given query' do
@@ -35,13 +35,13 @@ RSpec.describe HomeController do
     context "when params include 'to' and 'from'" do
       it 'passes end of day for to and beginning of day for from to the query' do
         expect(repo).to receive(:tickets_for_query).with(
-          query_text: '',
-          versions: [],
+          query_text: nil,
+          versions: nil,
           from_date: DateTime.parse('2016-03-20').beginning_of_day,
           to_date: DateTime.parse('2016-03-30').end_of_day,
         ).and_return(tickets)
 
-        get :index, q: '', to: '2016-03-30', from: '2016-03-20'
+        get :index, to: '2016-03-30', from: '2016-03-20'
 
         expect(response).to have_http_status(:success)
         expect(assigns(:tickets)).to eq(tickets)
