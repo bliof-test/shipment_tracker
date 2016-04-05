@@ -71,7 +71,7 @@ class CommitStatus
     elsif feature_reviews.length == 1
       url_to_feature_review(feature_reviews.first.path)
     else
-      url_to_search_feature_reviews(repo_name, sha)
+      url_to_search_feature_reviews(sha)
     end
   end
 
@@ -86,10 +86,9 @@ class CommitStatus
     routes.root_url.chomp('/') + feature_review_path
   end
 
-  def url_to_search_feature_reviews(repo_name, sha, url_opts = {})
-    url_opts[:application] = repo_name
-    url_opts[:version] = sha
-    routes.search_feature_reviews_url(url_opts)
+  def url_to_search_feature_reviews(sha, url_opts = {})
+    url_opts[:q] = sha
+    routes.root_url(url_opts)
   end
 
   def status_for(feature_reviews)

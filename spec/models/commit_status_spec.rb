@@ -96,7 +96,7 @@ RSpec.describe CommitStatus do
             sha: 'abc',
             state: 'success',
             description: 'Approved Feature Review found',
-            target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
+            target_url: 'https://localhost/?q=abc',
           )
 
           CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
@@ -123,7 +123,7 @@ RSpec.describe CommitStatus do
             sha: 'abc',
             state: 'pending',
             description: 'Awaiting approval for Feature Review',
-            target_url: 'https://localhost/feature_reviews/search?application=app1&version=abc',
+            target_url: 'https://localhost/?q=abc',
           )
 
           CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
