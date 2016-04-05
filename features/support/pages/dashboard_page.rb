@@ -7,7 +7,7 @@ module Pages
     end
 
     def search_for(query:, from: nil, to: nil)
-      page.visit url_helpers.root_path(preview: 'true')
+      page.visit url_helpers.root_path
       page.fill_in('q', with: query)
       page.fill_in('from_date', with: from)
       page.fill_in('to_date', with: to)
