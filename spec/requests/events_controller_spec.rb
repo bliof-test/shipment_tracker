@@ -86,6 +86,17 @@ RSpec.describe 'EventsController' do
         expect(response).to be_ok
       end
 
+      it 'discards duplicated data' do
+        expect(event_factory).to receive(:create).with(
+          'circleci', { 'foo' => 'bar', 'token' => 'the payloads token' }, nil
+        )
+
+        post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token',
+                                                event: { foo: 'bar', token: 'the payloads token' }
+
+        expect(response).to be_ok
+      end
+
       it 'does not create authorised session' do
         expect(event_factory).to receive(:create).once
 
