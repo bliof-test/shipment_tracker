@@ -60,22 +60,12 @@ RSpec.describe Events::DeployEvent do
     end
 
     context 'when the payload contains a short SHA' do
-      let(:payload) {
-        {
-          'app_name' => 'some_app',
-          'servers' => ['prod1.example.com', 'prod2.example.com'],
-          'version' => 'abcabca',
-          'deployed_by' => 'bob',
-          'locale' => 'us',
-          'environment' => 'staging',
-        }
-      }
-      let(:repo) { double }
-      let(:commit) { double(GitCommit, id: '1abcabcabcabcabcabcabcabcabcabcabcabcabc') }
-
       before do
-        allow(repo).to receive(:commit_for_version).and_return(commit)
-        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(repo)
+        commit = double(GitCommit, id: '1abcabcabcabcabcabcabcabcabcabcabcabcabc')
+        git_repo = double(GitRepository, commit_for_version: commit)
+        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(git_repo)
+
+        payload['version'] = '1abc'
       end
 
       it 'expands to full SHA' do
