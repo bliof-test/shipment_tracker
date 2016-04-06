@@ -199,10 +199,18 @@ RSpec.describe GitRepository do
       expect(commit.id).to eq version('A')
     end
 
-    it 'returns an empty GitCommit when the lookup fails' do
-      commit = subject.commit_for_version('invalid_sha')
-      expect(commit).to be_a(GitCommit)
-      expect(commit.associated_ids).to be_empty
+    context 'when the lookup fails' do
+      it 'returns an empty GitCommit for an invalid SHA' do
+        commit = subject.commit_for_version('invalid_sha')
+        expect(commit).to be_a(GitCommit)
+        expect(commit.associated_ids).to be_empty
+      end
+
+      it 'returns an empty GitCommit for an extra long SHA' do
+        commit = subject.commit_for_version('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc')
+        expect(commit).to be_a(GitCommit)
+        expect(commit.id).to be_nil
+      end
     end
   end
 
