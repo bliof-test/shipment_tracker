@@ -6,18 +6,14 @@
 
 [![](http://i.imgur.com/VkjlJmj.jpg)](https://www.flickr.com/photos/britishlibrary/11237769263/)
 
-Tracks shipment of software versions for audit purposes.
+Tracks software versions during the release cycle for audit purposes.
 
 The app has various "audit endpoints" to receive events,
 such as deploys, builds, ticket creations, etc.
 
-All received events are stored in the DB and are never modified.
+All received events are stored in the DB and are never modified.  
 [Event sourcing] is used to replay each event allowing us to reconstruct the state
 of the system at any point in time.
-
-## Releases
-
-Merges in the deployment branch are tracked on the shipment tracker application and not GitHub.
 
 ## Getting Started
 
