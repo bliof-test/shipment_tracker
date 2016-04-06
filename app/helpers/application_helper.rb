@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 module ApplicationHelper
+  WIKI_URL = 'https://github.com/FundingCircle/shipment_tracker/wiki'
+
   def wiki_links(key)
     {
-      home: 'https://github.com/FundingCircle/shipment_tracker/wiki',
-      prepare: 'https://github.com/FundingCircle/shipment_tracker/wiki/1.-CREATING-A-FEATURE-REVIEW',
-      review: 'https://github.com/FundingCircle/shipment_tracker/wiki/2.-ANALYSING-A-FEATURE-REVIEW',
-      qa: 'https://github.com/FundingCircle/shipment_tracker/wiki/3.-QA-REVIEWS-FEATURE',
-      releases: 'https://github.com/FundingCircle/shipment_tracker/wiki/5.-MERGING-AND-DEPLOYING-A-FEATURE',
-      approve: 'https://github.com/FundingCircle/shipment_tracker/wiki/4.-PRODUCT-OWNER-REVIEWS-FEATURE',
+      home: WIKI_URL,
+      prepare_fr: "#{WIKI_URL}/1.-FEATURE-REVIEWS#how-do-i-create-a-feature-review",
+      feature_review: "#{WIKI_URL}/1.-FEATURE-REVIEWS",
+      approval: "#{WIKI_URL}/2.-APPROVAL-OF-FEATURE",
+      releases: "#{WIKI_URL}/3.-RELEASES",
     }[key.to_sym]
   end
 
