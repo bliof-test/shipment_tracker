@@ -85,7 +85,9 @@ module Events
     end
 
     def full_sha(sha)
-      return sha if sha.nil? || sha.length == 40
+      return if sha.nil? || sha.length > 40
+      return sha if sha.length == 40
+
       git_repository_loader = GitRepositoryLoader.from_rails_config
       repo = git_repository_loader.load(app_name)
       repo.commit_for_version(sha).id

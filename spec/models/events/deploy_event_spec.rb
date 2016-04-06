@@ -73,13 +73,19 @@ RSpec.describe Events::DeployEvent do
       end
     end
 
-    context 'when the payload contains an unknown version' do
+    context 'when the payload is missing the version' do
       before do
-        payload['version'] = 'something that is not a real version'
+        payload['version'] = nil
+      end
 
-        commit = double(GitCommit, id: nil)
-        git_repo = double(GitRepository, commit_for_version: commit)
-        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(git_repo)
+      it 'returns nil for the version' do
+        expect(subject.version).to be_nil
+      end
+    end
+
+    context 'when the payload contains a gibberish version longer than 40 chars' do
+      before do
+        payload['version'] = 'abc' * 20
       end
 
       it 'returns nil for the version' do
