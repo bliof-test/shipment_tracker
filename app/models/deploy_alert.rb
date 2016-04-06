@@ -34,7 +34,7 @@ class DeployAlert
   end
 
   def self.alert_unknown_version(deploy)
-    "#{alert_header(deploy)}Deploy event sent to Shipment Tracker is missing the software version."
+    "#{alert_header(deploy)}Deploy event sent to Shipment Tracker contains an unknown software version."
   end
 
   def self.alert_rollback(deploy)
