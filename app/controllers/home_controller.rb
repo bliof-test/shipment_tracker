@@ -7,26 +7,26 @@ class HomeController < ApplicationController
     @from_date = params[:from]
     @to_date = params[:to]
 
-    redirect_to root_path(from: Time.zone.today, to: Time.zone.today) if @query.blank? &&
-                                                                         @from_date.blank? &&
-                                                                         @to_date.blank?
+    search_for_tickets_deployed_today if empty_search?
 
-    @tickets = released_ticket_repo.tickets_for_query(build_query_hash(@query, params))
+    @tickets = Repositories::ReleasedTicketRepository.new.tickets_for_query(query_options)
   end
 
   private
 
-  def released_ticket_repo
-    Repositories::ReleasedTicketRepository.new
+  def search_for_tickets_deployed_today
+    redirect_to root_path(from: Time.zone.today, to: Time.zone.today)
   end
 
-  def build_query_hash(query, params)
-    query_hash = {}
-    query_hash[:versions] = query&.scan(SHA_REGEX)
+  def empty_search?
+    @query.blank? && @from_date.blank? && @to_date.blank?
+  end
 
-    query_hash[:query_text] = query&.gsub(SHA_REGEX, '')
-    query_hash[:from_date] = Date.parse(params[:from]) if params[:from].present?
-    query_hash[:to_date] = Date.parse(params[:to]) if params[:to].present?
-    query_hash
+  def query_options(options = {})
+    options[:query_text] = @query&.gsub(SHA_REGEX, '')
+    options[:versions] = @query&.scan(SHA_REGEX)
+    options[:from_date] = Date.parse(@from_date) if @from_date.present?
+    options[:to_date] = Date.parse(@to_date) if @to_date.present?
+    options
   end
 end
