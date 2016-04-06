@@ -1,22 +1,19 @@
-# Shipment Tracker
+# Shipment Tracker <sup>*:sparkles:[See the wiki for usage docs][wiki]:sparkles:*</sup>
+
 [![Circle CI](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master.svg?style=shield)](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master)
 [![Code Climate](https://codeclimate.com/github/FundingCircle/shipment_tracker/badges/gpa.svg)](https://codeclimate.com/github/FundingCircle/shipment_tracker)
 [![Test Coverage](https://codeclimate.com/github/FundingCircle/shipment_tracker/badges/coverage.svg)](https://codeclimate.com/github/FundingCircle/shipment_tracker/coverage)
 
 [![](http://i.imgur.com/VkjlJmj.jpg)](https://www.flickr.com/photos/britishlibrary/11237769263/)
 
-Tracks shipment of software versions for audit purposes.
+Tracks software versions during the release cycle for audit purposes.
 
 The app has various "audit endpoints" to receive events,
 such as deploys, builds, ticket creations, etc.
 
-All received events are stored in the DB and are never modified.
+All received events are stored in the DB and are never modified.  
 [Event sourcing] is used to replay each event allowing us to reconstruct the state
 of the system at any point in time.
-
-## Releases
-
-Merges in the deployment branch are tracked on the shipment tracker application and not GitHub.
 
 ## Getting Started
 
@@ -150,6 +147,7 @@ Copyright © 2015-2016 Funding Circle Ltd.
 
 Distributed under the BSD 3-Clause License.
 
+[wiki]: ../../wiki/
 [Event sourcing]: http://www.infoq.com/presentations/Events-Are-Not-Just-for-Notifications
 [webhooks]: https://help.github.com/articles/about-webhooks/
 [access tokens]: https://help.github.com/articles/creating-an-access-token-for-command-line-use/
