@@ -7,8 +7,11 @@
 
 if ENV['COVERAGE']
   require 'simplecov'
-  SimpleCov.start('rails') do
+  SimpleCov.start do
     add_filter 'lib/tasks/'
+    add_filter 'features/'
+    add_filter 'spec/'
+    add_filter 'config/'
   end
 end
 
