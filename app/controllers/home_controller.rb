@@ -28,5 +28,8 @@ class HomeController < ApplicationController
     options[:from_date] = Date.parse(@from_date) if @from_date.present?
     options[:to_date] = Date.parse(@to_date) if @to_date.present?
     options
+  rescue ArgumentError => error
+    flash.now[:warning] = error.message
+    options
   end
 end
