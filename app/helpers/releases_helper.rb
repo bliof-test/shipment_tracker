@@ -12,4 +12,8 @@ module ReleasesHelper
       link_to(feature_review.authorisation_status.to_s.humanize, feature_review.path)
     end
   end
+
+  def time_with_timezone(time)
+    time&.strftime('%F %H:%M %Z')
+  end
 end
