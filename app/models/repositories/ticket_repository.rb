@@ -43,6 +43,7 @@ module Repositories
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
       store.create!(new_ticket)
 
+      # TODO: extract to CommitStatusUpdater class
       update_github_status_for(new_ticket) if update_github_status?(event, feature_reviews)
     end
 
@@ -53,11 +54,6 @@ module Repositories
     def previous_ticket_data(key)
       attrs = store.where(key: key).last.try(:attributes) || {}
       attrs.except!('id')
-    end
-
-    def update_github_status?(event, feature_reviews)
-      return false if Rails.configuration.data_maintenance_mode
-      event.approval? || event.unapproval? || feature_reviews.present?
     end
 
     def build_ticket(last_ticket, event, feature_reviews)
@@ -76,7 +72,7 @@ module Repositories
     def merge_version_timestamps(ticket, feature_reviews, event)
       old_version_timestamps = ticket.fetch('version_timestamps', {})
       new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) { |version, hash|
-        hash[version] = event.created_at
+        hash[version] = event.created_at # TODO: switch to datetime for JIRA time
       }
       new_version_timestamps.merge!(old_version_timestamps)
     end
@@ -95,7 +91,12 @@ module Repositories
 
     def merge_approved_at(last_ticket, event)
       return nil unless Ticket.new(status: event.status).approved?
-      last_ticket['approved_at'] || event.created_at
+      last_ticket['approved_at'] || event.created_at # TODO: switch to datetime for JIRA time
+    end
+
+    def update_github_status?(event, feature_reviews)
+      return false if Rails.configuration.data_maintenance_mode
+      event.approval? || event.unapproval? || feature_reviews.present?
     end
 
     def update_github_status_for(ticket_hash)

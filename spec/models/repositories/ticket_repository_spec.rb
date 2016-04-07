@@ -167,7 +167,7 @@ RSpec.describe Repositories::TicketRepository do
       expect(results).to eq([
         Ticket.new(
           ticket_1.merge(
-            status: 'Ready for Deployment', approved_at: time, event_created_at: time,
+            status: 'Ready for Deployment', approved_at: time, event_created_at: time, # TODO: prefer timestamp: time.to_i
           ),
         ),
       ])
