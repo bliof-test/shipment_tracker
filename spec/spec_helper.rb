@@ -24,6 +24,7 @@ end
 require 'webmock/rspec'
 require 'solid_use_case'
 require 'solid_use_case/rspec_matchers'
+require 'active_support/testing/time_helpers'
 
 require 'clients/github'
 require 'support/feature_review_helpers'
@@ -31,6 +32,7 @@ require 'support/feature_review_helpers'
 RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
   config.include SolidUseCase::RSpecMatchers
+  config.include ActiveSupport::Testing::TimeHelpers
 
   config.before(:each, :disable_repo_verification) do
     allow_any_instance_of(GithubClient).to receive(:repo_accessible?).and_return(true)
