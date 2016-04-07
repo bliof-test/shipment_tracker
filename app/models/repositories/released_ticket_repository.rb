@@ -81,15 +81,13 @@ module Repositories
 
     def snapshot_deploy_event(event)
       return unless event.version
-      begin
-        last_deploy = latest_production_deploy(event.app_name, event.locale, event.created_at)
-        released_commits = released_commits(event.app_name, event.version, last_deploy&.version)
-        released_commits.each do |commit|
-          update_ticket_deploy_data(event, commit)
-        end
-      rescue GitRepositoryLoader::NotFound, GitRepository::CommitNotValid, GitRepository::CommitNotFound => e
-        log_warning(e, event)
+
+      last_deploy = latest_production_deploy(event.app_name, event.locale, event.created_at)
+      released_commits(event.app_name, event.version, last_deploy&.version).each do |commit|
+        update_ticket_deploy_data(event, commit)
       end
+    rescue GitRepositoryLoader::NotFound, GitRepository::CommitNotValid, GitRepository::CommitNotFound => e
+      Rails.logger.warn "Could not snapshot DeployEvent #{event.id} for '#{event.app_name}'\n#{e.message}"
     end
 
     def update_ticket_deploy_data(event, commit)
@@ -99,11 +97,6 @@ module Repositories
         ticket_record.versions << commit.id unless ticket_record.versions.include?(commit.id)
         ticket_record.save!
       end
-    end
-
-    def log_warning(error, event)
-      Rails.logger.warn "Could not snapshot deploy event ID '#{event.id}' for '#{event.app_name}' locally:"
-      Rails.logger.warn error.message
     end
 
     def duplicate_deploy?(deploys_for_record, event)

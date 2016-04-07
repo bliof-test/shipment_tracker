@@ -115,7 +115,8 @@ RSpec.describe DeployAlert do
         it 'returns an alert message for missing software version' do
           allow(git_repo).to receive(:exists?).and_return(false)
           actual = DeployAlert.audit_message(deploy)
-          expected = message(deploy, 'Deploy event sent to Shipment Tracker is missing the software version.')
+          expected = message(deploy,
+            'Deploy event sent to Shipment Tracker contains an unknown software version.')
 
           expect(actual).to eq(expected)
         end
@@ -136,7 +137,8 @@ RSpec.describe DeployAlert do
         it 'returns an alert message for missing software version' do
           allow(git_repo).to receive(:exists?).and_return(false)
           actual = DeployAlert.audit_message(deploy)
-          expected = message(deploy, 'Deploy event sent to Shipment Tracker is missing the software version.')
+          expected = message(deploy,
+            'Deploy event sent to Shipment Tracker contains an unknown software version.')
 
           expect(actual).to eq(expected)
         end

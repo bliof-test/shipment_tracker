@@ -60,26 +60,36 @@ RSpec.describe Events::DeployEvent do
     end
 
     context 'when the payload contains a short SHA' do
-      let(:payload) {
-        {
-          'app_name' => 'some_app',
-          'servers' => ['prod1.example.com', 'prod2.example.com'],
-          'version' => 'abcabca',
-          'deployed_by' => 'bob',
-          'locale' => 'us',
-          'environment' => 'staging',
-        }
-      }
-      let(:repo) { double }
-      let(:commit) { double(GitCommit, id: '1abcabcabcabcabcabcabcabcabcabcabcabcabc') }
-
       before do
-        allow(repo).to receive(:commit_for_version).and_return(commit)
-        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(repo)
+        payload['version'] = '1abc'
+
+        commit = double(GitCommit, id: '1abcabcabcabcabcabcabcabcabcabcabcabcabc')
+        git_repo = double(GitRepository, commit_for_version: commit)
+        allow_any_instance_of(GitRepositoryLoader).to receive(:load).and_return(git_repo)
       end
 
       it 'expands to full SHA' do
         expect(subject.version).to eq('1abcabcabcabcabcabcabcabcabcabcabcabcabc')
+      end
+    end
+
+    context 'when the payload is missing the version' do
+      before do
+        payload['version'] = nil
+      end
+
+      it 'returns nil for the version' do
+        expect(subject.version).to be_nil
+      end
+    end
+
+    context 'when the payload contains a gibberish version longer than 40 chars' do
+      before do
+        payload['version'] = 'abc' * 20
+      end
+
+      it 'returns nil for the version' do
+        expect(subject.version).to be_nil
       end
     end
 

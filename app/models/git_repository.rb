@@ -185,7 +185,7 @@ class GitRepository
 
   def lookup(sha)
     rugged_repository.lookup(sha)
-  rescue Rugged::InvalidError, Rugged::ObjectError, Rugged::OdbError
+  rescue Rugged::InvalidError, Rugged::ObjectError, Rugged::OdbError, TypeError
     nil
   end
 end

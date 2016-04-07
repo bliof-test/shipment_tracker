@@ -26,7 +26,7 @@ module Events
       @version ||= if deployed_to_heroku?
                      details['head_long']
                    else
-                     expand_sha(details['version'])
+                     full_sha(details['version'])
                    end
     end
 
@@ -84,8 +84,10 @@ module Events
       heroku_app_name.split('-').first.downcase
     end
 
-    def expand_sha(sha)
-      return sha unless sha.present? && sha.size < 40
+    def full_sha(sha)
+      return if sha.nil? || sha.length > 40
+      return sha if sha.length == 40
+
       git_repository_loader = GitRepositoryLoader.from_rails_config
       repo = git_repository_loader.load(app_name)
       repo.commit_for_version(sha).id
