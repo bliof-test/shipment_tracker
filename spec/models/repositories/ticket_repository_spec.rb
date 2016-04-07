@@ -199,43 +199,40 @@ RSpec.describe Repositories::TicketRepository do
     end
 
     it 'projects latest associated tickets' do
-      jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
-      ticket_1 = jira_1.merge(ticket_defaults)
+      ticket_1 = ticket_defaults.merge(key: 'JIRA-1')
 
-      repository.apply(build(:jira_event, :created, jira_1.merge(comment_body: url)))
+      repository.apply(build(:jira_event, :created, key: 'JIRA-1', comment_body: url))
       results = repository.tickets_for_path(path)
       expect(results).to eq([
         Ticket.new(ticket_1.merge(status: 'To Do')),
       ])
 
-      repository.apply(build(:jira_event, :started, jira_1))
+      repository.apply(build(:jira_event, :started, key: 'JIRA-1'))
       results = repository.tickets_for_path(path)
-      expect(results).to eq([Ticket.new(ticket_1.merge(status: 'In Progress'))])
+      expect(results).to eq([
+        Ticket.new(ticket_1.merge(status: 'In Progress')),
+      ])
 
-      repository.apply(build(:jira_event, :approved, jira_1.merge(created_at: time)))
+      repository.apply(build(:jira_event, :approved, key: 'JIRA-1', created_at: time)) # TODO: timestamp: time.to_i
       results = repository.tickets_for_path(path)
       expect(results).to eq([
         Ticket.new(
-          ticket_1.merge(
-            status: 'Ready for Deployment', approved_at: time, event_created_at: time,
-          ),
+          ticket_1.merge(status: 'Ready for Deployment', approved_at: time, event_created_at: time),
         ),
       ])
 
-      repository.apply(build(:jira_event, :deployed, jira_1.merge(created_at: time + 1.hour)))
+      repository.apply(build(:jira_event, :deployed, key: 'JIRA-1', created_at: time + 1.hour)) # TODO
       results = repository.tickets_for_path(path)
       expect(results).to eq([
-        Ticket.new(ticket_1.merge(
-                     status: 'Done', approved_at: time, event_created_at: time + 1.hour,
-        )),
+        Ticket.new(
+          ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time + 1.hour)),
       ])
 
-      repository.apply(build(:jira_event, :rejected, jira_1.merge(created_at: time + 2.hours)))
+      repository.apply(build(:jira_event, :rejected, key: 'JIRA-1', created_at: time + 2.hours)) # TODO
       results = repository.tickets_for_path(path)
       expect(results).to eq([
-        Ticket.new(ticket_1.merge(
-                     status: 'In Progress', approved_at: nil, event_created_at: time + 2.hours,
-        )),
+        Ticket.new(
+          ticket_1.merge(status: 'In Progress', approved_at: nil, event_created_at: time + 2.hours)),
       ])
     end
 
