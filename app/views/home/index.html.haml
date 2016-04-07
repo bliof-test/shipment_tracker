@@ -10,30 +10,28 @@
       %input#to_date.input-sm.form-control{:name => "to", :type => "text", :style => "width: 120px; height: 34px;", :value => @to_date}/
   %input.btn.btn-primary{:type => "submit", :value => "Search"}/
 
-- if @query || @from_date || @to_date
-  %br
-  %h3= result_message_for(query: @query, from_date: @from_date, to_date: @to_date, found: @tickets.any?).html_safe
-  %br
-  - @tickets.in_groups_of(3) do | tickets_row |
-    .row
-      - tickets_row.compact.each do | ticket |
-        .col-md-4
-          .panel.panel-default.result
-            .panel-heading
-              %span.key= jira_link(ticket.key)
-              %strong.summary= truncate(ticket.summary, length: 100, seperator: ' ')
-            .panel-body
-              - if ticket.description.nil?
-                %em.description No description found.
-              - else
-                = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
-              %p
-                %hr
-                %b Deploys
-              - if ticket.deploys.empty?
-                %p none
-              - ticket.deploys.each do |deploy|
-                %p.deploy
-                  = flag_icon(deploy['region'].to_sym)
-                  = "#{deploy['deployed_at']} #{deploy['app']}"
-                  = commit_link(deploy['version'], deploy['github_url'])
+%h3#query_msg= result_message_for(query: @query, from_date: @from_date, to_date: @to_date, found: @tickets.any?).html_safe
+
+- @tickets.in_groups_of(3) do | tickets_row |
+  .row
+    - tickets_row.compact.each do | ticket |
+      .col-md-4
+        .panel.panel-default.result
+          .panel-heading
+            %span.key= jira_link(ticket.key)
+            %strong.summary= truncate(ticket.summary, length: 100, seperator: ' ')
+          .panel-body
+            - if ticket.description.nil?
+              %em.description No description found.
+            - else
+              = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
+            %p
+              %hr
+              %b Deploys
+            - if ticket.deploys.empty?
+              %p none
+            - ticket.deploys.each do |deploy|
+              %p.deploy
+                = flag_icon(deploy['region'].to_sym)
+                = "#{deploy['deployed_at']} #{deploy['app']}"
+                = commit_link(deploy['version'], deploy['github_url'])
