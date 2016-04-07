@@ -9,7 +9,6 @@ RSpec.describe HomeController do
   describe 'GET #index', :logged_in do
     let(:tickets) { [double] }
     let(:repo) { double }
-    let(:today) { Time.zone.today }
 
     before do
       allow(Repositories::ReleasedTicketRepository).to receive(:new).and_return(repo)
@@ -19,10 +18,10 @@ RSpec.describe HomeController do
     it 'searches for tickets deployed today when search params are empty' do
       get :index
 
-      expect(response).to redirect_to(root_path(to: today, from: today))
+      expect(response).to redirect_to(root_path(from: Time.zone.today, to: Time.zone.today))
     end
 
-    it 'searches tickets for the given query' do
+    it 'searches tickets for the given query and extracts SHAs' do
       expect(repo).to receive(:tickets_for_query).with(
         query_text: 'some text',
         versions: ['cf5a10f6ddff6fb5199bb86893bf77e48a82cbce']
@@ -31,24 +30,6 @@ RSpec.describe HomeController do
       get :index, q: ' some text cf5a10f6ddff6fb5199bb86893bf77e48a82cbce'
 
       expect(response).to have_http_status(:success)
-    end
-
-    context "when params include 'to' and 'from'" do
-      it 'passes end of day for to and beginning of day for from to the query' do
-        expect(repo).to receive(:tickets_for_query).with(
-          query_text: nil,
-          versions: nil,
-          from_date: DateTime.parse('2016-03-20').beginning_of_day,
-          to_date: DateTime.parse('2016-03-30').end_of_day,
-        ).and_return(tickets)
-
-        get :index, to: '2016-03-30', from: '2016-03-20'
-
-        expect(response).to have_http_status(:success)
-        expect(assigns(:tickets)).to eq(tickets)
-        expect(assigns(:from_date)).to eq('2016-03-20')
-        expect(assigns(:to_date)).to eq('2016-03-30')
-      end
     end
   end
 end
