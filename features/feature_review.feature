@@ -156,32 +156,20 @@ Scenario: Viewing a Feature Review
 @logged_in
 Scenario: Viewing a Feature Review that requires re-approval
   Given an application called "frontend"
-
   And a ticket "JIRA-1" with summary "Some work" is started at "2014-10-11 13:01:17"
-  And a ticket "JIRA-2" with summary "More work" is started at "2014-10-11 15:10:27"
-
   And a commit "#abc" by "Alice" is created at "2014-10-12 11:01:00" for app "frontend"
-  And a commit "#def" by "Alice" is created at "2014-10-13 12:02:00" for app "frontend"
-
   And ticket "JIRA-1" is approved by "jim@fundingcircle.com" at "2014-10-13 17:30:10"
-
   And developer prepares review known as "FR" for UAT "uat.fundingcircle.com" with apps
     | app_name | version |
     | frontend | #abc    |
-
   And at time "2014-10-14 16:00:01" adds link for review "FR" to comment for ticket "JIRA-1"
-  And at time "2014-10-14 17:00:01" adds link for review "FR" to comment for ticket "JIRA-2"
-
-  And ticket "JIRA-2" is approved by "jim@fundingcircle.com" at "2014-10-14 17:30:10"
 
   When I visit the feature review known as "FR"
 
   Then I should see that the Feature Review requires reapproval
-
   And I should see the tickets
-    | Ticket | Summary   | Status               |
-    | JIRA-1 | Some work | Requires reapproval  |
-    | JIRA-2 | More work | Ready for Deployment |
+    | Ticket | Summary   | Status              |
+    | JIRA-1 | Some work | Requires reapproval |
 
 @logged_in
 Scenario: Viewing a Feature Review as at a specified time
