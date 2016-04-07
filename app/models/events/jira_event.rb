@@ -51,14 +51,15 @@ module Events
 
     def timestamp
       if details['timestamp']
-        seconds_since_epoch
+        epoch_time
       else
         created_at
       end
     end
 
-    def seconds_since_epoch
-      details['timestamp'] / 1000
+    def epoch_time
+      timestamp = details['timestamp']
+      timestamp.to_s.length == 13 ? timestamp / 1000 : timestamp
     end
 
     def status_item
