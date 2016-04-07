@@ -9,27 +9,28 @@ RSpec.describe HomeController do
   describe 'GET #index', :logged_in do
     let(:tickets) { [double] }
     let(:repo) { double }
-    let(:date) { Time.zone.today }
+    let(:today) { Time.zone.today }
 
     before do
       allow(Repositories::ReleasedTicketRepository).to receive(:new).and_return(repo)
       allow(repo).to receive(:tickets_for_query).and_return(tickets)
     end
 
-    it 'displays no tickets' do
+    it 'searches for tickets deployed today when search params are empty' do
       get :index
 
-      expect(response).to redirect_to(root_path(to: date, from: date))
+      expect(response).to redirect_to(root_path(to: today, from: today))
     end
 
     it 'searches tickets for the given query' do
-      expect(repo).to receive(:tickets_for_query).with(query_text: 'dog', versions: []).and_return(tickets)
+      expect(repo).to receive(:tickets_for_query).with(
+        query_text: 'some text',
+        versions: ['cf5a10f6ddff6fb5199bb86893bf77e48a82cbce']
+      ).and_return(tickets)
 
-      get :index, q: 'dog'
+      get :index, q: ' some text cf5a10f6ddff6fb5199bb86893bf77e48a82cbce'
 
       expect(response).to have_http_status(:success)
-      expect(assigns(:query)).to eq('dog')
-      expect(assigns(:tickets)).to eq(tickets)
     end
 
     context "when params include 'to' and 'from'" do

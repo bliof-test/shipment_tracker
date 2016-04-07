@@ -23,7 +23,7 @@ class HomeController < ApplicationController
   end
 
   def query_options(options = {})
-    options[:query_text] = @query&.gsub(SHA_REGEX, '')
+    options[:query_text] = @query&.gsub(SHA_REGEX, '')&.strip
     options[:versions] = @query&.scan(SHA_REGEX)
     options[:from_date] = Date.parse(@from_date) if @from_date.present?
     options[:to_date] = Date.parse(@to_date) if @to_date.present?
