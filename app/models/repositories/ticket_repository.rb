@@ -97,7 +97,7 @@ module Repositories
     end
 
     def merge_approved_at(last_ticket, event)
-      return nil unless Ticket.new(status: event.status).approved?
+      return nil unless event.approval?
       last_ticket['approved_at'] || event.created_at
     end
 
