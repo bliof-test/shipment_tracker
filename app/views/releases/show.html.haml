@@ -44,4 +44,4 @@
       %td
         - release.feature_reviews.each do |feature_review|
           %div= feature_review_link(feature_review)
-      %td= release.production_deploy_time.try(:to_formatted_s, :long_ordinal)
+      %td= time_with_timezone(release.production_deploy_time)
