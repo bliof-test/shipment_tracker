@@ -102,7 +102,7 @@ module Support
       ticket_details[:updated] = time
       event = build(
         :jira_event,
-        approve ? :approved : :rejected,
+        approve ? :approved : :unapproved,
         ticket_details,
       )
       @tickets[jira_key] = ticket_details.merge(status: event.status)

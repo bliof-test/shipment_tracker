@@ -23,7 +23,7 @@ RSpec.describe Events::JiraEvent do
 
     context 'when the status changes from approved to unapproved' do
       it 'returns false' do
-        expect(build(:jira_event, :rejected).approval?).to be false
+        expect(build(:jira_event, :unapproved).approval?).to be false
       end
     end
   end
@@ -49,7 +49,7 @@ RSpec.describe Events::JiraEvent do
 
     context 'when the status changes from approved to unapproved' do
       it 'returns true' do
-        expect(build(:jira_event, :rejected).unapproval?).to be true
+        expect(build(:jira_event, :unapproved).unapproval?).to be true
       end
     end
   end
