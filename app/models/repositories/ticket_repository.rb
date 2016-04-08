@@ -97,8 +97,11 @@ module Repositories
     end
 
     def merge_approved_at(last_ticket, event)
-      return nil unless event.approval?
-      last_ticket['approved_at'] || event.created_at
+      if event.approval?
+        event.created_at
+      elsif last_ticket.present? && Ticket.new(status: event.status).approved?
+        last_ticket['approved_at']
+      end
     end
 
     def update_github_status_for(ticket_hash)

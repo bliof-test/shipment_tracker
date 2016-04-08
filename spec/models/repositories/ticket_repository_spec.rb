@@ -266,23 +266,29 @@ RSpec.describe Repositories::TicketRepository do
       ])
     end
 
-    it 'only sets approval time for approval events' do
-      premature_approval = build(:jira_event, :approved, key: '1', created_at: time - 3.hours)
-      repository.apply(premature_approval)
-      expect(ticket_snapshot).to be_nil
+    it 'initially sets approval time for approval events' do
+      aggregate_failures do
+        premature_approval = build(:jira_event, :approved, key: '1', created_at: time - 3.hours)
+        repository.apply(premature_approval)
+        expect(ticket_snapshot).to be_nil
 
-      linking = build(:jira_event,
-        :ready_for_deploy, key: '1', comment_body: feature_review_url(app: 'sha'), created_at: time - 2.hours)
-      repository.apply(linking)
-      expect(ticket_snapshot.approved_at).to be_nil
+        linking = build(:jira_event, :ready_for_deploy,
+          key: '1', comment_body: feature_review_url(app: 'sha'), created_at: time - 2.hours)
+        repository.apply(linking)
+        expect(ticket_snapshot.approved_at).to be_nil
 
-      unapproval = build(:jira_event, :unapproved, key: '1', created_at: time - 1.hour)
-      repository.apply(unapproval)
-      expect(ticket_snapshot.approved_at).to be_nil
+        unapproval = build(:jira_event, :unapproved, key: '1', created_at: time - 1.hour)
+        repository.apply(unapproval)
+        expect(ticket_snapshot.approved_at).to be_nil
 
-      reapproval = build(:jira_event, :approved, key: '1', created_at: time)
-      repository.apply(reapproval)
-      expect(ticket_snapshot.approved_at).to eq(time)
+        reapproval = build(:jira_event, :approved, key: '1', created_at: time)
+        repository.apply(reapproval)
+        expect(ticket_snapshot.approved_at).to eq(time)
+
+        deployment = build(:jira_event, :deployed, key: '1', created_at: time + 1.hour)
+        repository.apply(deployment)
+        expect(ticket_snapshot.approved_at).to eq(time)
+      end
     end
 
     context 'when multiple Feature Reviews are referenced in the same JIRA ticket' do
