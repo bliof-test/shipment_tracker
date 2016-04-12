@@ -8,18 +8,11 @@ module Events
     end
 
     def success
-      status = details
-               .fetch('build', {})
-               .fetch('status', nil)
-
-      status == 'SUCCESS'
+      details.dig('build', 'status') == 'SUCCESS'
     end
 
     def version
-      details
-        .fetch('build', {})
-        .fetch('scm', {})
-        .fetch('commit', 'unknown')
+      details.dig('build', 'scm', 'commit') || 'unknown'
     end
   end
 end

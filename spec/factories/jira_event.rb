@@ -46,8 +46,28 @@ FactoryGirl.define do
 
     initialize_with { new(attributes) }
 
-    trait :created do
+    trait :todo do
       status 'To Do'
+    end
+
+    trait :in_progress do
+      status 'In Progress'
+    end
+
+    trait :ready_for_review do
+      status 'Ready For Review'
+    end
+
+    trait :ready_for_deploy do
+      status 'Ready for Deployment'
+    end
+
+    trait :done do
+      status 'Done'
+    end
+
+    trait :created do
+      todo
     end
 
     trait :started do
@@ -62,7 +82,7 @@ FactoryGirl.define do
           ],
         },
       )
-      status 'In Progress'
+      in_progress
     end
 
     trait :development_completed do
@@ -77,7 +97,22 @@ FactoryGirl.define do
           ],
         },
       )
-      status 'Ready For Review'
+      ready_for_review
+    end
+
+    trait :rejected do
+      changelog_details(
+        'changelog' => {
+          'items' => [
+            {
+              'field' => 'status',
+              'fromString' => 'Ready for Review',
+              'toString' => 'In Progress',
+            },
+          ],
+        },
+      )
+      in_progress
     end
 
     trait :approved do
@@ -92,7 +127,7 @@ FactoryGirl.define do
           ],
         },
       )
-      status 'Ready for Deployment'
+      ready_for_deploy
     end
 
     trait :deployed do
@@ -107,10 +142,10 @@ FactoryGirl.define do
           ],
         },
       )
-      status 'Done'
+      done
     end
 
-    trait :rejected do
+    trait :unapproved do
       changelog_details(
         'changelog' => {
           'items' => [
@@ -122,7 +157,7 @@ FactoryGirl.define do
           ],
         },
       )
-      status 'In Progress'
+      in_progress
     end
   end
 

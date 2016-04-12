@@ -139,7 +139,7 @@ module Repositories
     end
 
     def tickets_for_versions(versions)
-      store.where('versions && ARRAY[?]::varchar[]', versions)
+      store.where('versions && ARRAY[?]', versions)
     end
 
     def released_commits(app_name, current_version, previous_version = nil)

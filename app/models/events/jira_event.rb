@@ -4,7 +4,7 @@ require 'events/base_event'
 module Events
   class JiraEvent < Events::BaseEvent
     def key
-      details.fetch('issue').fetch('key')
+      details.dig('issue', 'key')
     end
 
     def issue?
@@ -12,29 +12,29 @@ module Events
     end
 
     def issue_id
-      details.fetch('issue').fetch('id')
+      details.dig('issue', 'id')
     end
 
     def summary
-      details.fetch('issue').fetch('fields').fetch('summary')
+      details.dig('issue', 'fields', 'summary')
     end
 
     def description
-      details.fetch('issue').fetch('fields').fetch('description')
+      details.dig('issue', 'fields', 'description')
     end
 
     def status
-      details.fetch('issue').fetch('fields').fetch('status').fetch('name')
+      details.dig('issue', 'fields', 'status', 'name')
     end
 
     def comment
-      details.fetch('comment', {}).fetch('body', '')
+      details.dig('comment', 'body') || ''
     end
 
     def approval?
       status_item &&
-        approved_status?(status_item['toString']) &&
-        !approved_status?(status_item['fromString'])
+        !approved_status?(status_item['fromString']) &&
+        approved_status?(status_item['toString'])
     end
 
     def unapproval?
@@ -50,7 +50,7 @@ module Events
     end
 
     def changelog_items
-      details.fetch('changelog', 'items' => []).fetch('items')
+      details.dig('changelog', 'items') || []
     end
 
     def approved_status?(status)

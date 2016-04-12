@@ -8,15 +8,11 @@ module Events
     end
 
     def success
-      status = details
-               .fetch('payload', {})
-               .fetch('outcome', nil)
-
-      status == 'success'
+      details.dig('payload', 'outcome') == 'success'
     end
 
     def version
-      details.fetch('payload', {}).fetch('vcs_revision', 'unknown')
+      details.dig('payload', 'vcs_revision') || 'unknown'
     end
   end
 end

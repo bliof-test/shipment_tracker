@@ -7,14 +7,15 @@ require 'ticket'
 
 module Repositories
   class TicketRepository
+    attr_reader :store
+
+    delegate :table_name, to: :store
+
     def initialize(store = Snapshots::Ticket, git_repository_location: GitRepositoryLocation)
       @store = store
       @git_repository_location = git_repository_location
       @feature_review_factory = Factories::FeatureReviewFactory.new
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def tickets_for_path(feature_review_path, at: nil)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil
@@ -29,7 +30,7 @@ module Repositories
     def tickets_for_versions(versions)
       store
         .select('DISTINCT ON (key) *')
-        .where('versions && ARRAY[?]::varchar[]', versions)
+        .where('versions && ARRAY[?]', versions)
         .order('key, id DESC')
         .map { |t| Ticket.new(t.attributes) }
     end
@@ -38,8 +39,10 @@ module Repositories
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
       feature_reviews = feature_review_factory.create_from_text(event.comment)
-
       last_ticket = previous_ticket_data(event.key)
+
+      return if last_ticket.empty? && feature_reviews.empty?
+
       new_ticket = build_ticket(last_ticket, event, feature_reviews)
       store.create!(new_ticket)
 
@@ -94,8 +97,11 @@ module Repositories
     end
 
     def merge_approved_at(last_ticket, event)
-      return nil unless Ticket.new(status: event.status).approved?
-      last_ticket['approved_at'] || event.created_at
+      if event.approval?
+        event.created_at
+      elsif last_ticket.present? && Ticket.new(status: event.status).approved?
+        last_ticket['approved_at']
+      end
     end
 
     def update_github_status_for(ticket_hash)
