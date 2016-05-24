@@ -92,8 +92,11 @@ class DeployAlert
     def auditable_commits_newest_first
       @commits ||= if previous_deploy
                      git_repo
-                       .commits_between(previous_deploy.version, current_deploy.version, simplify: true)
-                       .reverse
+                       .commits_between(previous_deploy.version,
+                         current_deploy.version,
+                         simplify: true,
+                         newest_first: true,
+                                       )
                    else
                      [git_repo.commit_for_version(current_deploy.version)]
                    end
