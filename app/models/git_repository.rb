@@ -30,21 +30,18 @@ class GitRepository
     raise CommitNotFound
   end
 
-  def commits_between(from, to, simplify: false)
+  def commits_between(from, to, simplify: false, newest_first: false)
     instrument('commits_between') do
       validate_commit!(from) unless from.nil?
       validate_commit!(to)
 
-      walker = get_walker(to, from, simplify)
+      walker = get_walker(to, from, simplify: simplify, newest_first: newest_first)
       build_commits(walker)
     end
   end
 
   def recent_commits_on_main_branch(count = 50)
-    walker = Rugged::Walker.new(rugged_repository)
-    walker.sorting(Rugged::SORT_TOPO)
-    walker.push(main_branch.target_id)
-    walker.simplify_first_parent
+    walker = get_walker(main_branch.target_id, nil, simplify: true, newest_first: true)
 
     build_commits(walker.take(count))
   end
@@ -87,7 +84,7 @@ class GitRepository
 
     commits = []
 
-    walker = get_walker(main_branch.target_id, verified_commit_oid, false)
+    walker = get_walker(main_branch.target_id, verified_commit_oid, simplify: false)
     walker.each do |commit|
       commits << commit if rugged_repository.descendant_of?(commit.oid, verified_commit_oid)
       break if commit == merge_to_master_commit(verified_commit_oid)
@@ -117,7 +114,7 @@ class GitRepository
     parent_commit = rugged_repository.lookup(commit_oid).parents.first
     return true unless parent_commit
 
-    walker = get_walker(main_branch.target_id, parent_commit.oid, true)
+    walker = get_walker(main_branch.target_id, parent_commit.oid, simplify: true)
 
     begin
       walker.first.oid.start_with? commit_oid
@@ -135,9 +132,13 @@ class GitRepository
 
   attr_reader :rugged_repository
 
-  def get_walker(push_commit_oid, hide_commit_oid, simplify = false)
+  def get_walker(push_commit_oid, hide_commit_oid, simplify: false, newest_first: false)
     walker = Rugged::Walker.new(rugged_repository)
-    walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE)
+    if newest_first
+      walker.sorting(Rugged::SORT_TOPO)
+    else
+      walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE)
+    end
     walker.simplify_first_parent if simplify
     walker.push(push_commit_oid)
     walker.hide(hide_commit_oid) if hide_commit_oid
@@ -145,7 +146,7 @@ class GitRepository
   end
 
   def merge_to_master_commit(commit_oid)
-    walker = get_walker(main_branch.target_id, commit_oid, true)
+    walker = get_walker(main_branch.target_id, commit_oid, simplify: true)
     walker.find { |commit| rugged_repository.descendant_of?(commit.oid, commit_oid) }
   end
 
