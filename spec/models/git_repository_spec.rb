@@ -121,10 +121,10 @@ RSpec.describe GitRepository do
       end
     end
 
-    context 'when called with new_first flag set true' do
+    context 'when called with newest_first flag set true' do
       let(:options) { { newest_first: true } }
 
-      it 'returns all commits between two commits, including the end commit' do
+      it 'returns all commits between two commits, including the end commit, in order of newest first' do
         commits = repo.commits_between(version('A'), version('C'), options).map(&:id)
         expect(commits).to eq([version('C'), version('B')])
       end
