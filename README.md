@@ -100,9 +100,10 @@ In addition to the `update_git_loop` task, you can set the environment variable
 
 ### Enable GitHub Webhooks
 
-[Configure GitHub webhooks][webhooks] at an organization-wide level or per repository for **push** and **pull request** notifications.
+[Configure GitHub webhooks][webhooks] at an organization-wide level or per repository for **push** notifications.
 
-Shipment Tracker uses push notifications to update repositories that it keeps track of. It uses pull request notifications to show a status check in pull requests.
+Shipment Tracker uses GitHub push notifications to update the repositories that it keeps track of, and to show
+a Shipment Tracker status check in Pull Requests.
 
 To configure the webhook for a repository, first go into the API Tokens tab of Shipment Tracker and find (or create) a Github Notifications token. Next, in Github, go into the repository settings and add a new webhook. The "Payload URL" should be set to the Github Notifications URL from Shipment Tracker, the "Content type" should be JSON, and Github should send *All* events for this repository. Add the webhook, and all new Github Pull Requests should now show the Shipment Tracker status.
 
