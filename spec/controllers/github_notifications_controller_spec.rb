@@ -23,18 +23,4 @@ RSpec.describe GithubNotificationsController do
       end
     end
   end
-
-  def pr_payload(action:, full_repo_name:, sha:)
-    {
-      'action' => action,
-      'repository' => {
-        'full_name' => full_repo_name,
-      },
-      'pull_request' => {
-        'head' => {
-          'sha' => sha,
-        },
-      },
-    }
-  end
 end
