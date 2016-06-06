@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+require 'honeybadger'
+
 namespace :jobs do
   def already_running?(pid_path)
     pid = File.read(pid_path)
@@ -83,7 +85,13 @@ namespace :jobs do
         Thread.new do # Limited to 4 threads to avoid running out of memory.
           group.compact.each do |app_name|
             break if @shutdown
-            loader.load(app_name, update_repo: true)
+            begin
+              loader.load(app_name, update_repo: true)
+            rescue StandardError => error
+              Honeybadger.context(app_name: app_name, remote_head: repos_hash_changed[app_name])
+              Honeybadger.notify(error)
+              Honeybadger.context.clear!
+            end
           end
         end
       }.each(&:join)
