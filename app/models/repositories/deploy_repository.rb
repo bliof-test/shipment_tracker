@@ -49,12 +49,12 @@ module Repositories
         audit_deploy(current_deploy: current_deploy.attributes, previous_deploy: previous_deploy&.attributes)
       end
     rescue GitRepositoryLoader::NotFound => error
-      Honeybadger.context(event_id: event.id,
-                          app_name: event.app_name,
-                          deployer: event.deployed_by,
-                          deploy_time: event.created_at)
-      Honeybadger.notify(error)
-      Honeybadger.context.clear!
+      Honeybadger.notify(error, context: {
+        event_id: event.id,
+        app_name: event.app_name,
+        deployer: event.deployed_by,
+        deploy_time: event.created_at,
+      })
     end
 
     private

@@ -119,11 +119,9 @@ class GitRepository
     begin
       walker.first.oid.start_with? commit_oid
     rescue NoMethodError => error
-      Honeybadger.context(target_commit: commit_oid,
-                          master_head: main_branch.target_id,
-                          parent_commit: parent_commit.oid)
-      Honeybadger.notify(error)
-      Honeybadger.context.clear!
+      Honeybadger.notify(error, context: {
+        target_commit: commit_oid, master_head: main_branch.target_id, parent_commit: parent_commit.oid
+      })
       false
     end
   end
