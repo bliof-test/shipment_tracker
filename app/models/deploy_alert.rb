@@ -69,9 +69,7 @@ class DeployAlert
     end
 
     def recent_releases_authorised?
-      release_query = release_query_for(auditable_commits_newest_first,
-        current_deploy.region,
-        current_deploy.app_name)
+      release_query = release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name)
       release_query.deployed_releases.all?(&:authorised?)
     end
 
@@ -89,14 +87,14 @@ class DeployAlert
       )
     end
 
-    def auditable_commits_newest_first
+    def auditable_commits
       @commits ||= if previous_deploy
-                     git_repo
-                       .commits_between(previous_deploy.version,
-                         current_deploy.version,
-                         simplify: true,
-                         newest_first: true,
-                                       )
+                     git_repo.commits_between(
+                       previous_deploy.version,
+                       current_deploy.version,
+                       simplify: true,
+                       newest_first: true,
+                     )
                    else
                      [git_repo.commit_for_version(current_deploy.version)]
                    end

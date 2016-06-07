@@ -50,11 +50,11 @@ module Repositories
       end
     rescue GitRepositoryLoader::NotFound => error
       Honeybadger.notify(error, context: {
-        event_id: event.id,
-        app_name: event.app_name,
-        deployer: event.deployed_by,
-        deploy_time: event.created_at,
-      })
+                           event_id: event.id,
+                           app_name: event.app_name,
+                           deployer: event.deployed_by,
+                           deploy_time: event.created_at,
+                         })
     end
 
     private

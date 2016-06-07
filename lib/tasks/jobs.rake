@@ -88,7 +88,9 @@ namespace :jobs do
             begin
               loader.load(app_name, update_repo: true)
             rescue StandardError => error
-              Honeybadger.notify(error, context: { app_name: app_name, remote_head: repos_hash_changed[app_name] })
+              Honeybadger.notify(error, context: {
+                                   app_name: app_name, remote_head: repos_hash_changed[app_name]
+                                 })
             end
           end
         end

@@ -120,8 +120,10 @@ class GitRepository
       walker.first.oid.start_with? commit_oid
     rescue NoMethodError => error
       Honeybadger.notify(error, context: {
-        target_commit: commit_oid, master_head: main_branch.target_id, parent_commit: parent_commit.oid
-      })
+                           target_commit: commit_oid,
+                           master_head: main_branch.target_id,
+                           parent_commit: parent_commit.oid,
+                         })
       false
     end
   end
@@ -131,12 +133,11 @@ class GitRepository
   attr_reader :rugged_repository
 
   def get_walker(push_commit_oid, hide_commit_oid, simplify: false, newest_first: false)
+    sorting_strategy = Rugged::SORT_TOPO
+    sorting_strategy |= Rugged::SORT_REVERSE unless newest_first
+
     walker = Rugged::Walker.new(rugged_repository)
-    if newest_first
-      walker.sorting(Rugged::SORT_TOPO)
-    else
-      walker.sorting(Rugged::SORT_TOPO | Rugged::SORT_REVERSE)
-    end
+    walker.sorting(sorting_strategy)
     walker.simplify_first_parent if simplify
     walker.push(push_commit_oid)
     walker.hide(hide_commit_oid) if hide_commit_oid
