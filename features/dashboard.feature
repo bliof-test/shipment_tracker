@@ -4,7 +4,6 @@ Feature: Searching for releases on Dashboard
   I want to full text search for tickets
   So I can find tickets related to any topic
 
-@mock_slack_notifier
 Scenario: User finds deployed tickets by description
   Given the following tickets are created:
     | Jira Key | Summary       | Description                         | Deploys                     |
