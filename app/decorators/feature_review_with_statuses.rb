@@ -2,6 +2,7 @@
 require 'build'
 require 'deploy'
 require 'git_repository_location'
+require 'git_repository_loader'
 require 'qa_submission'
 require 'ticket'
 require 'uatest'
@@ -24,6 +25,15 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def github_repo_urls
     @github_repo_urls ||= GitRepositoryLocation.github_urls_for_apps(@feature_review.app_names)
+  end
+
+  def app_versions_with_commits
+    app_versions.map do |app_name, version|
+      git_repository_loader ||= GitRepositoryLoader.from_rails_config.load(app_name)
+      commits = git_repository_loader.get_dependent_commits(version)
+      commits << git_repository_loader.commit_for_version(version) if commits.empty?
+      [app_name, version, commits]
+    end
   end
 
   def build_status

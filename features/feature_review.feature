@@ -220,12 +220,13 @@ Scenario: Viewing an approved Feature Review after regenerating snapshots
 Scenario: QA rejects feature
   Given an application called "frontend"
   And an application called "backend"
-
+  And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
+  And a commit "#def" by "Alice" is created at "2014-10-04 13:05:00" for app "backend"
   And I am logged in as "foo@bar.com"
   And developer prepares review known as "FR_qa_rejects" for UAT "uat.fundingcircle.com" with apps
     | app_name | version |
-    | frontend | abc     |
-    | backend  | def     |
+    | frontend | #abc    |
+    | backend  | #def    |
   When I visit the feature review known as "FR_qa_rejects"
   Then I should see the QA acceptance with heading "warning"
 

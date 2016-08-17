@@ -8,13 +8,9 @@ module Pages
 
     def app_info
       verify!
-      Sections::PanelListSection.new(
-        page.find('.app-info.panel'),
-        item_config: {
-          'app_name' => '.name',
-          'version' => '.version',
-        },
-      ).items
+      Sections::TableSection.new(
+        page.find('.app-info table'),
+      ).items.map { |row| { 'app_name' => row['App'], 'version' => row['Commit'] } }
     end
 
     def builds
