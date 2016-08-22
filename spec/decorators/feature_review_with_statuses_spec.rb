@@ -78,9 +78,6 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       it 'returns the app_name, version and the same commit' do
-        expect(repository).to receive(:get_dependent_commits).and_return([])
-        expect(repository).to receive(:commit_for_version).and_return(commit)
-
         expect(subject.app_versions_with_commits).to eq(expected_result)
       end
     end

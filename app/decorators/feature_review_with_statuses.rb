@@ -8,10 +8,10 @@ require 'ticket'
 require 'uatest'
 
 class FeatureReviewWithStatuses < SimpleDelegator
-  attr_reader :builds, :deploys, :qa_submission, :tickets, :uatest, :time
+  attr_reader :builds, :deploys, :qa_submission, :tickets, :uatest, :time, :github_repository_loader_class
 
   # rubocop:disable Metrics/LineLength, Metrics/ParameterLists
-  def initialize(feature_review, builds: {}, deploys: [], qa_submission: nil, tickets: [], uatest: nil, at: nil)
+  def initialize(feature_review, builds: {}, deploys: [], qa_submission: nil, tickets: [], uatest: nil, at: nil, github_repository_loader_class: GitRepositoryLoader)
     super(feature_review)
     @feature_review = feature_review
     @time = at
@@ -20,6 +20,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
     @qa_submission = qa_submission
     @tickets = tickets
     @uatest = uatest
+    @github_repository_loader_class = github_repository_loader_class
   end
   # rubocop:enable Metrics/LineLength, Metrics/ParameterLists
 
@@ -29,10 +30,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def app_versions_with_commits
     app_versions.map do |app_name, version|
-      git_repository_loader ||= GitRepositoryLoader.from_rails_config.load(app_name)
-      commits = git_repository_loader.get_dependent_commits(version)
-      commits << git_repository_loader.commit_for_version(version) if commits.empty?
-      [app_name, version, commits]
+      [app_name, version, fetch_commits_for(app_name, version)]
     end
   end
 
@@ -98,5 +96,26 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def approved_path
     "#{base_path}?#{query_hash.merge(time: tickets_approved_at.utc).to_query}" if authorised?
+  end
+
+  private
+
+  def fetch_commits_for(app_name, version)
+    git_repository_loader = git_repository_loader_for(app_name)
+    dependent_commits(git_repository_loader, version) ||
+      commit_for_version(git_repository_loader, version)
+  end
+
+  def dependent_commits(loader, version)
+    commits = loader.get_dependent_commits(version)
+    commits.any? ? commits : nil
+  end
+
+  def commit_for_version(loader, version)
+    [loader.commit_for_version(version)]
+  end
+
+  def git_repository_loader_for(app_name)
+    github_repository_loader_class.from_rails_config.load(app_name)
   end
 end
