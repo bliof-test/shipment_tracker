@@ -9,10 +9,12 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:qa_submission) { double(:qa_submission) }
   let(:uatest) { double(:uatest) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
+  let(:app_names) { apps.keys }
+  let(:versions) { apps.values }
 
   let(:uat_url) { 'http://uat.com' }
   let(:feature_review) {
-    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: apps.values)
+    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: versions)
   }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
@@ -57,46 +59,49 @@ RSpec.describe FeatureReviewWithStatuses do
   describe '#app_versions_with_commits' do
     let(:repository_loader) { instance_double(GitRepositoryLoader) }
     let(:repository) { instance_double(GitRepository) }
-    let(:commit_version) { 'abc' }
+
+    let(:commit_1) { instance_double(GitCommit, id: versions.first, associated_ids: nil) }
+    let(:commit_2) { instance_double(GitCommit, id: versions.second, associated_ids: nil) }
+
+    let(:expected_results) do
+      [
+        [app_names.first, versions.first, [commit_1]],
+        [app_names.second, versions.second, [commit_2]],
+      ]
+    end
 
     before do
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
       allow(repository_loader).to receive(:load).and_return(repository)
+
+      allow(repository).to receive(:get_dependent_commits).with(versions.first)
+        .and_return(dependent_commits_1)
+      allow(repository).to receive(:get_dependent_commits).with(versions.second)
+        .and_return(dependent_commits_2)
     end
 
     context 'when merge commit does not exist' do
-      let(:commit) { instance_double(GitCommit, id: commit_version, associated_ids: nil) }
-
-      let(:expected_result) {
-        [['app1', 'xxx', [commit]],
-         ['app2', 'yyy', [commit]]]
-      }
+      let(:dependent_commits_1) { [] }
+      let(:dependent_commits_2) { [] }
 
       before do
-        allow(repository).to receive(:get_dependent_commits).and_return([])
-        allow(repository).to receive(:commit_for_version).and_return(commit)
+        allow(repository).to receive(:commit_for_version).with(versions.first).and_return(commit_1)
+        allow(repository).to receive(:commit_for_version).with(versions.second).and_return(commit_2)
       end
 
       it 'returns the app_name, version and the same commit' do
-        expect(subject.app_versions_with_commits).to eq(expected_result)
+        expect(decorator.app_versions_with_commits).to eq(expected_results)
       end
     end
 
     context 'when merge commit exists' do
-      let(:commit) { instance_double(GitCommit, id: commit_version, associated_ids: %w(abc def)) }
-      let(:dependent_commits) { [commit, commit] }
-
-      let(:expected_result) {
-        [['app1', 'xxx', dependent_commits],
-         ['app2', 'yyy', dependent_commits]]
-      }
-
-      before do
-        allow(repository).to receive(:get_dependent_commits).and_return(dependent_commits)
-      end
+      let(:dependent_commits_1) { [commit_1] }
+      let(:dependent_commits_2) { [commit_2] }
 
       it 'returns the app_name, version and dependent_commits' do
-        expect(subject.app_versions_with_commits).to eq(expected_result)
+        expect(repository).not_to receive(:commit_for_version)
+
+        expect(decorator.app_versions_with_commits).to eq(expected_results)
       end
     end
   end
