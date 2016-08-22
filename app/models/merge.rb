@@ -7,4 +7,8 @@ class Merge
   attribute :merged_by, String
   attribute :merged_at, Time
   attribute :deploys, Array
+
+  def github_repo_url
+    @github_repo_url ||= GitRepositoryLocation.github_urls_for_apps([app_name])
+  end
 end

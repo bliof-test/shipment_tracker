@@ -34,10 +34,13 @@
               %p
                 = app_name
                 %p
+                  %hr
                   - merges.each do |merge|
-                    = merge.sha
+                    = merge.merged_at.utc.strftime('%F %H:%M %Z')
+                    = commit_link(merge.sha, merge.github_repo_url[app_name])
                     = merge.merged_by
-                    = merge.merged_at
+                    %br
+                    %br
                     %p
                       %b Deploys
                       - if merge.deploys.empty?
@@ -47,4 +50,4 @@
                           = flag_icon(deploy['region'].to_sym)
                           = "#{deploy['deployed_at']} #{deploy['app']}"
                           = commit_link(deploy['version'], deploy['github_url'])
-
+                      %br

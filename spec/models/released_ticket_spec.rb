@@ -26,7 +26,6 @@ RSpec.describe ReleasedTicket do
       let(:sha) { '63c504b1cc3ccd19a079e4ea2477809ff503a7af' }
       let(:commit) { build(:git_commit, id: sha, time: 1.minute.ago) }
 
-      let(:deploy_time) { non_merge_commit.time + 1.day }
       let(:deploys) { [] }
 
       before do
