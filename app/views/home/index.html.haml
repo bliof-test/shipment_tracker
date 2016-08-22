@@ -27,11 +27,24 @@
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
             %p
               %hr
-              %b Deploys
-            - if ticket.deploys.empty?
+              %b Merges
+            - if ticket.merges.empty?
               %p none
-            - ticket.deploys.each do |deploy|
-              %p.deploy
-                = flag_icon(deploy['region'].to_sym)
-                = "#{deploy['deployed_at']} #{deploy['app']}"
-                = commit_link(deploy['version'], deploy['github_url'])
+            - ticket.merges.group_by { |merge| merge.app_name }.each do |app_name, merges|
+              %p
+                = app_name
+                %p
+                  - merges.each do |merge|
+                    = merge.sha
+                    = merge.merged_by
+                    = merge.merged_at
+                    %p
+                      %b Deploys
+                      - if merge.deploys.empty?
+                        %p none
+                      - merge.deploys.each do |deploy|
+                        %p.deploy
+                          = flag_icon(deploy['region'].to_sym)
+                          = "#{deploy['deployed_at']} #{deploy['app']}"
+                          = commit_link(deploy['version'], deploy['github_url'])
+
