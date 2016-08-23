@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 require 'rails_helper'
+require 'released_ticket_decorator'
 
-RSpec.describe ReleasedTicket do
+# frozen_string_literal: true
+require 'rails_helper'
+
+RSpec.describe ReleasedTicketDecorator do
   def build_deploy_hash(app, time, version)
     {
       'app' => app,
@@ -10,9 +14,11 @@ RSpec.describe ReleasedTicket do
     }
   end
 
-  describe '#merges' do
-    let(:released_ticket) { build(:released_ticket, deploys: deploys) }
-    let(:merges) { released_ticket.merges }
+  let(:released_ticket) { ReleasedTicket.new(deploys: deploys) }
+
+  describe '#deployed_commits' do
+    let(:decorator) { described_class.new(released_ticket) }
+    let(:deployed_commits) { decorator.deployed_commits }
 
     let(:repository_loader) { instance_double(GitRepositoryLoader) }
     let(:repository) { instance_double(GitRepository) }
@@ -29,13 +35,13 @@ RSpec.describe ReleasedTicket do
       let(:deploys) { [] }
 
       before do
-        build(:merge, sha: commit.id, deploys: deploys, merged_at: commit.time)
+        build(:deployed_commit, sha: commit.id, deploys: deploys, merged_at: commit.time)
       end
 
       it 'returns and empty array' do
         expect(repository).not_to receive(:commit_for_version)
 
-        expect(merges).to be_empty
+        expect(deployed_commits).to be_empty
       end
     end
 
@@ -69,18 +75,19 @@ RSpec.describe ReleasedTicket do
       let(:deploys) { deploy_hash_1 + deploy_hash_2 }
 
       before do
-        build(:merge, sha: merge_commit_1.id, deploys: deploy_hash_1, merged_at: merge_commit_1.time)
-        build(:merge, sha: merge_commit_2.id, deploys: deploy_hash_2, merged_at: merge_commit_2.time)
+        build(:deployed_commit, sha: merge_commit_1.id, deploys: deploy_hash_1, merged_at: merge_commit_1.time)
+        build(:deployed_commit, sha: merge_commit_2.id, deploys: deploy_hash_2, merged_at: merge_commit_2.time)
       end
 
       it 'returns the merges with the related deploys' do
         expect(repository).to receive(:commit_for_version).with(sha_1).and_return(merge_commit_1)
         expect(repository).to receive(:commit_for_version).with(sha_2).and_return(merge_commit_2)
 
-        expect(merges).to all(be_a(Merge))
-        expect(merges.map(&:sha)).to eq(commits.map(&:id))
-        expect(merges.map(&:deploys).flatten).to eq(deploys)
+        expect(deployed_commits).to all(be_a(DeployedCommit))
+        expect(deployed_commits.map(&:sha)).to eq(commits.map(&:id))
+        expect(deployed_commits.map(&:deploys).flatten).to eq(deploys)
       end
     end
   end
 end
+

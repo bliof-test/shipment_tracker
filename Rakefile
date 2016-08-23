@@ -48,7 +48,7 @@ namespace :heroku do
       ENV['RAILS_ENV'] = 'development'
       Rake::Task['db:drop'].invoke
 
-      Bundler.with_clean_env { sh "heroku pg:pull DATABASE_URL #{database}" }
+      Bundler.with_clean_env { sh "heroku pg:pull DATABASE_URL #{database} -a shipment-tracker" }
     else
       STDOUT.puts 'Did not overwrite development DB.'
     end

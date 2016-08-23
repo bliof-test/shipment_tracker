@@ -1,2 +1,2 @@
 # frozen_string_literal: true
-Rack::Timeout.timeout = 29 # seconds
+Rack::Timeout.timeout = Rails.env.development? ? 0 : 29 # seconds

@@ -26,28 +26,26 @@
             - else
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
             %p
-              %hr
-              %h3 Merges
-            - if ticket.merges.empty?
-              %p none
-            - ticket.merges.group_by(&:app_name).each do |app_name, merges|
+            - if ticket.deployed_commits.empty?
+              %p No deploys
+            - ticket.deployed_commits.group_by(&:app_name).each do |app_name, deployed_commits|
               %p
-                = app_name
+                %strong app_name
                 %p
-                  %hr
-                  - merges.each do |merge|
-                    = merge.merged_at.utc.strftime('%F %H:%M %Z')
-                    = commit_link(merge.sha, merge.github_repo_urls[app_name])
-                    = merge.merged_by
+                  - deployed_commits.each do |deployed_commit|
+                    Merged:
+                    = time_with_timezone(deployed_commit.merged_at)
+                    = commit_link(deployed_commit.sha, deployed_commit.github_repo_url)
+                    = deployed_commit.merged_by
                     %br
                     %br
                     %p
                       %b Deploys
-                      - if merge.deploys.empty?
+                      - if deployed_commit.deploys.empty?
                         %p none
-                      - merge.deploys.each do |deploy|
+                      - deployed_commit.deploys.each do |deploy|
                         %p.deploy
-                          = flag_icon(deploy['region'].to_sym)
-                          = "#{deploy['deployed_at']} #{deploy['app']}"
-                          = commit_link(deploy['version'], deploy['github_url'])
+                          = flag_icon(deploy.region.to_sym)
+                          = time_with_timezone(deploy.deployed_at)
+                          = deploy.deployed_by
                       %br

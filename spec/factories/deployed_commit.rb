@@ -1,8 +1,8 @@
 # frozen_string_literal: true
-require 'merge'
+require 'deployed_commit'
 
 FactoryGirl.define do
-  factory :merge do
+  factory :deployed_commit do
     sha 'abc'
     app_name 'test_app'
     merged_by 'Frank'

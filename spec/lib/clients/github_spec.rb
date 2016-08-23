@@ -31,8 +31,7 @@ RSpec.describe GithubClient do
         %w(git@github.com:owner/repo.git
            git://github.com/owner/repo.git
            ssh://github.com/owner/repo.git
-           http://github.com/owner/repo
-        ).each do |uri|
+           http://github.com/owner/repo).each do |uri|
           expect_any_instance_of(Octokit::Client).to receive(:repository?).with('owner/repo')
           github.repo_accessible?(uri)
         end

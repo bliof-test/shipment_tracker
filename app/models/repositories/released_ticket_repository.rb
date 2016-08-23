@@ -31,7 +31,8 @@ module Repositories
       ticket_keys = filter_tickets_by_date(from_date, to_date)
       query = query.where(key: ticket_keys) if ticket_keys
       query = query.limit(per_page)
-      query.map { |t| ReleasedTicket.new(t.attributes) }
+      query = query.map { |t| ReleasedTicketDecorator.new(ReleasedTicket.new(t.attributes)) }
+      query
     end
 
     def apply(event)
@@ -109,6 +110,7 @@ module Repositories
       {
         app: event.app_name,
         deployed_at: event.created_at.strftime('%F %H:%M %Z'),
+        deployed_by: event.deployed_by,
         github_url: GitRepositoryLocation.github_url_for_app(event.app_name),
         region: event.locale,
         version: version,

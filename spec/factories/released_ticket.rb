@@ -6,8 +6,8 @@ FactoryGirl.define do
     sequence(:key) { |n| "DS-#{n}" }
     summary 'Example summary'
     description 'Short description'
-    versions %w(7ff5be8830d3835cb06c24040d39da52147e4bdd,
-                0000000000000000000000000000000000000000,
+    versions %w(7ff5be8830d3835cb06c24040d39da52147e4bdd
+                0000000000000000000000000000000000000000
                 d1f55c79a8f16c7f751fc8dca5fe3c5a97994e4b)
     deploys [{
       'app' => 'hello_world_rails',

@@ -25,7 +25,7 @@ module Support
       index = repo.index
 
       index.read_tree(repo.head.target.tree) unless repo.empty?
-      index.add(path: 'README.md', oid: oid, mode: 0100644)
+      index.add(path: 'README.md', oid: oid, mode: 0o100644)
       oid = index.write_tree(repo)
 
       @now += 60

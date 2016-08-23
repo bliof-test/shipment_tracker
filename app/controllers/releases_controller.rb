@@ -25,7 +25,8 @@ class ReleasesController < ApplicationController
       per_page: 50,
       region: region,
       git_repo: git_repository,
-      app_name: app_name)
+      app_name: app_name,
+    )
   end
 
   def app_name

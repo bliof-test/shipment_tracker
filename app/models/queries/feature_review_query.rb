@@ -42,20 +42,23 @@ module Queries
     def builds
       build_repository.builds_for(
         apps: feature_review.app_versions,
-        at: time)
+        at: time,
+      )
     end
 
     def deploys
       deploy_repository.deploys_for(
         apps: feature_review.app_versions,
         server: feature_review.uat_host,
-        at: time)
+        at: time,
+      )
     end
 
     def qa_submission
       manual_test_repository.qa_submission_for(
         versions: feature_review.versions,
-        at: time)
+        at: time,
+      )
     end
 
     def tickets
@@ -66,7 +69,8 @@ module Queries
       uatest_repository.uatest_for(
         versions: feature_review.versions,
         server: feature_review.uat_host,
-        at: time)
+        at: time,
+      )
     end
   end
 end

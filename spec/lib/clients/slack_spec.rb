@@ -19,8 +19,7 @@ RSpec.describe SlackClient do
           fields: [
             { title: 'Project', value: 'frontend', short: true },
             { title: 'Deployer', value: 'Jeff', short: true },
-          ],
-        },
+          ] },
       ]
     }
 
