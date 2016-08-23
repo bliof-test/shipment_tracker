@@ -13,15 +13,12 @@ class ReleasedTicket
   end
 
   def merges
-    merges_from_deploys(deploys)
-  end
-
-  private
-
-  def merges_from_deploys(deploys)
+    # Returns merged commits which has been deployed
     uniq_deploys = deploys.uniq { |deploy| [deploy['app'], deploy['version']] }
     uniq_deploys.map { |deploy| Merge.new(build_hash(deploy)) }
   end
+
+  private
 
   def build_hash(deploy)
     { app_name: deploy['app'],

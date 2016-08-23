@@ -8,10 +8,10 @@ require 'ticket'
 require 'uatest'
 
 class FeatureReviewWithStatuses < SimpleDelegator
-  attr_reader :builds, :deploys, :qa_submission, :tickets, :uatest, :time, :github_repository_loader_class
+  attr_reader :builds, :deploys, :qa_submission, :tickets, :uatest, :time
 
   # rubocop:disable Metrics/LineLength, Metrics/ParameterLists
-  def initialize(feature_review, builds: {}, deploys: [], qa_submission: nil, tickets: [], uatest: nil, at: nil, github_repository_loader_class: GitRepositoryLoader)
+  def initialize(feature_review, builds: {}, deploys: [], qa_submission: nil, tickets: [], uatest: nil, at: nil)
     super(feature_review)
     @feature_review = feature_review
     @time = at
@@ -20,7 +20,6 @@ class FeatureReviewWithStatuses < SimpleDelegator
     @qa_submission = qa_submission
     @tickets = tickets
     @uatest = uatest
-    @github_repository_loader_class = github_repository_loader_class
   end
   # rubocop:enable Metrics/LineLength, Metrics/ParameterLists
 
@@ -103,19 +102,19 @@ class FeatureReviewWithStatuses < SimpleDelegator
   def fetch_commits_for(app_name, version)
     git_repository_loader = git_repository_loader_for(app_name)
     dependent_commits(git_repository_loader, version) ||
-      commit_for_version(git_repository_loader, version)
+      [commit_for_version(git_repository_loader, version)]
   end
 
   def dependent_commits(loader, version)
     commits = loader.get_dependent_commits(version)
-    commits.any? ? commits : nil
+    commits.presence
   end
 
   def commit_for_version(loader, version)
-    [loader.commit_for_version(version)]
+    loader.commit_for_version(version)
   end
 
   def git_repository_loader_for(app_name)
-    github_repository_loader_class.from_rails_config.load(app_name)
+    GitRepositoryLoader.from_rails_config.load(app_name)
   end
 end

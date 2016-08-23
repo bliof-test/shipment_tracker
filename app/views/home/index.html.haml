@@ -27,17 +27,17 @@
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
             %p
               %hr
-              %b Merges
+              %h3 Merges
             - if ticket.merges.empty?
               %p none
-            - ticket.merges.group_by { |merge| merge.app_name }.each do |app_name, merges|
+            - ticket.merges.group_by(&:app_name).each do |app_name, merges|
               %p
                 = app_name
                 %p
                   %hr
                   - merges.each do |merge|
                     = merge.merged_at.utc.strftime('%F %H:%M %Z')
-                    = commit_link(merge.sha, merge.github_repo_url[app_name])
+                    = commit_link(merge.sha, merge.github_repo_urls[app_name])
                     = merge.merged_by
                     %br
                     %br
