@@ -349,11 +349,13 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           context 'when deploying to different regons' do
             let(:deploy_event_gb) {
               build(:deploy_event, environment: 'production', version: version, created_at: time_string,
-                                   locale: 'gb')
+                                   locale: 'gb'
+                   )
             }
             let(:deploy_event_us) {
               build(:deploy_event, environment: 'production', version: version, created_at: time_string,
-                                   locale: 'us')
+                                   locale: 'us'
+                   )
             }
             let!(:released_ticket) {
               Snapshots::ReleasedTicket.create(

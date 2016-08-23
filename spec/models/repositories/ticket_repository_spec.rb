@@ -225,16 +225,14 @@ RSpec.describe Repositories::TicketRepository do
       results = repository.tickets_for_path(path)
       expect(results).to eq([
         Ticket.new(
-          ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time + 1.hour),
-        ),
+          ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time + 1.hour)),
       ])
 
       repository.apply(build(:jira_event, :unapproved, key: 'JIRA-1', created_at: time + 2.hours))
       results = repository.tickets_for_path(path)
       expect(results).to eq([
         Ticket.new(
-          ticket_1.merge(status: 'In Progress', approved_at: nil, event_created_at: time + 2.hours),
-        ),
+          ticket_1.merge(status: 'In Progress', approved_at: nil, event_created_at: time + 2.hours)),
       ])
     end
 
@@ -315,8 +313,7 @@ RSpec.describe Repositories::TicketRepository do
             key: 'JIRA-1',
             paths: [path1, path2],
             versions: %w(one two),
-            version_timestamps: { 'one' => times[0], 'two' => times[1] },
-          ),
+            version_timestamps: { 'one' => times[0], 'two' => times[1] }),
         ])
       end
     end

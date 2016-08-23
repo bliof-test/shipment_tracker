@@ -44,7 +44,8 @@ RSpec.describe Repositories::DeployRepository do
       expect(DeployAlertJob).to receive(:perform_later).with(expected_attrs)
 
       repository.apply(build(:deploy_event,
-        defaults.merge(version: expand_sha('xyz'), environment: 'production')))
+        defaults.merge(version: expand_sha('xyz'), environment: 'production')),
+                      )
     end
 
     context 'when in data maintenance mode' do
@@ -55,7 +56,8 @@ RSpec.describe Repositories::DeployRepository do
       it 'does not schedule a DeployAlertJob' do
         expect(DeployAlertJob).not_to receive(:perform_later)
         repository.apply(build(:deploy_event,
-          defaults.merge(version: expand_sha('xyz'), environment: 'production')))
+          defaults.merge(version: expand_sha('xyz'), environment: 'production')),
+                        )
       end
     end
   end
@@ -167,11 +169,14 @@ RSpec.describe Repositories::DeployRepository do
       let(:defaults) { { deployed_by: 'dj', environment: 'uat' } }
       it 'returns deploys for all apps to that server' do
         repository.apply(build(:deploy_event,
-          defaults.merge(server: 'x.io', version: expand_sha('1'), app_name: 'a')))
+          defaults.merge(server: 'x.io', version: expand_sha('1'), app_name: 'a')),
+                        )
         repository.apply(build(:deploy_event,
-          defaults.merge(server: 'x.io', version: expand_sha('2'), app_name: 'b')))
+          defaults.merge(server: 'x.io', version: expand_sha('2'), app_name: 'b')),
+                        )
         repository.apply(build(:deploy_event,
-          defaults.merge(server: 'y.io', version: expand_sha('3'), app_name: 'c')))
+          defaults.merge(server: 'y.io', version: expand_sha('3'), app_name: 'c')),
+                        )
 
         results = repository.deploys_for(server: 'x.io')
 
@@ -196,12 +201,15 @@ RSpec.describe Repositories::DeployRepository do
       it 'returns the state at that moment' do
         events = [
           build(:deploy_event,
-            defaults.merge(version: expand_sha('abc'), app_name: 'app1', created_at: time)),
+            defaults.merge(version: expand_sha('abc'), app_name: 'app1', created_at: time),
+               ),
           build(:deploy_event, defaults.merge(server: 'y.io', app_name: 'app1', created_at: time + 1.hour)),
           build(:deploy_event,
-            defaults.merge(version: expand_sha('def'), app_name: 'app2', created_at: time + 2.hours)),
+            defaults.merge(version: expand_sha('def'), app_name: 'app2', created_at: time + 2.hours),
+               ),
           build(:deploy_event,
-            defaults.merge(version: expand_sha('ghi'), app_name: 'app1', created_at: time + 3.hours)),
+            defaults.merge(version: expand_sha('ghi'), app_name: 'app1', created_at: time + 3.hours),
+               ),
         ]
 
         events.each do |event|
@@ -225,7 +233,8 @@ RSpec.describe Repositories::DeployRepository do
                      region: 'us',
                      correct: true,
                      environment: 'uat',
-                     event_created_at: time),
+                     event_created_at: time,
+                    ),
         ])
       end
     end
@@ -247,7 +256,8 @@ RSpec.describe Repositories::DeployRepository do
           build(:deploy_event, defaults.merge(server: 'a', environment: 'uat', version: expand_sha('def'))),
           build(:deploy_event, defaults.merge(server: 'b', environment: 'uat', version: expand_sha('ghi'))),
           build(:deploy_event,
-            defaults.merge(server: 'c', environment: 'production', version: expand_sha('xyz'))),
+            defaults.merge(server: 'c', environment: 'production', version: expand_sha('xyz')),
+               ),
         ].each do |deploy|
           repository.apply(deploy)
         end

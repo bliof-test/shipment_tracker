@@ -39,8 +39,7 @@ RSpec.describe AddRepositoryLocation do
       AddRepositoryLocation.run(
         validation_form: form,
         uri: 'git@github.com:owner/repo.git',
-        token_types: token_types,
-      )
+        token_types: token_types)
     end
 
     it 'generates token for each toke_type using repo name' do
@@ -52,8 +51,7 @@ RSpec.describe AddRepositoryLocation do
       AddRepositoryLocation.run(
         validation_form: form,
         uri: 'git@github.com:owner/repo.git',
-        token_types: token_types,
-      )
+        token_types: token_types)
     end
 
     context 'token can not be saved' do
