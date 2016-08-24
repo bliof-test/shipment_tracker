@@ -13,9 +13,9 @@ Scenario: User finds deployed tickets by description
     | ENG-4    | Another story | As a User\n implement another story |                             |
   When I search tickets with keywords "another story"
   Then I should find the following tickets on the dashboard:
-    | Jira Key | Summary       | Description                       | Deploys                         |
-    | ENG-3    | Another story | As a User implement another story | GB 2016-03-21 12:02 UTC app_1 #ghi |
-    | ENG-2    | Another task  | As a User implement another task  | GB 2016-03-21 12:02 UTC app_1 #def |
+    | Jira Key | Summary       | Description                       | Deploys                      |
+    | ENG-3    | Another story | As a User implement another story | GB 2016-03-21 12:02 UTC Jeff |
+    | ENG-2    | Another task  | As a User implement another task  | GB 2016-03-21 12:02 UTC Jeff |
 
 @mock_slack_notifier
 Scenario: User finds tickets by deployed app name
@@ -26,8 +26,8 @@ Scenario: User finds tickets by deployed app name
     | ENG-3    | Third task  | Something   | 2016-03-22 15:13 app_2 #def |
   When I search tickets with keywords "app_1"
   Then I should find the following tickets on the dashboard:
-    | Jira Key | Summary     | Description | Deploys                         |
-    | ENG-2    | Second task | Something   | GB 2016-03-21 12:02 UTC app_1 #abc |
+    | Jira Key | Summary     | Description | Deploys                      |
+    | ENG-2    | Second task | Something   | GB 2016-03-21 12:02 UTC Jeff |
 
 @mock_slack_notifier
 Scenario: User finds ticket by title
@@ -38,9 +38,9 @@ Scenario: User finds ticket by title
     | ENG-3    | Perform that issue      | As a User\n perform some story | 2016-03-22 16:13 app_3 #ghj |
   When I search tickets with keywords "implement issue"
   Then I should find the following tickets on the dashboard:
-    | Jira Key | Summary                 | Description                  | Deploys                            |
-    | ENG-2    | Implement this critical | As a User do another task    | GB 2016-03-22 15:13 UTC app_2 #def |
-    | ENG-3    | Perform that issue      | As a User perform some story | GB 2016-03-22 16:13 UTC app_3 #ghj |
+    | Jira Key | Summary                 | Description                  | Deploys                      |
+    | ENG-2    | Implement this critical | As a User do another task    | GB 2016-03-22 15:13 UTC Jeff |
+    | ENG-3    | Perform that issue      | As a User perform some story | GB 2016-03-22 16:13 UTC Jeff |
 
 @mock_slack_notifier
 Scenario: User finds ticket by commit version
@@ -51,8 +51,8 @@ Scenario: User finds ticket by commit version
     | ENG-3    | Perform that issue      | As a User\n perform some story | 2016-03-22 16:13 app_3 #ghj |
   When I search tickets with keywords "#def"
   Then I should find the following tickets on the dashboard:
-    | Jira Key | Summary                 | Description                  | Deploys                            |
-    | ENG-2    | Implement this critical | As a User do another task    | GB 2016-03-22 15:13 UTC app_2 #def |
+    | Jira Key | Summary                 | Description                  | Deploys                      |
+    | ENG-2    | Implement this critical | As a User do another task    | GB 2016-03-22 15:13 UTC Jeff |
 
 Scenario: User finds ticket by commit version deployed inherently
   Given an application called "frontend"
@@ -90,6 +90,6 @@ Scenario: User finds ticket by title filtered by date
     | Query                | From       | To         |
     | make implement story | 2016-03-22 | 2016-03-23 |
   Then I should find the following tickets on the dashboard:
-    | Jira Key | Summary            | Description                  | Deploys                            |
-    | ENG-2    | Implement this     | As a User do another task    | GB 2016-03-22 15:13 UTC app_2 #def |
-    | ENG-3    | Perform that issue | As a User perform some story | GB 2016-03-23 16:13 UTC app_3 #ghj |
+    | Jira Key | Summary            | Description                  | Deploys                      |
+    | ENG-2    | Implement this     | As a User do another task    | GB 2016-03-22 15:13 UTC Jeff |
+    | ENG-3    | Perform that issue | As a User perform some story | GB 2016-03-23 16:13 UTC Jeff |

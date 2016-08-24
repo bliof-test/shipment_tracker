@@ -25,7 +25,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     it 'returns Ticket objects' do
       tickets = ticket_repo.tickets_for_query(query_text: query, versions: [])
-      expect(tickets.first).to be_a(ReleasedTicket)
+      expect(tickets.first).to be_a(ReleasedTicketDecorator)
     end
 
     context 'when no tickets found' do
@@ -67,7 +67,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                                                { app: 'app1', deployed_at: time }].to_json),
           store.create(key: 'ENG-3', deploys: [{ app: 'app1', deployed_at: time - 4.weeks },
                                                { app: 'app1', deployed_at: time - 3.weeks }].to_json),
-        ].map { |record| ReleasedTicketDecorator.new(ReleasedTicket.new(record.attributes)) }
+        ].map { |record| ReleasedTicket.new(record.attributes) }
       }
 
       context "when 'from' date is selected" do
@@ -82,7 +82,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
         it "returns tickets deployed since 'from' date" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array(deployed_tickets[0..1])
+          expect(tickets).to eq(deployed_tickets[0..1])
         end
       end
 
@@ -97,7 +97,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         }
         it "returns tickets first deployed before 'to' date" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array([deployed_tickets.first, deployed_tickets.last])
+          expect(tickets).to eq([deployed_tickets.first, deployed_tickets.last])
         end
       end
 
@@ -115,7 +115,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                                                  { app: 'app5', deployed_at: time - 5.weeks }].to_json),
             store.create(key: 'ENG-6', deploys: [{ app: 'app6', deployed_at: time - 1.week },
                                                  { app: 'app6', deployed_at: time }].to_json),
-          ].map { |record| ReleasedTicketDecorator.new(ReleasedTicket.new(record.attributes)) }
+          ].map { |record| ReleasedTicket.new(record.attributes) }
         }
 
         let(:query) {
@@ -128,7 +128,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         }
         it "returns tickets deployed between 'from' and 'to' dates" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
+          expect(tickets).to eq([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
         end
       end
     end

@@ -63,13 +63,6 @@ RSpec.describe FeatureReviewWithStatuses do
     let(:commit_1) { instance_double(GitCommit, id: versions.first, associated_ids: nil) }
     let(:commit_2) { instance_double(GitCommit, id: versions.second, associated_ids: nil) }
 
-    let(:expected_results) do
-      [
-        [app_names.first, versions.first, [commit_1]],
-        [app_names.second, versions.second, [commit_2]],
-      ]
-    end
-
     before do
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
       allow(repository_loader).to receive(:load).and_return(repository)
@@ -83,6 +76,12 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when merge commit does not exist' do
       let(:dependent_commits_1) { [] }
       let(:dependent_commits_2) { [] }
+      let(:expected_results) do
+        [
+          [app_names.first, versions.first, [commit_1]],
+          [app_names.second, versions.second, [commit_2]],
+        ]
+      end
 
       before do
         allow(repository).to receive(:commit_for_version).with(versions.first).and_return(commit_1)
@@ -95,12 +94,20 @@ RSpec.describe FeatureReviewWithStatuses do
     end
 
     context 'when merge commit exists' do
-      let(:dependent_commits_1) { [commit_1] }
-      let(:dependent_commits_2) { [commit_2] }
+      let(:dependent_commits_1) { [instance_double(GitCommit, id: versions.first, associated_ids: nil)] }
+      let(:dependent_commits_2) { [instance_double(GitCommit, id: versions.second, associated_ids: nil)] }
+      let(:expected_results) do
+        [
+          [app_names.first, versions.first, dependent_commits_1],
+          [app_names.second, versions.second, dependent_commits_2],
+        ]
+      end
+
+      it 'does not receive commit_for_version' do
+        expect(repository).not_to receive(:commit_for_version)
+      end
 
       it 'returns the app_name, version and dependent_commits' do
-        expect(repository).not_to receive(:commit_for_version)
-
         expect(decorator.app_versions_with_commits).to eq(expected_results)
       end
     end

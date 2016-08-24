@@ -35,7 +35,7 @@
                   - deployed_commits.each do |deployed_commit|
                     Merged:
                     = time_with_timezone(deployed_commit.merged_at)
-                    = commit_link(deployed_commit.sha, deployed_commit.github_repo_url)
+                    = commit_link(deployed_commit.id, deployed_commit.github_repo_url)
                     = deployed_commit.merged_by
                     %br
                     %br

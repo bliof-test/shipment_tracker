@@ -14,6 +14,6 @@ module ReleasesHelper
   end
 
   def time_with_timezone(time)
-    time&.utc.strftime('%F %H:%M %Z')
+    time&.utc.strftime('%F %H:%M %Z') if time.present?
   end
 end
