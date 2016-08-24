@@ -4,7 +4,7 @@ require 'rails_helper'
 RSpec.describe ReleasedTicketDecorator do
   subject(:decorator) { ReleasedTicketDecorator.new(released_ticket) }
 
-  let(:released_ticket) { ReleasedTicket.new(deploys: deploys_hash) }
+  let(:released_ticket) { ReleasedTicket.new(deploys: deploys_array) }
 
   context '#deployed_commits' do
     let(:time) { Time.current }
@@ -25,7 +25,7 @@ RSpec.describe ReleasedTicketDecorator do
       ]
     }
 
-    let(:deploys_hash) do
+    let(:deploys_array) do
       deploys.map do |deploy|
         {
           'app' => deploy.app_name,
