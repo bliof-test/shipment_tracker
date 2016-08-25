@@ -33,10 +33,10 @@
   %thead
     %tr
       %th{width: '10%'} version
-      %th{width: '55%'} message
+      %th{width: '45%'} message
       %th{width: '15%'} feature reviews
       %th{width: '20%'} last deployed at
-      %th{width: '20%'} deployed by
+      %th{width: '10%'} deployed by
   %tbody
   - @deployed_releases.each do |release|
     %tr.deployed-release{class: ('danger' unless release.authorised?)}

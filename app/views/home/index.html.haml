@@ -27,25 +27,24 @@
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
             %p
             - if ticket.deployed_commits.empty?
-              %p No deploys
+              %strong No deploys
             - ticket.deployed_commits.group_by(&:app_name).each do |app_name, deployed_commits|
-              %p
+              %h5
                 %strong app_name
-                %p
-                  - deployed_commits.each do |deployed_commit|
-                    Merged:
-                    = time_with_timezone(deployed_commit.merged_at)
-                    = commit_link(deployed_commit.id, deployed_commit.github_repo_url)
-                    = deployed_commit.merged_by
-                    %br
-                    %br
-                    %p
-                      %strong Deploys
-                      - if deployed_commit.deploys.empty?
-                        %p none
-                      - deployed_commit.deploys.each do |deploy|
-                        %p.deploy
-                          = flag_icon(deploy.region.to_sym)
-                          = time_with_timezone(deploy.deployed_at)
-                          = deploy.deployed_by
-                      %br
+              - deployed_commits.each do |deployed_commit|
+                Merged:
+                = time_with_timezone(deployed_commit.merged_at)
+                = commit_link(deployed_commit.id, deployed_commit.github_repo_url)
+                = deployed_commit.merged_by
+                %br
+                %br
+                %h5
+                  %strong Deploys
+                - if deployed_commit.deploys.empty?
+                  %p none
+                - deployed_commit.deploys.each do |deploy|
+                  %p.deploy
+                    = flag_icon(deploy.region)
+                    = time_with_timezone(deploy.deployed_at)
+                    = deploy.deployed_by
+                %br
