@@ -16,7 +16,7 @@ Then 'I should find the following tickets on the dashboard:' do |tickets_table|
   hashes = tickets_table.hashes
 
   hashes.each do |hash|
-    hash['Deploys'] = hash['Deploys'].split(',').map { |deploy_string| deploy_string }
+    hash['Deploys'] = hash['Deploys'].split(',')
   end
 
   expect(result_tickets).to eq hashes

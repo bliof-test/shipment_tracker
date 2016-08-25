@@ -21,10 +21,6 @@ class Deploy
     git_repository_loader.commit_for_version(version)
   end
 
-  def similar_to?(other_deploy)
-    other_deploy.version == version && other_deploy.app_name == app_name
-  end
-
   private
 
   def git_repository_loader

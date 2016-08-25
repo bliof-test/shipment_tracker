@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 RSpec.describe ReleasedTicketDecorator do
-  subject(:decorator) { ReleasedTicketDecorator.new(released_ticket) }
+  subject(:decorator) { described_class.new(released_ticket) }
 
   let(:released_ticket) { ReleasedTicket.new(deploys: deploys_array) }
 
@@ -50,8 +50,11 @@ RSpec.describe ReleasedTicketDecorator do
 
     it 'returns an array of commits with the associated deploys' do
       results = decorator.deployed_commits
-      expect(results.map(&:id)).to eq(commits.map(&:id))
-      expect(results.map(&:deploys).flatten).to eq(deploys)
+
+      aggregate_failures do
+        expect(results.map(&:id)).to eq(commits.map(&:id))
+        expect(results.map(&:deploys).flatten).to eq(deploys)
+      end
     end
   end
 end

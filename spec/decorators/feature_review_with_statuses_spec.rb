@@ -56,7 +56,7 @@ RSpec.describe FeatureReviewWithStatuses do
     expect(decorator.uat_url).to eq(feature_review.uat_url)
   end
 
-  describe '#app_versions_with_commits' do
+  describe '#apps_with_latest_commit' do
     let(:repository_loader) { instance_double(GitRepositoryLoader) }
     let(:repository) { instance_double(GitRepository) }
 
@@ -73,13 +73,13 @@ RSpec.describe FeatureReviewWithStatuses do
         .and_return(dependent_commits_2)
     end
 
-    context 'when merge commit does not exist' do
+    context 'when the latest commit is not a merge commit' do
       let(:dependent_commits_1) { [] }
       let(:dependent_commits_2) { [] }
       let(:expected_results) do
         [
-          [app_names.first, versions.first, [commit_1]],
-          [app_names.second, versions.second, [commit_2]],
+          [app_names.first, commit_1],
+          [app_names.second, commit_2],
         ]
       end
 
@@ -88,18 +88,18 @@ RSpec.describe FeatureReviewWithStatuses do
         allow(repository).to receive(:commit_for_version).with(versions.second).and_return(commit_2)
       end
 
-      it 'returns the app_name, version and the same commit' do
-        expect(decorator.app_versions_with_commits).to eq(expected_results)
+      it 'returns the app_name and the very same commit' do
+        expect(decorator.apps_with_latest_commit).to eq(expected_results)
       end
     end
 
-    context 'when merge commit exists' do
+    context 'when the latest commit is a merge commit' do
       let(:dependent_commits_1) { [instance_double(GitCommit, id: versions.first, associated_ids: nil)] }
       let(:dependent_commits_2) { [instance_double(GitCommit, id: versions.second, associated_ids: nil)] }
       let(:expected_results) do
         [
-          [app_names.first, versions.first, dependent_commits_1],
-          [app_names.second, versions.second, dependent_commits_2],
+          [app_names.first, dependent_commits_1.first],
+          [app_names.second, dependent_commits_2.first],
         ]
       end
 
@@ -107,8 +107,8 @@ RSpec.describe FeatureReviewWithStatuses do
         expect(repository).not_to receive(:commit_for_version)
       end
 
-      it 'returns the app_name, version and dependent_commits' do
-        expect(decorator.app_versions_with_commits).to eq(expected_results)
+      it 'returns the app_name and the most recent dependent commit' do
+        expect(decorator.apps_with_latest_commit).to eq(expected_results)
       end
     end
   end

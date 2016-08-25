@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 RSpec.describe GitCommitWithDeploys do
-  subject(:decorator) { GitCommitWithDeploys.new(git_commit, deploys: deploys_array) }
+  subject(:decorator) { described_class.new(git_commit, deploys: deploys_array) }
 
   let(:time) { Time.current }
   let(:git_commit) { GitCommit.new(id: 'abc', author_name: 'user', message: 'new commit', time: time) }
@@ -29,7 +29,7 @@ RSpec.describe GitCommitWithDeploys do
   end
 
   context '#merged_by' do
-    it 'return the commit author' do
+    it 'returns the commit author' do
       expect(subject.merged_by).to eq(git_commit.author_name)
     end
   end

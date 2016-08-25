@@ -27,9 +27,11 @@ class FeatureReviewWithStatuses < SimpleDelegator
     @github_repo_urls ||= GitRepositoryLocation.github_urls_for_apps(@feature_review.app_names)
   end
 
-  def app_versions_with_commits
+  def apps_with_latest_commit
     app_versions.map do |app_name, version|
-      [app_name, version, fetch_commits_for(app_name, version)]
+      latest_commit = fetch_commits_for(app_name, version).first
+
+      [app_name, latest_commit]
     end
   end
 
@@ -106,8 +108,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def dependent_commits(loader, version)
-    commits = loader.get_dependent_commits(version)
-    commits.presence
+    loader.get_dependent_commits(version).presence
   end
 
   def commit_for_version(loader, version)

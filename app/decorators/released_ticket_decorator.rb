@@ -5,8 +5,8 @@ class ReleasedTicketDecorator < SimpleDelegator
   end
 
   def deployed_commits
-    uniq_deploys = deploy_objects.group_by { |deploy| [deploy.app_name, deploy.version] }
-    uniq_deploys.map { |_group, deploys| git_commit_with_deploys(deploys) }
+    grouped_deploys = deploy_objects.group_by { |deploy| [deploy.app_name, deploy.version] }
+    grouped_deploys.values.map { |deploys| git_commit_with_deploys(deploys) }
   end
 
   private

@@ -31,7 +31,7 @@ module Repositories
       ticket_keys = filter_tickets_by_date(from_date, to_date)
       query = query.where(key: ticket_keys) if ticket_keys
       query = query.limit(per_page)
-      query.map { |t| ReleasedTicketDecorator.new(ReleasedTicket.new(t.attributes)) }
+      query.map { |ticket| ReleasedTicketDecorator.new(ReleasedTicket.new(ticket.attributes)) }
     end
 
     def apply(event)
