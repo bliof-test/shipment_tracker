@@ -42,7 +42,7 @@ class DeployAlert
   end
 
   def self.alert_header(deploy)
-    time = deploy.event_created_at.strftime('%F %H:%M%:z')
+    time = deploy.deployed_at.strftime('%F %H:%M%:z')
     "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n" \
     "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}.\n"
   end

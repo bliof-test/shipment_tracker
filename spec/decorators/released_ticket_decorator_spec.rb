@@ -29,7 +29,7 @@ RSpec.describe ReleasedTicketDecorator do
       deploys.map do |deploy|
         {
           'app' => deploy.app_name,
-          'deployed_at' => deploy.event_created_at,
+          'deployed_at' => deploy.deployed_at,
           'deployed_by' => deploy.deployed_by,
           'version' => deploy.version,
         }

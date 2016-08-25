@@ -6,15 +6,11 @@ class Deploy
     attribute :app_name, String
     attribute :correct, Boolean
     attribute :deployed_by, String
-    attribute :event_created_at, Time
+    attribute :deployed_at, Time
     attribute :server, String
     attribute :region, String
     attribute :version, String
     attribute :environment, String
-  end
-
-  def deployed_at
-    event_created_at
   end
 
   def commit

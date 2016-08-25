@@ -6,7 +6,7 @@ RSpec.describe Deploy do
     described_class.new(
       version: 'abc',
       app_name: 'app1',
-      event_created_at: time,
+      deployed_at: time,
       deployed_by: 'user',
     )
   end

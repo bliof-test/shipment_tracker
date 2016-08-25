@@ -67,7 +67,7 @@ module Repositories
         environment: event.environment,
         version: event.version,
         deployed_by: event.deployed_by,
-        event_created_at: event.created_at,
+        deployed_at: event.created_at,
       )
     end
 
@@ -78,12 +78,12 @@ module Repositories
     end
 
     def deploy_time_to_s(deploy_attrs)
-      deploy_attrs['event_created_at'] = deploy_attrs['event_created_at'].to_s if deploy_attrs
+      deploy_attrs['deployed_at'] = deploy_attrs['deployed_at'].to_s if deploy_attrs
     end
 
     def deploys(apps, server, at)
       query = store.select('DISTINCT ON (server, app_name) *').where(server: server)
-      query = query.where(store.arel_table['event_created_at'].lteq(at)) if at
+      query = query.where(store.arel_table['deployed_at'].lteq(at)) if at
       query = query.where(store.arel_table['app_name'].in(apps.keys)) if apps
       query.order('server, app_name, id DESC').map { |deploy_record|
         build_deploy(deploy_record.attributes, apps)

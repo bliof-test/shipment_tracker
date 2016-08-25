@@ -10,7 +10,7 @@ class GitCommitWithDeploys < SimpleDelegator
   end
 
   def app_name
-    deploys&.first.try(:dig, 'app')
+    deploys&.first&.app_name
   end
 
   def merged_by

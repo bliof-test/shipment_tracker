@@ -62,7 +62,7 @@ RSpec.describe DeployAlert do
         app_name: 'some_app',
         version: '#new',
         region: 'gb',
-        event_created_at: Time.current,
+        deployed_at: Time.current,
         deployed_by: 'Devloper',
       )
     }
@@ -73,7 +73,7 @@ RSpec.describe DeployAlert do
         app_name: 'some_app',
         version: '#old',
         region: 'gb',
-        event_created_at: 1.hour.ago,
+        deployed_at: 1.hour.ago,
         deployed_by: 'Devloper',
       )
     }
@@ -108,7 +108,7 @@ RSpec.describe DeployAlert do
             version: nil,
             region: 'gb',
             deployed_by: 'Devloper',
-            event_created_at: Time.current,
+            deployed_at: Time.current,
           )
         }
 
@@ -130,7 +130,7 @@ RSpec.describe DeployAlert do
             version: 'asdfoim?asgd/adsg/\asdg\sd',
             region: 'gb',
             deployed_by: 'Devloper',
-            event_created_at: Time.current,
+            deployed_at: Time.current,
           )
         }
 
@@ -208,7 +208,7 @@ RSpec.describe DeployAlert do
               app_name: 'some_app',
               version: nil,
               region: 'gb',
-              event_created_at: 1.hour.ago,
+              deployed_at: 1.hour.ago,
               deployed_by: 'Devloper',
             )
           }
@@ -244,7 +244,7 @@ RSpec.describe DeployAlert do
 
   def message(deploy, reason)
     "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} " \
-    "at #{deploy.event_created_at.strftime('%F %H:%M%:z')}.\n"\
+    "at #{deploy.deployed_at.strftime('%F %H:%M%:z')}.\n"\
     "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}.\n#{reason}"
   end
 

@@ -16,7 +16,7 @@ class ReleasedTicketDecorator < SimpleDelegator
       Deploy.new({
         app_name: deploy['app'],
         deployed_by: deploy['deployed_by'],
-        event_created_at: deploy['deployed_at'],
+        deployed_at: deploy['deployed_at'],
       }.merge(deploy))
     }
   end

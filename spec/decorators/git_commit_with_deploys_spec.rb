@@ -2,7 +2,7 @@
 require 'rails_helper'
 
 RSpec.describe GitCommitWithDeploys do
-  subject(:decorator) { described_class.new(git_commit, deploys: deploys_array) }
+  subject(:decorator) { described_class.new(git_commit, deploys: deploys) }
 
   let(:time) { Time.current }
   let(:git_commit) { GitCommit.new(id: 'abc', author_name: 'user', message: 'new commit', time: time) }
@@ -21,7 +21,7 @@ RSpec.describe GitCommitWithDeploys do
     deploys.map do |deploy|
       {
         'app' => deploy.app_name,
-        'deployed_at' => deploy.event_created_at,
+        'deployed_at' => deploy.deployed_at,
         'deployed_by' => deploy.deployed_by,
         'version' => deploy.version,
       }

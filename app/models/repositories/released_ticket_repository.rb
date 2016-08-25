@@ -154,7 +154,7 @@ module Repositories
 
     def latest_production_deploy(app_name, region, event_date)
       @deploy_store.where(app_name: app_name, environment: 'production', region: region)
-                   .where('event_created_at < ?', event_date)
+                   .where('deployed_at < ?', event_date)
                    .order(id: 'desc')
                    .limit(1)
                    .first

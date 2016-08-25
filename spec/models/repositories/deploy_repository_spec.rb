@@ -28,7 +28,7 @@ RSpec.describe Repositories::DeployRepository do
           'server' => 'test.com',
           'version' => expand_sha('xyz'),
           'deployed_by' => 'Bob',
-          'event_created_at' => '',
+          'deployed_at' => '',
           'environment' => environment,
           'region' => 'us',
         },
@@ -233,7 +233,7 @@ RSpec.describe Repositories::DeployRepository do
                      region: 'us',
                      correct: true,
                      environment: 'uat',
-                     event_created_at: time,
+                     deployed_at: time,
                     ),
         ])
       end

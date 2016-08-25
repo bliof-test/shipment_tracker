@@ -30,7 +30,7 @@
               %strong No deploys
             - ticket.deployed_commits.group_by(&:app_name).each do |app_name, deployed_commits|
               %h5
-                %strong app_name
+                %strong= app_name
               - deployed_commits.each do |deployed_commit|
                 Merged:
                 = time_with_timezone(deployed_commit.merged_at)
