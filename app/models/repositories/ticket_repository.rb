@@ -54,7 +54,7 @@ module Repositories
     attr_reader :git_repository_location, :feature_review_factory
 
     def previous_ticket_data(key)
-      attrs = store.where(key: key).last.try(:attributes) || {}
+      attrs = store.where(key: key).last&.attributes || {}
       attrs.except!('id')
     end
 

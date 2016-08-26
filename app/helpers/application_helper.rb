@@ -32,7 +32,7 @@ module ApplicationHelper
   end
 
   def pull_request_link(commit_subject, github_repo_url)
-    pull_request_num = commit_subject.scan(/pull request #(\d+)/).first.try(:first)
+    pull_request_num = commit_subject.scan(/pull request #(\d+)/).first&.first
     if pull_request_num
       github_pull_request_url = "#{github_repo_url}/pull/#{pull_request_num}"
       pull_request_text = "pull request ##{pull_request_num}"

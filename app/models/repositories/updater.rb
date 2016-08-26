@@ -49,7 +49,7 @@ module Repositories
     end
 
     def last_id_for(repository)
-      Snapshots::EventCount.find_by_snapshot_name(repository.table_name).try(:event_id) || 0
+      Snapshots::EventCount.find_by_snapshot_name(repository.table_name)&.event_id || 0
     end
 
     def update_count_for(repository, id)

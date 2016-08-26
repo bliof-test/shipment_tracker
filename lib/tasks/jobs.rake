@@ -52,7 +52,7 @@ namespace :jobs do
       break if @shutdown
       start_time = Time.current
       puts "[#{start_time}] Running update_events"
-      lowest_event_id = Snapshots::EventCount.all.min_by(&:event_id).try(:event_id).to_i
+      lowest_event_id = Snapshots::EventCount.all.min_by(&:event_id)&.event_id&.to_i
 
       Repositories::Updater.from_rails_config.run
 
