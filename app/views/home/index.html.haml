@@ -25,26 +25,27 @@
               %em.description No description found.
             - else
               = simple_format(truncate(ticket.description, length: 250, seperator: ' '), class: 'description')
-            %p
             - if ticket.deployed_commits.empty?
               %strong No deploys
-            - ticket.deployed_commits.group_by(&:app_name).each do |app_name, deployed_commits|
-              %h5
-                %strong= app_name
-              - deployed_commits.each do |deployed_commit|
-                Merged:
-                = time_with_timezone(deployed_commit.merged_at)
-                = commit_link(deployed_commit.id, deployed_commit.github_repo_url)
-                = deployed_commit.merged_by
-                %br
-                %br
-                %h5
-                  %strong Deploys
-                - if deployed_commit.deploys.empty?
-                  %p none
-                - deployed_commit.deploys.each do |deploy|
-                  %p.deploy
-                    = flag_icon(deploy.region)
-                    = time_with_timezone(deploy.deployed_at)
-                    = deploy.deployed_by
-                %br
+            %ul.apps{style: 'padding-left: 0px; list-style-type: none; padding-top: 10px;'}
+              - ticket.deployed_commits.group_by(&:app_name).each do |app_name, deployed_commits|
+                %li.app
+                  %p.app_name{style: 'font-weight: bold;'}= app_name
+                  %ul.commits{style: 'padding-left: 10px; list-style-type: none;'}
+                    - deployed_commits.each do |deployed_commit|
+                      %li.commit
+                        Merged:
+                        = time_with_timezone(deployed_commit.merged_at)
+                        = commit_link(deployed_commit.id, deployed_commit.github_repo_url)
+                        = deployed_commit.merged_by
+                        %h5{style: 'font-weight: bold;'} Deploys
+                        - if deployed_commit.deploys.empty?
+                          %p none
+                        %ul.deploys{style: 'padding-left: 20px; list-style-type: none;'}
+                          - deployed_commit.deploys.each do |deploy|
+                            %li.deploy
+                              %p
+                                = flag_icon(deploy.region)
+                                = time_with_timezone(deploy.deployed_at)
+                                = deploy.deployed_by
+
