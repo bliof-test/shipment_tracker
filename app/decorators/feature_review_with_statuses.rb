@@ -29,7 +29,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def apps_with_latest_commit
     app_versions.map do |app_name, version|
-      latest_commit = fetch_commits_for(app_name, version).first
+      latest_commit = fetch_commit_for(app_name, version)
 
       [app_name, latest_commit]
     end
@@ -101,10 +101,10 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   private
 
-  def fetch_commits_for(app_name, version)
+  def fetch_commit_for(app_name, version)
     git_repository_loader = git_repository_loader_for(app_name)
-    dependent_commits(git_repository_loader, version) ||
-      [commit_for_version(git_repository_loader, version)]
+    dependent_commits(git_repository_loader, version)&.first ||
+      commit_for_version(git_repository_loader, version)
   end
 
   def dependent_commits(loader, version)

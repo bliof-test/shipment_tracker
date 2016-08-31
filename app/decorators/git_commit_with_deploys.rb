@@ -2,15 +2,12 @@
 require 'git_commit'
 
 class GitCommitWithDeploys < SimpleDelegator
-  attr_reader :deploys
+  attr_reader :deploys, :app_name
 
   def initialize(git_commit, deploys: [])
     super(git_commit)
     @deploys = deploys
-  end
-
-  def app_name
-    deploys&.first&.app_name
+    @app_name = deploys&.first&.app_name
   end
 
   def merged_by
