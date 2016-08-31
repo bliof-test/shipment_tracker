@@ -21,11 +21,11 @@ class FeatureReview
   end
 
   def uat_url
-    uat_uri.try(:to_s)
+    uat_uri&.to_s
   end
 
   def uat_host
-    uat_uri.try(:host)
+    uat_uri&.host
   end
 
   def query_hash

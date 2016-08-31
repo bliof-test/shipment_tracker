@@ -2,6 +2,7 @@
 require 'build'
 require 'deploy'
 require 'git_repository_location'
+require 'git_repository_loader'
 require 'qa_submission'
 require 'ticket'
 require 'uatest'
@@ -24,6 +25,14 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def github_repo_urls
     @github_repo_urls ||= GitRepositoryLocation.github_urls_for_apps(@feature_review.app_names)
+  end
+
+  def apps_with_latest_commit
+    app_versions.map do |app_name, version|
+      latest_commit = fetch_commit_for(app_name, version)
+
+      [app_name, latest_commit]
+    end
   end
 
   def build_status
@@ -88,5 +97,25 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def approved_path
     "#{base_path}?#{query_hash.merge(time: tickets_approved_at.utc).to_query}" if authorised?
+  end
+
+  private
+
+  def fetch_commit_for(app_name, version)
+    git_repository_loader = git_repository_loader_for(app_name)
+    dependent_commits(git_repository_loader, version)&.first ||
+      commit_for_version(git_repository_loader, version)
+  end
+
+  def dependent_commits(loader, version)
+    loader.get_dependent_commits(version).presence
+  end
+
+  def commit_for_version(loader, version)
+    loader.commit_for_version(version)
+  end
+
+  def git_repository_loader_for(app_name)
+    GitRepositoryLoader.from_rails_config.load(app_name)
   end
 end

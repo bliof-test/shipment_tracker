@@ -18,7 +18,7 @@ module Forms
     def initialize(apps:, git_repository_loader: nil, uat_url:)
       @apps = apps
       @git_repository_loader = git_repository_loader
-      @uat_url = Addressable::URI.heuristic_parse(uat_url, scheme: 'http').try(:host)
+      @uat_url = Addressable::URI.heuristic_parse(uat_url, scheme: 'http')&.host
     end
 
     def valid?

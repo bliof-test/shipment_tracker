@@ -81,7 +81,7 @@ class GitRepository
   # Returns all commits that are children of the given commit
   # up to and including the merge commit.
   def get_descendant_commits_of_branch(commit_oid)
-    verified_commit_oid = lookup(commit_oid).try(:oid)
+    verified_commit_oid = lookup(commit_oid)&.oid
 
     return [] if verified_commit_oid.nil? || commit_on_master?(commit_oid)
 

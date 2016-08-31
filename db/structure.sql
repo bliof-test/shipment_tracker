@@ -155,7 +155,7 @@ CREATE TABLE deploys (
     server character varying,
     version character varying,
     deployed_by character varying,
-    event_created_at timestamp without time zone,
+    deployed_at timestamp without time zone,
     environment character varying,
     region character varying
 );
@@ -819,3 +819,4 @@ INSERT INTO schema_migrations (version) VALUES ('20160318164129');
 
 INSERT INTO schema_migrations (version) VALUES ('20160324142505');
 
+INSERT INTO schema_migrations (version) VALUES ('20160825111503');

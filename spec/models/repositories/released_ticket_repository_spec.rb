@@ -25,7 +25,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
     it 'returns Ticket objects' do
       tickets = ticket_repo.tickets_for_query(query_text: query, versions: [])
-      expect(tickets.first).to be_a(ReleasedTicket)
+      expect(tickets.first).to be_a(ReleasedTicketDecorator)
     end
 
     context 'when no tickets found' do
@@ -82,7 +82,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
 
         it "returns tickets deployed since 'from' date" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array(deployed_tickets[0..1])
+          expect(tickets).to eq(deployed_tickets[0..1])
         end
       end
 
@@ -97,7 +97,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         }
         it "returns tickets first deployed before 'to' date" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array([deployed_tickets.first, deployed_tickets.last])
+          expect(tickets).to eq([deployed_tickets.first, deployed_tickets.last])
         end
       end
 
@@ -128,7 +128,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
         }
         it "returns tickets deployed between 'from' and 'to' dates" do
           tickets = ticket_repo.tickets_for_query(query)
-          expect(tickets).to match_array([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
+          expect(tickets).to eq([deployed_tickets[0], deployed_tickets[2], deployed_tickets[3]])
         end
       end
     end
@@ -240,6 +240,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'app' => 'hello_world',
                 'version' => 'def',
                 'deployed_at' => time_string,
+                'deployed_by' => 'frank@example.com',
                 'github_url' => gurl,
                 'region' => 'gb',
               }],
@@ -256,6 +257,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'app' => 'hello_world',
                 'version' => 'abc',
                 'deployed_at' => second_time_string,
+                'deployed_by' => 'frank@example.com',
                 'github_url' => gurl,
                 'region' => 'us',
               },
@@ -263,6 +265,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'app' => 'hello_world',
                 'version' => 'def',
                 'deployed_at' => time_string,
+                'deployed_by' => 'frank@example.com',
                 'github_url' => gurl,
                 'region' => 'gb',
               },
@@ -292,6 +295,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                   'app' => 'hello_world',
                   'version' => 'abc',
                   'deployed_at' => second_time_string,
+                  'deployed_by' => 'frank@example.com',
                   'github_url' => gurl,
                   'region' => 'us',
                 },
@@ -317,6 +321,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                   'app' => 'hello_world',
                   'version' => 'abc',
                   'deployed_at' => yesterday_str,
+                  'deployed_by' => 'frank@example.com',
                   'region' => 'us',
                 }],
               )
@@ -328,6 +333,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                   'app' => 'hello_world',
                   'version' => 'abc',
                   'deployed_at' => yesterday_str,
+                  'deployed_by' => 'frank@example.com',
                   'region' => 'us',
                 },
               ]
@@ -367,6 +373,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                   'app' => 'hello_world',
                   'version' => 'abc',
                   'deployed_at' => time_string,
+                  'deployed_by' => 'frank@example.com',
                   'github_url' => gurl,
                   'region' => 'us',
                 },
@@ -374,6 +381,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                   'app' => 'hello_world',
                   'version' => 'abc',
                   'deployed_at' => time_string,
+                  'deployed_by' => 'frank@example.com',
                   'github_url' => gurl,
                   'region' => 'gb',
                 },
@@ -400,6 +408,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
                 'app' => 'hello_world',
                 'version' => 'def123',
                 'deployed_at' => time_string,
+                'deployed_by' => 'frank@example.com',
                 'region' => 'gb',
               }],
             )

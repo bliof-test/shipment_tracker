@@ -34,7 +34,7 @@ RSpec.describe Queries::ReleasesQuery do
 
   let(:deploys) {
     [
-      Deploy.new(version: 'def', app_name: app_name, event_created_at: deploy_time, deployed_by: 'auser'),
+      Deploy.new(version: 'def', app_name: app_name, deployed_at: deploy_time, deployed_by: 'auser'),
     ]
   }
   let(:approved_ticket) {

@@ -9,10 +9,12 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:qa_submission) { double(:qa_submission) }
   let(:uatest) { double(:uatest) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
+  let(:app_names) { apps.keys }
+  let(:versions) { apps.values }
 
   let(:uat_url) { 'http://uat.com' }
   let(:feature_review) {
-    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: apps.values)
+    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: versions)
   }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
@@ -52,6 +54,63 @@ RSpec.describe FeatureReviewWithStatuses do
 
   it 'delegates unknown messages to the feature_review' do
     expect(decorator.uat_url).to eq(feature_review.uat_url)
+  end
+
+  describe '#apps_with_latest_commit' do
+    let(:repository_loader) { instance_double(GitRepositoryLoader) }
+    let(:repository) { instance_double(GitRepository) }
+
+    let(:commit_1) { instance_double(GitCommit, id: versions.first, associated_ids: nil) }
+    let(:commit_2) { instance_double(GitCommit, id: versions.second, associated_ids: nil) }
+
+    before do
+      allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
+      allow(repository_loader).to receive(:load).and_return(repository)
+
+      allow(repository).to receive(:get_dependent_commits).with(versions.first)
+        .and_return(dependent_commits_1)
+      allow(repository).to receive(:get_dependent_commits).with(versions.second)
+        .and_return(dependent_commits_2)
+    end
+
+    context 'when the latest commit is not a merge commit' do
+      let(:dependent_commits_1) { [] }
+      let(:dependent_commits_2) { [] }
+      let(:expected_results) do
+        [
+          [app_names.first, commit_1],
+          [app_names.second, commit_2],
+        ]
+      end
+
+      before do
+        allow(repository).to receive(:commit_for_version).with(versions.first).and_return(commit_1)
+        allow(repository).to receive(:commit_for_version).with(versions.second).and_return(commit_2)
+      end
+
+      it 'returns the app_name and the very same commit' do
+        expect(decorator.apps_with_latest_commit).to eq(expected_results)
+      end
+    end
+
+    context 'when the latest commit is a merge commit' do
+      let(:dependent_commits_1) { [instance_double(GitCommit, id: versions.first, associated_ids: nil)] }
+      let(:dependent_commits_2) { [instance_double(GitCommit, id: versions.second, associated_ids: nil)] }
+      let(:expected_results) do
+        [
+          [app_names.first, dependent_commits_1.first],
+          [app_names.second, dependent_commits_2.first],
+        ]
+      end
+
+      it 'does not receive commit_for_version' do
+        expect(repository).not_to receive(:commit_for_version)
+      end
+
+      it 'returns the app_name and the most recent dependent commit' do
+        expect(decorator.apps_with_latest_commit).to eq(expected_results)
+      end
+    end
   end
 
   describe '#github_repo_urls' do
