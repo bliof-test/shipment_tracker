@@ -71,7 +71,7 @@ class GitRepository
     end
 
     dependent_commits + commits_between(common_ancestor_oid, commit_oid)[0...-1]
-  rescue CommitNotValid
+  rescue CommitNotValid, CommitNotFound
     []
   end
 

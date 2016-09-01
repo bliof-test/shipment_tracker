@@ -84,8 +84,10 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       before do
-        allow(repository).to receive(:commit_for_version).with(versions.first).and_return(commit_1)
-        allow(repository).to receive(:commit_for_version).with(versions.second).and_return(commit_2)
+        allow(repository).to receive(:commit_for_version).with(versions.first)
+          .and_return(commit_1)
+        allow(repository).to receive(:commit_for_version).with(versions.second)
+          .and_return(commit_2)
       end
 
       it 'returns the app_name and the very same commit' do
