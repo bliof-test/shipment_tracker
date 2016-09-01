@@ -445,6 +445,20 @@ RSpec.describe GitRepository do
       end
     end
 
+    context 'when the commit is not found' do
+      let(:git_diagram) do
+        <<-'EOS'
+             o-A-o
+            /
+          -o-----o
+        EOS
+      end
+
+      it 'is empty' do
+        expect(repo.get_dependent_commits('5c6e280c6c4f5aff08a179526b6d73410552f453')).to be_empty
+      end
+    end
+
     context 'when the sha is invalid' do
       let(:git_diagram) do
         <<-'EOS'
