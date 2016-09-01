@@ -53,8 +53,8 @@
           %tr
             %td= app_name
             %td= commit_link(latest_commit.id, @feature_review_with_statuses.github_repo_urls[app_name])
-            %td= latest_commit.author_name
-            %td= latest_commit.time
+            %td= latest_commit.author_name || 'unknown'
+            %td= latest_commit.time || 'unknown'
       %ul.list-group
         %li.list-group-item
           - if @feature_review_with_statuses.uat_url

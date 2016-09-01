@@ -209,16 +209,25 @@ RSpec.describe GitRepository do
     end
 
     context 'when the lookup fails' do
-      it 'returns an empty GitCommit for an invalid SHA' do
-        commit = subject.commit_for_version('invalid_sha')
-        expect(commit).to be_a(GitCommit)
-        expect(commit.associated_ids).to be_empty
+      shared_examples :failed_lookup do |sha|
+        subject(:commit) { repo.commit_for_version(sha) }
+
+        it 'does not raise any exception' do
+          expect { commit }.not_to raise_error
+        end
+
+        it 'returns a GitCommit object for the given sha' do
+          expect(commit).to be_a(GitCommit)
+          expect(commit.id).to eq(sha)
+        end
       end
 
-      it 'returns an empty GitCommit for an extra long SHA' do
-        commit = subject.commit_for_version('abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc')
-        expect(commit).to be_a(GitCommit)
-        expect(commit.id).to be_nil
+      context 'invalid sha' do
+        include_examples :failed_lookup, 'invalid_sha'
+      end
+
+      context 'extra long sha' do
+        include_examples :failed_lookup, 'abc123abc123abc123abc123abc123abc123abc123abc123abc123abc123abc'
       end
     end
   end
