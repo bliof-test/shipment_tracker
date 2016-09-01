@@ -31,6 +31,8 @@ class FeatureReviewWithStatuses < SimpleDelegator
     app_versions.map do |app_name, version|
       latest_commit = fetch_commit_for(app_name, version)
 
+      latest_commit = GitCommit.new(id: version) unless latest_commit.id
+
       [app_name, latest_commit]
     end
   end

@@ -47,9 +47,7 @@ class GitRepository
   end
 
   def commit_for_version(sha)
-    commit = build_commit(lookup(sha))
-    commit = GitCommit.new(id: sha) unless commit.id
-    commit
+    build_commit(lookup(sha))
   end
 
   # Returns "dependent commits" given a commit sha from a topic branch.
