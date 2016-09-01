@@ -28,11 +28,11 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def apps_with_latest_commit
-    app_versions.map do |app_name, version|
+    app_versions.map { |app_name, version|
       latest_commit = fetch_commit_for(app_name, version)
 
-      [app_name, latest_commit]
-    end
+      latest_commit ? [app_name, latest_commit] : nil
+    }.compact
   end
 
   def build_status

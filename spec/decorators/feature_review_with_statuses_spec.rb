@@ -73,6 +73,25 @@ RSpec.describe FeatureReviewWithStatuses do
         .and_return(dependent_commits_2)
     end
 
+    context 'when one of the app latest commit is not an existing commit' do
+      let(:dependent_commits_1) { [] }
+      let(:dependent_commits_2) { [] }
+      let(:expected_results) do
+        [
+          [app_names.first, commit_1],
+        ]
+      end
+
+      before do
+        allow(repository).to receive(:commit_for_version).with(versions.first).and_return(commit_1)
+        allow(repository).to receive(:commit_for_version).with(versions.second).and_return(nil)
+      end
+
+      it 'returns the expected results for the existing commit only' do
+        expect(decorator.apps_with_latest_commit).to eq(expected_results)
+      end
+    end
+
     context 'when the latest commit is not a merge commit' do
       let(:dependent_commits_1) { [] }
       let(:dependent_commits_2) { [] }
