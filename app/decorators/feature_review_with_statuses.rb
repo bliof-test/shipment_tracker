@@ -105,12 +105,12 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def fetch_commit_for(app_name, version)
     git_repository_loader = git_repository_loader_for(app_name)
-    dependent_commits(git_repository_loader, version)&.first ||
+    descendant_commits(git_repository_loader, version)&.first ||
       commit_for_version(git_repository_loader, version)
   end
 
-  def dependent_commits(loader, version)
-    loader.get_dependent_commits(version).presence
+  def descendant_commits(loader, version)
+    loader.get_descendant_commits_of_branch(version).presence
   end
 
   def commit_for_version(loader, version)
