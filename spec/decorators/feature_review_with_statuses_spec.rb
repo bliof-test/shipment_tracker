@@ -67,9 +67,9 @@ RSpec.describe FeatureReviewWithStatuses do
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
       allow(repository_loader).to receive(:load).and_return(repository)
 
-      allow(repository).to receive(:get_dependent_commits).with(versions.first)
+      allow(repository).to receive(:get_descendant_commits_of_branch).with(versions.first)
         .and_return(dependent_commits_1)
-      allow(repository).to receive(:get_dependent_commits).with(versions.second)
+      allow(repository).to receive(:get_descendant_commits_of_branch).with(versions.second)
         .and_return(dependent_commits_2)
     end
 
