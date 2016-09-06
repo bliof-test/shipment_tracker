@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 require 'git_commit'
-require 'honeybadger'
 require 'rugged'
 
 class GitRepository
@@ -115,17 +114,8 @@ class GitRepository
     return true unless parent_commit
 
     walker = get_walker(main_branch.target_id, parent_commit.oid, simplify: true)
-
-    begin
-      walker.first.oid.start_with? commit_oid
-    rescue NoMethodError => error
-      Honeybadger.notify(error, context: {
-                           target_commit: commit_oid,
-                           master_head: main_branch.target_id,
-                           parent_commit: parent_commit.oid,
-                         })
-      false
-    end
+    first_walker_commit = walker.first
+    first_walker_commit.nil? ? false : first_walker_commit.oid.start_with?(commit_oid)
   end
 
   private
