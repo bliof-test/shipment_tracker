@@ -1,6 +1,6 @@
 # Shipment Tracker <sup>*:sparkles:[See the wiki for usage docs][wiki]:sparkles:*</sup>
 
-[![Circle CI](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master.svg?style=shield)](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master)
+[![CircleCI](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master.svg?style=shield)](https://circleci.com/gh/FundingCircle/shipment_tracker/tree/master)
 [![Code Climate](https://codeclimate.com/github/FundingCircle/shipment_tracker/badges/gpa.svg)](https://codeclimate.com/github/FundingCircle/shipment_tracker)
 [![Test Coverage](https://codeclimate.com/github/FundingCircle/shipment_tracker/badges/coverage.svg)](https://codeclimate.com/github/FundingCircle/shipment_tracker/coverage)
 [![Dependency Status](https://gemnasium.com/badges/github.com/FundingCircle/shipment_tracker.svg)](https://gemnasium.com/github.com/FundingCircle/shipment_tracker)
