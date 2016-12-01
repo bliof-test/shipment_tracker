@@ -51,21 +51,28 @@ RSpec.describe HandlePushEvent do
   end
 
   describe 'updating remote head' do
+    it 'fails when repo not found' do
+      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
+
+      result = HandlePushEvent.run(payload)
+      expect(result).to fail_with(:repo_not_found)
+    end
+
     it 'updates the corresponding repository location' do
       allow_any_instance_of(CommitStatus).to receive(:not_found)
 
       git_repository_location = instance_double(GitRepositoryLocation)
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
 
+      git_repository_loader = instance_double(GitRepositoryLoader)
+      git_repository = instance_double(GitRepository)
+
+      allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
+      allow(git_repository_loader).to receive(:load) { git_repository }
+      allow(git_repository).to receive(:commit_on_master?) { false }
+
       expect(git_repository_location).to receive(:update).with(remote_head: 'fca1234')
       HandlePushEvent.run(payload)
-    end
-
-    it 'fails when repo not found' do
-      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
-
-      result = HandlePushEvent.run(payload)
-      expect(result).to fail_with(:repo_not_found)
     end
   end
 
@@ -78,6 +85,13 @@ RSpec.describe HandlePushEvent do
 
     it 'resets the GitHub commit status' do
       allow_any_instance_of(CommitStatus).to receive(:not_found)
+
+      git_repository_loader = instance_double(GitRepositoryLoader)
+      git_repository = instance_double(GitRepository)
+
+      allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
+      allow(git_repository_loader).to receive(:load) { git_repository }
+      allow(git_repository).to receive(:commit_on_master?) { false }
 
       expect_any_instance_of(CommitStatus).to receive(:reset).with(
         full_repo_name: payload.full_repo_name,
@@ -100,18 +114,46 @@ RSpec.describe HandlePushEvent do
   end
 
   describe 'relinking tickets' do
+    let(:ticket_repo) { instance_double(Repositories::TicketRepository, tickets_for_versions: tickets) }
+    let(:git_repo_loader) { instance_double(GitRepositoryLoader) }
+    let(:git_repo) { instance_double(GitRepository) }
+    let(:on_master) { false }
+    let(:tickets) { [double] }
+
     before do
       git_repository_location = instance_double(GitRepositoryLocation, update: nil)
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
       allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repo)
+      allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repo_loader }
+      allow(git_repo_loader).to receive(:load) { git_repo }
+      allow(git_repo).to receive(:commit_on_master?) { on_master }
     end
-
-    let(:ticket_repo) { instance_double(Repositories::TicketRepository, tickets_for_versions: tickets) }
-    let(:tickets) { [] }
 
     context 'when new branch created' do
       let(:payload_data) { default_payload_data.merge('created' => true) }
-      let(:tickets) { [double] }
+
+      before do
+        allow_any_instance_of(CommitStatus).to receive(:not_found)
+      end
+
+      it 'does not re-link' do
+        expect(JiraClient).not_to receive(:post_comment)
+
+        HandlePushEvent.run(payload)
+      end
+
+      it 'posts not found status' do
+        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+          full_repo_name: 'owner/repo_name',
+          sha: 'def1234',
+        )
+
+        HandlePushEvent.run(payload)
+      end
+    end
+
+    context 'when commit is already on master' do
+      let(:on_master) { true }
 
       before do
         allow_any_instance_of(CommitStatus).to receive(:not_found)
@@ -135,6 +177,7 @@ RSpec.describe HandlePushEvent do
 
     context 'when there are no previously linked tickets' do
       let(:tickets) { [] }
+
       before do
         allow_any_instance_of(CommitStatus).to receive(:not_found)
       end
