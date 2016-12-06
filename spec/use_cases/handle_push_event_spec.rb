@@ -51,48 +51,56 @@ RSpec.describe HandlePushEvent do
   end
 
   describe 'updating remote head' do
-    it 'fails when repo not found' do
-      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
+    context 'when repo not found' do
+      before do
+        allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(nil)
+      end
 
-      result = HandlePushEvent.run(payload)
-      expect(result).to fail_with(:repo_not_found)
+      it 'fails' do
+        result = HandlePushEvent.run(payload)
+        expect(result).to fail_with(:repo_not_found)
+      end
     end
 
-    it 'updates the corresponding repository location' do
-      allow_any_instance_of(CommitStatus).to receive(:not_found)
+    context 'repo exists' do
+      let(:git_repository_location) { instance_double(GitRepositoryLocation) }
+      let(:git_repository_loader) { instance_double(GitRepositoryLoader) }
+      let(:git_repository) { instance_double(GitRepository) }
 
-      git_repository_location = instance_double(GitRepositoryLocation)
-      allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
+      before do
+        allow_any_instance_of(CommitStatus).to receive(:not_found)
 
-      git_repository_loader = instance_double(GitRepositoryLoader)
-      git_repository = instance_double(GitRepository)
+        allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
 
-      allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
-      allow(git_repository_loader).to receive(:load) { git_repository }
-      allow(git_repository).to receive(:commit_on_master?) { false }
+        allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
+        allow(git_repository_loader).to receive(:load) { git_repository }
+        allow(git_repository).to receive(:commit_on_master?) { false }
+      end
 
-      expect(git_repository_location).to receive(:update).with(remote_head: 'fca1234')
-      HandlePushEvent.run(payload)
+      it 'updates the corresponding repository location' do
+        expect(git_repository_location).to receive(:update).with(remote_head: 'fca1234')
+        HandlePushEvent.run(payload)
+      end
     end
   end
 
   describe 'resetting commit status' do
+    let(:git_repository_location) { instance_double(GitRepositoryLocation) }
+    let(:git_repository_loader) { instance_double(GitRepositoryLoader) }
+    let(:git_repository) { instance_double(GitRepository) }
+
     before do
-      git_repository_location = instance_double(GitRepositoryLocation)
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
       allow(git_repository_location).to receive(:update)
-    end
 
-    it 'resets the GitHub commit status' do
       allow_any_instance_of(CommitStatus).to receive(:not_found)
-
-      git_repository_loader = instance_double(GitRepositoryLoader)
-      git_repository = instance_double(GitRepository)
 
       allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
       allow(git_repository_loader).to receive(:load) { git_repository }
       allow(git_repository).to receive(:commit_on_master?) { false }
+    end
 
+    it 'resets the GitHub commit status' do
       expect_any_instance_of(CommitStatus).to receive(:reset).with(
         full_repo_name: payload.full_repo_name,
         sha: payload.after_sha,
