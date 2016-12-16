@@ -7,6 +7,13 @@ module Pages
     )
   end
 
+  def edit_git_repository_location_page
+    Pages::EditGitRepositoryLocationPage.new(
+      page: page,
+      url_helpers: Rails.application.routes.url_helpers,
+    )
+  end
+
   def prepare_feature_review_page
     Pages::PrepareFeatureReviewPage.new(
       page: page,

@@ -24,4 +24,27 @@ module Pages
 
     attr_reader :page, :url_helpers
   end
+
+  class EditGitRepositoryLocationPage
+    def initialize(page:, url_helpers:)
+      @page        = page
+      @url_helpers = url_helpers
+    end
+
+    def visit(application)
+      page.visit url_helpers.edit_git_repository_location_path(application)
+    end
+
+    def fill_in_repo_owners(repo_owners:)
+      page.fill_in 'Repo Owners', with: repo_owners
+    end
+
+    def click(button)
+      page.click_link_or_button(button)
+    end
+
+    private
+
+    attr_reader :page, :url_helpers
+  end
 end

@@ -24,6 +24,7 @@ module Support
       @reviews = {}
       @review_urls = {}
       @stubbed_requests = {}
+      @repository_locations = {}
     end
 
     def setup_application(name)
@@ -36,11 +37,25 @@ module Support
       @application = name
       @repos[name] = test_repo
 
-      GitRepositoryLocation.create(uri: test_repo.uri, name: name)
+      @repository_locations[name] = GitRepositoryLocation.create(uri: test_repo.uri, name: name)
+    end
+
+    def add_owner_to(repository_location, owners)
+      result = Forms::EditGitRepositoryLocationForm.new(
+        repo: repository_location,
+        current_user: User.new(email: 'current-user@example.com'),
+        params: { repo_owners: owners },
+      ).call
+
+      fail "Could not add owners #{owners} to #{repository_location.name}" unless result
     end
 
     def repository_for(application)
       @repos[application]
+    end
+
+    def repository_location_for(application)
+      @repository_locations[application]
     end
 
     def resolve_version(version)

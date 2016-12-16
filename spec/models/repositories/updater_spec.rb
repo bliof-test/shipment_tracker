@@ -16,17 +16,22 @@ RSpec.describe Repositories::Updater do
       expect(Repositories::Updater.from_rails_config).to eq(expected_updater)
     end
   end
+
   let(:repository_1) {
-    instance_double(Repositories::BuildRepository,
+    instance_double(
+      Repositories::BuildRepository,
       'repository_1',
       store: Snapshots::Build,
-      table_name: 'tbl_1')
+      table_name: 'tbl_1',
+    )
   }
   let(:repository_2) {
-    instance_double(Repositories::DeployRepository,
+    instance_double(
+      Repositories::DeployRepository,
       'repository_2',
       store: Snapshots::Deploy,
-      table_name: 'tbl_2')
+      table_name: 'tbl_2',
+    )
   }
   let(:repositories) { [repository_1, repository_2] }
 
@@ -107,6 +112,28 @@ RSpec.describe Repositories::Updater do
         updater.run
       end
     end
+
+    context 'with repositories that do not run in the background' do
+      it 'will not apply any events' do
+        create(:repo_ownership_event)
+
+        repository = Repositories::RepoOwnershipRepository.new
+
+        expect(repository).not_to receive(:apply)
+
+        Repositories::Updater.new([repository]).run
+      end
+
+      it 'will apply events if the force option is set' do
+        create(:repo_ownership_event)
+
+        repository = Repositories::RepoOwnershipRepository.new
+
+        expect(repository).to receive(:apply).and_return(true)
+
+        Repositories::Updater.new([repository]).run({}, true)
+      end
+    end
   end
 
   describe '#reset' do
@@ -137,6 +164,25 @@ RSpec.describe Repositories::Updater do
       expect(repository_2).to receive(:apply).with(events[1]).ordered
 
       updater.run
+    end
+  end
+
+  describe '#recreate' do
+    it 'resets and forces a run' do
+      event = create(:repo_ownership_event)
+
+      repository = Repositories::RepoOwnershipRepository.new
+      allow(repository).to receive(:apply)
+
+      Repositories::Updater.new([repository]).run({}, true)
+
+      last_updated_event = Snapshots::EventCount.last
+
+      expect(repository).to receive(:apply).with(event)
+      Repositories::Updater.new([repository]).recreate
+
+      # Make sure that there was a reset
+      expect(Snapshots::EventCount.find_by_id(last_updated_event.id)).to be_blank
     end
   end
 end
