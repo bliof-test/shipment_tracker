@@ -35,15 +35,12 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   end
 
   describe '.app_remote_head_hash' do
-    let(:app_locations) {
-      [
-        GitRepositoryLocation.new(name: 'app1', remote_head: 'abc123'),
-        GitRepositoryLocation.new(name: 'app2', remote_head: 'abc456'),
-      ]
-    }
+    before do
+      GitRepositoryLocation.create(name: 'app1', remote_head: 'abc123', uri: '/app1')
+      GitRepositoryLocation.create(name: 'app2', remote_head: 'abc456', uri: '/app2')
+    end
 
     it 'returns a hash of app names and remote head locations' do
-      allow(GitRepositoryLocation).to receive(:all).and_return(app_locations)
       expect(GitRepositoryLocation.app_remote_head_hash).to eql('app1' => 'abc123', 'app2' => 'abc456')
     end
   end

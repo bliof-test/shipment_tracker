@@ -35,7 +35,7 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
 
   def self.app_remote_head_hash
-    all.each_with_object({}) { |repo, repo_hash| repo_hash[repo.name] = repo.remote_head }
+    all.pluck(:name, :remote_head).to_h
   end
 
   def self.repo_tracked?(full_repo_name)
