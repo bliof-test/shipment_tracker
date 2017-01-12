@@ -31,7 +31,7 @@ class GitRepositoryLocation < ActiveRecord::Base
   end
 
   def self.find_by_full_repo_name(repo_name)
-    find_by('uri LIKE ?', "%#{repo_name}%")
+    find_by('uri LIKE ?', "%#{repo_name}.git")
   end
 
   def self.app_remote_head_hash

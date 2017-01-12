@@ -105,6 +105,8 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
   describe '.find_by_full_repo_name' do
     context 'when a GitRepositoryLocation exists with the same name' do
       it 'returns a GitRepositoryLocation' do
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/repo-frontend.git')
+        GitRepositoryLocation.create(uri: 'git@github.com:owner/old-repo-frontend.git')
         repo_location = GitRepositoryLocation.create(uri: 'git@github.com:owner/repo.git')
 
         result = GitRepositoryLocation.find_by_full_repo_name('owner/repo')
