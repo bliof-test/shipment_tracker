@@ -16,6 +16,7 @@ module Queries
       @manual_test_repository = Repositories::ManualTestRepository.new
       @ticket_repository = Repositories::TicketRepository.new
       @uatest_repository = Repositories::UatestRepository.new
+      @release_exception_repository = Repositories::ReleaseExceptionRepository.new
       @feature_review = feature_review
       @time = at
 
@@ -24,7 +25,7 @@ module Queries
 
     private
 
-    attr_reader :build_repository, :deploy_repository, :manual_test_repository,
+    attr_reader :build_repository, :deploy_repository, :manual_test_repository, :release_exception_repository,
       :ticket_repository, :uatest_repository, :feature_review, :time
 
     def build_feature_review_with_statuses
@@ -33,6 +34,7 @@ module Queries
         builds: builds,
         deploys: deploys,
         qa_submission: qa_submission,
+        release_exception: release_exception,
         tickets: tickets,
         uatest: uatest,
         at: time,
@@ -54,6 +56,12 @@ module Queries
 
     def qa_submission
       manual_test_repository.qa_submission_for(
+        versions: feature_review.versions,
+        at: time)
+    end
+
+    def release_exception
+      release_exception_repository.release_exception_for(
         versions: feature_review.versions,
         at: time)
     end

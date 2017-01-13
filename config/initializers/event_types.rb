@@ -32,4 +32,8 @@ Rails.application.config.event_types = [
     name: 'Repo Ownership',
     endpoint: 'repo_ownership',
     event_class: Events::RepoOwnershipEvent, internal: true),
+  EventType.new(
+    name: 'Project Owner Exception',
+    endpoint: 'release_exception',
+    event_class: Events::ReleaseExceptionEvent, internal: true),
 ]

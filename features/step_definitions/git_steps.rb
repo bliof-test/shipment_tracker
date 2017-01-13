@@ -2,6 +2,10 @@
 require 'support/git_test_repository'
 require 'time'
 
+Given 'an application with owner "$repo_owner_email" called "$name"' do |repo_owner_email, name|
+  scenario_context.setup_application(name, owners: repo_owner_email)
+end
+
 Given 'an application called "$name"' do |name|
   scenario_context.setup_application(name)
 end

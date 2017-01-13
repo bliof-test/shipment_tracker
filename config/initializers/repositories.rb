@@ -4,6 +4,7 @@ Rails.configuration.repositories = [
   Repositories::DeployRepository.new,
   Repositories::BuildRepository.new,
   Repositories::ManualTestRepository.new,
+  Repositories::ReleaseExceptionRepository.new,
   Repositories::TicketRepository.new,
 
   # ReleasedTickets repo depends on DeployRepository

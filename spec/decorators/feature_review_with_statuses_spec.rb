@@ -7,6 +7,7 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:builds) { double(:builds) }
   let(:deploys) { double(:deploys) }
   let(:qa_submission) { double(:qa_submission) }
+  let(:release_exception) { double(:release_exception) }
   let(:uatest) { double(:uatest) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
   let(:app_names) { apps.keys }
@@ -23,6 +24,7 @@ RSpec.describe FeatureReviewWithStatuses do
       feature_review,
       builds: builds,
       deploys: deploys,
+      release_exception: release_exception,
       qa_submission: qa_submission,
       tickets: tickets,
       uatest: uatest,
@@ -30,21 +32,23 @@ RSpec.describe FeatureReviewWithStatuses do
     )
   }
 
-  it 'returns #builds, #deploys, #qa_submission, #tickets, #uatest and #time as initialized' do
+  it 'returns all necessary fields as initialized' do
     expect(decorator.builds).to eq(builds)
     expect(decorator.deploys).to eq(deploys)
+    expect(decorator.release_exception).to eq(release_exception)
     expect(decorator.qa_submission).to eq(qa_submission)
     expect(decorator.tickets).to eq(tickets)
     expect(decorator.uatest).to eq(uatest)
     expect(decorator.time).to eq(query_time)
   end
 
-  context 'when initialized without builds, deploys, qa_submission, tickets, uatest and time' do
+  context 'when initialized without parameters' do
     let(:decorator) { described_class.new(feature_review) }
 
     it 'returns default values for #builds, #deploys, #qa_submission, #tickets, #uatest and #time' do
       expect(decorator.builds).to eq({})
       expect(decorator.deploys).to eq([])
+      expect(decorator.release_exception).to eq(nil)
       expect(decorator.qa_submission).to eq(nil)
       expect(decorator.tickets).to eq([])
       expect(decorator.uatest).to eq(nil)
@@ -213,6 +217,32 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
+  describe '#release_exception_status' do
+    context 'when the project owner has approved the feature_review' do
+      let(:release_exception) { ReleaseException.new(approved: true) }
+
+      it 'returns :success' do
+        expect(decorator.release_exception_status).to eq(:success)
+      end
+    end
+
+    context 'when the project owner has rejected the feature_review' do
+      let(:release_exception) { ReleaseException.new(approved: false) }
+
+      it 'returns :failure' do
+        expect(decorator.release_exception_status).to eq(:failure)
+      end
+    end
+
+    context 'when the release_exception is missing' do
+      let(:release_exception) { nil }
+
+      it 'returns nil' do
+        expect(decorator.release_exception_status).to be nil
+      end
+    end
+  end
+
   describe '#qa_status' do
     context 'when QA submission is accepted' do
       let(:qa_submission) { QaSubmission.new(accepted: true) }
@@ -298,7 +328,11 @@ RSpec.describe FeatureReviewWithStatuses do
   end
 
   describe '#authorised?' do
-    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).authorised? }
+    let(:feature_review_with_statuses) {
+      FeatureReviewWithStatuses.new(feature_review, tickets: tickets)
+    }
+
+    subject { feature_review_with_statuses.authorised? }
 
     context 'when there are no tickets' do
       let(:tickets) { [] }
@@ -322,7 +356,22 @@ RSpec.describe FeatureReviewWithStatuses do
           instance_double(Ticket, authorised?: true),
         ]
       }
+
       it { is_expected.to be false }
+
+      context 'but it is approved by the project owner' do
+        let(:release_exception) { instance_double(ReleaseException, approved?: true) }
+        let(:feature_review_with_statuses) {
+          FeatureReviewWithStatuses.new(
+            feature_review,
+            tickets: tickets,
+            release_exception: release_exception)
+        }
+
+        subject { feature_review_with_statuses.authorised? }
+
+        it { is_expected.to be true }
+      end
     end
   end
 
@@ -337,8 +386,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when any associated tickets are not approved' do
       let(:tickets) {
         [
-          instance_double(Ticket, approved?: false),
-          instance_double(Ticket, approved?: true),
+          instance_double(Ticket, approved?: false, authorised?: false),
+          instance_double(Ticket, approved?: true, authorised?: true),
         ]
       }
       it { is_expected.to be :not_approved }
@@ -363,18 +412,33 @@ RSpec.describe FeatureReviewWithStatuses do
       }
       it { is_expected.to be :requires_reapproval }
     end
+
+    context 'when it is approved by a repo owner' do
+      let(:release_exception) { ReleaseException.new(approved: true) }
+      let(:feature_review_with_statuses) {
+        FeatureReviewWithStatuses.new(
+          feature_review,
+          tickets: tickets,
+          release_exception: release_exception,
+        )
+      }
+
+      subject { feature_review_with_statuses.authorisation_status }
+
+      it { is_expected.to be :approved }
+    end
   end
 
-  describe '#tickets_approved_at' do
-    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).tickets_approved_at }
+  describe '#approved_at' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).approved_at }
 
     let(:approval_time) { Time.current }
 
     context 'when all associated tickets are approved' do
       let(:tickets) {
         [
-          instance_double(Ticket, approved?: true, approved_at: approval_time),
-          instance_double(Ticket, approved?: true, approved_at: approval_time - 1.hour),
+          instance_double(Ticket, approved?: true, approved_at: approval_time, authorised?: true),
+          instance_double(Ticket, approved?: true, approved_at: approval_time - 1.hour, authorised?: true),
         ]
       }
 
@@ -386,12 +450,28 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when any associated tickets are not approved' do
       let(:tickets) {
         [
-          instance_double(Ticket, approved?: false, approved_at: nil),
-          instance_double(Ticket, approved?: true, approved_at: approval_time),
+          instance_double(Ticket, approved?: false, approved_at: nil, authorised?: false),
+          instance_double(Ticket, approved?: true, approved_at: approval_time, authorised?: false),
         ]
       }
 
       it { is_expected.to be_nil }
+
+      context 'when there is a release_exception_status' do
+        let(:release_exception) { ReleaseException.new(approved: true, submitted_at: approval_time) }
+
+        subject {
+          FeatureReviewWithStatuses.new(
+            feature_review,
+            tickets: tickets,
+            release_exception: release_exception,
+          ).approved_at
+        }
+
+        it 'returns the approval time of the ticket that was approved last' do
+          expect(subject).to eq(approval_time)
+        end
+      end
     end
   end
 

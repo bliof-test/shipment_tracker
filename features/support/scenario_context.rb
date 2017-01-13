@@ -27,7 +27,7 @@ module Support
       @repository_locations = {}
     end
 
-    def setup_application(name)
+    def setup_application(name, owners: nil)
       return if @repos.key?(name)
 
       dir = "#{Dir.mktmpdir}/#{name}"
@@ -38,9 +38,10 @@ module Support
       @repos[name] = test_repo
 
       @repository_locations[name] = GitRepositoryLocation.create(uri: test_repo.uri, name: name)
+      add_owners_to(@repository_locations[name], owners: owners) if owners.present?
     end
 
-    def add_owner_to(repository_location, owners)
+    def add_owners_to(repository_location, owners:)
       result = Forms::EditGitRepositoryLocationForm.new(
         repo: repository_location,
         current_user: User.new(email: 'current-user@example.com'),

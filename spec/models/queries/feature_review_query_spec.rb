@@ -8,12 +8,14 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:manual_test_repository) { instance_double(Repositories::ManualTestRepository) }
   let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
   let(:uatest_repository) { instance_double(Repositories::UatestRepository) }
+  let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
 
   let(:expected_builds) { double('expected builds') }
   let(:expected_deploys) { double('expected deploys') }
   let(:expected_qa_submission) { double('expected qa submission') }
   let(:expected_tickets) { double('expected tickets') }
   let(:expected_uatest) { double('uatest') }
+  let(:expected_release_exception) { double('release_exception') }
 
   let(:expected_apps) { { 'app1' => '123' } }
   let(:expected_uat_host) { 'uat.example.com' }
@@ -31,6 +33,7 @@ RSpec.describe Queries::FeatureReviewQuery do
     allow(Repositories::ManualTestRepository).to receive(:new).and_return(manual_test_repository)
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
     allow(Repositories::UatestRepository).to receive(:new).and_return(uatest_repository)
+    allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(release_exception_repository)
 
     allow(build_repository).to receive(:builds_for)
       .with(apps: expected_apps, at: time)
@@ -41,6 +44,9 @@ RSpec.describe Queries::FeatureReviewQuery do
     allow(manual_test_repository).to receive(:qa_submission_for)
       .with(versions: expected_apps.values, at: time)
       .and_return(expected_qa_submission)
+    allow(release_exception_repository).to receive(:release_exception_for)
+      .with(versions: expected_apps.values, at: time)
+      .and_return(expected_release_exception)
     allow(ticket_repository).to receive(:tickets_for_path)
       .with(feature_review.path, at: time)
       .and_return(expected_tickets)
@@ -58,6 +64,7 @@ RSpec.describe Queries::FeatureReviewQuery do
           deploys: expected_deploys,
           qa_submission: expected_qa_submission,
           tickets: expected_tickets,
+          release_exception: expected_release_exception,
           uatest: expected_uatest,
           at: time,
         )

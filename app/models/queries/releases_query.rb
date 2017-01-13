@@ -14,6 +14,7 @@ module Queries
 
       @deploy_repository = Repositories::DeployRepository.new
       @ticket_repository = Repositories::TicketRepository.new
+      @exception_repository = Repositories::ReleaseExceptionRepository.new
       @feature_review_factory = Factories::FeatureReviewFactory.new
 
       @pending_releases = []
@@ -28,7 +29,7 @@ module Queries
 
     private
 
-    attr_reader :app_name, :deploy_repository, :feature_review_factory, :git_repository, :ticket_repository
+    attr_reader :app_name, :deploy_repository, :feature_review_factory
 
     def production_deploys
       @production_deploys ||= deploy_repository
@@ -44,7 +45,11 @@ module Queries
     end
 
     def tickets
-      @tickets ||= ticket_repository.tickets_for_versions(associated_versions)
+      @tickets ||= @ticket_repository.tickets_for_versions(associated_versions)
+    end
+
+    def release_exception(versions)
+      @exception_repository.release_exception_for(versions: versions)
     end
 
     def associated_versions
@@ -88,6 +93,7 @@ module Queries
       FeatureReviewWithStatuses.new(
         feature_review,
         tickets: tickets.select { |t| t.paths.include?(feature_review.path) },
+        release_exception: release_exception(feature_review.versions),
       )
     end
   end

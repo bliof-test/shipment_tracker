@@ -13,6 +13,7 @@ RSpec.describe Queries::ReleasesQuery do
 
   let(:deploy_repository) { instance_double(Repositories::DeployRepository) }
   let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
+  let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
   let(:git_repository) { instance_double(GitRepository) }
 
   let(:app_name) { 'foo' }
@@ -57,12 +58,15 @@ RSpec.describe Queries::ReleasesQuery do
   before do
     allow(Repositories::DeployRepository).to receive(:new).and_return(deploy_repository)
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
+    allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(release_exception_repository)
     allow(git_repository).to receive(:recent_commits_on_main_branch).with(50).and_return(commits)
     allow(deploy_repository).to receive(:deploys_for_versions)
       .with(versions, environment: 'production', region: 'gb')
       .and_return(deploys)
     allow(ticket_repository).to receive(:tickets_for_versions).with(associated_versions)
       .and_return(tickets)
+    allow(release_exception_repository).to receive(:release_exception_for).with(any_args)
+      .and_return(nil)
   end
 
   describe '#versions' do
@@ -104,7 +108,7 @@ RSpec.describe Queries::ReleasesQuery do
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])
       expect(deployed_releases.map(&:authorised?)).to eq([true, false])
       expect(deployed_releases.map(&:feature_reviews)).to eq([[authorised_feature_review], []])
-      expect(deployed_releases.map(&:feature_reviews).flatten.first.tickets_approved_at).to eq(approval_time)
+      expect(deployed_releases.map(&:feature_reviews).flatten.first.approved_at).to eq(approval_time)
     end
   end
 end

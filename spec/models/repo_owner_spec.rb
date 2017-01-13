@@ -46,8 +46,7 @@ RSpec.describe RepoOwner do
       repo_owner = FactoryGirl.build(:repo_owner)
       repo = double('Repo')
 
-      expect_any_instance_of(Repositories::RepoOwnershipRepository)
-        .to receive(:owners_of).with(repo).and_return([repo_owner])
+      expect(repo).to receive(:owners).and_return([repo_owner])
 
       expect(repo_owner.owner_of?(repo)).to eq(true)
     end
@@ -56,8 +55,7 @@ RSpec.describe RepoOwner do
       repo_owner = FactoryGirl.build(:repo_owner)
       repo = double('Repo')
 
-      expect_any_instance_of(Repositories::RepoOwnershipRepository)
-        .to receive(:owners_of).with(repo).and_return([])
+      expect(repo).to receive(:owners).and_return([])
 
       expect(repo_owner.owner_of?(repo)).to eq(false)
     end
