@@ -146,18 +146,19 @@
           = simple_format(@feature_review_with_statuses.release_exception.comment, class: 'repo-owner-comment')
         - else
           No unapproved deployment exception explanation by a Repo Owner
-      .panel-footer
-        = form_tag(events_path(type: 'release_exception', return_to: @return_to), method: 'post') do
-          - @feature_review_with_statuses.app_versions.each do |app_name, version|
-            = hidden_field_tag('apps[][name]', app_name)
-            = hidden_field_tag('apps[][version]', version)
-          %label.radio-inline.feature-review-accept
-            = radio_button_tag 'status', 'approved', false, required: true
-            Approve
-          %label.radio-inline.feature-review-reject
-            = radio_button_tag 'status', 'declined', false, required: true
-            Decline
-          .form-group
-            = label_tag('comment', 'Comment', class: 'control-label sr-only')
-            = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
-          = submit_tag('Submit', class: 'btn btn-primary')
+      - if owner_of_any_repo?(current_user, @feature_review_with_statuses)
+        .panel-footer
+          = form_tag(events_path(type: 'release_exception', return_to: @return_to), method: 'post') do
+            - @feature_review_with_statuses.app_versions.each do |app_name, version|
+              = hidden_field_tag('apps[][name]', app_name)
+              = hidden_field_tag('apps[][version]', version)
+            %label.radio-inline.feature-review-accept
+              = radio_button_tag 'status', 'approved', false, required: true
+              Approve
+            %label.radio-inline.feature-review-reject
+              = radio_button_tag 'status', 'declined', false, required: true
+              Decline
+            .form-group
+              = label_tag('comment', 'Comment', class: 'control-label sr-only')
+              = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
+            = submit_tag('Submit', class: 'btn btn-primary')

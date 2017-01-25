@@ -40,6 +40,11 @@ module FeatureReviewsHelper
     end
   end
 
+  def owner_of_any_repo?(user, feature_review)
+    repos = GitRepositoryLocation.where(name: feature_review.app_names)
+    repos.any? { |repo| user.owner_of?(repo) }
+  end
+
   def to_link(url, options = {})
     link_to url, Addressable::URI.heuristic_parse(url).to_s, options
   end
