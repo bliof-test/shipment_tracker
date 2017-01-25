@@ -23,5 +23,5 @@
     %tr
       %td= git_repository_location.name
       %td= git_repository_location.uri
-      %td= RepoOwner.to_mail_address_list(git_repository_location.owners).format
+      %td= format_owner_emails(git_repository_location.owners)
       %td= link_to 'edit', edit_git_repository_location_path(git_repository_location)
