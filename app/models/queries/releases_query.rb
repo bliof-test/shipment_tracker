@@ -80,6 +80,11 @@ module Queries
                                   .select { |fr| (fr.versions & commit.associated_ids).present? }
                                   .map { |fr| decorate_feature_review(fr) }
 
+      if decorated_feature_reviews.empty?
+        new_feature_review = feature_review_factory.create_from_version(app_name, commit.id)
+        decorated_feature_reviews << decorate_feature_review(new_feature_review)
+      end
+
       Release.new(
         commit: commit,
         production_deploy_time: deploy&.deployed_at,

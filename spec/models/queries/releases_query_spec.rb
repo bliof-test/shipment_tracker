@@ -95,19 +95,29 @@ RSpec.describe Queries::ReleasesQuery do
   end
 
   describe '#deployed_releases' do
-    subject(:deployed_releases) { releases_query.deployed_releases }
-    it 'returns list of releases deployed to production in region "gb"' do
-      authorised_feature_review = FeatureReview.new(
+    let(:authorised_feature_review) {
+      FeatureReview.new(
         versions: approved_ticket.versions,
         path: approved_ticket.paths.first,
       )
+    }
 
+    let(:new_feature_review_for_unauthorised_deploy) {
+      FeatureReview.new(versions: ['ghi'], path: '/feature_reviews?apps%5Bfoo%5D=ghi')
+    }
+
+    subject(:deployed_releases) { releases_query.deployed_releases }
+    it 'returns list of releases deployed to production in region "gb"' do
       expect(deployed_releases.map(&:version)).to eq(%w(def ghi))
       expect(deployed_releases.map(&:subject)).to eq(['merge commit', 'first commit on master branch'])
       expect(deployed_releases.map(&:production_deploy_time)).to eq([deploy_time, nil])
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])
       expect(deployed_releases.map(&:authorised?)).to eq([true, false])
-      expect(deployed_releases.map(&:feature_reviews)).to eq([[authorised_feature_review], []])
+
+      expect(deployed_releases.map(&:feature_reviews)).to eq(
+        [[authorised_feature_review], [new_feature_review_for_unauthorised_deploy]],
+      )
+
       expect(deployed_releases.map(&:feature_reviews).flatten.first.approved_at).to eq(approval_time)
     end
   end

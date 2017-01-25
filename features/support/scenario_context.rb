@@ -141,6 +141,10 @@ module Support
       feature_review_path(review[:apps_hash], review[:uat_url], time)
     end
 
+    def new_review_path(version)
+      Factories::FeatureReviewFactory.new.create_from_version(@application, version).path
+    end
+
     def post_event(type, payload)
       OmniAuth.config.test_mode = true
       OmniAuth.config.mock_auth[:event_token] = OmniAuth::AuthHash.new(provider: 'event_token', uid: type)

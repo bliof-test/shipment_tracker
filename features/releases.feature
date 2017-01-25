@@ -82,8 +82,8 @@ Scenario: Viewing releases for an app
     | version  | subject                    | feature reviews | review statuses       | review times          | approved | last deployed at |
     | #master3 | sneaky commit              | FR_789          | Approved              | 2014-10-05 11:03:45   | yes      | 2014-10-05 11:54 |
     | #merge1  | Merge feature1 into master | FR_ONE          | Not approved          |                       | no       | 2014-10-01 17:34 |
-    | #master2 | historic commit            |                 |                       |                       | no       |                  |
-    | #master1 | initial commit             |                 |                       |                       | no       | 2014-09-28 11:37 |
+    | #master2 | historic commit            |                 | Not approved          |                       | no       |                  |
+    | #master1 | initial commit             |                 | Not approved          |                       | no       | 2014-09-28 11:37 |
 
 Scenario: Release requires re-approval
   Given an application called "frontend"
