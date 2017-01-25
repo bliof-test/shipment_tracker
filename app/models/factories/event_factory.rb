@@ -12,7 +12,7 @@ module Factories
     def create(endpoint, payload, user_email)
       type = event_type_repository.find_by_endpoint(endpoint)
       details = decorate_with_email(payload, type, user_email)
-      type.event_class.create(details: details)
+      type.event_class.create!(details: details)
     end
 
     private

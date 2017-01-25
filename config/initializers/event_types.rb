@@ -28,4 +28,8 @@ Rails.application.config.event_types = [
     name: 'Manual test',
     endpoint: 'manual_test',
     event_class: Events::ManualTestEvent, internal: true),
+  EventType.new(
+    name: 'Repo Ownership',
+    endpoint: 'repo_ownership',
+    event_class: Events::RepoOwnershipEvent, internal: true),
 ]

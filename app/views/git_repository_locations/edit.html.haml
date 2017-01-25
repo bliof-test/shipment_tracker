@@ -1,0 +1,15 @@
+- title @repository_name
+
+= form_for(@form, url: git_repository_location_path(@form.git_repository_location), method: :patch) do |f|
+  = form_errors(@form)
+
+  .form-group
+    %strong Git URI
+    %span.form-control.cursor-none{disabled: true}= @repository_uri
+
+  .form-group
+    = f.label(:repo_owners, class: 'control-label')
+    = f.text_area(:repo_owners, placeholder: "John Doe <repo-owner@example.com>\nsecond-repo-owner@example.com, third-repo-owner@example.com", value: @form.repo_owners_data, class: 'form-control', rows: 5)
+
+  .form-group
+    = f.submit('Update Git Repository', class: 'btn btn-primary')

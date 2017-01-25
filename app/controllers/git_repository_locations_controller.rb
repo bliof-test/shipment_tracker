@@ -22,7 +22,37 @@ class GitRepositoryLocationsController < ApplicationController
     end
   end
 
+  def edit
+    load_edit_env
+
+    @form = form_for(@git_repository_location)
+  end
+
+  def update
+    load_edit_env
+
+    edit_params = params.require(:forms_edit_git_repository_location_form).permit(:repo_owners)
+    @form = form_for(@git_repository_location, edit_params)
+
+    if @form.call
+      flash[:success] = "Repository #{@repository_name} successfully updated!"
+      redirect_to action: :index
+    else
+      render 'edit'
+    end
+  end
+
   private
+
+  def form_for(repo, params = {})
+    Forms::EditGitRepositoryLocationForm.new(repo: repo, current_user: current_user, params: params)
+  end
+
+  def load_edit_env
+    @git_repository_location = GitRepositoryLocation.find(params[:id])
+    @repository_name = @git_repository_location.name
+    @repository_uri = @git_repository_location.uri
+  end
 
   def success_msg(repo_name)
     render_to_string partial: 'partials/add_repo_success_msg', locals: { repo_name: repo_name }

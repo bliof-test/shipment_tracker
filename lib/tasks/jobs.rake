@@ -32,12 +32,12 @@ namespace :jobs do
     manage_pid pid_path_for('jobs_recreate_snapshots')
 
     puts "[#{Time.current}] Running recreate_snapshots"
+
     updater = Repositories::Updater.from_rails_config
-
     repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
-    updater.reset
 
-    updater.run(repo_event_id_hash)
+    updater.recreate(repo_event_id_hash)
+
     puts "[#{Time.current}] Completed recreate_snapshots"
   end
 
@@ -48,19 +48,26 @@ namespace :jobs do
       @shutdown = true
     end
 
-    loop do
-      break if @shutdown
-      start_time = Time.current
-      puts "[#{start_time}] Running update_events"
-      lowest_event_id = Snapshots::EventCount.all.min_by(&:event_id)&.event_id&.to_i
+    Rails.logger.tagged('update_events_loop') do
+      loop do
+        break if @shutdown
 
-      Repositories::Updater.from_rails_config.run
+        start_time = Time.current
+        puts "[#{start_time}] Running update_events"
 
-      end_time = Time.current
-      num_events = Events::BaseEvent.where('id > ?', lowest_event_id).count
-      puts "[#{end_time}] Cached #{num_events} events in #{end_time - start_time} seconds"
-      break if @shutdown
-      sleep 5
+        lowest_event_id = Snapshots::EventCount.all.min_by(&:event_id)&.event_id&.to_i
+
+        Repositories::Updater.from_rails_config.run
+
+        num_events = Events::BaseEvent.where('id > ?', lowest_event_id).count
+
+        end_time = Time.current
+        puts "[#{end_time}] Cached #{num_events} events in #{end_time - start_time} seconds"
+
+        break if @shutdown
+
+        sleep 5
+      end
     end
   end
 
@@ -85,12 +92,17 @@ namespace :jobs do
         Thread.new do # Limited to 4 threads to avoid running out of memory.
           group.compact.each do |app_name|
             break if @shutdown
+
             begin
               loader.load(app_name, update_repo: true)
             rescue StandardError => error
-              Honeybadger.notify(error, context: {
-                                   app_name: app_name, remote_head: repos_hash_changed[app_name]
-                                 })
+              Honeybadger.notify(
+                error,
+                context: {
+                  app_name: app_name,
+                  remote_head: repos_hash_changed[app_name],
+                },
+              )
             end
           end
         end

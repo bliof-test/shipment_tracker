@@ -1,0 +1,14 @@
+# frozen_string_literal: true
+class RepoOwner < ActiveRecord::Base
+  class << self
+    def to_mail_address_list(owners)
+      MailAddressList.new(owners.map { |owner| { name: owner.name, email: owner.email } })
+    end
+  end
+
+  validates :email, presence: true, uniqueness: true, email: true
+
+  def owner_of?(repo)
+    Repositories::RepoOwnershipRepository.new.owners_of(repo).include?(self)
+  end
+end

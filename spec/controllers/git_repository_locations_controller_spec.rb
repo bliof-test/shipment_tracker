@@ -43,4 +43,60 @@ RSpec.describe GitRepositoryLocationsController do
       it { is_expected.to redirect_to(git_repository_locations_path) }
     end
   end
+
+  describe 'GET #edit', :logged_in do
+    it 'can be rendered' do
+      repo = FactoryGirl.create(:git_repository_location)
+
+      get :edit, id: repo
+
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  describe 'PATCH #update', :logged_in do
+    context 'with correct parameters' do
+      let(:repo) { FactoryGirl.create(:git_repository_location) }
+      let(:params) {
+        {
+          id: repo,
+          forms_edit_git_repository_location_form: { repo_owners: 'test@example.com' },
+        }
+      }
+
+      it 'sets the owner of the repo' do
+        patch :update, params
+
+        expect(repo.owners.first.email).to eq('test@example.com')
+      end
+
+      it 'redirects to edit and sets successful flash' do
+        patch :update, params
+
+        expect(response).to redirect_to(action: :index)
+        expect(flash[:success]).to be_present
+      end
+    end
+
+    context 'with incorrect parameters' do
+      let(:repo) { FactoryGirl.create(:git_repository_location) }
+      let(:params) {
+        {
+          id: repo,
+          forms_edit_git_repository_location_form: { repo_owners: 'testexample.com' },
+        }
+      }
+
+      it 'does not change the owner of the repo' do
+        expect { patch :update, params }.not_to change { repo.reload }
+      end
+
+      it 'renders edit and does not set successful flash' do
+        patch :update, params
+
+        expect(response).to render_template(:edit)
+        expect(flash[:success]).not_to be_present
+      end
+    end
+  end
 end

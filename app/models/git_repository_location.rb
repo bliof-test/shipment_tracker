@@ -4,7 +4,7 @@ require 'git_clone_url'
 class GitRepositoryLocation < ActiveRecord::Base
   before_validation on: :create do
     self.uri = uri&.strip
-    self.name = extract_name(uri)
+    self.name ||= extract_name(uri)
   end
 
   validates :uri, presence: true
@@ -49,7 +49,15 @@ class GitRepositoryLocation < ActiveRecord::Base
     end
   end
 
+  def owners
+    repo_ownership_repository.owners_of(self)
+  end
+
   private
+
+  def repo_ownership_repository
+    Repositories::RepoOwnershipRepository.new
+  end
 
   def self.url_from_uri(uri)
     parsed_uri = GitCloneUrl.parse(uri)

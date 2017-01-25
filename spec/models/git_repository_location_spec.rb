@@ -147,4 +147,20 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       expect(repository_loction.full_repo_name).to eq('owner/repo')
     end
   end
+
+  describe '#owners' do
+    it 'is empty array if there are no repo owners' do
+      expect(described_class.new(name: 'test-repo').owners).to eq([])
+    end
+
+    it 'returns an array the current repo owners' do
+      repo = described_class.new(name: 'test-repo')
+      repo_owners = [RepoOwner.new]
+
+      expect_any_instance_of(Repositories::RepoOwnershipRepository)
+        .to receive(:owners_of).with(repo).and_return(repo_owners)
+
+      expect(repo.owners).to eq(repo_owners)
+    end
+  end
 end

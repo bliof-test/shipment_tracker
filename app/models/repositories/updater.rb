@@ -14,10 +14,14 @@ module Repositories
       @repositories = repositories
     end
 
-    def run(repo_event_id_hash = {})
+    def recreate(repo_event_id_hash = {})
+      reset
+      run(repo_event_id_hash, true)
+    end
+
+    def run(repo_event_id_hash = {}, force = false)
       repositories.each do |repository|
-        Rails.logger.info "[#{Time.current}] Running recreate_snapshots for repo #{repository.table_name}"
-        run_for(repository, repo_event_id_hash[repository.table_name])
+        run_for(repository, repo_event_id_hash[repository.table_name], force)
       end
     end
 
@@ -33,15 +37,33 @@ module Repositories
 
     attr_reader :repositories
 
-    def run_for(repository, ceiling_id)
-      repository.store.transaction do
-        last_id = 0
-        new_events_for(repository, ceiling_id).each do |event|
-          last_id = event.id
-          repository.apply(event)
+    def run_for(repository, ceiling_id, force = false)
+      if force || run_in_background?(repository)
+        Rails.logger.info "[#{Time.current}] Apply events for #{repository.class} - #{repository.table_name}"
+
+        repository.store.transaction do
+          last_id = 0
+
+          new_events_for(repository, ceiling_id).each do |event|
+            last_id = event.id
+            repository.apply(event)
+          end
+
+          update_count_for(repository, last_id) unless last_id == 0
         end
-        update_count_for(repository, last_id) unless last_id == 0
+      else
+        Rails.logger.info(
+          "[#{Time.current}] Skip applying events for #{repository.class} - #{repository.table_name}",
+        )
       end
+    end
+
+    def run_in_background?(repository)
+      repositories_that_do_not_run_in_the_background = [
+        Repositories::RepoOwnershipRepository,
+      ]
+
+      !repositories_that_do_not_run_in_the_background.include?(repository.class)
     end
 
     def new_events_for(repository, ceiling_id)

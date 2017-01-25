@@ -1,6 +1,6 @@
 - title 'Repositories'
 
-= form_for('repository_locations_form', url: git_repository_locations_path, class: 'form-horizontal') do |form|
+= form_for('repository_locations_form', url: git_repository_locations_path, html: { class: 'form-horizontal' }) do |form|
   .form-group.row
     = form.label(:uri, 'Git URI', class: 'col-md-1 control-label')
     .col-md-4
@@ -18,8 +18,10 @@
     .col-md-offset-1.col-md-4
       = form.submit('Add Git Repository', class: 'btn btn-primary')
 
-- table headers: ['Name', 'URI'], classes: 'git_repository_locations' do
+- table headers: ['Name', 'URI', t('.repo_owners')], classes: 'git_repository_locations' do
   - @git_repository_locations.each do |git_repository_location|
     %tr
       %td= git_repository_location.name
       %td= git_repository_location.uri
+      %td= format_owner_emails(git_repository_location.owners)
+      %td= link_to 'edit', edit_git_repository_location_path(git_repository_location)
