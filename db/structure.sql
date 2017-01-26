@@ -320,7 +320,8 @@ CREATE TABLE release_exceptions (
     comment text,
     submitted_at timestamp without time zone NOT NULL,
     created_at timestamp without time zone,
-    updated_at timestamp without time zone
+    updated_at timestamp without time zone,
+    path character varying
 );
 
 
@@ -1004,4 +1005,6 @@ INSERT INTO schema_migrations (version) VALUES ('20160825111503');
 INSERT INTO schema_migrations (version) VALUES ('20161216125029');
 
 INSERT INTO schema_migrations (version) VALUES ('20170105131624');
+
+INSERT INTO schema_migrations (version) VALUES ('20170126115241');
 

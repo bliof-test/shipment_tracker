@@ -30,13 +30,13 @@ module Factories
       )
     end
 
-    def create_from_version(app_name, version)
+    def create_from_apps(apps)
       uri = Addressable::URI.parse('/feature_reviews').normalize
-      query_hash = { 'apps' => { app_name => version } }
+      query_hash = { 'apps' => apps }
 
       create(
         path: whitelisted_path(uri, query_hash),
-        versions: [version],
+        versions: apps.values.reject(&:blank?),
       )
     end
 

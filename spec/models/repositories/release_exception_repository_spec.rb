@@ -94,6 +94,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
           approved: true,
           comment: 'Good to go',
           submitted_at: t[2],
+          path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
         ),
       )
     end
@@ -120,6 +121,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
             approved: true,
             comment: 'Good to go',
             submitted_at: times[1],
+            path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
           ),
         )
       end

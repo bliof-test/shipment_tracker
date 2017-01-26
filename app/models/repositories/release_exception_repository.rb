@@ -16,7 +16,6 @@ module Repositories
 
       store
         .where(submitted_at_query)
-        .where(table['versions'].eq(prepared_versions(versions)))
         .where('versions @> ARRAY[?]', versions)
         .order('id DESC')
         .first
@@ -30,6 +29,7 @@ module Repositories
         repo_owner_id: event.repo_owner.id,
         approved: event.approved?,
         comment: event.comment,
+        path: event.path,
         versions: prepared_versions(event.versions),
         submitted_at: event.created_at,
       )

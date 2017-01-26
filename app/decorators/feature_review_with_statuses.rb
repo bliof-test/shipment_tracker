@@ -111,7 +111,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   private
 
   def approved_by_owner?
-    release_exception_status.present? && release_exception_status == :success
+    release_exception_status == :success
   end
 
   def fetch_commit_for(app_name, version)

@@ -34,6 +34,12 @@ RSpec.describe Events::ReleaseExceptionEvent do
     end
   end
 
+  describe '#path' do
+    it 'returns the path' do
+      expect(event.path).to eq '/feature_reviews?apps%5Bfrontend%5D=abc'
+    end
+  end
+
   describe '#comment' do
     it 'returns the comment' do
       expect(event.email).to eq(email)

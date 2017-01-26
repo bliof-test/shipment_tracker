@@ -40,8 +40,8 @@ module Queries
       @commits ||= @git_repository.recent_commits_on_main_branch(@per_page)
     end
 
-    def feature_reviews
-      @feature_reviews ||= feature_review_factory.create_from_tickets(tickets)
+    def feature_reviews_with_tickets
+      @feature_reviews_with_tickets ||= feature_review_factory.create_from_tickets(tickets)
     end
 
     def tickets
@@ -76,22 +76,37 @@ module Queries
     end
 
     def create_release_from(commit:, deploy: nil)
-      decorated_feature_reviews = feature_reviews
-                                  .select { |fr| (fr.versions & commit.associated_ids).present? }
-                                  .map { |fr| decorate_feature_review(fr) }
-
-      if decorated_feature_reviews.empty?
-        new_feature_review = feature_review_factory.create_from_version(app_name, commit.id)
-        decorated_feature_reviews << decorate_feature_review(new_feature_review)
-      end
-
       Release.new(
         commit: commit,
         production_deploy_time: deploy&.deployed_at,
         subject: commit.subject_line,
-        feature_reviews: decorated_feature_reviews,
+        feature_reviews: decorated_feature_reviews_from(commit),
         deployed_by: deploy&.deployed_by,
       )
+    end
+
+    def decorated_feature_reviews_from(commit)
+      feature_reviews_for_commit = feature_reviews_with_tickets_for_commit(commit)
+
+      if feature_reviews_for_commit.empty?
+        release_exception = release_exception(commit.id)
+
+        if release_exception.present?
+          feature_reviews_for_commit << feature_review_factory.create_from_url_string(release_exception.path)
+        end
+      end
+
+      if feature_reviews_for_commit.empty?
+        feature_reviews_for_commit << feature_review_factory.create_from_apps(app_name => commit.id)
+      end
+
+      feature_reviews_for_commit.map { |fr| decorate_feature_review(fr) }
+    end
+
+    def feature_reviews_with_tickets_for_commit(commit)
+      feature_reviews_with_tickets.select { |fr|
+        (fr.versions & commit.associated_ids).present?
+      }
     end
 
     def decorate_feature_review(feature_review)

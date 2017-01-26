@@ -142,7 +142,7 @@ module Support
     end
 
     def new_review_path(version)
-      Factories::FeatureReviewFactory.new.create_from_version(@application, version).path
+      Factories::FeatureReviewFactory.new.create_from_apps(@application => version).path
     end
 
     def post_event(type, payload)

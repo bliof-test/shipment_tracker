@@ -165,13 +165,12 @@ RSpec.describe Factories::FeatureReviewFactory do
     end
   end
 
-  describe '#create_from_version' do
+  describe '#create_from_apps' do
     it 'returns a feature review for this version on a specific app' do
-      version = 'apple'
-      app_name = 'abc'
+      apps = { 'abc' => 'apple' }
 
-      feature_review = factory.create_from_version(app_name, version)
-      expect(feature_review.versions).to eq(['apple'])
+      feature_review = factory.create_from_apps(apps)
+      expect(feature_review.versions).to eq(%w(apple))
       expect(feature_review.path).to eq('/feature_reviews?apps%5Babc%5D=apple')
     end
   end
