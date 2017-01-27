@@ -66,6 +66,7 @@ module Repositories
         region: event.locale,
         environment: event.environment,
         version: event.version,
+        uuid: event.uuid,
         deployed_by: event.deployed_by,
         deployed_at: event.created_at,
       )

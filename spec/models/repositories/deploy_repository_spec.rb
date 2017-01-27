@@ -34,6 +34,7 @@ RSpec.describe Repositories::DeployRepository do
       {
         current_deploy: {
           'id' => a_value > 0,
+          'uuid' => a_value,
           'app_name' => 'frontend',
           'server' => 'test.com',
           'version' => expand_sha('xyz'),
@@ -48,6 +49,32 @@ RSpec.describe Repositories::DeployRepository do
 
     before do
       allow(DeployAlert).to receive(:auditable?).and_return(true)
+    end
+
+    it 'will create a snapshot based on the event' do
+      repository.apply(
+        build(
+          :deploy_event,
+          version: expand_sha('xyz'),
+          environment: 'production',
+          app_name: 'frontend',
+          server: 'test.com',
+          deployed_by: 'Bob',
+          locale: 'us',
+          uuid: 'bad85eb9-0713-4da7-8d36-07a8e4b00eab',
+        ),
+      )
+
+      expect(Snapshots::Deploy.find_by_uuid('bad85eb9-0713-4da7-8d36-07a8e4b00eab'))
+        .to have_attributes(
+          version: expand_sha('xyz'),
+          environment: 'production',
+          app_name: 'frontend',
+          server: 'test.com',
+          deployed_by: 'Bob',
+          region: 'us',
+          uuid: 'bad85eb9-0713-4da7-8d36-07a8e4b00eab',
+        )
     end
 
     it 'schedules a DeployAlertJob' do
@@ -81,9 +108,6 @@ RSpec.describe Repositories::DeployRepository do
     }
 
     context 'when deploy events exist' do
-      before do
-      end
-
       it 'returns all deploys for given version, environment and region' do
         apply_deploys(
           defaults.merge(version: expand_sha('xyz'), environment: 'uat'),

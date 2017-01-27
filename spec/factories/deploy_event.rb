@@ -25,6 +25,8 @@ FactoryGirl.define do
       }
     }
 
+    uuid { SecureRandom.uuid }
+
     initialize_with { new(attributes) }
   end
 end
