@@ -42,6 +42,7 @@ RSpec.describe Repositories::DeployRepository do
           'deployed_at' => '',
           'environment' => environment,
           'region' => 'us',
+          'deploy_alert' => nil,
         },
         previous_deploy: nil,
       }
@@ -65,7 +66,7 @@ RSpec.describe Repositories::DeployRepository do
         ),
       )
 
-      expect(Snapshots::Deploy.find_by_uuid('bad85eb9-0713-4da7-8d36-07a8e4b00eab'))
+      expect(Snapshots::Deploy.find_by(uuid: 'bad85eb9-0713-4da7-8d36-07a8e4b00eab'))
         .to have_attributes(
           version: expand_sha('xyz'),
           environment: 'production',

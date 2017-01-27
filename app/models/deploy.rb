@@ -11,6 +11,7 @@ class Deploy
     attribute :region, String
     attribute :version, String
     attribute :environment, String
+    attribute :uuid, String
   end
 
   def commit

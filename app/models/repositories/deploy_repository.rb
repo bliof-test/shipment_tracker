@@ -42,19 +42,22 @@ module Repositories
 
     def apply(event)
       return unless event.is_a?(Events::DeployEvent)
+
       current_deploy = create_deploy_snapshot!(event)
 
       if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
-        previous_deploy = second_last_production_deploy(current_deploy.app_name, current_deploy.region)
-        audit_deploy(current_deploy: current_deploy.attributes, previous_deploy: previous_deploy&.attributes)
+        audit_deploy(current_deploy)
       end
     rescue GitRepositoryLoader::NotFound => error
-      Honeybadger.notify(error, context: {
-                           event_id: event.id,
-                           app_name: event.app_name,
-                           deployer: event.deployed_by,
-                           deploy_time: event.created_at,
-                         })
+      Honeybadger.notify(
+        error,
+        context: {
+          event_id: event.id,
+          app_name: event.app_name,
+          deployer: event.deployed_by,
+          deploy_time: event.created_at,
+        },
+      )
     end
 
     private
@@ -72,14 +75,22 @@ module Repositories
       )
     end
 
-    def audit_deploy(deploys_attrs)
-      deploy_time_to_s(deploys_attrs[:current_deploy])
-      deploy_time_to_s(deploys_attrs[:previous_deploy])
-      DeployAlertJob.perform_later(deploys_attrs)
+    def audit_deploy(current_deploy)
+      previous_deploy = second_last_production_deploy(current_deploy.app_name, current_deploy.region)
+
+      DeployAlertJob.perform_later(
+        current_deploy: data_for_deploy(current_deploy),
+        previous_deploy: data_for_deploy(previous_deploy),
+      )
     end
 
-    def deploy_time_to_s(deploy_attrs)
-      deploy_attrs['deployed_at'] = deploy_attrs['deployed_at'].to_s if deploy_attrs
+    def data_for_deploy(deploy)
+      return unless deploy
+
+      data = deploy.attributes
+      data['deployed_at'] = data['deployed_at'].to_s
+
+      data
     end
 
     def deploys(apps, server, at)

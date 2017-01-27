@@ -7,7 +7,7 @@ RSpec.describe DeployAlertJob do
   end
 
   describe '#perform' do
-    let(:deploy_attrs) do
+    let(:default_deploy_attrs) do
       {
         'id' => 1,
         'app_name' => 'frontend',
@@ -20,15 +20,27 @@ RSpec.describe DeployAlertJob do
       }
     end
 
+    def deploy_with(data = {})
+      Deploy.new(deploy_attrs(data))
+    end
+
+    def deploy_attrs(data = {})
+      default_deploy_attrs.merge(data)
+    end
+
+    before do
+      allow(SlackClient).to receive(:send_deploy_alert)
+    end
+
     it 'runs DeployAlert.audit_message with correct arguments' do
-      previous_deploy = Deploy.new(deploy_attrs.merge('id' => 1))
-      current_deploy = Deploy.new(deploy_attrs.merge('id' => 2))
+      previous_deploy = deploy_with('id' => 1, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594')
+      current_deploy = deploy_with('id' => 2, 'uuid' => 'bad85eb9-0713-4da7-8d36-07a8e4b00eab')
 
       expect(DeployAlert).to receive(:audit_message).with(current_deploy, previous_deploy)
 
-      DeployAlertJob.perform_now(
-        current_deploy: deploy_attrs.merge('id' => 2),
-        previous_deploy: deploy_attrs.merge('id' => 1),
+      described_class.perform_now(
+        current_deploy: deploy_attrs('id' => 2, 'uuid' => 'bad85eb9-0713-4da7-8d36-07a8e4b00eab'),
+        previous_deploy: deploy_attrs('id' => 1, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594'),
       )
     end
 
@@ -42,8 +54,8 @@ RSpec.describe DeployAlertJob do
         'John',
       )
 
-      DeployAlertJob.perform_now(
-        current_deploy: deploy_attrs.merge(
+      described_class.perform_now(
+        current_deploy: deploy_attrs(
           'app_name' => 'frontend',
           'deployed_by' => 'John',
           'region' => 'uk',
@@ -74,6 +86,50 @@ RSpec.describe DeployAlertJob do
           ),
         )
       end.to change { ActionMailer::Base.deliveries.count }.by(1)
+    end
+
+    it 'creates a deploy alert event if there is an alert message' do
+      current_deploy = deploy_with('id' => 2, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594')
+
+      expect(DeployAlert).to(
+        receive(:audit_message).with(current_deploy, nil).and_return('There is a problem!'),
+      )
+
+      described_class.perform_now(
+        current_deploy: deploy_attrs('id' => 2, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594'),
+        previous_deploy: nil,
+      )
+
+      deploy_alert = Events::DeployAlertEvent.last
+
+      expect(deploy_alert.deploy_uuid).to eq('2d931510-d99f-494a-8c67-87feb05e1594')
+      expect(deploy_alert.message).to eq('There is a problem!')
+    end
+
+    it "will not create a deploy alert event if there isn't an alert message" do
+      current_deploy = deploy_with('id' => 2, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594')
+
+      expect(DeployAlert).to receive(:audit_message).with(current_deploy, nil).and_return(nil)
+
+      described_class.perform_now(
+        current_deploy: deploy_attrs('id' => 2, 'uuid' => '2d931510-d99f-494a-8c67-87feb05e1594'),
+        previous_deploy: nil,
+      )
+
+      expect(Events::DeployAlertEvent.last).to be_nil
+    end
+
+    it "will not create a deploy alert event if there isn't a uuid for the deploy" do
+      current_deploy = deploy_with('id' => 2)
+
+      expect(DeployAlert).to receive(:audit_message).with(current_deploy, nil).and_return('problem')
+
+      described_class.perform_now(
+        current_deploy: deploy_attrs('id' => 2),
+        previous_deploy: nil,
+      )
+
+      expect(Events::DeployAlertEvent.last).to be_nil
     end
   end
 end

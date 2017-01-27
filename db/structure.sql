@@ -339,6 +339,7 @@ CREATE TABLE release_exceptions (
     versions text[] DEFAULT '{}'::text[],
     approved boolean,
     comment text,
+    submitted_at timestamp without time zone NOT NULL,
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     path character varying
@@ -863,6 +864,13 @@ CREATE INDEX index_release_exceptions_on_repo_owner_id ON release_exceptions USI
 
 
 --
+-- Name: index_release_exceptions_on_submitted_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_release_exceptions_on_submitted_at ON release_exceptions USING btree (submitted_at);
+
+
+--
 -- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -1002,10 +1010,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150823124740');
 
 INSERT INTO schema_migrations (version) VALUES ('20150823124742');
 
-INSERT INTO schema_migrations (version) VALUES ('20150908100119');
-
-INSERT INTO schema_migrations (version) VALUES ('20150910115332');
-
 INSERT INTO schema_migrations (version) VALUES ('20150910135208');
 
 INSERT INTO schema_migrations (version) VALUES ('20150915150206');
@@ -1017,8 +1021,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150915161859');
 INSERT INTO schema_migrations (version) VALUES ('20150921110831');
 
 INSERT INTO schema_migrations (version) VALUES ('20150921115023');
-
-INSERT INTO schema_migrations (version) VALUES ('20150921115024');
 
 INSERT INTO schema_migrations (version) VALUES ('20150928130626');
 
