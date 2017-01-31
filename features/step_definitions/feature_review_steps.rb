@@ -76,10 +76,11 @@ Then 'I should see a summary that includes' do |summary_table|
   expect(panel.items).to include(*expected_summary)
 end
 
-When 'I "$action" the feature with comment "$comment"' do |action, comment|
-  feature_review_page.create_qa_submission(
+When 'I "$action" the feature with comment "$comment" as a "$type"' do |action, comment, type|
+  feature_review_page.create_submission(
     comment: comment,
     status: action,
+    type: type,
   )
 end
 
@@ -94,6 +95,19 @@ Then 'I should see the QA acceptance' do |table|
 
   expect(panel.status).to eq(status)
   expect(panel.items.first).to eq(expected_qa_submission)
+end
+
+Then 'I should see the Repo Owner Commentary with heading "$status"' do |status|
+  expect(feature_review_page.panel_heading_status('release-exception')).to eq(status)
+end
+
+Then 'I should see the Repo Owner Commentary' do |table|
+  expected_release_exception_comment_info = table.hashes.first
+  status = expected_release_exception_comment_info.delete('status')
+  panel = feature_review_page.release_exception_panel
+
+  expect(panel.status).to eq(status)
+  expect(panel.items.first).to eq(expected_release_exception_comment_info)
 end
 
 Then 'I should see the results of the User Acceptance Tests with heading "$s" and version "$v"' do |s, v|

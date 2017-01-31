@@ -9,6 +9,6 @@ class RepoOwner < ActiveRecord::Base
   validates :email, presence: true, uniqueness: true, email: true
 
   def owner_of?(repo)
-    Repositories::RepoOwnershipRepository.new.owners_of(repo).include?(self)
+    repo.owners.include?(self)
   end
 end

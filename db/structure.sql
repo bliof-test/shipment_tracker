@@ -2,16 +2,12 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.5.5
--- Dumped by pg_dump version 9.5.5
-
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
-SET row_security = off;
 
 --
 -- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
@@ -79,7 +75,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: builds; Type: TABLE; Schema: public; Owner: -
+-- Name: builds; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE builds (
@@ -111,7 +107,7 @@ ALTER SEQUENCE builds_id_seq OWNED BY builds.id;
 
 
 --
--- Name: delayed_jobs; Type: TABLE; Schema: public; Owner: -
+-- Name: delayed_jobs; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE delayed_jobs (
@@ -150,7 +146,7 @@ ALTER SEQUENCE delayed_jobs_id_seq OWNED BY delayed_jobs.id;
 
 
 --
--- Name: deploys; Type: TABLE; Schema: public; Owner: -
+-- Name: deploys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE deploys (
@@ -185,7 +181,7 @@ ALTER SEQUENCE deploys_id_seq OWNED BY deploys.id;
 
 
 --
--- Name: event_counts; Type: TABLE; Schema: public; Owner: -
+-- Name: event_counts; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE event_counts (
@@ -215,7 +211,7 @@ ALTER SEQUENCE event_counts_id_seq OWNED BY event_counts.id;
 
 
 --
--- Name: events; Type: TABLE; Schema: public; Owner: -
+-- Name: events; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE events (
@@ -247,7 +243,7 @@ ALTER SEQUENCE events_id_seq OWNED BY events.id;
 
 
 --
--- Name: git_repository_locations; Type: TABLE; Schema: public; Owner: -
+-- Name: git_repository_locations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE git_repository_locations (
@@ -280,7 +276,7 @@ ALTER SEQUENCE git_repository_locations_id_seq OWNED BY git_repository_locations
 
 
 --
--- Name: manual_tests; Type: TABLE; Schema: public; Owner: -
+-- Name: manual_tests; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE manual_tests (
@@ -313,7 +309,43 @@ ALTER SEQUENCE manual_tests_id_seq OWNED BY manual_tests.id;
 
 
 --
--- Name: released_tickets; Type: TABLE; Schema: public; Owner: -
+-- Name: release_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE TABLE release_exceptions (
+    id integer NOT NULL,
+    repo_owner_id integer,
+    versions text[] DEFAULT '{}'::text[],
+    approved boolean,
+    comment text,
+    submitted_at timestamp without time zone NOT NULL,
+    created_at timestamp without time zone,
+    updated_at timestamp without time zone,
+    path character varying
+);
+
+
+--
+-- Name: release_exceptions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE release_exceptions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: release_exceptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE release_exceptions_id_seq OWNED BY release_exceptions.id;
+
+
+--
+-- Name: released_tickets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE released_tickets (
@@ -349,7 +381,7 @@ ALTER SEQUENCE released_tickets_id_seq OWNED BY released_tickets.id;
 
 
 --
--- Name: repo_owners; Type: TABLE; Schema: public; Owner: -
+-- Name: repo_owners; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE repo_owners (
@@ -381,7 +413,7 @@ ALTER SEQUENCE repo_owners_id_seq OWNED BY repo_owners.id;
 
 
 --
--- Name: repo_ownerships; Type: TABLE; Schema: public; Owner: -
+-- Name: repo_ownerships; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE repo_ownerships (
@@ -413,7 +445,7 @@ ALTER SEQUENCE repo_ownerships_id_seq OWNED BY repo_ownerships.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE schema_migrations (
@@ -422,7 +454,7 @@ CREATE TABLE schema_migrations (
 
 
 --
--- Name: tickets; Type: TABLE; Schema: public; Owner: -
+-- Name: tickets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE tickets (
@@ -458,7 +490,7 @@ ALTER SEQUENCE tickets_id_seq OWNED BY tickets.id;
 
 
 --
--- Name: tokens; Type: TABLE; Schema: public; Owner: -
+-- Name: tokens; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE tokens (
@@ -491,7 +523,7 @@ ALTER SEQUENCE tokens_id_seq OWNED BY tokens.id;
 
 
 --
--- Name: uatests; Type: TABLE; Schema: public; Owner: -
+-- Name: uatests; Type: TABLE; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE TABLE uatests (
@@ -576,6 +608,13 @@ ALTER TABLE ONLY manual_tests ALTER COLUMN id SET DEFAULT nextval('manual_tests_
 -- Name: id; Type: DEFAULT; Schema: public; Owner: -
 --
 
+ALTER TABLE ONLY release_exceptions ALTER COLUMN id SET DEFAULT nextval('release_exceptions_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: -
+--
+
 ALTER TABLE ONLY released_tickets ALTER COLUMN id SET DEFAULT nextval('released_tickets_id_seq'::regclass);
 
 
@@ -615,7 +654,7 @@ ALTER TABLE ONLY uatests ALTER COLUMN id SET DEFAULT nextval('uatests_id_seq'::r
 
 
 --
--- Name: builds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: builds_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY builds
@@ -623,7 +662,7 @@ ALTER TABLE ONLY builds
 
 
 --
--- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY delayed_jobs
@@ -631,7 +670,7 @@ ALTER TABLE ONLY delayed_jobs
 
 
 --
--- Name: deploys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: deploys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY deploys
@@ -639,7 +678,7 @@ ALTER TABLE ONLY deploys
 
 
 --
--- Name: event_counts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: event_counts_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY event_counts
@@ -647,7 +686,7 @@ ALTER TABLE ONLY event_counts
 
 
 --
--- Name: events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: events_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY events
@@ -655,7 +694,7 @@ ALTER TABLE ONLY events
 
 
 --
--- Name: git_repository_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: git_repository_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY git_repository_locations
@@ -663,7 +702,7 @@ ALTER TABLE ONLY git_repository_locations
 
 
 --
--- Name: manual_tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: manual_tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY manual_tests
@@ -671,7 +710,15 @@ ALTER TABLE ONLY manual_tests
 
 
 --
--- Name: released_tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: release_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+--
+
+ALTER TABLE ONLY release_exceptions
+    ADD CONSTRAINT release_exceptions_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: released_tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY released_tickets
@@ -679,7 +726,7 @@ ALTER TABLE ONLY released_tickets
 
 
 --
--- Name: repo_owners_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: repo_owners_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY repo_owners
@@ -687,7 +734,7 @@ ALTER TABLE ONLY repo_owners
 
 
 --
--- Name: repo_ownerships_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: repo_ownerships_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY repo_ownerships
@@ -695,7 +742,7 @@ ALTER TABLE ONLY repo_ownerships
 
 
 --
--- Name: tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY tickets
@@ -703,7 +750,7 @@ ALTER TABLE ONLY tickets
 
 
 --
--- Name: tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY tokens
@@ -711,7 +758,7 @@ ALTER TABLE ONLY tokens
 
 
 --
--- Name: uatests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: uatests_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
 --
 
 ALTER TABLE ONLY uatests
@@ -719,126 +766,140 @@ ALTER TABLE ONLY uatests
 
 
 --
--- Name: delayed_jobs_priority; Type: INDEX; Schema: public; Owner: -
+-- Name: delayed_jobs_priority; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX delayed_jobs_priority ON delayed_jobs USING btree (priority, run_at);
 
 
 --
--- Name: index_builds_on_version; Type: INDEX; Schema: public; Owner: -
+-- Name: index_builds_on_version; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_builds_on_version ON builds USING btree (version);
 
 
 --
--- Name: index_deploys_on_app_name; Type: INDEX; Schema: public; Owner: -
+-- Name: index_deploys_on_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_deploys_on_app_name ON deploys USING btree (app_name);
 
 
 --
--- Name: index_deploys_on_server_and_app_name; Type: INDEX; Schema: public; Owner: -
+-- Name: index_deploys_on_server_and_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_deploys_on_server_and_app_name ON deploys USING btree (server, app_name);
 
 
 --
--- Name: index_deploys_on_version; Type: INDEX; Schema: public; Owner: -
+-- Name: index_deploys_on_version; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_deploys_on_version ON deploys USING btree (version);
 
 
 --
--- Name: index_git_repository_locations_on_name; Type: INDEX; Schema: public; Owner: -
+-- Name: index_git_repository_locations_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_git_repository_locations_on_name ON git_repository_locations USING btree (name);
 
 
 --
--- Name: index_manual_tests_on_versions; Type: INDEX; Schema: public; Owner: -
+-- Name: index_manual_tests_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_manual_tests_on_versions ON manual_tests USING gin (versions);
 
 
 --
--- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -
+-- Name: index_release_exceptions_on_repo_owner_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_release_exceptions_on_repo_owner_id ON release_exceptions USING btree (repo_owner_id);
+
+
+--
+-- Name: index_release_exceptions_on_submitted_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+--
+
+CREATE INDEX index_release_exceptions_on_submitted_at ON release_exceptions USING btree (submitted_at);
+
+
+--
+-- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_released_tickets_on_key ON released_tickets USING btree (key);
 
 
 --
--- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -
+-- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_released_tickets_on_tsv ON released_tickets USING gin (tsv);
 
 
 --
--- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -
+-- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_released_tickets_on_versions ON released_tickets USING gin (versions);
 
 
 --
--- Name: index_repo_owners_on_email; Type: INDEX; Schema: public; Owner: -
+-- Name: index_repo_owners_on_email; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_repo_owners_on_email ON repo_owners USING btree (email);
 
 
 --
--- Name: index_repo_ownerships_on_app_name; Type: INDEX; Schema: public; Owner: -
+-- Name: index_repo_ownerships_on_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_repo_ownerships_on_app_name ON repo_ownerships USING btree (app_name);
 
 
 --
--- Name: index_tickets_on_key; Type: INDEX; Schema: public; Owner: -
+-- Name: index_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_tickets_on_key ON tickets USING btree (key);
 
 
 --
--- Name: index_tickets_on_paths; Type: INDEX; Schema: public; Owner: -
+-- Name: index_tickets_on_paths; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_tickets_on_paths ON tickets USING gin (paths);
 
 
 --
--- Name: index_tickets_on_versions; Type: INDEX; Schema: public; Owner: -
+-- Name: index_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_tickets_on_versions ON tickets USING gin (versions);
 
 
 --
--- Name: index_tokens_on_value; Type: INDEX; Schema: public; Owner: -
+-- Name: index_tokens_on_value; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX index_tokens_on_value ON tokens USING btree (value);
 
 
 --
--- Name: index_uatests_on_versions; Type: INDEX; Schema: public; Owner: -
+-- Name: index_uatests_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE INDEX index_uatests_on_versions ON uatests USING gin (versions);
 
 
 --
--- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: -
+-- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: -; Tablespace: 
 --
 
 CREATE UNIQUE INDEX unique_schema_migrations ON schema_migrations USING btree (version);
@@ -852,10 +913,18 @@ CREATE TRIGGER released_tickets_tsv_update BEFORE INSERT OR UPDATE ON released_t
 
 
 --
+-- Name: fk_rails_90b3b0f798; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY release_exceptions
+    ADD CONSTRAINT fk_rails_90b3b0f798 FOREIGN KEY (repo_owner_id) REFERENCES repo_owners(id);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO "$user", public;
+SET search_path TO "$user",public;
 
 INSERT INTO schema_migrations (version) VALUES ('20150427164403');
 
@@ -899,10 +968,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150823124740');
 
 INSERT INTO schema_migrations (version) VALUES ('20150823124742');
 
-INSERT INTO schema_migrations (version) VALUES ('20150908100119');
-
-INSERT INTO schema_migrations (version) VALUES ('20150910115332');
-
 INSERT INTO schema_migrations (version) VALUES ('20150910135208');
 
 INSERT INTO schema_migrations (version) VALUES ('20150915150206');
@@ -914,8 +979,6 @@ INSERT INTO schema_migrations (version) VALUES ('20150915161859');
 INSERT INTO schema_migrations (version) VALUES ('20150921110831');
 
 INSERT INTO schema_migrations (version) VALUES ('20150921115023');
-
-INSERT INTO schema_migrations (version) VALUES ('20150921115024');
 
 INSERT INTO schema_migrations (version) VALUES ('20150928130626');
 
@@ -940,4 +1003,8 @@ INSERT INTO schema_migrations (version) VALUES ('20160324142505');
 INSERT INTO schema_migrations (version) VALUES ('20160825111503');
 
 INSERT INTO schema_migrations (version) VALUES ('20161216125029');
+
+INSERT INTO schema_migrations (version) VALUES ('20170105131624');
+
+INSERT INTO schema_migrations (version) VALUES ('20170126115241');
 

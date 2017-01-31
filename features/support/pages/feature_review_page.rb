@@ -46,11 +46,19 @@ module Pages
       ).items
     end
 
-    def create_qa_submission(status:, comment:)
+    def create_submission(status:, comment:, type:)
+      type_panel_matching = {
+        'QA' => '.qa-submission',
+        'Repo Owner' => '.release-exception',
+      }
+
       verify!
       page.choose(status.capitalize)
-      page.fill_in('Comment', with: comment)
-      page.click_link_or_button('Submit')
+
+      page.within(type_panel_matching[type]) do
+        page.fill_in('Comment', with: comment)
+        page.click_link_or_button('Submit')
+      end
     end
 
     def link_a_jira_ticket(jira_key:)
@@ -66,6 +74,17 @@ module Pages
         item_config: {
           'comment' => '.qa-comment',
           'email' => '.qa-email',
+        },
+      )
+    end
+
+    def release_exception_panel
+      verify!
+      Sections::PanelListSection.new(
+        page.find('.release-exception.panel'),
+        item_config: {
+          'comment' => '.repo-owner-comment',
+          'email' => '.repo-owner-email',
         },
       )
     end

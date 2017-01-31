@@ -13,6 +13,7 @@ RSpec.describe Queries::ReleasesQuery do
 
   let(:deploy_repository) { instance_double(Repositories::DeployRepository) }
   let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
+  let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
   let(:git_repository) { instance_double(GitRepository) }
 
   let(:app_name) { 'foo' }
@@ -57,12 +58,15 @@ RSpec.describe Queries::ReleasesQuery do
   before do
     allow(Repositories::DeployRepository).to receive(:new).and_return(deploy_repository)
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
+    allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(release_exception_repository)
     allow(git_repository).to receive(:recent_commits_on_main_branch).with(50).and_return(commits)
     allow(deploy_repository).to receive(:deploys_for_versions)
       .with(versions, environment: 'production', region: 'gb')
       .and_return(deploys)
     allow(ticket_repository).to receive(:tickets_for_versions).with(associated_versions)
       .and_return(tickets)
+    allow(release_exception_repository).to receive(:release_exception_for).with(any_args)
+      .and_return(nil)
   end
 
   describe '#versions' do
@@ -91,20 +95,30 @@ RSpec.describe Queries::ReleasesQuery do
   end
 
   describe '#deployed_releases' do
-    subject(:deployed_releases) { releases_query.deployed_releases }
-    it 'returns list of releases deployed to production in region "gb"' do
-      authorised_feature_review = FeatureReview.new(
+    let(:authorised_feature_review) {
+      FeatureReview.new(
         versions: approved_ticket.versions,
         path: approved_ticket.paths.first,
       )
+    }
 
+    let(:new_feature_review_for_unauthorised_deploy) {
+      FeatureReview.new(versions: ['ghi'], path: '/feature_reviews?apps%5Bfoo%5D=ghi')
+    }
+
+    subject(:deployed_releases) { releases_query.deployed_releases }
+    it 'returns list of releases deployed to production in region "gb"' do
       expect(deployed_releases.map(&:version)).to eq(%w(def ghi))
       expect(deployed_releases.map(&:subject)).to eq(['merge commit', 'first commit on master branch'])
       expect(deployed_releases.map(&:production_deploy_time)).to eq([deploy_time, nil])
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])
       expect(deployed_releases.map(&:authorised?)).to eq([true, false])
-      expect(deployed_releases.map(&:feature_reviews)).to eq([[authorised_feature_review], []])
-      expect(deployed_releases.map(&:feature_reviews).flatten.first.tickets_approved_at).to eq(approval_time)
+
+      expect(deployed_releases.map(&:feature_reviews)).to eq(
+        [[authorised_feature_review], [new_feature_review_for_unauthorised_deploy]],
+      )
+
+      expect(deployed_releases.map(&:feature_reviews).flatten.first.approved_at).to eq(approval_time)
     end
   end
 end

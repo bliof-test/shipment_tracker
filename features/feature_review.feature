@@ -141,6 +141,7 @@ Scenario: Viewing a Feature Review
     | failed  | UAT Environment       |
     | warning | QA Acceptance         |
     | warning | User Acceptance Tests |
+    | warning | Repo Owner Commentary |
 
   And I should see the builds with heading "warning" and content
     | Status  | App      | Source   |
@@ -230,7 +231,7 @@ Scenario: QA rejects feature
   When I visit the feature review known as "FR_qa_rejects"
   Then I should see the QA acceptance with heading "warning"
 
-  When I "reject" the feature with comment "Not good enough"
+  When I "reject" the feature with comment "Not good enough" as a "QA"
 
   Then I should see an alert: "Thank you for your submission. It will appear in a moment."
 
@@ -239,9 +240,35 @@ Scenario: QA rejects feature
     | status  | email       | comment         |
     | danger  | foo@bar.com | Not good enough |
 
-  When I "accept" the feature with comment "Superb!"
+  When I "accept" the feature with comment "Superb!" as a "QA"
 
   And I reload the page after a while
   Then I should see the QA acceptance
     | status  | email       | comment |
     | success | foo@bar.com | Superb! |
+
+Scenario: Repo Owner approves feature
+  Given an application with owner "foo@bar.com" called "frontend"
+  And an application with owner "foo@bar.com" called "backend"
+  And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
+  And a commit "#def" by "Alice" is created at "2014-10-04 13:05:00" for app "backend"
+  And I am logged in as "foo@bar.com"
+  And developer prepares review known as "FR_repo_owner_test" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version |
+    | frontend | #abc    |
+    | backend  | #def    |
+
+  When I visit the feature review known as "FR_repo_owner_test"
+  Then I should see the Repo Owner Commentary with heading "warning"
+  When I "reject" the feature with comment "Not good enough" as a "Repo Owner"
+  Then I should see an alert: "Thank you for your submission. It will appear in a moment."
+  When I reload the page after a while
+  Then I should see the Repo Owner Commentary
+    | status | email       | comment         |
+    | danger | foo@bar.com | Not good enough |
+
+  When I "approve" the feature with comment "This can go live!" as a "Repo Owner"
+  And I reload the page after a while
+  Then I should see the Repo Owner Commentary
+    | status  | email       | comment           |
+    | success | foo@bar.com | This can go live! |

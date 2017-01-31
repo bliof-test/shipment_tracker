@@ -13,7 +13,6 @@ Then 'I should see the "$deploy_status" releases' do |deploy_status, releases_ta
       'version' => real_version.slice(0..6),
       'subject' => release_line.fetch('subject'),
       'feature_reviews' => release_line.fetch('review statuses'),
-      'feature_review_paths' => nil,
     }
 
     nicknames = release_line.fetch('feature reviews').split(',').map(&:strip)
@@ -24,6 +23,10 @@ Then 'I should see the "$deploy_status" releases' do |deploy_status, releases_ta
         time: time ? Time.zone.parse(time) : nil,
       )
     }
+
+    if release['feature_review_paths'].blank?
+      release['feature_review_paths'] << scenario_context.new_review_path(real_version)
+    end
 
     if deploy_status == 'deployed'
       time = release_line.fetch('last deployed at')

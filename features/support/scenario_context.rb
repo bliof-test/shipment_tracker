@@ -27,7 +27,7 @@ module Support
       @repository_locations = {}
     end
 
-    def setup_application(name)
+    def setup_application(name, owners: nil)
       return if @repos.key?(name)
 
       dir = "#{Dir.mktmpdir}/#{name}"
@@ -38,9 +38,10 @@ module Support
       @repos[name] = test_repo
 
       @repository_locations[name] = GitRepositoryLocation.create(uri: test_repo.uri, name: name)
+      add_owners_to(@repository_locations[name], owners: owners) if owners.present?
     end
 
-    def add_owner_to(repository_location, owners)
+    def add_owners_to(repository_location, owners:)
       result = Forms::EditGitRepositoryLocationForm.new(
         repo: repository_location,
         current_user: User.new(email: 'current-user@example.com'),
@@ -138,6 +139,10 @@ module Support
     def review_path(feature_review_nickname: nil, time: nil)
       review = @reviews.fetch(feature_review_nickname)
       feature_review_path(review[:apps_hash], review[:uat_url], time)
+    end
+
+    def new_review_path(version)
+      Factories::FeatureReviewFactory.new.create_from_apps(@application => version).path
     end
 
     def post_event(type, payload)

@@ -35,7 +35,7 @@ end
 
 Given 'owner of "$application" is "$owner"' do |application, owner|
   repo = scenario_context.repository_location_for(application)
-  scenario_context.add_owner_to(repo, owner)
+  scenario_context.add_owners_to(repo, owners: owner)
 end
 
 When 'I enter owner emails "$repo_owners"' do |repo_owners|
