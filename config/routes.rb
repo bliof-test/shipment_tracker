@@ -13,6 +13,9 @@ Rails.application.routes.draw do
   post 'events/:type', to: 'events#create', as: 'events'
 
   resource :feature_reviews, only: [:new, :show, :create] do
+    member do
+      get 'unlink', to: 'feature_reviews#unlink_ticket'
+    end
     post 'link_ticket'
   end
 

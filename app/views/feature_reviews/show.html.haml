@@ -11,7 +11,7 @@
   .col-lg-12
     - panel(heading: feature_status(@feature_review_with_statuses), status: @feature_review_with_statuses.authorisation_status, klass: 'feature-status', help_url: wiki_links(:approval), align_right: true) do
       - if @feature_review_with_statuses.tickets.any?
-        - table(headers: %w(Ticket Summary Status)) do
+        - table(headers: %w(Ticket Summary Status Actions)) do
           - @feature_review_with_statuses.tickets.each do |ticket|
             %tr.ticket
               %td= jira_link(ticket.key)
@@ -19,6 +19,9 @@
               %td
                 - icon(item_status_icon_class(ticket.authorised?(@feature_review_with_statuses.versions)))
                 = ticket.authorisation_status(@feature_review_with_statuses.versions)
+              %td
+                = link_to 'unlink', {controller: :feature_reviews, action: :unlink_ticket, apps: @feature_review_with_statuses.app_versions, jira_key: ticket.key, return_to: @return_to}, {class: 'btn btn-danger btn-xs', role: 'button'}
+
       .panel-body
         = form_tag(link_ticket_feature_reviews_path(return_to: @return_to), method: 'post', class: 'form-inline') do
           .form-group

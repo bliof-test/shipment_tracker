@@ -20,17 +20,16 @@ module Repositories
     def tickets_for_path(feature_review_path, at: nil)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil
       store
-        .select('DISTINCT ON (key) *')
         .where('paths @> ARRAY[?]', feature_review_path)
-        .where(query)
+        .where(id: store.select('MAX(id) as id').where(query).group(:key))
         .order('key, id DESC')
         .map { |t| Ticket.new(t.attributes) }
     end
 
     def tickets_for_versions(versions)
       store
-        .select('DISTINCT ON (key) *')
         .where('versions && ARRAY[?]', versions)
+        .where(id: store.select('MAX(id) as id').group(:key))
         .order('key, id DESC')
         .map { |t| Ticket.new(t.attributes) }
     end
@@ -43,10 +42,11 @@ module Repositories
 
       return if last_ticket.empty? && feature_reviews.empty?
 
-      new_ticket = build_ticket(last_ticket, event, feature_reviews)
+      new_ticket = event.apply(last_ticket)
+
       store.create!(new_ticket)
 
-      update_github_status_for(new_ticket) if update_github_status?(event, feature_reviews)
+      update_github_status_for([new_ticket, last_ticket]) if update_github_status?(event, feature_reviews)
     end
 
     private
@@ -63,50 +63,10 @@ module Repositories
       event.approval? || event.unapproval? || feature_reviews.present?
     end
 
-    def build_ticket(last_ticket, event, feature_reviews)
-      last_ticket.merge(
-        'key' => event.key,
-        'summary' => event.summary,
-        'status' => event.status,
-        'paths' => merge_ticket_paths(last_ticket, feature_reviews),
-        'event_created_at' => event.created_at,
-        'versions' => merge_ticket_versions(last_ticket, feature_reviews),
-        'approved_at' => merge_approved_at(last_ticket, event),
-        'version_timestamps' => merge_version_timestamps(last_ticket, feature_reviews, event),
-      )
-    end
+    def update_github_status_for(ticket_hashes)
+      tickets = ticket_hashes.map { |ticket| Ticket.new(ticket) }
 
-    def merge_version_timestamps(ticket, feature_reviews, event)
-      old_version_timestamps = ticket.fetch('version_timestamps', {})
-      new_version_timestamps = feature_reviews.flat_map(&:versions).each_with_object({}) { |version, hash|
-        hash[version] = event.created_at
-      }
-      new_version_timestamps.merge!(old_version_timestamps)
-    end
-
-    def merge_ticket_paths(ticket, feature_reviews)
-      old_paths = ticket.fetch('paths', [])
-      new_paths = feature_reviews.map(&:path)
-      old_paths.concat(new_paths).uniq
-    end
-
-    def merge_ticket_versions(ticket, feature_reviews)
-      old_versions = ticket.fetch('versions', [])
-      new_versions = feature_reviews.flat_map(&:versions)
-      old_versions.concat(new_versions).uniq
-    end
-
-    def merge_approved_at(last_ticket, event)
-      if event.approval?
-        event.created_at
-      elsif last_ticket.present? && Ticket.new(status: event.status).approved?
-        last_ticket['approved_at']
-      end
-    end
-
-    def update_github_status_for(ticket_hash)
-      ticket = Ticket.new(ticket_hash)
-      array_of_app_versions = feature_review_factory.create_from_tickets([ticket]).map(&:app_versions)
+      array_of_app_versions = feature_review_factory.create_from_tickets(tickets).map(&:app_versions)
 
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)

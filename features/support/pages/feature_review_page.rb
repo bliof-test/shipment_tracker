@@ -91,7 +91,7 @@ module Pages
 
     def tickets
       verify!
-      Sections::TableSection.new(page.find('.feature-status table')).items
+      Sections::TableSection.new(page.find('.feature-status table')).items.map { |row| row.except('Actions') }
     end
 
     def uatest_panel

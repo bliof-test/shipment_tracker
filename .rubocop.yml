@@ -16,7 +16,10 @@ Rails/TimeZone:
   Enabled: false
 
 Metrics/LineLength:
-  Max: 110
+  Max: 120
+
+Style/SingleLineBlockParams:
+  Enabled: false
 
 Metrics/MethodLength:
   Max: 15
@@ -58,6 +61,7 @@ Style/SignalException:
   EnforcedStyle: semantic
   Exclude:
     - 'app/use_cases/link_ticket.rb'
+    - 'app/use_cases/unlink_ticket.rb'
 
 Style/FrozenStringLiteralComment:
   Enabled: enable
