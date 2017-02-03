@@ -23,7 +23,7 @@ module Repositories
     end
 
     def apply(event)
-      return unless event.is_a?(Events::ReleaseExceptionEvent) && valid_repo_owner?(event)
+      return unless event.is_a?(Events::ReleaseExceptionEvent)
 
       store.create!(
         repo_owner_id: event.repo_owner.id,
@@ -36,12 +36,6 @@ module Repositories
     end
 
     private
-
-    def valid_repo_owner?(event)
-      event.git_repos.any? do |git_repo|
-        event.repo_owner.owner_of?(git_repo)
-      end
-    end
 
     def prepared_versions(versions)
       versions.sort

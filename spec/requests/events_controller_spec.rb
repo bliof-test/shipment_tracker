@@ -3,37 +3,22 @@ require 'rails_helper'
 
 RSpec.describe 'EventsController' do
   describe 'POST #create' do
-    let(:event_factory) { instance_double(Factories::EventFactory) }
-
-    before do
-      allow(Factories::EventFactory).to receive(:from_rails_config).and_return(event_factory)
-    end
-
     context 'with a cookie' do
-      let(:user_email) { 'alice@fundingcircle.com' }
-
       before do
-        login_with_omniauth(email: user_email)
+        login_with_omniauth(email: 'alice@fundingcircle.com')
       end
 
       it 'saves the event' do
-        expect(event_factory).to receive(:create).with(
-          'circleci',
-          { 'foo' => 'bar' },
-          user_email,
-        )
-
         post '/events/circleci', foo: 'bar'
 
         expect(response).to be_ok
         expect(response.headers).to have_key('Set-Cookie')
+
+        event = Events::CircleCiEvent.last
+        expect(event.details).to eq('foo' => 'bar')
       end
 
       context 'with a return_to param' do
-        before do
-          allow(event_factory).to receive(:create).with('circleci', {}, user_email)
-        end
-
         context 'when return_to is a relative path' do
           it 'redirects to the path' do
             post '/events/circleci?return_to=/my/projection?with=data'
@@ -77,34 +62,38 @@ RSpec.describe 'EventsController' do
       end
 
       it 'saves the event' do
-        expect(event_factory).to receive(:create).with(
-          'circleci', { 'foo' => 'bar', 'token' => 'the payloads token' }, nil
-        )
-
         post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token'
 
         expect(response).to be_ok
+
+        event = Events::CircleCiEvent.last
+        expect(event.details).to eq('foo' => 'bar', 'token' => 'the payloads token')
       end
 
       it 'discards duplicated data' do
-        expect(event_factory).to receive(:create).with(
-          'circleci', { 'foo' => 'bar', 'token' => 'the payloads token' }, nil
+        post(
+          "/events/circleci?token=#{token}",
+          foo: 'bar',
+          token: 'the payloads token',
+          event: { foo: 'bar', token: 'the payloads token' },
         )
 
-        post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token',
-                                                event: { foo: 'bar', token: 'the payloads token' }
-
         expect(response).to be_ok
+
+        event = Events::CircleCiEvent.last
+        expect(event.details).to eq('foo' => 'bar', 'token' => 'the payloads token')
       end
 
       it 'does not create authorised session' do
-        expect(event_factory).to receive(:create).once
-
         post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token'
+
+        expect(Events::CircleCiEvent.count).to eq(1)
 
         # subsequent post without token should not work
         post '/events/circleci', more: 'data'
         expect(response).to be_forbidden
+
+        expect(Events::CircleCiEvent.count).to eq(1)
       end
     end
 
@@ -121,6 +110,59 @@ RSpec.describe 'EventsController' do
         post '/events/circleci?token=asdfasdf', foo: 'bar'
 
         expect(response).to be_forbidden
+      end
+    end
+
+    context 'when the event is not valid' do
+      before do
+        login_with_omniauth(email: 'test@example.com')
+      end
+
+      describe 'forbidden action' do
+        class ForbiddenEvent < Events::BaseEvent
+          validate -> { errors.add :base, 'forbidden' }
+        end
+
+        before do
+          expect_any_instance_of(Factories::EventFactory).to receive(:build).and_return(ForbiddenEvent.new)
+        end
+
+        it 'will return 403 Forbidden if there is a base error for the event' do
+          post '/events/test', foo: 'bar'
+
+          expect(response).to be_forbidden
+        end
+
+        it 'will not redirect event if there is return_to' do
+          post '/events/test?return_to=/my/projection?with=data'
+
+          expect(response).to be_forbidden
+          expect(response['Location']).to be_blank
+        end
+      end
+
+      describe 'invalid event data' do
+        class CustomEvent < Events::BaseEvent
+          attr_accessor :name
+          validates :name, presence: true
+        end
+
+        before do
+          expect_any_instance_of(Factories::EventFactory).to receive(:build).and_return(CustomEvent.new)
+        end
+
+        it 'will return 400 if there is a validation error' do
+          post '/events/test', foo: 'bar'
+
+          expect(response).to be_bad_request
+        end
+
+        it 'will redirect back with an error flash if there is return_to' do
+          post '/events/test?return_to=/my/projection?with=data'
+
+          expect(response).to redirect_to('/my/projection?with=data')
+          expect(flash[:error]).to be_present
+        end
       end
     end
   end

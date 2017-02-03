@@ -9,19 +9,26 @@ module Factories
       new(EventTypeRepository.from_rails_config)
     end
 
-    def create(endpoint, payload, user_email)
+    def build(endpoint:, payload:, user: nil)
       type = event_type_repository.find_by_endpoint(endpoint)
-      details = decorate_with_email(payload, type, user_email)
-      type.event_class.create!(details: details)
+
+      data = format_payload(payload, type, user)
+
+      type.event_class.new(data)
     end
 
     private
 
     attr_reader :event_type_repository
 
-    def decorate_with_email(payload, type, email)
-      return payload unless type.internal? && email.present?
-      payload.merge('email' => email)
+    def format_payload(payload, type, user)
+      metadata = {}
+
+      if type.internal? && user && user.email.present?
+        metadata = { 'email' => user.email }
+      end
+
+      { details: payload.merge(metadata) }
     end
   end
 end
