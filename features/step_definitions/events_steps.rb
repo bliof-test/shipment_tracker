@@ -45,10 +45,11 @@ Given 'the following tickets are created:' do |tickets_table|
 end
 
 Given 'at time "$a" adds link for review "$b" to comment for ticket "$c"' do |time, nickname, jira_key|
-  scenario_context.link_ticket_and_feature_review(
+  scenario_context.post_jira_comment(
     jira_key: jira_key,
     feature_review_nickname: nickname,
     time: time,
+    comment_type: LinkTicket,
   )
 end
 
