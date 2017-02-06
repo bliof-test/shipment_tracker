@@ -41,7 +41,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
 
@@ -66,7 +66,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc').update
         end
       end
     end
@@ -99,7 +99,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/?q=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
 
@@ -126,7 +126,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/?q=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
     end
@@ -150,7 +150,7 @@ RSpec.describe CommitStatus do
           target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
         )
 
-        CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+        CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
       end
 
       context 'when there is a staging deploy for the software version under review' do
@@ -165,7 +165,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+          CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
         end
       end
     end
@@ -181,7 +181,7 @@ RSpec.describe CommitStatus do
         target_url: nil,
       )
 
-      CommitStatus.new.reset(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').reset
     end
   end
 
@@ -195,7 +195,7 @@ RSpec.describe CommitStatus do
         target_url: nil,
       )
 
-      CommitStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').error
     end
   end
 
@@ -209,7 +209,7 @@ RSpec.describe CommitStatus do
         target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
       )
 
-      CommitStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').not_found
     end
   end
 end

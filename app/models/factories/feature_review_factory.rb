@@ -23,7 +23,8 @@ module Factories
     def create_from_url_string(url)
       uri = Addressable::URI.parse(url).normalize
       query_hash = Rack::Utils.parse_nested_query(uri.query)
-      versions = query_hash.fetch('apps', {}).values.reject(&:blank?)
+      apps = query_hash.fetch('apps', {})
+      versions = get_app_versions(apps)
       create(
         path: whitelisted_path(uri, query_hash),
         versions: versions,
@@ -44,6 +45,10 @@ module Factories
 
     def create(attrs)
       FeatureReview.new(attrs)
+    end
+
+    def get_app_versions(apps)
+      apps.values.reject(&:blank?)
     end
 
     def whitelisted_path(uri, query_hash)
