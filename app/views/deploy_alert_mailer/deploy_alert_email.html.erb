@@ -1,0 +1,25 @@
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "EmailMessage",
+  "potentialAction": {
+    "@type": "ViewAction",
+    "target": <%= @releases_url.to_json.html_safe %>,
+    "name": <%= "Recent #{@region} Releases".to_json.html_safe %>
+  },
+  "description": <%= "Recent #{@region} Releases For #{@repo}".to_json.html_safe %>
+}
+</script>
+
+
+<h1 style='font-family: sans-serif;'>Deploy Alert</h1>
+
+<p style="font-family: sans-serif; margin: 0 0 5px 0;">Repo: <%= @repo %></p>
+<p style="font-family: sans-serif; margin: 0 0 5px 0;">Region: <%= @region %> <%= link_to('(releases)', @releases_url) %></p>
+<p style="font-family: sans-serif; margin: 0 0 5px 0;">Deployer: <%= @deployer %></p>
+<p style="font-family: sans-serif; margin: 0 0 5px 0;">Deployed At: <%= @deployed_at %></p>
+
+<br />
+<br />
+
+<pre style="font-size: 18px; line-height: 24px;"><%= @alert %></pre>

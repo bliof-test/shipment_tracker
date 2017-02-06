@@ -74,4 +74,7 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.active_job.queue_adapter = :delayed_job
+
+  config.action_mailer.delivery_method = :sendmail
+  config.deploy_alert_email = ENV['DEPLOY_ALERT_EMAIL']
 end

@@ -2,6 +2,10 @@
 require 'rails_helper'
 
 RSpec.describe DeployAlertJob do
+  before do
+    allow(SlackClient).to receive(:send_deploy_alert)
+  end
+
   describe '#perform' do
     let(:deploy_attrs) do
       {
@@ -10,7 +14,7 @@ RSpec.describe DeployAlertJob do
         'server' => 'test.com',
         'version' => 'xyz',
         'deployed_by' => 'Bob',
-        'event_created_at' => Time.new(2016, 11, 20, 14, 0, 0, 0).to_s,
+        'deployed_at' => Time.new(2016, 11, 20, 14, 0, 0, 0).to_s,
         'environment' => 'production',
         'region' => 'us',
       }
@@ -45,6 +49,31 @@ RSpec.describe DeployAlertJob do
           'region' => 'uk',
         ),
       )
+    end
+
+    it 'will notificaty the repo owners by email if there is an error' do
+      expect(DeployAlert).to receive(:audit_message).and_return 'There was an error.'
+
+      allow_any_instance_of(Repositories::RepoOwnershipRepository).to(
+        receive(:owners_of).with('frontend').and_return(
+          [
+            build(:repo_owner, name: 'John', email: 'john@test.com'),
+            build(:repo_owner, name: 'Ivan', email: 'ivan@test.com'),
+          ],
+        ),
+      )
+
+      create(:git_repository_location, name: 'frontend')
+
+      expect do
+        DeployAlertJob.perform_now(
+          current_deploy: deploy_attrs.merge(
+            'app_name' => 'frontend',
+            'deployed_by' => 'John',
+            'region' => 'uk',
+          ),
+        )
+      end.to change { ActionMailer::Base.deliveries.count }.by(1)
     end
   end
 end
