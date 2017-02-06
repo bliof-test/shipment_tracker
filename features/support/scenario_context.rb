@@ -97,10 +97,10 @@ module Support
       }
     end
 
-    def link_ticket_and_feature_review(jira_key:, feature_review_nickname:, time: Time.current.to_s)
+    def post_jira_comment(jira_key:, feature_review_nickname:, time: Time.current.to_s, comment_type:)
       url = review_url(feature_review_nickname: feature_review_nickname)
       ticket_details = @tickets.fetch(jira_key).merge!(
-        comment_body: "Here you go: #{url}",
+        comment_body: comment_type.build_comment(url),
         updated: time,
       )
       @stubbed_requests['pending'] = stub_request(:post, %r{https://api.github.com/.*})

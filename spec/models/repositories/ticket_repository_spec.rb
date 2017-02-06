@@ -17,7 +17,7 @@ RSpec.describe Repositories::TicketRepository do
   end
 
   describe '#tickets_for_* queries' do
-    let(:attrs_a) {
+    let(:attrs_a1) {
       { key: 'JIRA-A',
         summary: 'JIRA-A summary',
         status: 'Done',
@@ -26,6 +26,18 @@ RSpec.describe Repositories::TicketRepository do
           feature_review_path(frontend: 'abc', backend: 'NON1'),
         ],
         event_created_at: 9.days.ago,
+        versions: %w(abc NON1 NON3 NON2) }
+    }
+
+    let(:attrs_a2) {
+      { key: 'JIRA-A',
+        summary: 'JIRA-A summary',
+        status: 'Done',
+        paths: [
+          feature_review_path(frontend: 'NON3', backend: 'NON2'),
+          feature_review_path(frontend: 'abc', backend: 'NON1'),
+        ],
+        event_created_at: 3.days.ago,
         versions: %w(abc NON1 NON3 NON2) }
     }
 
@@ -78,7 +90,8 @@ RSpec.describe Repositories::TicketRepository do
     }
 
     before :each do
-      Snapshots::Ticket.create!(attrs_a)
+      Snapshots::Ticket.create!(attrs_a1)
+      Snapshots::Ticket.create!(attrs_a2)
       Snapshots::Ticket.create!(attrs_b)
       Snapshots::Ticket.create!(attrs_c)
       Snapshots::Ticket.create!(attrs_d)
@@ -94,7 +107,7 @@ RSpec.describe Repositories::TicketRepository do
           )
         }
 
-        it { is_expected.to match_array([Ticket.new(attrs_a), Ticket.new(attrs_e2)]) }
+        it { is_expected.to match_array([Ticket.new(attrs_a1), Ticket.new(attrs_e2)]) }
       end
 
       context 'with a specified time' do
@@ -105,7 +118,9 @@ RSpec.describe Repositories::TicketRepository do
           )
         }
 
-        it { is_expected.to match_array([Ticket.new(attrs_a)]) }
+        it 'returns the most up to date ticket before a specified time' do
+          is_expected.to match_array([Ticket.new(attrs_a1)])
+        end
       end
     end
 
@@ -115,7 +130,7 @@ RSpec.describe Repositories::TicketRepository do
           tickets = repository.tickets_for_versions(%w(abc def))
 
           expect(tickets).to match_array([
-            Ticket.new(attrs_a),
+            Ticket.new(attrs_a1),
             Ticket.new(attrs_b),
             Ticket.new(attrs_e2),
           ])
@@ -127,7 +142,7 @@ RSpec.describe Repositories::TicketRepository do
           tickets = repository.tickets_for_versions('abc')
 
           expect(tickets).to match_array([
-            Ticket.new(attrs_a),
+            Ticket.new(attrs_a1),
             Ticket.new(attrs_e2),
           ])
         end
@@ -138,7 +153,7 @@ RSpec.describe Repositories::TicketRepository do
   describe '#apply' do
     let(:time) { Time.current.change(usec: 0) }
     let(:times) { [time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute] }
-    let(:url) { feature_review_url(app: 'foo') }
+    let(:url) { LinkTicket.build_comment(feature_review_url(app: 'foo')) }
     let(:path) { feature_review_path(app: 'foo') }
     let(:ticket_defaults) { { paths: [path], versions: %w(foo), version_timestamps: { 'foo' => nil } } }
     let(:repository_location) { instance_double(GitRepositoryLocation, full_repo_name: 'owner/frontend') }
@@ -198,123 +213,94 @@ RSpec.describe Repositories::TicketRepository do
       end
     end
 
-    it 'projects latest associated tickets' do
-      ticket_1 = ticket_defaults.merge(key: 'JIRA-1')
+    it 'persists the new ticket' do
+      event = build(:jira_event, key: 'JIRA-1', comment_body: feature_review_url(app: 'sha'))
+      ticket = { key: 'JIRA-1', summary: 'some data' }
+      allow(event).to receive(:apply).and_return(ticket)
 
-      repository.apply(build(:jira_event, :created, key: 'JIRA-1', comment_body: url))
-      results = repository.tickets_for_path(path)
-      expect(results).to eq([
-        Ticket.new(ticket_1.merge(status: 'To Do')),
-      ])
+      repository.apply(event)
 
-      repository.apply(build(:jira_event, :started, key: 'JIRA-1'))
-      results = repository.tickets_for_path(path)
-      expect(results).to eq([
-        Ticket.new(ticket_1.merge(status: 'In Progress')),
-      ])
-
-      repository.apply(build(:jira_event, :approved, key: 'JIRA-1', created_at: time))
-      results = repository.tickets_for_path(path)
-      expect(results).to eq([
-        Ticket.new(
-          ticket_1.merge(status: 'Ready for Deployment', approved_at: time, event_created_at: time),
-        ),
-      ])
-
-      repository.apply(build(:jira_event, :deployed, key: 'JIRA-1', created_at: time + 1.hour))
-      results = repository.tickets_for_path(path)
-      expect(results).to eq([
-        Ticket.new(
-          ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time + 1.hour)),
-      ])
-
-      repository.apply(build(:jira_event, :unapproved, key: 'JIRA-1', created_at: time + 2.hours))
-      results = repository.tickets_for_path(path)
-      expect(results).to eq([
-        Ticket.new(
-          ticket_1.merge(status: 'In Progress', approved_at: nil, event_created_at: time + 2.hours)),
-      ])
-    end
-
-    it 'snapshots tickets linked to a Feature Review' do
-      jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
-      jira_4 = { key: 'JIRA-4', summary: 'Ticket 4' }
-      ticket_1 = jira_1.merge(ticket_defaults)
-      ticket_4 = jira_4.merge(ticket_defaults)
-
-      [
-        build(:jira_event, :created, jira_1),
-        build(:jira_event, :started, jira_1),
-        build(:jira_event, :development_completed, jira_1.merge(comment_body: "Please review #{url}")),
-
-        build(:jira_event, :created, key: 'JIRA-2'),
-        build(:jira_event, :created, key: 'JIRA-3', comment_body: 'http://example.com/feature_reviews/fake'),
-
-        build(:jira_event, :created, jira_4),
-        build(:jira_event, :started, jira_4),
-        build(:jira_event, :development_completed, jira_4.merge(comment_body: url)),
-
-        build(:jira_event, :approved, jira_1.merge(created_at: time)),
-        build(:jira_event, :deployed, jira_1),
-      ].each do |event|
-        repository.apply(event)
-      end
-
-      expect(repository.tickets_for_path(path)).to match_array([
-        Ticket.new(ticket_1.merge(status: 'Done', approved_at: time, event_created_at: time)),
-        Ticket.new(ticket_4.merge(status: 'Ready For Review')),
-      ])
-    end
-
-    it 'initially sets approval time for approval events' do
-      aggregate_failures do
-        premature_approval = build(:jira_event, :approved, key: '1', created_at: time - 3.hours)
-        repository.apply(premature_approval)
-        expect(ticket_snapshot).to be_nil
-
-        linking = build(:jira_event, :ready_for_deploy,
-          key: '1', comment_body: feature_review_url(app: 'sha'), created_at: time - 2.hours)
-        repository.apply(linking)
-        expect(ticket_snapshot.approved_at).to be_nil
-
-        unapproval = build(:jira_event, :unapproved, key: '1', created_at: time - 1.hour)
-        repository.apply(unapproval)
-        expect(ticket_snapshot.approved_at).to be_nil
-
-        reapproval = build(:jira_event, :approved, key: '1', created_at: time)
-        repository.apply(reapproval)
-        expect(ticket_snapshot.approved_at).to eq(time)
-
-        deployment = build(:jira_event, :deployed, key: '1', created_at: time + 1.hour)
-        repository.apply(deployment)
-        expect(ticket_snapshot.approved_at).to eq(time)
-      end
+      persisted_ticket = Snapshots::Ticket.where(key: 'JIRA-1').last
+      expect(persisted_ticket.summary).to eq('some data')
     end
 
     context 'when multiple Feature Reviews are referenced in the same JIRA ticket' do
-      let(:url1) { feature_review_url(app1: 'one') }
-      let(:url2) { feature_review_url(app2: 'two') }
-      let(:path1) { feature_review_path(app1: 'one') }
-      let(:path2) { feature_review_path(app2: 'two') }
-
       subject(:repository) { Repositories::TicketRepository.new }
 
-      it 'projects the ticket referenced in the JIRA comments for each repository' do
-        [
-          build(:jira_event, key: 'JIRA-1', comment_body: "Review #{url1}", created_at: times[0]),
-          build(:jira_event, key: 'JIRA-1', comment_body: "Review [FR link|#{url2}]", created_at: times[1]),
-          build(:jira_event, key: 'JIRA-1', comment_body: "Review #{url1}", created_at: times[2]),
-        ].each do |event|
-          repository.apply(event)
-        end
+      context 'and applying link event' do
+        let(:url1) { feature_review_url(app1: 'one') }
+        let(:url2) { feature_review_url(app2: 'two') }
+        let(:path1) { feature_review_path(app1: 'one') }
+        let(:path2) { feature_review_path(app2: 'two') }
 
-        expect(repository.tickets_for_path(path1)).to eq([
-          Ticket.new(
+        it 'projects the ticket referenced in the JIRA comments for each repository' do
+          [
+            build(
+              :jira_event,
+              key: 'JIRA-1',
+              comment_body: LinkTicket.build_comment(url1),
+              created_at: times[0],
+            ),
+            build(
+              :jira_event,
+              key: 'JIRA-1',
+              comment_body: LinkTicket.build_comment(url2),
+              created_at: times[1],
+            ),
+            build(
+              :jira_event,
+              key: 'JIRA-1',
+              comment_body: LinkTicket.build_comment(url1),
+              created_at: times[2],
+            ),
+          ].each do |event|
+            repository.apply(event)
+          end
+
+          expect(repository.tickets_for_path(path1)).to eq([
+            Ticket.new(
+              key: 'JIRA-1',
+              paths: [path1, path2],
+              versions: %w(one two),
+              version_timestamps: { 'one' => times[0], 'two' => times[1] }),
+          ])
+        end
+      end
+
+      context 'and applying unlink event' do
+        let(:path1) { feature_review_path(app1: 'one') }
+        let(:url1) { feature_review_url(app1: 'one') }
+        let(:link_jira_event1) {
+          build(:jira_event,
             key: 'JIRA-1',
-            paths: [path1, path2],
-            versions: %w(one two),
-            version_timestamps: { 'one' => times[0], 'two' => times[1] }),
-        ])
+            comment_body: LinkTicket.build_comment(url1),
+            created_at: times[0],
+               )
+        }
+        let(:unlink_jira_event1) {
+          build(:jira_event, key: 'JIRA-1', comment_body: UnlinkTicket.build_comment(url1))
+        }
+
+        let(:path2) { feature_review_path(app2: 'two') }
+        let(:url2) { feature_review_url(app2: 'two') }
+        let(:link_jira_event2) {
+          build(:jira_event,
+            key: 'JIRA-1',
+            comment_body: LinkTicket.build_comment(url2),
+            created_at: times[1],
+               )
+        }
+
+        it 'removes the feature review link from a ticket' do
+          repository.apply(link_jira_event1)
+          repository.apply(link_jira_event2)
+          repository.apply(unlink_jira_event1)
+
+          last_snapshot = Snapshots::Ticket.where(key: 'JIRA-1').last
+          expect(last_snapshot.paths).to eq([path2])
+          expect(last_snapshot.versions).to eq %w(two)
+          expect(last_snapshot.version_timestamps).to eq('two' => times[1].to_s)
+        end
       end
     end
 
@@ -325,10 +311,14 @@ RSpec.describe Repositories::TicketRepository do
         ticket_1 = jira_1.merge(ticket_defaults)
 
         [
-          build(:jira_event, :created, jira_1.merge(comment_body: url, created_at: times[0])),
+          build(:jira_event, :created, jira_1.merge(
+                                         comment_body: LinkTicket.build_comment(url), created_at: times[0])
+               ),
           build(:jira_event, :approved, jira_1.merge(created_at: times[1])),
           build(:jira_event, :created, jira_2.merge(created_at: times[2])),
-          build(:jira_event, :created, jira_2.merge(comment_body: url, created_at: times[3])),
+          build(:jira_event, :created, jira_2.merge(
+                                         comment_body: LinkTicket.build_comment(url), created_at: times[3])
+               ),
         ].each do |event|
           repository.apply(event)
         end
@@ -367,12 +357,14 @@ RSpec.describe Repositories::TicketRepository do
       end
 
       context 'when ticket event is for a comment' do
-        context 'when event contains a Feature Review link' do
+        context 'when it links' do
           let(:event) {
             build(
               :jira_event,
               key: 'JIRA-XYZ',
-              comment_body: "#{feature_review_url(frontend: 'abc')} #{feature_review_url(frontend: 'def')}",
+              comment_body: LinkTicket.build_comment(
+                "#{feature_review_url(frontend: 'abc')}, #{feature_review_url(frontend: 'def')}",
+              ),
             )
           }
 
@@ -386,6 +378,54 @@ RSpec.describe Repositories::TicketRepository do
               sha: 'def',
             )
             repository.apply(event)
+          end
+        end
+
+        context 'when it unlinks' do
+          let(:linking_event1) {
+            build(
+              :jira_event,
+              key: 'JIRA-XYZ',
+              comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
+            )
+          }
+          let(:linking_event2) {
+            build(
+              :jira_event,
+              key: 'JIRA-XYZ',
+              comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'def')),
+            )
+          }
+          let(:unlinking_event1) {
+            build(
+              :jira_event,
+              key: 'JIRA-XYZ',
+              comment_body: UnlinkTicket.build_comment(feature_review_url(frontend: 'abc')),
+            )
+          }
+
+          it 'schedules commit status updates for each version' do
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
+              full_repo_name: 'owner/frontend',
+              sha: 'abc',
+            )
+            repository.apply(linking_event1)
+
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
+              full_repo_name: 'owner/frontend',
+              sha: 'def',
+            )
+            repository.apply(linking_event2)
+
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
+              full_repo_name: 'owner/frontend',
+              sha: 'abc',
+            )
+            expect(CommitStatusUpdateJob).to receive(:perform_later).with(
+              full_repo_name: 'owner/frontend',
+              sha: 'def',
+            )
+            repository.apply(unlinking_event1)
           end
         end
 
@@ -417,13 +457,20 @@ RSpec.describe Repositories::TicketRepository do
       end
 
       context 'when ticket event is for an approval' do
-        let(:approval_event) { build(:jira_event, :approved, key: 'JIRA-XYZ', created_at: time) }
+        let(:approval_event) {
+          build(:jira_event,
+            :approved,
+            key: 'JIRA-XYZ',
+            created_at: time,
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
+               )
+        }
 
         before do
           event = build(
             :jira_event,
             key: 'JIRA-XYZ',
-            comment_body: "Reviews: http://foo.com#{feature_review_path(frontend: 'abc')}",
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
             created_at: time - 1.hour,
           )
           repository.apply(event)
@@ -439,13 +486,20 @@ RSpec.describe Repositories::TicketRepository do
       end
 
       context 'when ticket event is for an unapproval' do
-        let(:unapproval_event) { build(:jira_event, :unapproved, key: 'JIRA-XYZ', created_at: time) }
+        let(:unapproval_event) {
+          build(:jira_event,
+            :unapproved,
+            key: 'JIRA-XYZ',
+            created_at: time,
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
+               )
+        }
 
         before do
           event = build(
             :jira_event,
             key: 'JIRA-XYZ',
-            comment_body: "Reviews: http://foo.com#{feature_review_path(frontend: 'abc')}",
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
             created_at: time - 1.hour,
           )
           repository.apply(event)

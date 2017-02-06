@@ -3,7 +3,7 @@ require 'rails_helper'
 require 'link_ticket'
 
 RSpec.describe LinkTicket do
-  let(:ticket_repository) { double }
+  let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
 
   let(:apps_with_versions) { { 'frontend' => 'abc', 'backend' => 'def' } }
   let(:args) {
@@ -33,11 +33,11 @@ RSpec.describe LinkTicket do
 
       it 'posts a comment' do
         expect(JiraClient).to receive(:post_comment).with(jira_key, expected_comment)
-        LinkTicket.run(args)
+        described_class.run(args)
       end
 
       it 'returns a success message' do
-        result = LinkTicket.run(args)
+        result = described_class.run(args)
         expect(result).to be_a_success
         expect(result.value).to eq(expected_message)
       end
@@ -51,7 +51,7 @@ RSpec.describe LinkTicket do
         allow(JiraClient).to receive(:post_comment).and_raise(JiraClient::InvalidKeyError)
       end
       it 'fails with message' do
-        result = LinkTicket.run(args)
+        result = described_class.run(args)
         expect(result).to fail_with(:invalid_key)
         expect(result.value.message).to eq(expected_message)
       end
@@ -64,11 +64,11 @@ RSpec.describe LinkTicket do
       let(:ticket) { Ticket.new(paths: [feature_review_path(apps_with_versions)], key: jira_key) }
 
       before do
-        expect(ticket_repository).to receive(:tickets_for_path).and_return([ticket])
+        allow(ticket_repository).to receive(:tickets_for_path).and_return([ticket])
       end
 
       it 'fails with message' do
-        result = LinkTicket.run(args)
+        result = described_class.run(args)
         expect(result).to fail_with(:duplicate_key)
         expect(result.value.message).to eq(expected_message)
       end
@@ -82,7 +82,7 @@ RSpec.describe LinkTicket do
       end
 
       it 'fails with message' do
-        result = LinkTicket.run(args)
+        result = described_class.run(args)
         expect(result).to fail_with(:post_failed)
         expect(result.value.message).to eq(expected_message)
       end
@@ -96,7 +96,7 @@ RSpec.describe LinkTicket do
     }
 
     it 'fails validation' do
-      result = LinkTicket.run(args)
+      result = described_class.run(args)
       expect(result).to fail_with(:invalid_key)
       expect(result.value.message).to eq(expected_message)
     end

@@ -67,6 +67,11 @@ module Pages
       page.click_link_or_button('Link')
     end
 
+    def unlink_a_jira_ticket(jira_key:)
+      verify!
+      page.find('tr', text: jira_key) { click_link_or_button('unlink') }
+    end
+
     def qa_submission_panel
       verify!
       Sections::PanelListSection.new(
@@ -91,7 +96,7 @@ module Pages
 
     def tickets
       verify!
-      Sections::TableSection.new(page.find('.feature-status table')).items
+      Sections::TableSection.new(page.find('.feature-status table')).items.map { |row| row.except('Actions') }
     end
 
     def uatest_panel

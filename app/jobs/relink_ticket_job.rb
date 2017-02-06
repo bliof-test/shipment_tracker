@@ -36,8 +36,7 @@ class RelinkTicketJob < ActiveJob::Base
 
   def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
-    message = "[Feature ready for review|#{feature_review_url(new_feature_review_path)}]"
-    JiraClient.post_comment(ticket_key, message)
+    JiraClient.post_comment(ticket_key, LinkTicket.build_comment(feature_review_url(new_feature_review_path)))
   rescue JiraClient::InvalidKeyError
     @send_error_status = true
     Rails.logger.warn "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."

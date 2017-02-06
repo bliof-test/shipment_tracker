@@ -32,8 +32,8 @@ gem 'unicorn'
 gem 'virtus'
 
 group :development do
-  gem 'better_errors', require: false
-  gem 'binding_of_caller', require: false
+  gem 'better_errors'
+  gem 'binding_of_caller'
   gem 'foreman', require: false
   gem 'spring'
   gem 'spring-commands-rspec'

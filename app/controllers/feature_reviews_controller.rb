@@ -37,6 +37,20 @@ class FeatureReviewsController < ApplicationController
     redirect_to redirect_path
   end
 
+  def unlink_ticket
+    args = ticket_linking_options.merge(apps: params.fetch(:apps))
+    UnlinkTicket.run(args).match do
+      success do |success_message|
+        flash[:success] = success_message
+      end
+
+      failure do |error|
+        flash[:error] = error.message
+      end
+    end
+    redirect_to feature_reviews_path(apps: params[:apps])
+  end
+
   private
 
   def ticket_linking_options

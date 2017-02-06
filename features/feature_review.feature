@@ -67,6 +67,33 @@ Scenario: Linking a Feature Review
   When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
   Then I should see an alert: "Failed to link JIRA-123. Duplicate tickets should not be added."
 
+@logged_in @disable_jira_client
+Scenario: Unlinking a ticket from a Feature Review
+  Given an application called "frontend"
+  And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
+  And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
+  And a ticket "JIRA-789" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
+  And developer prepares review known as "FR_view" for UAT "uat.fundingcircle.com" with apps
+    | app_name | version |
+    | frontend | #abc    |
+
+  When I visit the feature review known as "FR_view"
+  When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
+  And I link the feature review "FR_view" to the Jira ticket "JIRA-789"
+
+  When I reload the page after a while
+  Then I should see the tickets
+    | Ticket   | Summary       | Status      |
+    | JIRA-123 | Urgent ticket | In Progress |
+    | JIRA-789 | Urgent ticket | In Progress |
+
+  When I unlink the feature review "FR_view" from the Jira ticket "JIRA-123"
+
+  When I reload the page after a while
+  Then I should see the tickets
+    | Ticket   | Summary       | Status      |
+    | JIRA-789 | Urgent ticket | In Progress |
+
 @logged_in
 Scenario: Viewing User Acceptance Tests results on a Feature review
   Given an application called "frontend"
@@ -216,7 +243,6 @@ Scenario: Viewing an approved Feature Review after regenerating snapshots
   And I should see the tickets
     | Ticket   | Summary       | Status               |
     | JIRA-123 | Urgent ticket | Ready for Deployment |
-
 
 Scenario: QA rejects feature
   Given an application called "frontend"

@@ -43,7 +43,29 @@ module Events
         !approved_status?(status_item['toString'])
     end
 
+    def apply(ticket)
+      handler.new(ticket, self).apply
+    end
+
     private
+
+    def handler
+      if link_action?
+        Handlers::LinkTicketHandler
+      elsif unlink_action?
+        Handlers::UnlinkTicketHandler
+      else
+        Handlers::TicketHandler
+      end
+    end
+
+    def link_action?
+      comment.include?(LinkTicket::COMMENT_LABEL)
+    end
+
+    def unlink_action?
+      comment.include?(UnlinkTicket::COMMENT_LABEL)
+    end
 
     def status_item
       @status_item ||= changelog_items.find { |item| item['field'] == 'status' }
