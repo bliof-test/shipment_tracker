@@ -131,6 +131,14 @@ module Support
       end
     end
 
+    def stub_github_update_for_repo_owner(action)
+      state = (action == 'approve' ? 'success' : 'pending')
+
+      @stubbed_requests[state] = stub_request(:post, %r{https://api.github.com/.*})
+                                 .with(body: /"state":"#{state}"/)
+                                 .and_return(status: 201)
+    end
+
     def review_url(feature_review_nickname: nil, time: nil)
       review = @reviews.fetch(feature_review_nickname)
       feature_review_url(review[:apps_hash], review[:uat_url], time)

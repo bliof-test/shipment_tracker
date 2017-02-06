@@ -41,6 +41,6 @@ Given 'the branch "$branch" is merged with merge commit "$version" at "$time' do
   )
 end
 
-Given 'all pull requests for "$commit" should be updated to "$status" status' do |_commit, status|
-  expect(scenario_context.stubbed_requests[status]).to have_been_requested
+Given 'all pull requests for "$app_count" application should be updated to "$status" status' do |app_count, status|
+  expect(scenario_context.stubbed_requests[status]).to have_been_requested.at_least_times(app_count)
 end

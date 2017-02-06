@@ -35,9 +35,12 @@ module Factories
       uri = Addressable::URI.parse('/feature_reviews').normalize
       query_hash = { 'apps' => apps }
 
+      last_staging_deploy = deploy_repository.last_staging_deploy_for_versions(get_app_versions(apps))
+      query_hash['uat_url'] = last_staging_deploy.server if last_staging_deploy
+
       create(
         path: whitelisted_path(uri, query_hash),
-        versions: apps.values.reject(&:blank?),
+        versions: get_app_versions(apps),
       )
     end
 
@@ -68,6 +71,10 @@ module Factories
     def clean_uri(uri)
       trailing_junk = uri[/.*\w(\W*)$/, 1]
       uri.chomp(trailing_junk)
+    end
+
+    def deploy_repository
+      Repositories::DeployRepository.new
     end
   end
 end

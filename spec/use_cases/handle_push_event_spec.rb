@@ -88,12 +88,11 @@ RSpec.describe HandlePushEvent do
     let(:git_repository_location) { instance_double(GitRepositoryLocation) }
     let(:git_repository_loader) { instance_double(GitRepositoryLoader) }
     let(:git_repository) { instance_double(GitRepository) }
+    let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
     before do
       allow(GitRepositoryLocation).to receive(:find_by_full_repo_name).and_return(git_repository_location)
       allow(git_repository_location).to receive(:update)
-
-      allow_any_instance_of(CommitStatus).to receive(:not_found)
 
       allow(GitRepositoryLoader).to receive(:from_rails_config) { git_repository_loader }
       allow(git_repository_loader).to receive(:load) { git_repository }
@@ -101,10 +100,11 @@ RSpec.describe HandlePushEvent do
     end
 
     it 'resets the GitHub commit status' do
-      expect_any_instance_of(CommitStatus).to receive(:reset).with(
+      allow(CommitStatus).to receive(:new).with(
         full_repo_name: payload.full_repo_name,
         sha: payload.after_sha,
-      )
+      ).and_return(commit_status)
+      expect(commit_status).to receive(:reset)
 
       HandlePushEvent.run(payload)
     end
@@ -139,6 +139,7 @@ RSpec.describe HandlePushEvent do
 
     context 'when new branch created' do
       let(:payload_data) { default_payload_data.merge('created' => true) }
+      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       before do
         allow_any_instance_of(CommitStatus).to receive(:not_found)
@@ -151,10 +152,11 @@ RSpec.describe HandlePushEvent do
       end
 
       it 'posts not found status' do
-        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+        allow(CommitStatus).to receive(:new).with(
           full_repo_name: 'owner/repo_name',
           sha: 'def1234',
-        )
+        ).and_return(commit_status)
+        expect(commit_status).to receive(:not_found)
 
         HandlePushEvent.run(payload)
       end
@@ -162,6 +164,7 @@ RSpec.describe HandlePushEvent do
 
     context 'when commit is already on master' do
       let(:on_master) { true }
+      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       before do
         allow_any_instance_of(CommitStatus).to receive(:not_found)
@@ -174,10 +177,11 @@ RSpec.describe HandlePushEvent do
       end
 
       it 'posts not found status' do
-        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+        allow(CommitStatus).to receive(:new).with(
           full_repo_name: 'owner/repo_name',
           sha: 'def1234',
-        )
+        ).and_return(commit_status)
+        expect(commit_status).to receive(:not_found)
 
         HandlePushEvent.run(payload)
       end
@@ -185,6 +189,7 @@ RSpec.describe HandlePushEvent do
 
     context 'when there are no previously linked tickets' do
       let(:tickets) { [] }
+      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       before do
         allow_any_instance_of(CommitStatus).to receive(:not_found)
@@ -197,10 +202,11 @@ RSpec.describe HandlePushEvent do
       end
 
       it 'posts a "failure" commit status to GitHub' do
-        expect_any_instance_of(CommitStatus).to receive(:not_found).with(
+        allow(CommitStatus).to receive(:new).with(
           full_repo_name: 'owner/repo_name',
           sha: 'def1234',
-        )
+        ).and_return(commit_status)
+        expect(commit_status).to receive(:not_found)
 
         HandlePushEvent.run(payload)
       end
@@ -276,6 +282,7 @@ RSpec.describe HandlePushEvent do
 
     context 'when the linking fails for a ticket' do
       let(:payload_data) { default_payload_data.merge('repository' => { 'full_name' => 'owner/app1' }) }
+      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       let(:tickets) {
         [
@@ -311,10 +318,7 @@ RSpec.describe HandlePushEvent do
       it 'posts "error" status to GitHub on InvalidKeyError' do
         allow(JiraClient).to receive(:post_comment).and_raise(JiraClient::InvalidKeyError)
 
-        expect_any_instance_of(CommitStatus).to receive(:error).once.with(
-          full_repo_name: 'owner/app1',
-          sha: 'def1234',
-        )
+        expect_any_instance_of(CommitStatus).to receive(:error).once
 
         HandlePushEvent.run(payload)
       end
@@ -322,10 +326,11 @@ RSpec.describe HandlePushEvent do
       it 'posts "error" status to GitHub on any other error' do
         allow(JiraClient).to receive(:post_comment).and_raise
 
-        expect_any_instance_of(CommitStatus).to receive(:error).once.with(
+        allow(CommitStatus).to receive(:new).with(
           full_repo_name: 'owner/app1',
           sha: 'def1234',
-        )
+        ).and_return(commit_status)
+        expect(commit_status).to receive(:error).once
 
         HandlePushEvent.run(payload)
       end
