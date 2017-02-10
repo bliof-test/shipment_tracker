@@ -44,8 +44,8 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
         )
       }
 
-      it 'does not create an exception' do
-        expect { repository.apply event }.not_to change { Snapshots::ReleaseException.count }
+      it 'create an exception' do
+        expect { repository.apply event }.to change { Snapshots::ReleaseException.count }.by(1)
       end
     end
   end

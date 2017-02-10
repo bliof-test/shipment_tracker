@@ -3,6 +3,8 @@ require 'events/base_event'
 
 module Events
   class ReleaseExceptionEvent < Events::BaseEvent
+    validate :validate_repo_owner_permissions
+
     def apps
       details.fetch('apps', [])
     end
@@ -16,7 +18,7 @@ module Events
     end
 
     def git_repos
-      GitRepositoryLocation.where(name: apps.map { |app| app['name'] }).to_a
+      GitRepositoryLocation.where(name: app_names).to_a
     end
 
     def repo_owner
@@ -37,6 +39,19 @@ module Events
 
     def approved?
       details.fetch('status', nil) == 'approved'
+    end
+
+    private
+
+    def app_names
+      apps.map { |app| app['name'] }
+    end
+
+    def validate_repo_owner_permissions
+      return if git_repos.any? { |repo| repo_owner.owner_of?(repo) }
+
+      errors.add(:repo_owner, :not_allowed_to_add_release_exception)
+      errors.add(:base, 'forbidden')
     end
   end
 end

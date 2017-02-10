@@ -81,4 +81,36 @@ RSpec.describe Events::ReleaseExceptionEvent do
       end
     end
   end
+
+  describe 'validation' do
+    context 'when the owner owns at least 1 of the repos' do
+      it 'creates an exception' do
+        repo = create(:git_repository_location, name: 'frontend')
+        owner = create(:repo_owner, email: 'test@example.com')
+
+        expect_any_instance_of(Repositories::RepoOwnershipRepository)
+          .to receive(:owners_of).with(repo).and_return([owner])
+
+        event = build(
+          :release_exception_event,
+          apps: [%w(frontend abc)],
+          email: 'test@example.com',
+        )
+
+        expect(event).to be_valid
+      end
+    end
+
+    context 'when the owner does not own any of the repos' do
+      it 'create an exception' do
+        event = build(
+          :release_exception_event,
+          apps: [%w(frontend abc)],
+          email: 'test2@example.com',
+        )
+
+        expect(event).not_to be_valid
+      end
+    end
+  end
 end
