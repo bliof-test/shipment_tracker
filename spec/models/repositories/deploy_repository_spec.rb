@@ -254,7 +254,7 @@ RSpec.describe Repositories::DeployRepository do
 
     context 'when no deploy exist' do
       it 'returns nil' do
-        expect(repository.last_staging_deploy_for_version(version)).to be nil
+        expect(repository.last_staging_deploy_for_versions([version])).to be nil
       end
     end
 
@@ -266,7 +266,7 @@ RSpec.describe Repositories::DeployRepository do
           defaults.merge(server: 'c', environment: 'production', version: expand_sha('xyz')),
         )
 
-        expect(repository.last_staging_deploy_for_version(version)).to be nil
+        expect(repository.last_staging_deploy_for_versions([version])).to be nil
       end
     end
 
@@ -281,7 +281,7 @@ RSpec.describe Repositories::DeployRepository do
       end
 
       it 'returns the latest non-production deploy for the version under review' do
-        expect(repository.last_staging_deploy_for_version(version)).to eq(
+        expect(repository.last_staging_deploy_for_versions([version])).to eq(
           Deploy.new(defaults.merge(server: 'b', version: version, region: 'de')),
         )
       end
@@ -289,7 +289,7 @@ RSpec.describe Repositories::DeployRepository do
       it 'looks for any non-production environments' do
         apply_deploys(defaults.merge(server: 'c', environment: 'uat', version: version))
 
-        expect(repository.last_staging_deploy_for_version(version)).to eq(
+        expect(repository.last_staging_deploy_for_versions([version])).to eq(
           Deploy.new(defaults.merge(server: 'c', version: version, region: 'de')),
         )
       end

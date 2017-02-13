@@ -93,10 +93,10 @@ class FeatureReviewWithStatuses < SimpleDelegator
   def approved_at
     return unless authorised?
 
-    if tickets_approved?
-      tickets.map(&:approved_at).max
-    else
+    if release_exception.present?
       release_exception.approved_at
+    elsif tickets_approved?
+      tickets.map(&:approved_at).max
     end
   end
 

@@ -257,7 +257,7 @@ Scenario: QA rejects feature
   When I visit the feature review known as "FR_qa_rejects"
   Then I should see the QA acceptance with heading "warning"
 
-  When I "reject" the feature with comment "Not good enough" as a "QA"
+  When I "reject" the feature with comment "Not good enough" as a QA
 
   Then I should see an alert: "Thank you for your submission. It will appear in a moment."
 
@@ -266,7 +266,7 @@ Scenario: QA rejects feature
     | status  | email       | comment         |
     | danger  | foo@bar.com | Not good enough |
 
-  When I "accept" the feature with comment "Superb!" as a "QA"
+  When I "accept" the feature with comment "Superb!" as a QA
 
   And I reload the page after a while
   Then I should see the QA acceptance
@@ -286,15 +286,17 @@ Scenario: Repo Owner approves feature
 
   When I visit the feature review known as "FR_repo_owner_test"
   Then I should see the Repo Owner Commentary with heading "warning"
-  When I "reject" the feature with comment "Not good enough" as a "Repo Owner"
+  When I "reject" the feature with comment "Not good enough" as a Repo Owner
   Then I should see an alert: "Thank you for your submission. It will appear in a moment."
   When I reload the page after a while
+  Then all pull requests for "2" application should be updated to "pending" status
   Then I should see the Repo Owner Commentary
     | status | email       | comment         |
     | danger | foo@bar.com | Not good enough |
 
-  When I "approve" the feature with comment "This can go live!" as a "Repo Owner"
+  When I "approve" the feature with comment "This can go live!" as a Repo Owner
   And I reload the page after a while
+  Then all pull requests for "2" application should be updated to "success" status
   Then I should see the Repo Owner Commentary
     | status  | email       | comment           |
     | success | foo@bar.com | This can go live! |

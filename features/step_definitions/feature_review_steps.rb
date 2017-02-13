@@ -76,11 +76,20 @@ Then 'I should see a summary that includes' do |summary_table|
   expect(panel.items).to include(*expected_summary)
 end
 
-When 'I "$action" the feature with comment "$comment" as a "$type"' do |action, comment, type|
+When 'I "$action" the feature with comment "$comment" as a QA' do |action, comment|
   feature_review_page.create_submission(
     comment: comment,
     status: action,
-    type: type,
+    type: 'QA',
+  )
+end
+
+When 'I "$action" the feature with comment "$comment" as a Repo Owner' do |action, comment|
+  scenario_context.stub_github_update_for_repo_owner(action)
+  feature_review_page.create_submission(
+    comment: comment,
+    status: action,
+    type: 'Repo Owner',
   )
 end
 

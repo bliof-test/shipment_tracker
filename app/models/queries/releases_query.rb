@@ -13,8 +13,6 @@ module Queries
       @app_name = app_name
 
       @deploy_repository = Repositories::DeployRepository.new
-      @ticket_repository = Repositories::TicketRepository.new
-      @exception_repository = Repositories::ReleaseExceptionRepository.new
       @feature_review_factory = Factories::FeatureReviewFactory.new
 
       @pending_releases = []
@@ -38,22 +36,6 @@ module Queries
 
     def commits
       @commits ||= @git_repository.recent_commits_on_main_branch(@per_page)
-    end
-
-    def feature_reviews_with_tickets
-      @feature_reviews_with_tickets ||= feature_review_factory.create_from_tickets(tickets)
-    end
-
-    def tickets
-      @tickets ||= @ticket_repository.tickets_for_versions(associated_versions)
-    end
-
-    def release_exception(versions)
-      @exception_repository.release_exception_for(versions: versions)
-    end
-
-    def associated_versions
-      commits.flat_map(&:associated_ids).uniq
     end
 
     def production_deploy_for_commit(commit)
@@ -86,35 +68,11 @@ module Queries
     end
 
     def decorated_feature_reviews_from(commit)
-      feature_reviews_for_commit = feature_reviews_with_tickets_for_commit(commit)
-
-      if feature_reviews_for_commit.empty?
-        release_exception = release_exception(commit.id)
-
-        if release_exception.present?
-          feature_reviews_for_commit << feature_review_factory.create_from_url_string(release_exception.path)
-        end
-      end
-
-      if feature_reviews_for_commit.empty?
-        feature_reviews_for_commit << feature_review_factory.create_from_apps(app_name => commit.id)
-      end
-
-      feature_reviews_for_commit.map { |fr| decorate_feature_review(fr) }
+      decorated_feature_reviews_query.get(commit)
     end
 
-    def feature_reviews_with_tickets_for_commit(commit)
-      feature_reviews_with_tickets.select { |fr|
-        (fr.versions & commit.associated_ids).present?
-      }
-    end
-
-    def decorate_feature_review(feature_review)
-      FeatureReviewWithStatuses.new(
-        feature_review,
-        tickets: tickets.select { |t| t.paths.include?(feature_review.path) },
-        release_exception: release_exception(feature_review.versions),
-      )
+    def decorated_feature_reviews_query
+      @decorated_feature_reviews_query ||= DecoratedFeatureReviewsQuery.new(app_name, commits)
     end
   end
 end

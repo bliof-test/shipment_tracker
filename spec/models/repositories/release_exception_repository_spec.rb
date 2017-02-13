@@ -7,11 +7,12 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
   let(:repo_owner) { FactoryGirl.create(:repo_owner, email: 'test@example.com') }
 
   before do
-    FactoryGirl.create(:git_repository_location, name: 'app1', uri: 'example.com/app1.git')
-    FactoryGirl.create(:git_repository_location, name: 'app2', uri: 'example.com/app2.git')
+    FactoryGirl.create(:git_repository_location, name: 'app1', uri: 'http://example.com/app1.git')
+    FactoryGirl.create(:git_repository_location, name: 'app2', uri: 'http://example.com/app2.git')
 
     allow_any_instance_of(Repositories::RepoOwnershipRepository)
       .to receive(:owners_of).and_return([repo_owner])
+    allow(CommitStatusUpdateJob).to receive(:perform_later)
   end
 
   describe '#apply' do
@@ -29,6 +30,16 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
 
       it 'creates an exception' do
         expect { repository.apply event }.to change { Snapshots::ReleaseException.count }.by(1)
+      end
+
+      it 'updates the commit status' do
+        expect(CommitStatusUpdateJob).to receive(:perform_later)
+          .with(full_repo_name: 'app1', sha: '1')
+
+        expect(CommitStatusUpdateJob).to receive(:perform_later)
+          .with(full_repo_name: 'app2', sha: '2')
+
+        repository.apply event
       end
     end
 
@@ -72,14 +83,14 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
   end
 
   describe '#release_exception_for' do
-    it 'returns the last project owner exception' do
+    it 'returns the last project owner exception for any of the app versions' do
       t = [4.hours.ago, 3.hours.ago, 2.hours.ago, 1.hour.ago].map { |time| time.change(usec: 0) }
 
       events = [
         create_exception_event(created_at: t[0]),
-        create_exception_event(apps: %w(app2 2), created_at: t[1]),
+        create_exception_event(apps: [%w(app2 2)], created_at: t[1]),
+        create_exception_event(apps: [%w(app1 1)], created_at: t[3]),
         create_exception_event(approved: true, created_at: t[2]),
-        create_exception_event(apps: %w(app1 1), created_at: t[3]),
       ]
 
       events.each do |event|

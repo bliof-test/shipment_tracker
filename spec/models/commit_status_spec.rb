@@ -9,12 +9,16 @@ RSpec.describe CommitStatus do
   end
 
   let(:client) { instance_double(GithubClient) }
+  let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
+  let(:exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
 
   describe '#update' do
     before do
-      ticket_repository = instance_double(Repositories::TicketRepository)
       allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
       allow(ticket_repository).to receive(:tickets_for_versions).and_return(tickets)
+
+      allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(exception_repository)
+      allow(exception_repository).to receive(:release_exception_for).and_return(nil)
     end
 
     context 'when a single Feature Review exists for the relevant commit' do
@@ -41,7 +45,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
 
@@ -66,7 +70,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc').update
         end
       end
     end
@@ -99,7 +103,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/?q=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
 
@@ -126,7 +130,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/?q=abc',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/app1', sha: 'abc')
+          CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
         end
       end
     end
@@ -135,11 +139,33 @@ RSpec.describe CommitStatus do
       before do
         deploy_repository = instance_double(Repositories::DeployRepository)
         allow(Repositories::DeployRepository).to receive(:new).and_return(deploy_repository)
-        allow(deploy_repository).to receive(:last_staging_deploy_for_version).and_return(deploy)
+        allow(deploy_repository).to receive(:last_staging_deploy_for_versions).and_return(deploy)
       end
 
       let(:deploy) { nil }
       let(:tickets) { [] }
+
+      context 'when a release exception is present' do
+        before do
+          release_exception = ReleaseException.new(
+            approved: true,
+            path: '/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+          )
+          allow(exception_repository).to receive(:release_exception_for).and_return(release_exception)
+        end
+
+        it 'posts status "success" with description and link to a Feature Review' do
+          expect(client).to receive(:create_status).with(
+            repo: 'owner/repo',
+            sha: 'abc123',
+            state: 'success',
+            description: 'Approved Feature Review found',
+            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+          )
+
+          CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
+        end
+      end
 
       it 'posts status "failure" with description and link to create a Feature Review' do
         expect(client).to receive(:create_status).with(
@@ -150,7 +176,7 @@ RSpec.describe CommitStatus do
           target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
         )
 
-        CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+        CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
       end
 
       context 'when there is a staging deploy for the software version under review' do
@@ -165,7 +191,7 @@ RSpec.describe CommitStatus do
             target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
           )
 
-          CommitStatus.new.update(full_repo_name: 'owner/repo', sha: 'abc123')
+          CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
         end
       end
     end
@@ -181,7 +207,7 @@ RSpec.describe CommitStatus do
         target_url: nil,
       )
 
-      CommitStatus.new.reset(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').reset
     end
   end
 
@@ -195,7 +221,7 @@ RSpec.describe CommitStatus do
         target_url: nil,
       )
 
-      CommitStatus.new.error(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').error
     end
   end
 
@@ -209,7 +235,7 @@ RSpec.describe CommitStatus do
         target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
       )
 
-      CommitStatus.new.not_found(full_repo_name: 'owner/repo', sha: 'abc123')
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').not_found
     end
   end
 end

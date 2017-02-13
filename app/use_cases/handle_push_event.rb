@@ -23,9 +23,8 @@ class HandlePushEvent
 
   def reset_commit_status(payload)
     return fail :protected_branch if payload.push_to_master?
-    status_options = { full_repo_name: payload.full_repo_name, sha: payload.after_sha }
 
-    CommitStatus.new.reset(status_options)
+    CommitStatus.new(full_repo_name: payload.full_repo_name, sha: payload.after_sha).reset
     continue(payload)
   end
 

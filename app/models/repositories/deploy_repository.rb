@@ -27,8 +27,8 @@ module Repositories
       }
     end
 
-    def last_staging_deploy_for_version(version)
-      last_matching_non_prod_deploy = store.where.not(environment: 'production').where(version: version).last
+    def last_staging_deploy_for_versions(versions)
+      last_matching_non_prod_deploy = store.where.not(environment: 'production').where(version: versions).last
       Deploy.new(last_matching_non_prod_deploy.attributes) if last_matching_non_prod_deploy
     end
 

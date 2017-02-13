@@ -14,9 +14,9 @@ class RelinkTicketJob < ActiveJob::Base
 
     if branch_created || commit_on_master?(full_repo_name, after_sha) ||
        relink_tickets(before_sha, after_sha).empty?
-      post_not_found_status(full_repo_name: full_repo_name, sha: after_sha)
+      post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
-      post_error_status(full_repo_name: full_repo_name, sha: after_sha)
+      post_error_status(full_repo_name, after_sha)
     end
   end
 
@@ -49,12 +49,12 @@ class RelinkTicketJob < ActiveJob::Base
     Rails.application.routes.url_helpers.root_url.chomp('/') + feature_review_path
   end
 
-  def post_not_found_status(status_options)
-    CommitStatus.new.not_found(status_options)
+  def post_not_found_status(full_repo_name, sha)
+    CommitStatus.new(full_repo_name: full_repo_name, sha: sha).not_found
   end
 
-  def post_error_status(status_options)
-    CommitStatus.new.error(status_options)
+  def post_error_status(full_repo_name, sha)
+    CommitStatus.new(full_repo_name: full_repo_name, sha: sha).error
   end
 
   def commit_on_master?(full_repo_name, sha)

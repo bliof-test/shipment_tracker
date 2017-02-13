@@ -16,7 +16,7 @@ module Repositories
 
       store
         .where(submitted_at_query)
-        .where('versions @> ARRAY[?]', versions)
+        .where('versions && ARRAY[?]', versions)
         .order('id DESC')
         .first
         .try { |result| ReleaseException.new(result.attributes) }
@@ -33,9 +33,20 @@ module Repositories
         versions: prepared_versions(event.versions),
         submitted_at: event.created_at,
       )
+
+      update_commit_status(event)
     end
 
     private
+
+    def update_commit_status(event)
+      event.app_versions.each do |app_name, version|
+        CommitStatusUpdateJob.perform_later(
+          full_repo_name: GitRepositoryLocation.find_by(name: app_name).full_repo_name,
+          sha: version,
+        )
+      end
+    end
 
     def prepared_versions(versions)
       versions.sort
