@@ -1,11 +1,12 @@
 @mock_slack_notifier
+@mock_email_notifications
 Feature: Alerting deploys of unauthorised Releases
   As a user
   I should see slack notifications when deployment rules are violated
   So that appropriate actions can be taken
 
 Scenario: Release has no approved Feature Reviews
-  Given an application called "frontend"
+  Given an application with owner "bob@fundingcircle.com" called "frontend"
 
   # An authorised deploy
   And a commit "#master1" with message "initial commit" is created at "2016-01-18 09:10:57"
@@ -30,8 +31,9 @@ Scenario: Release has no approved Feature Reviews
   And the branch "feature1" is merged with merge commit "#merge1" at "2016-01-22 16:14:39"
   When commit "#merge1" of "frontend" is deployed by "Joe" to production at "2016-01-22 17:34:20"
   Then a deploy alert should be dispatched for
-    | app_name | version | time                   | deployer | message                                              |
-    | frontend | #merge1 | 2016-01-22 17:34+00:00 | Joe      | Release not authorised; Feature Review not approved. |
+    | method | app_name | version | time                      | deployer | message                                              | to                    |
+    | slack  | frontend | #merge1 | 2016-01-22 17:34+00:00    | Joe      | Release not authorised; Feature Review not approved. |                       |
+    | email  | frontend | #merge1 | 2016-01-22 17:34:20+00:00 | Joe      | Release not authorised; Feature Review not approved. | bob@fundingcircle.com |
 
 Scenario: Dependent release has no approved Feature Reviews
   Given an application called "frontend"
