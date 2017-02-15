@@ -218,7 +218,7 @@ RSpec.describe FeatureReviewWithStatuses do
   end
 
   describe '#release_exception_status' do
-    context 'when the project owner has approved the feature_review' do
+    context 'when the repo owner has approved the feature_review' do
       let(:release_exception) { ReleaseException.new(approved: true) }
 
       it 'returns :success' do
@@ -226,7 +226,7 @@ RSpec.describe FeatureReviewWithStatuses do
       end
     end
 
-    context 'when the project owner has rejected the feature_review' do
+    context 'when the repo owner has rejected the feature_review' do
       let(:release_exception) { ReleaseException.new(approved: false) }
 
       it 'returns :failure' do
@@ -359,7 +359,7 @@ RSpec.describe FeatureReviewWithStatuses do
 
       it { is_expected.to be false }
 
-      context 'but it is approved by the project owner' do
+      context 'but it is approved by the repo owner' do
         let(:release_exception) { instance_double(ReleaseException, approved?: true) }
         let(:feature_review_with_statuses) {
           FeatureReviewWithStatuses.new(

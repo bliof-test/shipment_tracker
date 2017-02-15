@@ -51,7 +51,7 @@ RSpec.describe DeployAlertJob do
       )
     end
 
-    it 'will notificaty the repo owners by email if there is an error' do
+    it 'will notify the repo owners by email if there is an error' do
       expect(DeployAlert).to receive(:audit_message).and_return 'There was an error.'
 
       allow_any_instance_of(Repositories::RepoOwnershipRepository).to(
