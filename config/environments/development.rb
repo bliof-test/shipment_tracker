@@ -36,4 +36,9 @@ Rails.application.configure do
   # config.action_view.raise_on_missing_translations = true
 
   config.active_job.queue_adapter = :delayed_job
+
+  config.deploy_alert_email = 'deploy-alerts@shipment-tracker.dev'
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = { address: 'localhost', port: 1025 }
 end

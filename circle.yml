@@ -5,7 +5,7 @@ test:
   override:
     - bundle exec rake spec
     - bundle exec rake cucumber
-    - bundle exec rubocop
+    - bundle exec rubocop -D
   post:
     - bundle exec rake codeclimate
     - "curl --header 'Accept: application/json' https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM?circle-token=$CIRCLE_TOKEN | curl --request POST --header 'Content-Type:application/json' --data @- --fail $SHIPMENT_TRACKER_POST_URL"

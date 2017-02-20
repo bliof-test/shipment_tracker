@@ -74,4 +74,20 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.active_job.queue_adapter = :delayed_job
+
+  if ENV['MAILGUN']
+    ActionMailer::Base.smtp_settings = {
+      port: ENV['MAILGUN_SMTP_PORT'],
+      address: ENV['MAILGUN_SMTP_SERVER'],
+      user_name: ENV['MAILGUN_SMTP_LOGIN'],
+      password: ENV['MAILGUN_SMTP_PASSWORD'],
+      domain: 'shipment-tracker.herokuapp.com',
+      authentication: :plain,
+    }
+    ActionMailer::Base.delivery_method = :smtp
+  else
+    config.action_mailer.delivery_method = :sendmail
+  end
+
+  config.deploy_alert_email = ENV['DEPLOY_ALERT_EMAIL']
 end

@@ -7,6 +7,7 @@ require 'active_record/railtie'
 require 'active_job/railtie'
 require 'action_controller/railtie'
 require 'action_view/railtie'
+require 'action_mailer/railtie'
 require 'sprockets/railtie'
 
 # Requires gems listed in Gemfile, including any gems limited to :test, :development, or :production groups.

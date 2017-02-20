@@ -5,7 +5,8 @@ module Snapshots
   class RepoOwnership < ActiveRecord::Base
     class << self
       def for(repo)
-        find_or_initialize_by(app_name: repo.name)
+        app_name = repo.is_a?(String) ? repo : repo.name
+        find_or_initialize_by(app_name: app_name)
       end
     end
 

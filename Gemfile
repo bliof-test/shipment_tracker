@@ -39,6 +39,7 @@ group :development do
   gem 'spring-commands-rspec'
   gem 'guard-rspec', require: false
   gem 'guard-cucumber', require: false
+  gem 'mailcatcher'
 end
 
 group :development, :test do

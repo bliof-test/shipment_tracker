@@ -3,11 +3,17 @@ require 'rails_helper'
 
 RSpec.describe Snapshots::RepoOwnership do
   describe '.for' do
-    it 'returns the snapshot for specific git repository' do
-      repo = double('Repo', name: 'test-repo')
+    it 'returns the snapshot for specific git_repository_location' do
+      repo = instance_double(GitRepositoryLocation, name: 'test-repo')
       snapshot = create(:repo_ownership_snapshot, app_name: 'test-repo')
 
       expect(described_class.for(repo)).to eq(snapshot)
+    end
+
+    it 'works with strings' do
+      snapshot = create(:repo_ownership_snapshot, app_name: 'test-repo')
+
+      expect(described_class.for('test-repo')).to eq(snapshot)
     end
 
     context 'when there is no snapshot' do
