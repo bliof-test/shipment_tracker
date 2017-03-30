@@ -6,11 +6,7 @@ require 'snapshots/ticket'
 require 'ticket'
 
 module Repositories
-  class TicketRepository
-    attr_reader :store
-
-    delegate :table_name, to: :store
-
+  class TicketRepository < Base
     def initialize(store = Snapshots::Ticket, git_repository_location: GitRepositoryLocation)
       @store = store
       @git_repository_location = git_repository_location

@@ -5,14 +5,11 @@ require 'events/uat_event'
 require 'uatest'
 
 module Repositories
-  class UatestRepository
+  class UatestRepository < Base
     def initialize(store = Snapshots::Uatest, deploy_repository: Repositories::DeployRepository.new)
       @store = store
       @deploy_repository = deploy_repository
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def uatest_for(versions:, server:, at: nil)
       query = at ? store.arel_table['event_created_at'].lteq(at) : nil

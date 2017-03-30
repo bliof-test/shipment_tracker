@@ -5,13 +5,10 @@ require 'deploy'
 require 'deploy_alert_job'
 
 module Repositories
-  class DeployRepository
+  class DeployRepository < Base
     def initialize(store = Snapshots::Deploy)
       @store = store
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def deploys_for(apps: nil, server:, at: nil)
       deploys(apps, server, at)

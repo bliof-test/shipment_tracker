@@ -3,13 +3,10 @@ require 'events/deploy_alert_event'
 require 'snapshots/deploy'
 
 module Repositories
-  class DeployAlertRepository
+  class DeployAlertRepository < Base
     def initialize(store = Snapshots::Deploy)
       @store = store
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def apply(event)
       return unless event.is_a?(Events::DeployAlertEvent)

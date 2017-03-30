@@ -33,10 +33,7 @@ namespace :jobs do
 
     puts "[#{Time.current}] Running recreate_snapshots"
 
-    updater = Repositories::Updater.from_rails_config
-    repo_event_id_hash = Snapshots::EventCount.repo_event_id_hash # preserving the ceiling_ids before reset
-
-    updater.recreate(repo_event_id_hash)
+    Repositories::Updater.from_rails_config.recreate
 
     puts "[#{Time.current}] Completed recreate_snapshots"
   end
@@ -55,11 +52,13 @@ namespace :jobs do
         start_time = Time.current
         puts "[#{start_time}] Running update_events"
 
-        lowest_event_id = Snapshots::EventCount.all.min_by(&:event_id)&.event_id&.to_i
+        from_event_id = Snapshots::EventCount.global_event_pointer
 
         Repositories::Updater.from_rails_config.run
 
-        num_events = Events::BaseEvent.where('id > ?', lowest_event_id).count
+        last_event_id = Snapshots::EventCount.global_event_pointer
+
+        num_events = Events::BaseEvent.where('id > ?', from_event_id).where('id <= ?', last_event_id).count
 
         end_time = Time.current
         puts "[#{end_time}] Cached #{num_events} events in #{end_time - start_time} seconds"

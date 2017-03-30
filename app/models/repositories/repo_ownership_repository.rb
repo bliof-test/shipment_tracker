@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 module Repositories
-  class RepoOwnershipRepository
+  class RepoOwnershipRepository < Base
     def initialize(store = Snapshots::RepoOwnership)
       @store = store
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     # Events::RepoOwnershipEvent
     def apply(event)

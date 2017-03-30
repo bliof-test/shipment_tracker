@@ -7,16 +7,13 @@ require 'released_ticket'
 require 'snapshots/deploy'
 
 module Repositories
-  class ReleasedTicketRepository
+  class ReleasedTicketRepository < Base
     def initialize(store = Snapshots::ReleasedTicket)
       @store = store
       @deploy_store = Snapshots::Deploy
       @feature_review_factory = Factories::FeatureReviewFactory.new
       @git_repository_loader = GitRepositoryLoader.from_rails_config
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def tickets_for_query(query_text:, versions:, per_page: ShipmentTracker::NUMBER_OF_TICKETS_TO_DISPLAY,
       from_date: nil, to_date: nil)
