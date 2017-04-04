@@ -4,6 +4,10 @@ require 'snapshots/deploy'
 
 module Repositories
   class DeployAlertRepository < Base
+    def identifier
+      'deploy_alert_repository'
+    end
+
     def initialize(store = Snapshots::Deploy)
       @store = store
     end
