@@ -4,108 +4,54 @@ require 'repositories/updater'
 
 RSpec.describe Repositories::Updater do
   describe '.from_rails_config' do
-    let(:expected_updater) { double('updater') }
-
-    before do
-      allow(Repositories::Updater).to receive(:new)
-        .with(Rails.configuration.repositories)
-        .and_return(expected_updater)
-    end
-
     it 'returns a configured updater' do
-      expect(Repositories::Updater.from_rails_config).to eq(expected_updater)
+      expect(described_class.from_rails_config.repositories).to eq(Rails.configuration.repositories)
     end
   end
 
-  let(:repository_1) {
-    instance_double(
-      Repositories::BuildRepository,
-      'repository_1',
-      store: Snapshots::Build,
-      table_name: 'tbl_1',
-    )
-  }
-  let(:repository_2) {
-    instance_double(
-      Repositories::DeployRepository,
-      'repository_2',
-      store: Snapshots::Deploy,
-      table_name: 'tbl_2',
-    )
-  }
+  def repository_stub(repository)
+    allow(repository).to receive(:apply)
+
+    repository
+  end
+
+  let(:repository_1) { repository_stub(Repositories::BuildRepository.new(Snapshots::Build)) }
+  let(:repository_2) { repository_stub(Repositories::DeployRepository.new(Snapshots::Deploy)) }
   let(:repositories) { [repository_1, repository_2] }
 
-  let(:events) { [build(:jira_event), build(:jira_event)] }
-
-  subject(:updater) { Repositories::Updater.new(repositories) }
+  subject(:updater) { described_class.new(repositories: repositories) }
 
   describe '#run' do
-    it 'feeds events to each repository and updates the counts' do
-      events.each(&:save!)
+    it 'feeds the events in ordered manner to each of the repositories' do
+      events = create_list :jira_event, 2
 
       expect(repository_1).to receive(:apply).with(events[0]).ordered
-      expect(repository_1).to receive(:apply).with(events[1]).ordered
-
       expect(repository_2).to receive(:apply).with(events[0]).ordered
+
+      expect(repository_1).to receive(:apply).with(events[1]).ordered
       expect(repository_2).to receive(:apply).with(events[1]).ordered
 
       updater.run
 
-      last_id = events[1].id
-      expect(Snapshots::EventCount.find_by(snapshot_name: repository_1.table_name).event_id).to eq(last_id)
-      expect(Snapshots::EventCount.find_by(snapshot_name: repository_2.table_name).event_id).to eq(last_id)
+      expect(repository_1.last_applied_event_id).to eq(events.last.id)
+      expect(repository_2.last_applied_event_id).to eq(events.last.id)
     end
 
     context 'when given a hash with snapshot names and event ids' do
-      let(:events) {
-        [
-          build(:jira_event),
-          build(:jira_event),
-          build(:jira_event),
-        ]
-      }
-
       it 'only snapshots up to the given event id for each repository' do
         allow(repository_1).to receive(:apply)
         allow(repository_2).to receive(:apply)
 
-        events.each(&:save!)
+        events = create_list :jira_event, 3
 
-        updater.run(repository_1.table_name => events[0].id, repository_2.table_name => events[1].id)
+        updater.run(up_to_event: events.second.id)
 
-        expect(Snapshots::EventCount.find_by(snapshot_name: repository_1.table_name).event_id)
-          .to eq(events[0].id)
-        expect(Snapshots::EventCount.find_by(snapshot_name: repository_2.table_name).event_id)
-          .to eq(events[1].id)
-      end
-    end
-
-    context 'when the application is updated and we have different repositories specified' do
-      let(:events) { [build(:jira_event), build(:jira_event)] }
-      let(:new_events) { [build(:jira_event)] }
-
-      it 'only feeds events that are new for each repository' do
-        events.each(&:save!)
-
-        expect(repository_1).to receive(:apply).with(events[0]).ordered
-        expect(repository_1).to receive(:apply).with(events[1]).ordered
-
-        Repositories::Updater.new([repository_1]).run
-
-        new_events.each(&:save!)
-
-        expect(repository_1).to receive(:apply).with(new_events[0]).ordered
-        expect(repository_2).to receive(:apply).with(events[0]).ordered
-        expect(repository_2).to receive(:apply).with(events[1]).ordered
-        expect(repository_2).to receive(:apply).with(new_events[0]).ordered
-
-        Repositories::Updater.new([repository_1, repository_2]).run
+        expect(repository_1.last_applied_event_id).to eq(events.second.id)
+        expect(repository_2.last_applied_event_id).to eq(events.second.id)
       end
     end
 
     context 'when there are no new events' do
-      let(:events) { [] }
-
       it 'does not update the event count' do
         expect_any_instance_of(Snapshots::EventCount).to_not receive(:save)
 
@@ -117,28 +63,28 @@ RSpec.describe Repositories::Updater do
       it 'will not apply any events' do
         create(:repo_ownership_event)
 
-        repository = Repositories::RepoOwnershipRepository.new
+        expect(repository_1).not_to receive(:apply)
 
-        expect(repository).not_to receive(:apply)
-
-        Repositories::Updater.new([repository]).run
+        described_class.new(
+          repositories: [repository_1],
+          manually_applied: [repository_1.class],
+        ).run
       end
 
       it 'will apply events if the force option is set' do
         create(:repo_ownership_event)
 
-        repository = Repositories::RepoOwnershipRepository.new
+        expect(repository_1).to receive(:apply).and_return(true)
 
-        expect(repository).to receive(:apply).and_return(true)
-
-        Repositories::Updater.new([repository]).run({}, true)
+        described_class.new(
+          repositories: [repository_1],
+          manually_applied: [repository_1.class],
+        ).run(apply_to_all: true)
       end
     end
   end
 
   describe '#reset' do
-    let(:events) { [build(:circle_ci_event), build(:deploy_event)] }
-
     let(:store_1) { Snapshots::Build }
     let(:store_2) { Snapshots::Deploy }
 
@@ -146,7 +92,10 @@ RSpec.describe Repositories::Updater do
     let(:repository_2) { Repositories::DeployRepository.new(store_2) }
 
     it 'wipes all repositories and what events they require' do
-      events.each(&:save!)
+      events = [
+        create(:circle_ci_event),
+        create(:deploy_event),
+      ]
 
       updater.run
 
@@ -159,8 +108,8 @@ RSpec.describe Repositories::Updater do
       expect(store_2.count).to eq(0)
 
       expect(repository_1).to receive(:apply).with(events[0]).ordered
-      expect(repository_1).to receive(:apply).with(events[1]).ordered
       expect(repository_2).to receive(:apply).with(events[0]).ordered
+      expect(repository_1).to receive(:apply).with(events[1]).ordered
       expect(repository_2).to receive(:apply).with(events[1]).ordered
 
       updater.run
@@ -171,15 +120,15 @@ RSpec.describe Repositories::Updater do
     it 'resets and forces a run' do
       event = create(:repo_ownership_event)
 
-      repository = Repositories::RepoOwnershipRepository.new
-      allow(repository).to receive(:apply)
+      repository = repository_stub(Repositories::RepoOwnershipRepository.new)
+      updater = described_class.new(repositories: [repository], manually_applied: [repository.class])
 
-      Repositories::Updater.new([repository]).run({}, true)
+      updater.run(apply_to_all: true)
 
       last_updated_event = Snapshots::EventCount.last
 
       expect(repository).to receive(:apply).with(event)
-      Repositories::Updater.new([repository]).recreate
+      updater.recreate
 
       # Make sure that there was a reset
       expect(Snapshots::EventCount.find_by_id(last_updated_event.id)).to be_blank

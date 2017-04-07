@@ -36,4 +36,8 @@ Rails.application.config.event_types = [
     name: 'Project Owner Exception',
     endpoint: 'release_exception',
     event_class: Events::ReleaseExceptionEvent, internal: true),
+  EventType.new(
+    name: 'Deploy Alert',
+    endpoint: 'deploy_alert',
+    event_class: Events::DeployAlertEvent, internal: true),
 ]

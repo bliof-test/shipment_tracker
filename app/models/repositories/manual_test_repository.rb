@@ -4,13 +4,10 @@ require 'qa_submission'
 require 'snapshots/manual_test'
 
 module Repositories
-  class ManualTestRepository
+  class ManualTestRepository < Base
     def initialize(store = Snapshots::ManualTest)
       @store = store
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def qa_submission_for(versions:, at: nil)
       qa_submission(versions, at)

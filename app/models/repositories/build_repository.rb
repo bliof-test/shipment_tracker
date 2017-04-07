@@ -5,13 +5,10 @@ require 'events/jenkins_event'
 require 'snapshots/build'
 
 module Repositories
-  class BuildRepository
+  class BuildRepository < Base
     def initialize(store = Snapshots::Build)
       @store = store
     end
-
-    attr_reader :store
-    delegate :table_name, to: :store
 
     def apply(event)
       return unless event.is_a?(Events::CircleCiEvent) || event.is_a?(Events::JenkinsEvent)

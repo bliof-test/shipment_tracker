@@ -25,6 +25,8 @@ FactoryGirl.define do
       }
     }
 
+    uuid nil
+
     initialize_with { new(attributes) }
   end
 end

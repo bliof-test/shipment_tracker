@@ -132,8 +132,5 @@ end
 # rubocop:enable LineLength
 
 When 'snapshots are regenerated' do
-  repos = Rails.configuration.repositories
-  updater = Repositories::Updater.new(repos)
-  updater.reset
-  updater.run
+  Repositories::Updater.from_rails_config.recreate
 end
