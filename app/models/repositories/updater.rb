@@ -50,7 +50,7 @@ module Repositories
     private
 
     def apply(repository:, event:)
-      Rails.logger.info "[#{Time.current}] Apply event for #{repository.class} - #{repository.table_name}"
+      Rails.logger.info "[#{Time.current}] Apply event #{event.id} for #{repository.class} - #{repository.table_name}"
       repository.apply(event)
       Snapshots::EventCount.update_pointer(repository.identifier, event.id)
     end
