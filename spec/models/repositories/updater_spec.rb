@@ -5,7 +5,7 @@ require 'repositories/updater'
 RSpec.describe Repositories::Updater do
   describe '.from_rails_config' do
     it 'returns a configured updater' do
-      expect(Repositories::Updater.from_rails_config.repositories).to eq(Rails.configuration.repositories)
+      expect(described_class.from_rails_config.repositories).to eq(Rails.configuration.repositories)
     end
   end
 
@@ -19,7 +19,7 @@ RSpec.describe Repositories::Updater do
   let(:repository_2) { repository_stub(Repositories::DeployRepository.new(Snapshots::Deploy)) }
   let(:repositories) { [repository_1, repository_2] }
 
-  subject(:updater) { Repositories::Updater.new(repositories) }
+  subject(:updater) { described_class.new(repositories: repositories) }
 
   describe '#run' do
     it 'feeds the events in ordered manner to each of the repositories' do
@@ -44,7 +44,7 @@ RSpec.describe Repositories::Updater do
 
         events = create_list :jira_event, 3
 
-        updater.run(upto_event: events.second.id)
+        updater.run(up_to_event: events.second.id)
 
         expect(repository_1.last_applied_event_id).to eq(events.second.id)
         expect(repository_2.last_applied_event_id).to eq(events.second.id)
@@ -63,21 +63,23 @@ RSpec.describe Repositories::Updater do
       it 'will not apply any events' do
         create(:repo_ownership_event)
 
-        repository = Repositories::RepoOwnershipRepository.new
+        expect(repository_1).not_to receive(:apply)
 
-        expect(repository).not_to receive(:apply)
-
-        Repositories::Updater.new([repository]).run
+        described_class.new(
+          repositories: [repository_1],
+          manually_applied: [repository_1.class],
+        ).run
       end
 
       it 'will apply events if the force option is set' do
         create(:repo_ownership_event)
 
-        repository = Repositories::RepoOwnershipRepository.new
+        expect(repository_1).to receive(:apply).and_return(true)
 
-        expect(repository).to receive(:apply).and_return(true)
-
-        Repositories::Updater.new([repository]).run(apply_to_all: true)
+        described_class.new(
+          repositories: [repository_1],
+          manually_applied: [repository_1.class],
+        ).run(apply_to_all: true)
       end
     end
   end
@@ -118,15 +120,15 @@ RSpec.describe Repositories::Updater do
     it 'resets and forces a run' do
       event = create(:repo_ownership_event)
 
-      repository = Repositories::RepoOwnershipRepository.new
-      allow(repository).to receive(:apply)
+      repository = repository_stub(Repositories::RepoOwnershipRepository.new)
+      updater = described_class.new(repositories: [repository], manually_applied: [repository.class])
 
-      Repositories::Updater.new([repository]).run(apply_to_all: true)
+      updater.run(apply_to_all: true)
 
       last_updated_event = Snapshots::EventCount.last
 
       expect(repository).to receive(:apply).with(event)
-      Repositories::Updater.new([repository]).recreate
+      updater.recreate
 
       # Make sure that there was a reset
       expect(Snapshots::EventCount.find_by_id(last_updated_event.id)).to be_blank

@@ -7,27 +7,31 @@ require 'active_record'
 module Repositories
   class Updater
     def self.from_rails_config
-      new(Rails.configuration.repositories)
+      new(
+        repositories: Rails.configuration.repositories,
+        manually_applied: Rails.configuration.repositories_that_do_not_run_in_the_background,
+      )
     end
 
-    def initialize(repositories)
+    def initialize(repositories:, manually_applied: [])
       @repositories = repositories
+      @manually_applied_repositories = manually_applied
     end
 
-    attr_accessor :repositories
+    attr_accessor :repositories, :manually_applied_repositories
 
-    def recreate(upto_event: nil)
+    def recreate(up_to_event: nil)
       reset
-      run(apply_to_all: true, upto_event: upto_event)
+      run(apply_to_all: true, up_to_event: up_to_event)
     end
 
-    def run(apply_to_all: false, upto_event: nil)
+    def run(apply_to_all: false, up_to_event: nil)
       repositories_to_use = filter_repositories(apply_to_all: apply_to_all)
 
-      new_events(upto_event: upto_event).each do |event|
+      new_events(up_to_event: up_to_event).each do |event|
         ActiveRecord::Base.transaction do
           repositories_to_use.each do |repository|
-            apply repository: repository, event: event
+            apply(repository: repository, event: event)
           end
 
           Snapshots::EventCount.global_event_pointer = event.id
@@ -46,7 +50,7 @@ module Repositories
     private
 
     def apply(repository:, event:)
-      Rails.logger.info "[#{Time.current}] Apply events for #{repository.class} - #{repository.table_name}"
+      Rails.logger.info "[#{Time.current}] Apply event for #{repository.class} - #{repository.table_name}"
       repository.apply(event)
       Snapshots::EventCount.update_pointer(repository.identifier, event.id)
     end
@@ -55,18 +59,14 @@ module Repositories
       if apply_to_all
         repositories
       else
-        repositories_that_do_not_run_in_the_background = [
-          Repositories::RepoOwnershipRepository,
-        ]
-
-        repositories.reject { |r| repositories_that_do_not_run_in_the_background.include?(r.class) }
+        repositories.reject { |r| manually_applied_repositories.include?(r.class) }
       end
     end
 
-    def new_events(upto_event: nil)
+    def new_events(up_to_event: nil)
       Events::BaseEvent.between(
         Snapshots::EventCount.global_event_pointer,
-        to_id: upto_event || Events::BaseEvent.last&.id,
+        to_id: up_to_event || Events::BaseEvent.last&.id,
       )
     end
 

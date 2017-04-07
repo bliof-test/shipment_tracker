@@ -61,7 +61,7 @@ namespace :jobs do
         num_events = Events::BaseEvent.where('id > ?', from_event_id).where('id <= ?', last_event_id).count
 
         end_time = Time.current
-        puts "[#{end_time}] Cached #{num_events} events in #{end_time - start_time} seconds"
+        puts "[#{end_time}] Applied #{num_events} events in #{end_time - start_time} seconds"
 
         break if @shutdown
 

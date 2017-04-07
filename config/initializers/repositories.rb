@@ -12,3 +12,7 @@ Rails.configuration.repositories = [
   Repositories::UatestRepository.new,
   Repositories::DeployAlertRepository.new,
 ]
+
+Rails.configuration.repositories_that_do_not_run_in_the_background = [
+  Repositories::RepoOwnershipRepository,
+]

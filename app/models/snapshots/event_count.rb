@@ -5,7 +5,7 @@ module Snapshots
   class EventCount < ActiveRecord::Base
     class << self
       def global_event_pointer
-        find_by_snapshot_name('global_event_pointer')&.event_id || 0
+        pointer_for('global_event_pointer')
       end
 
       def global_event_pointer=(event_id)
