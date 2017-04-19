@@ -14,6 +14,12 @@ module Repositories
       deploys(apps, server, at)
     end
 
+    def unapproved_production_deploys_for(app_name:, region:)
+      store
+        .where(app_name: app_name, environment: 'production', region: region)
+        .where.not(deploy_alert: nil)
+    end
+
     def deploys_for_versions(versions, environment:, region:)
       query = store.select('DISTINCT ON (version) *')
       query = query.where(store.arel_table['version'].in(versions))

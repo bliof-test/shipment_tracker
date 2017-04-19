@@ -8,6 +8,15 @@ module Repositories
       @store = store
     end
 
+    def release_exception_for_application(app_name:, at: nil)
+      submitted_at_query = at ? store.arel_table['submitted_at'].lteq(at) : nil
+
+      store
+        .where(submitted_at_query)
+        .where('path like ?', "%#{app_name}%")
+        .map { |result| ReleaseException.new(result.attributes) }
+    end
+
     def release_exception_for(versions:, at: nil)
       submitted_at_query = at ? store.arel_table['submitted_at'].lteq(at) : nil
 

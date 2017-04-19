@@ -8,6 +8,7 @@ class ReleaseException
     attribute :approved, Boolean
     attribute :submitted_at, Time
     attribute :path, String
+    attribute :versions, Array, default: []
   end
 
   def repo_owner

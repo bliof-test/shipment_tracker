@@ -3,4 +3,9 @@
 %ul
   - @app_names.each do |app_name|
     %li
-      = link_to app_name, release_path(app_name)
+      %h5= app_name
+      %ul
+        %li
+          = link_to 'Pending and Deployed Releases', release_path(app_name)
+        %li
+          = link_to 'Unapproved Releases and Release Exception', unapproved_deployment_path(app_name)

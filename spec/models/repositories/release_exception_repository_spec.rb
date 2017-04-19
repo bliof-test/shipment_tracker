@@ -15,6 +15,24 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
     allow(CommitStatusUpdateJob).to receive(:perform_later)
   end
 
+  describe '#release_exception_for_application' do
+    it 'returns all release exceptions for a given app' do
+      events = [
+        create_exception_event(apps: [%w(app1 3)]),
+        create_exception_event(apps: [%w(app2 2)]),
+        create_exception_event(apps: [%w(app1 1)]),
+      ]
+
+      events.each do |event|
+        repository.apply(event)
+      end
+
+      result = repository.release_exception_for_application(app_name: 'app1')
+
+      expect(result.count).to eq(2)
+    end
+  end
+
   describe '#apply' do
     context 'event is made by a repo owner' do
       let(:event) {
@@ -77,6 +95,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
       email: 'test@example.com',
       comment: 'Good to go',
       approved: false,
+      created_at: Time.now,
     }
 
     build(:release_exception_event, default.merge(options))
