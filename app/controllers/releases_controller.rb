@@ -48,8 +48,4 @@ class ReleasesController < ApplicationController
   def git_repository
     git_repository_loader.load(app_name)
   end
-
-  def force_html_format
-    request.format = 'html'
-  end
 end
