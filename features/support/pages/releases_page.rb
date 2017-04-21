@@ -8,7 +8,10 @@ module Pages
 
     def visit(app)
       page.visit url_helpers.releases_path
-      page.click_on(app)
+
+      page.within(:xpath, "//li[@id=\"#{app}\"]") do
+        page.click_on('Pending and Deployed Releases')
+      end
     end
 
     def pending_releases

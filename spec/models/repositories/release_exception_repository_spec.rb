@@ -23,13 +23,33 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
         create_exception_event(apps: [%w(app1 1)]),
       ]
 
-      events.each do |event|
-        repository.apply(event)
-      end
+      events.each { |event| repository.apply(event) }
 
       result = repository.release_exception_for_application(app_name: 'app1')
 
       expect(result.count).to eq(2)
+    end
+
+    context 'with specified time period' do
+      it 'returns all release exceptions made within the given time period' do
+        events = [
+          create_exception_event(apps: [%w(app1 3)], created_at: Date.parse('01-05-2017')),
+          create_exception_event(apps: [%w(app1 1)], created_at: Date.parse('01-03-2017')),
+          create_exception_event(apps: [%w(app2 2)]),
+        ]
+
+        events.each { |event| repository.apply(event) }
+        result = repository.release_exception_for_application(
+          app_name: 'app1',
+          from_date: Date.parse('01-02-2017'),
+          to_date: Date.parse('01-04-2017'),
+        )
+        expect(result.count).to eq(1)
+        expect(result.first).to have_attributes(
+          submitted_at: Date.parse('01-03-2017'),
+          versions: %w(1),
+        )
+      end
     end
   end
 
@@ -125,6 +145,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
           comment: 'Good to go',
           submitted_at: t[2],
           path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
+          versions: %w(1 2),
         ),
       )
     end
@@ -152,6 +173,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
             comment: 'Good to go',
             submitted_at: times[1],
             path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
+            versions: %w(1 2),
           ),
         )
       end

@@ -14,10 +14,16 @@ module Repositories
       deploys(apps, server, at)
     end
 
-    def unapproved_production_deploys_for(app_name:, region:)
+    def unapproved_production_deploys_for(app_name:, region:, from_date: nil, to_date: nil)
+      time_period_query = if from_date.present? && to_date.present?
+                            store.arel_table['deployed_at'].between(from_date.beginning_of_day..to_date.end_of_day)
+                          end
       store
+        .where(time_period_query)
         .where(app_name: app_name, environment: 'production', region: region)
-        .where.not(deploy_alert: nil)
+        .where.not(deploy_alert: nil).map { |deploy_record|
+          Deploy.new(deploy_record.attributes)
+        }
     end
 
     def deploys_for_versions(versions, environment:, region:)

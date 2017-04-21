@@ -6,6 +6,15 @@
       %a(href="?region=#{tab_region}")
         %span #{flag_icon(tab_region.to_sym)} #{tab_region.upcase}
 
+%form.form-inline.unapproved-deploys-form{'accept-charset' => 'UTF-8', action: "/unapproved_deployments/#{@app_name}", method: 'get'}
+  .form-group
+    #datepicker.input-daterange.input-group
+      %span.input-group-addon From
+      %input#from_date.input-sm.form-control{name: 'start_date', type: 'text', style: 'width: 120px; height: 34px;', value: @start_date}/
+      %span.input-group-addon To
+      %input#to_date.input-sm.form-control{name: 'end_date', type: 'text', style: 'width: 120px; height: 34px;', value: @end_date}/
+  %input.btn.btn-primary{type: 'Submit', value: 'Search'}/
+
 %h2 Unapproved Deployments
 %p
   A list of all unapproved releases
@@ -32,7 +41,7 @@
       %td= deploy.deploy_alert
 
 
-%h2 Release Exceptions
+%h2 Repository Owner Commentaries
 %p
   A list of all releases, which were approved with a release exception published by a repository owner
   %br

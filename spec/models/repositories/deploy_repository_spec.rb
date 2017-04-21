@@ -285,24 +285,55 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#unapproved_production_deploys_for' do
-    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'gb' } }
+    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'gb', created_at: Date.parse('01-04-2017') } }
 
-    it 'returns the unapproved production deploys for a specified region' do
-      apply_deploys(
-        defaults.merge(environment: 'uat', version: expand_sha('def')),
-        defaults.merge(environment: 'uat', version: expand_sha('ghi')),
-        defaults.merge(environment: 'production', version: expand_sha('abc')),
-        defaults.merge(environment: 'production', version: expand_sha('xyz')),
-        defaults.merge(environment: 'production', version: expand_sha('xyz'), locale: 'us'),
-      )
+    context 'with no specified time frame' do
+      it 'returns all unapproved production deploys for a specified region' do
+        apply_deploys(
+          defaults.merge(environment: 'uat', version: expand_sha('def')),
+          defaults.merge(environment: 'production', version: expand_sha('abc')),
+          defaults.merge(environment: 'production', version: expand_sha('ghi')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz')),
+        )
 
-      apply_deploy_alert_for(version: expand_sha('xyz'), environment: 'production', region: 'gb')
+        apply_deploy_alert_for(version: expand_sha('abc'), environment: 'production', region: 'gb')
+        apply_deploy_alert_for(version: expand_sha('ghi'), environment: 'production', region: 'gb')
 
-      deploys = repository.unapproved_production_deploys_for(app_name: 'frontend', region: 'gb')
-      expect(deploys.count).to eq(1)
-      expect(deploys.first.region).to eq('gb')
-      expect(deploys.first.environment).to eq('production')
-      expect(deploys.first.deploy_alert).to eq('Not Good!')
+        deploys = repository.unapproved_production_deploys_for(
+          app_name: 'frontend',
+          region: 'gb',
+        )
+
+        expect(deploys.count).to eq(2)
+        expect(deploys.map(&:version)).to match_array([expand_sha('abc'), expand_sha('ghi')])
+      end
+    end
+
+    context 'with given specified time frame' do
+      it 'returns the unapproved production deploys for a specified region within a specified time frame' do
+        apply_deploys(
+          defaults.merge(environment: 'uat', version: expand_sha('def')),
+          defaults.merge(environment: 'production', version: expand_sha('abc')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz'), created_at: Date.parse('01-02-2017')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz'), locale: 'us'),
+        )
+
+        apply_deploy_alert_for(version: expand_sha('xyz'), environment: 'production', region: 'gb')
+
+        deploys = repository.unapproved_production_deploys_for(
+          app_name: 'frontend',
+          region: 'gb',
+          from_date: Date.parse('01-03-2017'),
+          to_date: Date.parse('01-05-2017'),
+        )
+
+        expect(deploys.count).to eq(1)
+        expect(deploys.first.region).to eq('gb')
+        expect(deploys.first.environment).to eq('production')
+        expect(deploys.first.deploy_alert).to eq('Not Good!')
+        expect(deploys.first.deployed_at).to eq(Date.parse('01-04-2017'))
+      end
     end
   end
 

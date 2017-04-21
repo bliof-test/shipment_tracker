@@ -2,7 +2,7 @@
 %p Click on an application below to view the pending and deployed releases.
 %ul
   - @app_names.each do |app_name|
-    %li
+    %li{id: app_name}
       %h5= app_name
       %ul
         %li
