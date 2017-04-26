@@ -7,7 +7,7 @@ class ReleasesController < ApplicationController
   end
 
   def show
-    update_cookies
+    update_region_cookies
     redirect_to release_path(app_name, region: region) unless params[:region]
     projection = build_projection
     @pending_releases = projection.pending_releases
@@ -40,16 +40,7 @@ class ReleasesController < ApplicationController
     @region = cookies[:deploy_region]
   end
 
-  def update_cookies
-    cookies.permanent[:deploy_region] ||= Rails.configuration.default_deploy_region
-    cookies.permanent[:deploy_region] = params[:region] if params[:region]
-  end
-
   def git_repository
     git_repository_loader.load(app_name)
-  end
-
-  def force_html_format
-    request.format = 'html'
   end
 end

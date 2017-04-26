@@ -6,8 +6,21 @@ RSpec.describe Repositories::DeployRepository do
 
   def apply_deploys(*deploy_events_data)
     deploy_events_data.each do |deploy_event_data|
-      repository.apply(build(:deploy_event, deploy_event_data))
+      deploy_event = create(:deploy_event, deploy_event_data)
+      repository.apply(deploy_event.reload)
     end
+  end
+
+  def apply_deploy_alert_for(version:, environment:, region:)
+    deploy = repository
+             .deploys_for_versions([version], environment: environment, region: region)
+             .first
+
+    Repositories::DeployAlertRepository.new.apply(
+      Events::DeployAlertEvent.new(
+        details: { deploy_uuid: deploy.uuid, message: 'Not Good!' },
+      ),
+    )
   end
 
   def expand_sha(sha)
@@ -119,11 +132,14 @@ RSpec.describe Repositories::DeployRepository do
           defaults.merge(version: expand_sha('jkl'), locale: 'gb'),
         )
 
-        expect(repository.deploys_for_versions(versions, environment: environment, region: 'us'))
-          .to match_array([
-            Deploy.new(defaults.merge(version: versions.first, deployed_by: 'Car', region: 'us')),
-            Deploy.new(defaults.merge(version: versions.second, region: 'us')),
-          ])
+        deploys = repository.deploys_for_versions(versions, environment: environment, region: 'us')
+
+        expect(deploys.map { |deploy|
+          deploy.attributes.slice(:version, :deployed_by, :region)
+        }).to match_array([
+          { version: versions.first, deployed_by: 'Car', region: 'us' },
+          { version: versions.second, deployed_by: 'Bob', region: 'us' },
+        ])
       end
     end
 
@@ -153,16 +169,14 @@ RSpec.describe Repositories::DeployRepository do
       apply_deploys(defaults.merge(version: expand_sha('abc')))
       results = repository.deploys_for(apps: apps, server: server)
 
-      expect(results).to eq([
-        Deploy.new(defaults.merge(version: expand_sha('abc'), correct: true, region: 'gb')),
-      ])
+      expect(results.count).to eq(1)
+      expect(results.first).to have_attributes(version: expand_sha('abc'), correct: true, region: 'gb')
 
       apply_deploys(defaults.merge(version: expand_sha('def')))
       results = repository.deploys_for(apps: apps, server: server)
 
-      expect(results).to eq([
-        Deploy.new(defaults.merge(version: expand_sha('def'), correct: false, region: 'gb')),
-      ])
+      expect(results.count).to eq(1)
+      expect(results.first).to have_attributes(version: expand_sha('def'), correct: false, region: 'gb')
     end
 
     it 'is case insensitive when a repo name and the event app name do not match in case' do
@@ -170,7 +184,8 @@ RSpec.describe Repositories::DeployRepository do
 
       results = repository.deploys_for(apps: apps, server: server)
 
-      expect(results).to eq([Deploy.new(defaults.merge(app_name: 'frontend', correct: true, region: 'gb'))])
+      expect(results.count).to eq(1)
+      expect(results.first).to have_attributes(app_name: 'frontend', correct: true, region: 'gb')
     end
 
     it 'ignores the deploys event when it is for another server' do
@@ -202,9 +217,12 @@ RSpec.describe Repositories::DeployRepository do
           defaults.merge(app_name: 'backend'),
         )
 
-        expect(repository.deploys_for(apps: apps, server: server)).to match_array([
-          Deploy.new(defaults.merge(app_name: 'frontend', correct: true, region: 'gb')),
-          Deploy.new(defaults.merge(app_name: 'backend', correct: true, region: 'gb')),
+        deploys = repository.deploys_for(apps: apps, server: server)
+        expect(deploys.map { |deploy|
+          deploy.attributes.slice(:app_name, :correct, :region)
+        }).to match_array([
+          { app_name: 'frontend', correct: true, region: 'gb' },
+          { app_name: 'backend', correct: true, region: 'gb' },
         ])
       end
     end
@@ -221,17 +239,11 @@ RSpec.describe Repositories::DeployRepository do
 
         results = repository.deploys_for(server: 'x.io')
 
-        expect(results).to match_array([
-          Deploy.new(
-            defaults.merge(
-              app_name: 'a', server: 'x.io', version: expand_sha('1'), correct: false, region: 'us',
-            ),
-          ),
-          Deploy.new(
-            defaults.merge(
-              app_name: 'b', server: 'x.io', version: expand_sha('2'), correct: false, region: 'us',
-            ),
-          ),
+        expect(results.map { |deploy|
+          deploy.attributes.slice(:app_name, :server, :version, :correct, :region)
+        }).to match_array([
+          { app_name: 'a', server: 'x.io', version: expand_sha('1'), correct: false, region: 'us' },
+          { app_name: 'b', server: 'x.io', version: expand_sha('2'), correct: false, region: 'us' },
         ])
       end
     end
@@ -257,18 +269,70 @@ RSpec.describe Repositories::DeployRepository do
           at: time + 1.second,
         )
 
-        expect(results).to match_array([
-          Deploy.new(
-            app_name: 'app1',
-            server: 'x.io',
-            version: expand_sha('abc'),
-            deployed_by: 'dj',
-            region: 'us',
-            correct: true,
-            environment: 'uat',
-            deployed_at: time,
-          ),
-        ])
+        expect(results.count).to eq(1)
+        expect(results.first).to have_attributes(
+          app_name: 'app1',
+          server: 'x.io',
+          version: expand_sha('abc'),
+          deployed_by: 'dj',
+          region: 'us',
+          correct: true,
+          environment: 'uat',
+          deployed_at: time,
+        )
+      end
+    end
+  end
+
+  describe '#unapproved_production_deploys_for' do
+    let(:defaults) { { app_name: 'frontend', deployed_by: 'Bob', locale: 'gb', created_at: Date.parse('01-04-2017') } }
+
+    context 'with no specified time frame' do
+      it 'returns all unapproved production deploys for a specified region' do
+        apply_deploys(
+          defaults.merge(environment: 'uat', version: expand_sha('def')),
+          defaults.merge(environment: 'production', version: expand_sha('abc')),
+          defaults.merge(environment: 'production', version: expand_sha('ghi')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz')),
+        )
+
+        apply_deploy_alert_for(version: expand_sha('abc'), environment: 'production', region: 'gb')
+        apply_deploy_alert_for(version: expand_sha('ghi'), environment: 'production', region: 'gb')
+
+        deploys = repository.unapproved_production_deploys_for(
+          app_name: 'frontend',
+          region: 'gb',
+        )
+
+        expect(deploys.count).to eq(2)
+        expect(deploys.map(&:version)).to match_array([expand_sha('abc'), expand_sha('ghi')])
+      end
+    end
+
+    context 'with given specified time frame' do
+      it 'returns the unapproved production deploys for a specified region within a specified time frame' do
+        apply_deploys(
+          defaults.merge(environment: 'uat', version: expand_sha('def')),
+          defaults.merge(environment: 'production', version: expand_sha('abc')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz'), created_at: Date.parse('01-02-2017')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz')),
+          defaults.merge(environment: 'production', version: expand_sha('xyz'), locale: 'us'),
+        )
+
+        apply_deploy_alert_for(version: expand_sha('xyz'), environment: 'production', region: 'gb')
+
+        deploys = repository.unapproved_production_deploys_for(
+          app_name: 'frontend',
+          region: 'gb',
+          from_date: Date.parse('01-03-2017'),
+          to_date: Date.parse('01-05-2017'),
+        )
+
+        expect(deploys.count).to eq(1)
+        expect(deploys.first.region).to eq('gb')
+        expect(deploys.first.environment).to eq('production')
+        expect(deploys.first.deploy_alert).to eq('Not Good!')
+        expect(deploys.first.deployed_at).to eq(Date.parse('01-04-2017'))
       end
     end
   end
@@ -306,17 +370,20 @@ RSpec.describe Repositories::DeployRepository do
       end
 
       it 'returns the latest non-production deploy for the version under review' do
-        expect(repository.last_staging_deploy_for_versions([version])).to eq(
-          Deploy.new(defaults.merge(server: 'b', version: version, region: 'de')),
-        )
+        deploy = repository.last_staging_deploy_for_versions([version])
+
+        expect(deploy.version).to eq(version)
+        expect(deploy.server).to eq('b')
+        expect(deploy.region).to eq('de')
       end
 
       it 'looks for any non-production environments' do
         apply_deploys(defaults.merge(server: 'c', environment: 'uat', version: version))
 
-        expect(repository.last_staging_deploy_for_versions([version])).to eq(
-          Deploy.new(defaults.merge(server: 'c', version: version, region: 'de')),
-        )
+        deploy = repository.last_staging_deploy_for_versions([version])
+        expect(deploy.version).to eq(version)
+        expect(deploy.server).to eq('c')
+        expect(deploy.region).to eq('de')
       end
     end
   end

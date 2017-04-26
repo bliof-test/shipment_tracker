@@ -8,6 +8,17 @@ module Repositories
       @store = store
     end
 
+    def release_exception_for_application(app_name:, from_date: nil, to_date: nil)
+      time_period_query = if from_date.present? && to_date.present?
+                            store.arel_table['submitted_at'].between(from_date.beginning_of_day..to_date.end_of_day)
+                          end
+
+      store
+        .where(time_period_query)
+        .where('path like ?', "%#{app_name}%")
+        .map { |result| ReleaseException.new(result.attributes) }
+    end
+
     def release_exception_for(versions:, at: nil)
       submitted_at_query = at ? store.arel_table['submitted_at'].lteq(at) : nil
 

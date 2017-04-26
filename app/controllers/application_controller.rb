@@ -29,4 +29,15 @@ class ApplicationController < ActionController::Base
   rescue URI::InvalidURIError
     nil
   end
+
+  protected
+
+  def update_region_cookies
+    cookies.permanent[:deploy_region] ||= Rails.configuration.default_deploy_region
+    cookies.permanent[:deploy_region] = params[:region] if params[:region]
+  end
+
+  def force_html_format
+    request.format = 'html'
+  end
 end

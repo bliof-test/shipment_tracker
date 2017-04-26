@@ -7,6 +7,7 @@ class Deploy
     attribute :correct, Boolean
     attribute :deployed_by, String
     attribute :deployed_at, Time
+    attribute :deploy_alert, String
     attribute :server, String
     attribute :region, String
     attribute :version, String
