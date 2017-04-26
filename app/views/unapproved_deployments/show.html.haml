@@ -78,6 +78,6 @@
       %td= release_exception.comment
       %td= time_with_timezone(release_exception.submitted_at)
       - deploy = @deploy_repository.deploys_for_versions(release_exception.versions, environment: 'production', region: @region).first
-      %td= deploy.deployed_by
-      %td= time_with_timezone(deploy.deployed_at)
+      %td= deploy.present? ? deploy.deployed_by : 'Not Deployed'
+      %td= deploy.present? ? time_with_timezone(deploy.deployed_at) : 'Not Deployed'
 
