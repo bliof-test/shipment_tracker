@@ -11,6 +11,10 @@ class ReleaseException
     attribute :versions, Array, default: []
   end
 
+  def commits
+    versions.map { |version| GitCommit.new(id: version) }
+  end
+
   def repo_owner
     RepoOwner.find(repo_owner_id)
   end

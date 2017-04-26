@@ -17,25 +17,30 @@
 
 %h2 Unapproved Deployments
 %p
-  A list of all unapproved releases
+  A list of all releases, which were not approved at deployment time
   %br A release is unapproved if none of the associated tickets have been approved in JIRA and no repository owner has pointed a reason why there is no approved JIRA ticket.
 
 %table.table.table-condensed
   %thead
     %tr
       %th{width: '10%'} Version
-      %th{width: '25%'} Tickets
-      %th{width: '15%'} Deployed at
+      %th{width: '10%'} Tickets
+      %th{width: '10%'} Feature Reviews
+      %th{width: '20%'} Deployed at
       %th{width: '10%'} Deployed by
       %th{width: '40%'} Deploy Alert
   %tbody
   - @unapproved_deploys.each do |deploy|
-    %tr.pending-release.danger
+    - feature_reviews = feature_reviews_for_versions(@app_name, [deploy.version])
+    %tr.pending-release{class: ('danger' unless feature_reviews.any?(&:authorised?))}
       %td.monospace= commit_link(deploy.version, @github_repo_url)
-      - tickets = Repositories::TicketRepository.new.tickets_for_versions([deploy.version])
+      - tickets = tickets_for_versions([deploy.version])
       %td
         - tickets.each do |ticket|
           %div= jira_link(ticket.key)
+      %td
+        - feature_reviews.each do |feature_review|
+          %div= feature_review_link(feature_review)
       %td= time_with_timezone(deploy.deployed_at)
       %td= deploy.deployed_by
       %td= deploy.deploy_alert
@@ -51,19 +56,24 @@
     %tr
       %th{width: '10%'} Version
       %th{width: '10%'} Tickets
+      %th{width: '10%'} Feature Reviews
       %th{width: '15%'} Repo Owner
-      %th{width: '30%'} Release Exception
-      %th{width: '15%'} Release Exception posted at
-      %th{width: '15%'} Deployed By
-      %th{width: '15%'} Deployed At
+      %th{width: '25%'} Release Exception
+      %th{width: '10%'} Release Exception posted at
+      %th{width: '10%'} Deployed By
+      %th{width: '10%'} Deployed At
   %tbody
   - @release_exceptions.each do |release_exception|
     %tr.deployed-release
       %td.monospace= commit_link(release_exception.versions.last, @github_repo_url)
-      - tickets = Repositories::TicketRepository.new.tickets_for_versions(release_exception.versions)
+      - tickets = tickets_for_versions(release_exception.versions)
       %td
         - tickets.each do |ticket|
           %div= jira_link(ticket.key)
+      - feature_reviews = feature_reviews_for_versions(@app_name, release_exception.versions)
+      %td
+        - feature_reviews.each do |feature_review|
+          %div= feature_review_link(feature_review)
       %td= release_exception.repo_owner.email
       %td= release_exception.comment
       %td= time_with_timezone(release_exception.submitted_at)
