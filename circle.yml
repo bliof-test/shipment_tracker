@@ -1,6 +1,6 @@
 dependencies:
   pre:
-    - gem update bundler
+    - gem install bundler --no-doc
 test:
   override:
     - bundle exec rake spec
@@ -8,4 +8,8 @@ test:
     - bundle exec rubocop -D
   post:
     - bundle exec rake codeclimate
-    - "curl --header 'Accept: application/json' https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM?circle-token=$CIRCLE_TOKEN | curl --request POST --header 'Content-Type:application/json' --data @- --fail $SHIPMENT_TRACKER_POST_URL"
+    - |
+      if [ "$CIRCLE_PROJECT_USERNAME" == "FundingCircle" ]; then
+        curl --header 'Accept: application/json' https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM?circle-token=$CIRCLE_TOKEN \
+        | curl --request POST --header 'Content-Type:application/json' --data @- --fail $SHIPMENT_TRACKER_POST_URL
+      fi
