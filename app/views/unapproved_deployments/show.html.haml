@@ -33,7 +33,8 @@
   - @unapproved_deploys.each do |deploy|
     - feature_reviews = feature_reviews_for_versions(@app_name, [deploy.version])
     %tr.pending-release{class: ('danger' unless feature_reviews.any?(&:authorised?))}
-      %td.monospace= commit_link(deploy.version, @github_repo_url)
+      %td.monospace
+        = deploy.version.present? ? commit_link(deploy.version, @github_repo_url) : 'Unknown Version'
       - tickets = tickets_for_versions([deploy.version])
       %td
         - tickets.each do |ticket|
