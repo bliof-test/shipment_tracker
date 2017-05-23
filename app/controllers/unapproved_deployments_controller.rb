@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 class UnapprovedDeploymentsController < ApplicationController
-  before_action :update_region_cookies, only: [:show]
+  before_action :force_html_format, only: :show
+  before_action :update_region_cookies, only: :show
 
   def show
     update_region_cookies
