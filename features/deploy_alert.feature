@@ -32,8 +32,8 @@ Scenario: Release has no approved Feature Reviews
   When commit "#merge1" of "frontend" is deployed by "Joe" to production at "2016-01-22 17:34:20"
   Then a deploy alert should be dispatched for
     | method | app_name | version | time                      | deployer | message                                              | to                    |
-    | slack  | frontend | #merge1 | 2016-01-22 17:34+00:00    | Joe      | Release not authorised; Feature Review not approved. |                       |
-    | email  | frontend | #merge1 | 2016-01-22 17:34:20+00:00 | Joe      | Release not authorised; Feature Review not approved. | bob@fundingcircle.com |
+    | slack  | frontend | #merge1 | 2016-01-22 17:34+00:00    | Joe      | Release not authorised; Feature Review not approved.\n* Alice 8549b56d80ba94577c14a0d5286a9fec924b20a6 Not Approved |                       |
+    | email  | frontend | #merge1 | 2016-01-22 17:34:20+00:00 | Joe      | Release not authorised; Feature Review not approved.\n* Alice 8549b56d80ba94577c14a0d5286a9fec924b20a6 Not Approved | bob@fundingcircle.com |
 
 Scenario: Dependent release has no approved Feature Reviews
   Given an application called "frontend"
@@ -75,7 +75,7 @@ Scenario: Dependent release has no approved Feature Reviews
   When commit "#merge2" of "frontend" is deployed by "Joe" to production at "2016-01-24 17:34:20"
   Then a deploy alert should be dispatched for
     | app_name | version | time                   | deployer | message                                              |
-    | frontend | #merge2 | 2016-01-24 17:34+00:00 | Joe      | Release not authorised; Feature Review not approved. |
+    | frontend | #merge2 | 2016-01-24 17:34+00:00 | Joe      | Release not authorised; Feature Review not approved.\n* Alice 8549b56d80ba94577c14a0d5286a9fec924b20a6 Not Approved |
 
 Scenario: Rollback to an older software version
   Given an application called "frontend"

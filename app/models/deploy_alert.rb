@@ -21,12 +21,13 @@ class DeployAlert
     elsif deploy_auditor.rollback?
       alert_rollback(current_deploy)
     elsif !deploy_auditor.recent_releases_authorised?
-      alert_not_authorised(current_deploy)
+      alert_not_authorised(current_deploy, deploy_auditor)
     end
   end
 
-  def self.alert_not_authorised(deploy)
-    "#{alert_header(deploy)}Release not authorised; Feature Review not approved."
+  def self.alert_not_authorised(deploy, deploy_auditor)
+    "#{alert_header(deploy)}Release not authorised; Feature Review not approved.\n" \
+    "#{deploy_auditor.unauthorised_releases}"
   end
 
   def self.alert_not_on_master(deploy)
@@ -69,8 +70,17 @@ class DeployAlert
     end
 
     def recent_releases_authorised?
-      release_query = release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name)
-      release_query.deployed_releases.all?(&:authorised?)
+      recent_deployed_releases.all?(&:authorised?)
+    end
+
+    def recent_deployed_releases
+      release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name).deployed_releases
+    end
+
+    def unauthorised_releases
+      recent_deployed_releases.map { |release|
+        "* #{release.commit.author_name} #{release.commit.id} #{release.authorised? ? 'Approved' : 'Not Approved'}"
+      }.join("\n")
     end
 
     private
