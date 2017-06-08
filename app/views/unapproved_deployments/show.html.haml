@@ -44,7 +44,7 @@
           %div= feature_review_link(feature_review)
       %td= time_with_timezone(deploy.deployed_at)
       %td= deploy.deployed_by
-      %td= deploy.deploy_alert
+      %td= simple_format(deploy.deploy_alert)
 
 
 %h2 Repository Owner Commentaries

@@ -4,49 +4,59 @@ require 'git_repository_loader'
 require 'git_repository_location'
 
 class DeployAlert
-  attr_reader :deploy_env
+  attr_reader :current_deploy, :previous_deploy, :deploy_auditor
+
+  def initialize(current_deploy, previous_deploy = nil)
+    @current_deploy = current_deploy
+    @previous_deploy = previous_deploy
+    @deploy_auditor = DeployAuditor.new(current_deploy, previous_deploy)
+  end
 
   def self.auditable?(current_deploy)
     return false unless current_deploy.environment == 'production'
     GitRepositoryLocation.app_names.include?(current_deploy.app_name)
   end
 
-  def self.audit_message(current_deploy, previous_deploy = nil)
-    deploy_auditor = DeployAuditor.new(current_deploy, previous_deploy)
+  def self.audit_message(*args)
+    new(*args).audit_message
+  end
 
+  def audit_message
     if deploy_auditor.unknown_version?
-      alert_unknown_version(current_deploy)
+      alert_unknown_version
     elsif deploy_auditor.not_on_master?
-      alert_not_on_master(current_deploy)
+      alert_not_on_master
     elsif deploy_auditor.rollback?
-      alert_rollback(current_deploy)
+      alert_rollback
     elsif !deploy_auditor.recent_releases_authorised?
-      alert_not_authorised(current_deploy)
+      alert_not_authorised
     end
   end
 
-  def self.alert_not_authorised(deploy)
-    "#{alert_header(deploy)}Release not authorised; Feature Review not approved."
+  private
+
+  def alert_not_authorised
+    "#{alert_header}Release not authorised; Feature Review not approved.\n" \
+    "#{deploy_auditor.unauthorised_releases}"
   end
 
-  def self.alert_not_on_master(deploy)
-    "#{alert_header(deploy)}Version does not exist on GitHub master branch."
+  def alert_not_on_master
+    "#{alert_header}Version does not exist on GitHub master branch."
   end
 
-  def self.alert_unknown_version(deploy)
-    "#{alert_header(deploy)}Deploy event sent to Shipment Tracker contains an unknown software version."
+  def alert_unknown_version
+    "#{alert_header}Deploy event sent to Shipment Tracker contains an unknown software version."
   end
 
-  def self.alert_rollback(deploy)
-    "#{alert_header(deploy)}Old release deployed. Was the rollback intentional?"
+  def alert_rollback
+    "#{alert_header}Old release deployed. Was the rollback intentional?"
   end
 
-  def self.alert_header(deploy)
-    time = deploy.deployed_at.strftime('%F %H:%M%:z')
-    "#{deploy.region.upcase} Deploy Alert for #{deploy.app_name} at #{time}.\n" \
-    "#{deploy.deployed_by} deployed #{deploy.version || 'unknown version'}.\n"
+  def alert_header
+    time = current_deploy.deployed_at.strftime('%F %H:%M%:z')
+    "#{current_deploy.region.upcase} Deploy Alert for #{current_deploy.app_name} at #{time}.\n" \
+    "#{current_deploy.deployed_by} deployed #{current_deploy.version || 'unknown version'}.\n"
   end
-  private_class_method :alert_header
 
   class DeployAuditor
     def initialize(current_deploy, previous_deploy = nil)
@@ -69,8 +79,17 @@ class DeployAlert
     end
 
     def recent_releases_authorised?
-      release_query = release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name)
-      release_query.deployed_releases.all?(&:authorised?)
+      recent_deployed_releases.all?(&:authorised?)
+    end
+
+    def recent_deployed_releases
+      release_query_for(auditable_commits, current_deploy.region, current_deploy.app_name).deployed_releases
+    end
+
+    def unauthorised_releases
+      recent_deployed_releases.map { |release|
+        "* #{release.commit.author_name} #{release.commit.id} #{release.authorised? ? 'Approved' : 'Not Approved'}"
+      }.join("\n")
     end
 
     private

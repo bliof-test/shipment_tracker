@@ -63,7 +63,7 @@ RSpec.describe DeployAlert do
         version: '#new',
         region: 'gb',
         deployed_at: Time.current,
-        deployed_by: 'Devloper',
+        deployed_by: 'Developer',
       )
     }
 
@@ -74,7 +74,7 @@ RSpec.describe DeployAlert do
         version: '#old',
         region: 'gb',
         deployed_at: 1.hour.ago,
-        deployed_by: 'Devloper',
+        deployed_by: 'Developer',
       )
     }
 
@@ -107,7 +107,7 @@ RSpec.describe DeployAlert do
             app_name: 'some_app',
             version: nil,
             region: 'gb',
-            deployed_by: 'Devloper',
+            deployed_by: 'Developer',
             deployed_at: Time.current,
           )
         }
@@ -129,7 +129,7 @@ RSpec.describe DeployAlert do
             app_name: 'some_app',
             version: 'asdfoim?asgd/adsg/\asdg\sd',
             region: 'gb',
-            deployed_by: 'Devloper',
+            deployed_by: 'Developer',
             deployed_at: Time.current,
           )
         }
@@ -148,11 +148,14 @@ RSpec.describe DeployAlert do
     describe 'Alert: unauthorised release' do
       context 'when it is the first production deploy' do
         context 'when release is not authorized' do
-          let(:release) { instance_double(Release, authorised?: false) }
+          let(:commit) { instance_double(GitCommit, id: 'commit_id', author_name: 'Developer') }
+          let(:release) { instance_double(Release, authorised?: false, commit: commit) }
 
           it 'returns an alert message for unauthorised release' do
             actual = DeployAlert.audit_message(current_deploy)
-            expected = message(current_deploy, 'Release not authorised; Feature Review not approved.')
+            expected = message(current_deploy, "Release not authorised; Feature Review not approved.\n" \
+                               "* #{release.commit.author_name} #{release.commit.id} " \
+                               "#{release.authorised? ? 'Approved' : 'Not Approved'}")
 
             expect(actual).to eq(expected)
           end
@@ -169,12 +172,14 @@ RSpec.describe DeployAlert do
 
       context 'when there are previous deploys to production' do
         context 'when release is not authorized' do
-          let(:release) { instance_double(Release, authorised?: false) }
+          let(:commit) { instance_double(GitCommit, id: 'commit_id', author_name: 'Developer') }
+          let(:release) { instance_double(Release, authorised?: false, commit: commit) }
 
           it 'returns an alert message for unauthorised release' do
             actual = DeployAlert.audit_message(current_deploy, previous_deploy)
-            expected = message(current_deploy, 'Release not authorised; Feature Review not approved.')
-
+            expected = message(current_deploy, "Release not authorised; Feature Review not approved.\n" \
+                               "* #{release.commit.author_name} #{release.commit.id} " \
+                               "#{release.authorised? ? 'Approved' : 'Not Approved'}")
             expect(actual).to eq(expected)
           end
         end
@@ -209,7 +214,7 @@ RSpec.describe DeployAlert do
               version: nil,
               region: 'gb',
               deployed_at: 1.hour.ago,
-              deployed_by: 'Devloper',
+              deployed_by: 'Developer',
             )
           }
 
