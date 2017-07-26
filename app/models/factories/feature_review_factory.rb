@@ -6,7 +6,7 @@ require 'feature_review'
 
 module Factories
   class FeatureReviewFactory
-    QUERY_PARAM_WHITELIST = %w(apps uat_url).freeze
+    QUERY_PARAM_WHITELIST = %w(apps).freeze
 
     def create_from_text(text)
       URI.extract(text, %w(http https))
@@ -34,9 +34,6 @@ module Factories
     def create_from_apps(apps)
       uri = Addressable::URI.parse('/feature_reviews').normalize
       query_hash = { 'apps' => apps }
-
-      last_staging_deploy = deploy_repository.last_staging_deploy_for_versions(get_app_versions(apps))
-      query_hash['uat_url'] = last_staging_deploy.server if last_staging_deploy
 
       create(
         path: whitelisted_path(uri, query_hash),

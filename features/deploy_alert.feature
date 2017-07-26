@@ -11,7 +11,7 @@ Scenario: Release has no approved Feature Reviews
   # An authorised deploy
   And a commit "#master1" with message "initial commit" is created at "2016-01-18 09:10:57"
   And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #master1 |
   And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
@@ -23,7 +23,7 @@ Scenario: Release has no approved Feature Reviews
   And the branch "feature1" is checked out
   And a ticket "JIRA-TWO" with summary "Ticket TWO" is started at "2016-01-21 09:13:00"
   And a commit "#feat1_a" with message "feat1 first commit" is created at "2016-01-21 17:12:37"
-  And developer prepares review known as "FR_TWO" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_TWO" with apps
     | app_name | version  |
     | frontend | #feat1_a |
   And at time "2016-01-21 18:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"
@@ -41,7 +41,7 @@ Scenario: Dependent release has no approved Feature Reviews
   # An authorised deploy
   And a commit "#master1" with message "initial commit" is created at "2016-01-18 09:10:57"
   And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #master1 |
   And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
@@ -53,7 +53,7 @@ Scenario: Dependent release has no approved Feature Reviews
   And the branch "feature1" is checked out
   And a ticket "JIRA-TWO" with summary "Ticket TWO" is started at "2016-01-21 09:13:00"
   And a commit "#feat1_a" with message "feat1 first commit" is created at "2016-01-21 17:12:37"
-  And developer prepares review known as "FR_TWO" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_TWO" with apps
     | app_name | version  |
     | frontend | #feat1_a |
   And at time "2016-01-21 18:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"
@@ -64,7 +64,7 @@ Scenario: Dependent release has no approved Feature Reviews
   And the branch "feature2" is checked out
   And a ticket "JIRA-THREE" with summary "Ticket THREE" is started at "2016-01-23 09:13:00"
   And a commit "#feat2_a" with message "feat2 first commit" is created at "2016-01-23 17:12:37"
-  And developer prepares review known as "FR_THREE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_THREE" with apps
     | app_name | version  |
     | frontend | #feat2_a |
   And at time "2016-01-23 18:52:45" adds link for review "FR_THREE" to comment for ticket "JIRA-THREE"
@@ -83,7 +83,7 @@ Scenario: Rollback to an older software version
   # An authorised deploy
   And a commit "#master1" with message "first commit" is created at "2016-01-18 09:10:57"
   And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #master1 |
   And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
@@ -94,7 +94,7 @@ Scenario: Rollback to an older software version
   # An authorised deploy
   And a commit "#master2" with message "second commit" is created at "2016-02-18 09:10:57"
   And a ticket "JIRA-TWO" with summary "Ticket TWO" is started at "2016-02-18 09:13:00"
-  And developer prepares review known as "FR_TWO" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_TWO" with apps
     | app_name | version  |
     | frontend | #master2 |
   And at time "2016-02-20 14:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"

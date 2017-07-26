@@ -27,7 +27,6 @@ RSpec.describe 'Projection performance', type: :request do
             create :deploy_event, server: server, app_name: name, version: version
           end
           create :manual_test_event, apps: apps
-          create :uat_event, server: server
 
           file << benchmark(event_count) do
             get(path)
@@ -179,7 +178,6 @@ RSpec.describe 'Projection performance', type: :request do
     build_events(type: :jenkins_event, number: number)
     build_events(type: :deploy_event, number: number)
     build_events(type: :manual_test_event, number: number)
-    build_events(type: :uat_event, number: number)
   end
 
   def drop_events

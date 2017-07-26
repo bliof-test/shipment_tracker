@@ -427,11 +427,11 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           build :deploy_event, environment: 'uat', version: version, created_at: time_string
         }
         let!(:released_ticket) {
-          Snapshots::ReleasedTicket
-            .create(key: 'JIRA-1', summary: 'foo', description: 'bar',
-                    versions: [version, 'def123'],
-                    deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }]
-                   )
+          Snapshots::ReleasedTicket.create(
+            key: 'JIRA-1', summary: 'foo', description: 'bar',
+            versions: [version, 'def123'],
+            deploys: [{ 'app' => 'hello_world', 'version' => 'def123', 'deployed_at' => time_string }]
+          )
         }
         it 'does nothing' do
           ticket_repo.apply(deploy_event)
@@ -507,7 +507,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     end
 
     it 'does not apply the event when it is irrelevant' do
-      event = build(:uat_event)
+      event = build(:deploy_alert_event)
       expect { ticket_repo.apply(event) }.not_to change { Snapshots::ReleasedTicket.count }
     end
   end

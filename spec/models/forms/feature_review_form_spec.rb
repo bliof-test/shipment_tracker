@@ -4,38 +4,25 @@ require 'forms/feature_review_form'
 
 RSpec.describe Forms::FeatureReviewForm do
   let(:git_repository_loader) { instance_double(GitRepositoryLoader) }
-  let(:uat_url) { '' }
   let(:apps) { {} }
 
-  subject(:feature_review_form) {
-    Forms::FeatureReviewForm.new(
-      apps: apps,
-      uat_url: uat_url,
-      git_repository_loader: git_repository_loader,
-    )
-  }
+  def feature_review_form_for(apps)
+    described_class.new(apps: apps, git_repository_loader: git_repository_loader)
+  end
+
+  subject(:feature_review_form) { feature_review_form_for(apps) }
 
   describe '.new' do
     context 'with a git_repository_loader' do
       it 'should work' do
-        expect(
-          Forms::FeatureReviewForm.new(
-            apps: {},
-            uat_url: '',
-            git_repository_loader: double,
-          ),
-        ).to be_a(Forms::FeatureReviewForm)
+        expect(described_class.new(apps: {}, git_repository_loader: double))
+          .to be_a(described_class)
       end
     end
 
     context 'without a git_repository_loader' do
       it 'should work' do
-        expect(
-          Forms::FeatureReviewForm.new(
-            apps: {},
-            uat_url: '',
-          ),
-        ).to be_a(Forms::FeatureReviewForm)
+        expect(described_class.new(apps: {})).to be_a(described_class)
       end
     end
   end
@@ -52,20 +39,6 @@ RSpec.describe Forms::FeatureReviewForm do
       let(:apps) { { 'app1' => 'a', 'app2' => 'b', 'app3' => '' } }
       it 'returns the apps with empty ones filtered out' do
         expect(feature_review_form.apps).to eql('app1' => 'a', 'app2' => 'b')
-      end
-    end
-  end
-
-  describe '#uat_url' do
-    let(:uat_url) { 'http://foo.com/bar' }
-    it 'returns the uat_url' do
-      expect(feature_review_form.uat_url).to eql('foo.com')
-    end
-
-    context 'when uat not given' do
-      let(:uat_url) { nil }
-      it 'returns the uat_url' do
-        expect(feature_review_form.uat_url).to eql(nil)
       end
     end
   end
@@ -163,48 +136,22 @@ RSpec.describe Forms::FeatureReviewForm do
   end
 
   describe '#path' do
-    let(:apps) { { frontend: 'abc', backend: 'def' } }
-    let(:uat_url) { 'http://foobar.com/blah/blah' }
+    it 'will not include apps without versions' do
+      expect(feature_review_form_for(frontend: 'abc', backend: '').path)
+        .to eq('/feature_reviews?apps%5Bfrontend%5D=abc')
+    end
 
-    subject { feature_review_form.path }
+    it 'orders apps alphabetically' do
+      form = feature_review_form_for(a: 1, c: 3, b: 2, e: 5, d: 4)
 
-    it do
-      is_expected.to eq(
+      expect(form.path).to eq(
         '/feature_reviews?'\
-        'apps%5Bbackend%5D=def&'\
-        'apps%5Bfrontend%5D=abc&'\
-        'uat_url=foobar.com',
+        'apps%5Ba%5D=1&'\
+        'apps%5Bb%5D=2&'\
+        'apps%5Bc%5D=3&'\
+        'apps%5Bd%5D=4&'\
+        'apps%5Be%5D=5',
       )
-    end
-
-    context 'without uat_url' do
-      let(:apps) { { frontend: 'abc', backend: 'def' } }
-      let(:uat_url) { '' }
-
-      it { is_expected.to eq('/feature_reviews?apps%5Bbackend%5D=def&apps%5Bfrontend%5D=abc') }
-    end
-
-    context 'with empty app version' do
-      let(:apps) { { frontend: 'abc', backend: '' } }
-      let(:uat_url) { 'http://foobar.com' }
-
-      it { is_expected.to eq('/feature_reviews?apps%5Bfrontend%5D=abc&uat_url=foobar.com') }
-    end
-
-    context 'with lots of apps' do
-      let(:apps) { { a: 1, c: 3, b: 2, e: 5, d: 4 } }
-      let(:uat_url) { '' }
-
-      it 'orders apps alphabetically' do
-        is_expected.to eq(
-          '/feature_reviews?'\
-          'apps%5Ba%5D=1&'\
-          'apps%5Bb%5D=2&'\
-          'apps%5Bc%5D=3&'\
-          'apps%5Bd%5D=4&'\
-          'apps%5Be%5D=5',
-        )
-      end
     end
   end
 end

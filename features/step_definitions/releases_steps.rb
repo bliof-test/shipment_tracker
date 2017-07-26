@@ -30,11 +30,7 @@ Then 'I should see the "$deploy_status" releases' do |deploy_status, releases_ta
 
     if deploy_status == 'deployed'
       time = release_line.fetch('last deployed at')
-      release['time'] = if time.empty?
-                          nil
-                        else
-                          Time.zone.parse(time)
-                        end
+      release['time'] = time.empty? ? nil : Time.zone.parse(time)
     end
 
     release

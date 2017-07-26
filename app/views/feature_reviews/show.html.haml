@@ -38,23 +38,15 @@
             %span.title Test Results
         %li.list-group-item
           %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.deploy_status))
-            %span.title UAT Environment
-        %li.list-group-item
-          %strong
             - icon(item_status_icon_class(@feature_review_with_statuses.qa_status))
             %span.title QA Acceptance
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.uatest_status))
-            %span.title User Acceptance Tests
         %li.list-group-item
           %strong
             - icon(item_status_icon_class(@feature_review_with_statuses.release_exception_status))
             %span.title Repo Owner Commentary
 
   .col-lg-6
-    - panel(heading: 'Apps Under Review', klass: 'app-info', button_link: { text: 'Modify', url: edit_url(@feature_review_with_statuses.app_versions, @feature_review_with_statuses.uat_host)}) do
+    - panel(heading: 'Apps Under Review', klass: 'app-info', button_link: { text: 'Modify', url: edit_url(@feature_review_with_statuses.app_versions) }) do
       - table(headers: %w(App Commit Author Time)) do
         - @feature_review_with_statuses.apps_with_latest_commit.each do |app_name, latest_commit|
           %tr
@@ -62,29 +54,6 @@
             %td= commit_link(latest_commit.id, @feature_review_with_statuses.github_repo_urls[app_name])
             %td= latest_commit.author_name || 'unknown'
             %td= latest_commit.time || 'unknown'
-      %ul.list-group
-        %li.list-group-item
-          - if @feature_review_with_statuses.uat_url
-            Deployed to UAT
-            %strong.uat-url= to_link(@feature_review_with_statuses.uat_url, target: '_blank')
-          - else
-            No UAT specified
-
-.row
-  .col-lg-6
-    - panel(heading: 'UAT Environment', klass: 'deploys', status: @feature_review_with_statuses.deploy_status) do
-      - if @feature_review_with_statuses.uat_url.blank?
-        .panel-body No UAT Environment specified
-      - elsif @feature_review_with_statuses.deploys.empty?
-        .panel-body Could not find any deploys to #{@feature_review_with_statuses.uat_url}
-      - else
-        - table(headers: %w(Correct App Version)) do
-          - @feature_review_with_statuses.deploys.each do |deploy|
-            %tr.deploy
-              %td
-                - icon(item_status_icon_class(deploy.correct))
-              %td= deploy.app_name
-              %td.monospace= short_sha(deploy.version)
 
   .col-lg-6
     - panel(heading: 'Test Results', klass: 'builds', status: @feature_review_with_statuses.build_status) do
@@ -127,16 +96,6 @@
             = label_tag('comment', 'Comment', class: 'control-label sr-only', id: 'qa-comment')
             = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
           = submit_tag('Submit', class: 'btn btn-primary', id: '#qa-submit')
-  .col-lg-6
-    - panel(heading: 'User Acceptance Tests', klass: 'uatest', status: @feature_review_with_statuses.uatest_status) do
-      .panel-body
-        - if @feature_review_with_statuses.uatest
-          Ran test suite version
-          %span.uat-version= @feature_review_with_statuses.uatest.test_suite_version
-        - else
-          Could not find User Acceptance Tests that ran against expected UAT
-          = "(#{@feature_review_with_statuses.uat_url})" if @feature_review_with_statuses.uat_url
-          with the app versions that are under review.
   .col-lg-6
     - panel(heading: 'Repo Owner Commentary', klass: 'release-exception', status: @feature_review_with_statuses.release_exception_status) do
       .panel-body

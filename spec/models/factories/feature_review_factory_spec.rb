@@ -94,13 +94,11 @@ RSpec.describe Factories::FeatureReviewFactory do
       actual_url = full_url(
         'apps[a]' => '123',
         'apps[b]' => '456',
-        'uat_url' => 'http://foo.com',
       )
-      expected_path = '/feature_reviews?apps%5Ba%5D=123&apps%5Bb%5D=456&uat_url=http%3A%2F%2Ffoo.com'
+      expected_path = '/feature_reviews?apps%5Ba%5D=123&apps%5Bb%5D=456'
 
       feature_review = factory.create_from_url_string(actual_url)
       expect(feature_review.versions).to eq(%w(123 456))
-      expect(feature_review.uat_url).to eq('http://foo.com')
       expect(feature_review.path).to eq(expected_path)
     end
 
@@ -121,13 +119,11 @@ RSpec.describe Factories::FeatureReviewFactory do
       actual_url = full_url(
         'apps[a]' => '123',
         'apps[b]' => '',
-        'uat_url' => 'http://foo.com',
       )
-      expected_path = '/feature_reviews?apps%5Ba%5D=123&apps%5Bb%5D=&uat_url=http%3A%2F%2Ffoo.com'
+      expected_path = '/feature_reviews?apps%5Ba%5D=123&apps%5Bb%5D='
 
       feature_review = factory.create_from_url_string(actual_url)
       expect(feature_review.versions).to eq(['123'])
-      expect(feature_review.uat_url).to eq('http://foo.com')
       expect(feature_review.path).to eq(expected_path)
     end
   end

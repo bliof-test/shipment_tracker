@@ -23,7 +23,7 @@ Scenario: Viewing releases for an app
   # 2014-10-01 - reverting approval for release that has been merged and deployed
   And the branch "feature1" is checked out
   And a commit "#feat1_a" with message "feat1 first commit" is created at "2014-10-01 13:12:37"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #feat1_a |
   And at time "2014-10-01 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
@@ -36,7 +36,7 @@ Scenario: Viewing releases for an app
   # 2014-10-02
   And the branch "feature2" is checked out
   And a commit "#feat2_a" with message "feat2 first commit" is created at "2014-10-02 14:01:17"
-  And developer prepares review known as "FR_123" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_123" with apps
     | app_name | version  |
     | frontend | #feat2_a |
   And at time "2014-10-02 15:12:45" adds link for review "FR_123" to comment for ticket "JIRA-123"
@@ -45,11 +45,7 @@ Scenario: Viewing releases for an app
   And the branch "feature2" is checked out
   And a commit "#feat2_b" with message "feat2 second commit" is created at "2014-10-03 14:04:19"
   And commit "#feat2_b" of "frontend" is deployed by "Alice" to server "uat.fundingcircle.com" at "2014-10-03 14:25:00"
-  And developer prepares review known as "FR_123b" for UAT "uat.fundingcircle.com" with apps
-    | app_name | version  |
-    | frontend | #feat2_b |
-  And at time "2014-10-03 15:12:45" adds link for review "FR_123b" to comment for ticket "JIRA-123"
-  And developer prepares review known as "FR_456" for UAT "uat.example.com" with apps
+  And developer prepares review known as "FR_456" with apps
     | app_name | version  |
     | frontend | #feat2_b |
   And at time "2014-10-03 15:19:53" adds link for review "FR_456" to comment for ticket "JIRA-456"
@@ -61,7 +57,7 @@ Scenario: Viewing releases for an app
   # allow developers to gain approval retrospectively
   And the branch "master" is checked out
   And a commit "#master3" with message "sneaky commit" is created at "2014-10-05 11:01:02"
-  And developer prepares review known as "FR_789" for UAT "uat.example.com" with apps
+  And developer prepares review known as "FR_789" with apps
     | app_name | version  |
     | frontend | #master3 |
   And at time "2014-10-05 11:02:00" adds link for review "FR_789" to comment for ticket "JIRA-789"
@@ -76,7 +72,7 @@ Scenario: Viewing releases for an app
 
   Then I should see the "pending" releases
     | version | subject                    | feature reviews | review statuses       | review times          | approved |
-    | #merge2 | Merge feature2 into master | FR_123b, FR_456 | Not approved Approved | , 2014-10-04 15:24:34 | yes      |
+    | #merge2 | Merge feature2 into master | FR_456          | Approved              | 2014-10-04 15:24:34   | yes      |
 
   And I should see the "deployed" releases
     | version  | subject                    | feature reviews | review statuses       | review times          | approved | last deployed at |
@@ -90,7 +86,7 @@ Scenario: Release requires re-approval
   And a commit "#master1" with message "merge commit" is created at "2016-01-17 10:20:45"
   And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
   And ticket "JIRA-ONE" is approved by "bob@fundingcircle.com" at "2016-01-19 15:20:34"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #master1 |
   And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"

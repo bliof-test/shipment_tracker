@@ -4,7 +4,6 @@ require 'repositories/build_repository'
 require 'repositories/deploy_repository'
 require 'repositories/manual_test_repository'
 require 'repositories/ticket_repository'
-require 'repositories/uatest_repository'
 
 module Queries
   class FeatureReviewQuery
@@ -15,7 +14,6 @@ module Queries
       @deploy_repository = Repositories::DeployRepository.new
       @manual_test_repository = Repositories::ManualTestRepository.new
       @ticket_repository = Repositories::TicketRepository.new
-      @uatest_repository = Repositories::UatestRepository.new
       @release_exception_repository = Repositories::ReleaseExceptionRepository.new
       @feature_review = feature_review
       @time = at
@@ -26,17 +24,15 @@ module Queries
     private
 
     attr_reader :build_repository, :deploy_repository, :manual_test_repository, :release_exception_repository,
-      :ticket_repository, :uatest_repository, :feature_review, :time
+      :ticket_repository, :feature_review, :time
 
     def build_feature_review_with_statuses
       @feature_review_with_statuses = FeatureReviewWithStatuses.new(
         feature_review,
         builds: builds,
-        deploys: deploys,
         qa_submission: qa_submission,
         release_exception: release_exception,
         tickets: tickets,
-        uatest: uatest,
         at: time,
       )
     end
@@ -44,13 +40,6 @@ module Queries
     def builds
       build_repository.builds_for(
         apps: feature_review.app_versions,
-        at: time)
-    end
-
-    def deploys
-      deploy_repository.deploys_for(
-        apps: feature_review.app_versions,
-        server: feature_review.uat_host,
         at: time)
     end
 
@@ -68,13 +57,6 @@ module Queries
 
     def tickets
       ticket_repository.tickets_for_path(feature_review.path, at: time)
-    end
-
-    def uatest
-      uatest_repository.uatest_for(
-        versions: feature_review.versions,
-        server: feature_review.uat_host,
-        at: time)
     end
   end
 end

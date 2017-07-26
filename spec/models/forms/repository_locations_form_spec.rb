@@ -74,7 +74,6 @@ RSpec.describe Forms::RepositoryLocationsForm do
         { id: 'deploy', name: 'Deployment', value: true },
         { id: 'jenkins', name: 'Jenkins', value: false },
         { id: 'jira', name: 'JIRA', value: false },
-        { id: 'uat', name: 'UAT', value: false },
         { id: 'github_notifications', name: 'Github Notifications', value: false },
       ]
 

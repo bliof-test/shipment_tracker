@@ -85,16 +85,13 @@ module Support
       end
     end
 
-    def prepare_review(apps, uat_url, feature_review_nickname)
+    def prepare_review(apps, feature_review_nickname)
       apps_hash = {}
       apps.each do |app|
         apps_hash[app[:app_name]] = resolve_version(app[:version])
       end
 
-      @reviews[feature_review_nickname] = {
-        apps_hash: apps_hash,
-        uat_url: uat_url,
-      }
+      @reviews[feature_review_nickname] = { apps_hash: apps_hash }
     end
 
     def post_jira_comment(jira_key:, feature_review_nickname:, time: Time.current.to_s, comment_type:)
@@ -141,12 +138,12 @@ module Support
 
     def review_url(feature_review_nickname: nil, time: nil)
       review = @reviews.fetch(feature_review_nickname)
-      feature_review_url(review[:apps_hash], review[:uat_url], time)
+      feature_review_url(review[:apps_hash], time)
     end
 
     def review_path(feature_review_nickname: nil, time: nil)
       review = @reviews.fetch(feature_review_nickname)
-      feature_review_path(review[:apps_hash], review[:uat_url], time)
+      feature_review_path(review[:apps_hash], time)
     end
 
     def new_review_path(version)

@@ -9,7 +9,6 @@ Rails.configuration.repositories = [
 
   # Depends on DeployRepository:
   Repositories::ReleasedTicketRepository.new,
-  Repositories::UatestRepository.new,
   Repositories::DeployAlertRepository.new,
 ]
 

@@ -72,7 +72,6 @@ class FeatureReviewsController < ApplicationController
     form_input = params.fetch(:forms_feature_review_form, {})
     Forms::FeatureReviewForm.new(
       apps: form_input[:apps],
-      uat_url: form_input[:uat_url],
       git_repository_loader: git_repository_loader,
     )
   end
