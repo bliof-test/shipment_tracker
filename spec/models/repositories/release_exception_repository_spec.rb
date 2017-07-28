@@ -156,7 +156,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
 
         events = [
           create_exception_event(approved: false, created_at: times[0]),
-          create_exception_event(approved: true, created_at: times[1]),
+          create_exception_event(approved: true,  created_at: times[1]),
           create_exception_event(approved: false, created_at: times[2]),
         ]
 

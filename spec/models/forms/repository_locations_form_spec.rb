@@ -77,7 +77,7 @@ RSpec.describe Forms::RepositoryLocationsForm do
         { id: 'github_notifications', name: 'Github Notifications', value: false },
       ]
 
-      expect(Forms::RepositoryLocationsForm.default_token_types).to eq(expected_tokens)
+      expect(Forms::RepositoryLocationsForm.default_token_types).to match_array(expected_tokens)
     end
   end
 

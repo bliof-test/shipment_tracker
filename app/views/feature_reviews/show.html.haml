@@ -39,18 +39,29 @@
             %td= latest_commit.author_name || 'unknown'
             %td= latest_commit.time || 'unknown'
 
-    - panel(heading: 'Test Results', klass: 'builds', status: @feature_review_with_statuses.build_status) do
-      - if @feature_review_with_statuses.builds.empty?
-        .panel-body No builds found
+    - panel(heading: 'Unit Test Results', klass: 'builds', status: @feature_review_with_statuses.unit_test_result_status) do
+      - if @feature_review_with_statuses.unit_test_results.empty?
+        .panel-body No Unit Test Builds found
       - else
         - table(headers: %w(Status App Source)) do
-          - @feature_review_with_statuses.builds.each do |app_name, build|
+          - @feature_review_with_statuses.unit_test_results.each do |app_name, build|
             %tr.build
               %td
                 - icon(item_status_icon_class(build.success))
               %td= app_name
               %td= build.source
-
+    - panel(heading: 'Integration Test Results', klass: 'integration-test', status: @feature_review_with_statuses.integration_test_result_status) do
+      - if @feature_review_with_statuses.integration_test_results.empty?
+        .panel-body No Integration Test Builds found
+      - else
+        - table(headers: %w(Status App Source Build)) do
+          - @feature_review_with_statuses.integration_test_results.each do |app_name, build|
+            %tr.build
+              %td
+                - icon(item_status_icon_class(build.success))
+              %td= app_name
+              %td= build.source
+              %td= build.version.present? ? link_to(short_sha(build.version), build.url) : ''
     - panel(heading: 'Repo Owner Commentary', klass: 'release-exception', status: @feature_review_with_statuses.release_exception_status) do
       .panel-body
         - if @feature_review_with_statuses.release_exception
@@ -85,8 +96,12 @@
       %ul.list-group
         %li.list-group-item
           %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.build_status))
-            %span.title Test Results
+            - icon(item_status_icon_class(@feature_review_with_statuses.unit_test_result_status))
+            %span.title Unit Test Results
+        %li.list-group-item
+          %strong
+            - icon(item_status_icon_class(@feature_review_with_statuses.integration_test_result_status))
+            %span.title Integration Test Results
         %li.list-group-item
           %strong
             - icon(item_status_icon_class(@feature_review_with_statuses.qa_status))

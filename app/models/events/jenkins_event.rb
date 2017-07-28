@@ -7,8 +7,20 @@ module Events
       'Jenkins'
     end
 
+    def build_type
+      details.dig('build', 'build_type') || 'unit'
+    end
+
+    def build_url
+      details.dig('build', 'full_url')
+    end
+
     def success
       details.dig('build', 'status') == 'SUCCESS'
+    end
+
+    def app_name
+      details.dig('build', 'app_name')
     end
 
     def version

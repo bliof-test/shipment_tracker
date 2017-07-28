@@ -4,8 +4,9 @@ require 'feature_review_with_statuses'
 
 RSpec.describe FeatureReviewWithStatuses do
   let(:tickets) { double(:tickets) }
-  let(:builds) { double(:builds) }
   let(:qa_submissions) { [] }
+  let(:unit_test_results) { double(:unit_test_results, values: []) }
+  let(:integration_test_results) { double(:integration_test_results, values: []) }
   let(:release_exception) { double(:release_exception) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
   let(:app_names) { apps.keys }
@@ -17,7 +18,8 @@ RSpec.describe FeatureReviewWithStatuses do
   subject(:decorator) {
     FeatureReviewWithStatuses.new(
       feature_review,
-      builds: builds,
+      unit_test_results: unit_test_results,
+      integration_test_results: integration_test_results,
       release_exception: release_exception,
       qa_submissions: qa_submissions,
       tickets: tickets,
@@ -26,9 +28,10 @@ RSpec.describe FeatureReviewWithStatuses do
   }
 
   it 'returns all necessary fields as initialized' do
-    expect(decorator.builds).to eq(builds)
+    expect(decorator.unit_test_results).to eq(unit_test_results)
     expect(decorator.release_exception).to eq(release_exception)
     expect(decorator.qa_submissions).to eq(qa_submissions)
+    expect(decorator.integration_test_results).to eq(integration_test_results)
     expect(decorator.tickets).to eq(tickets)
     expect(decorator.time).to eq(query_time)
   end
@@ -36,10 +39,12 @@ RSpec.describe FeatureReviewWithStatuses do
   context 'when initialized without parameters' do
     let(:decorator) { described_class.new(feature_review) }
 
-    it 'returns default values for #builds, #qa_submissions, #tickets and #time' do
-      expect(decorator.builds).to eq({})
+    it 'returns the expected default values' do
       expect(decorator.release_exception).to eq(nil)
       expect(decorator.qa_submissions).to eq(nil)
+      expect(decorator.unit_test_results).to eq({})
+      expect(decorator.integration_test_results).to eq({})
+      expect(decorator.release_exception).to eq(nil)
       expect(decorator.tickets).to eq([])
       expect(decorator.time).to eq(nil)
     end
@@ -118,9 +123,9 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
-  describe '#build_status' do
-    context 'when all builds pass' do
-      let(:builds) do
+  describe '#unit_test_result_status' do
+    context 'when all unit test results pass' do
+      let(:unit_test_results) do
         {
           'frontend' => Build.new(success: true),
           'backend'  => Build.new(success: true),
@@ -128,11 +133,11 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       it 'returns :success' do
-        expect(decorator.build_status).to eq(:success)
+        expect(decorator.unit_test_result_status).to eq(:success)
       end
 
-      context 'but some builds are missing' do
-        let(:builds) do
+      context 'but some unit test results are missing' do
+        let(:unit_test_results) do
           {
             'frontend' => Build.new(success: true),
             'backend'  => Build.new,
@@ -140,13 +145,13 @@ RSpec.describe FeatureReviewWithStatuses do
         end
 
         it 'returns nil' do
-          expect(decorator.build_status).to eq(nil)
+          expect(decorator.unit_test_result_status).to eq(nil)
         end
       end
     end
 
-    context 'when any of the builds fails' do
-      let(:builds) do
+    context 'when any of the unit test results fails' do
+      let(:unit_test_results) do
         {
           'frontend' => Build.new(success: false),
           'backend'  => Build.new(success: true),
@@ -154,15 +159,48 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       it 'returns :failure' do
-        expect(decorator.build_status).to eq(:failure)
+        expect(decorator.unit_test_result_status).to eq(:failure)
+      end
+    end
+  end
+
+  describe '#integration_test_result_status' do
+    context 'when all integration test results pass' do
+      let(:integration_test_results) do
+        {
+          'frontend' => Build.new(success: true),
+          'backend'  => Build.new(success: true),
+        }
+      end
+
+      it 'returns :success' do
+        expect(decorator.integration_test_result_status).to eq(:success)
+      end
+
+      context 'but some unit test results are missing' do
+        let(:integration_test_results) do
+          {
+            'frontend' => Build.new(success: true),
+            'backend'  => Build.new,
+          }
+        end
+
+        it 'returns nil' do
+          expect(decorator.integration_test_result_status).to eq(nil)
+        end
       end
     end
 
-    context 'when there are no builds' do
-      let(:builds) { {} }
+    context 'when any of the unit test results is failure' do
+      let(:integration_test_results) do
+        {
+          'frontend' => Build.new(success: false),
+          'backend'  => Build.new(success: true),
+        }
+      end
 
-      it 'returns nil' do
-        expect(decorator.build_status).to be nil
+      it 'returns :failure' do
+        expect(decorator.integration_test_result_status).to eq(:failure)
       end
     end
   end
@@ -239,8 +277,9 @@ RSpec.describe FeatureReviewWithStatuses do
     end
 
     context 'when no status is a failure but at least one is a warning' do
-      let(:builds) { { 'frontend' => Build.new } }
       let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
+      let(:unit_test_results) { { 'frontend' => Build.new } }
+      let(:integration_test_results) { { 'frontend' => Build.new } }
 
       it 'returns nil' do
         expect(decorator.summary_status).to be(nil)

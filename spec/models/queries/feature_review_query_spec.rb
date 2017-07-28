@@ -8,10 +8,11 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
   let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
 
-  let(:expected_builds) { double('expected builds') }
   let(:expected_qa_submissions) { double('expected qa submissions') }
+  let(:expected_unit_test_results) { double('expected unit test results') }
   let(:expected_tickets) { double('expected tickets') }
   let(:expected_release_exception) { double('release_exception') }
+  let(:expected_integration_test_results) { double('integration unit test results') }
 
   let(:expected_apps) { { 'app1' => '123' } }
 
@@ -30,12 +31,14 @@ RSpec.describe Queries::FeatureReviewQuery do
     repository1 = instance_double(GitRepository, get_dependent_commits: [])
     allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
 
-    allow(build_repository).to receive(:builds_for)
-      .with(apps: expected_apps, at: time)
-      .and_return(expected_builds)
     allow(manual_test_repository).to receive(:qa_submissions_for)
-      .with(versions: expected_apps.values, at: time)
       .and_return(expected_qa_submissions)
+    allow(build_repository).to receive(:unit_test_results_for)
+      .with(apps: expected_apps, at: time)
+      .and_return(expected_unit_test_results)
+    allow(build_repository).to receive(:integration_test_results_for)
+      .with(apps: expected_apps, at: time)
+      .and_return(expected_integration_test_results)
     allow(release_exception_repository).to receive(:release_exception_for)
       .with(versions: expected_apps.values, at: time)
       .and_return(expected_release_exception)
@@ -49,10 +52,11 @@ RSpec.describe Queries::FeatureReviewQuery do
       expect(FeatureReviewWithStatuses).to receive(:new)
         .with(
           feature_review,
-          builds: expected_builds,
           qa_submissions: expected_qa_submissions,
+          unit_test_results: expected_unit_test_results,
           tickets: expected_tickets,
           release_exception: expected_release_exception,
+          integration_test_results: expected_integration_test_results,
           at: time,
         )
         .and_return(feature_review_with_statuses)

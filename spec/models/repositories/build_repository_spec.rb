@@ -14,18 +14,28 @@ RSpec.describe Repositories::BuildRepository do
     end
   end
 
-  describe '#builds_for' do
+  describe '#unit_test_results_for' do
     let(:apps) { { 'frontend' => 'abc' } }
 
     it 'projects last build' do
-      repository.apply(build(:jenkins_event, success?: false, version: 'abc'))
-      expect(repository.builds_for(apps: apps)).to eq(
-        'frontend' => Build.new(source: 'Jenkins', success: false, version: 'abc'),
+      repository.apply(build(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
+      expect(repository.unit_test_results_for(apps: apps)).to eq(
+        'frontend' => Build.new(source: 'Jenkins',
+                                build_type: 'unit',
+                                url: 'http://example.com',
+                                success: false,
+                                app_name: 'frontend',
+                                version: 'abc'),
       )
 
-      repository.apply(build(:jenkins_event, success?: true, version: 'abc'))
-      expect(repository.builds_for(apps: apps)).to eq(
-        'frontend' => Build.new(source: 'Jenkins', success: true, version: 'abc'),
+      repository.apply(build(:jenkins_event, success?: true, app_name: 'frontend', version: 'abc'))
+      expect(repository.unit_test_results_for(apps: apps)).to eq(
+        'frontend' => Build.new(source: 'Jenkins',
+                                build_type: 'unit',
+                                url: 'http://example.com',
+                                success: true,
+                                app_name: 'frontend',
+                                version: 'abc'),
       )
     end
 
@@ -33,25 +43,48 @@ RSpec.describe Repositories::BuildRepository do
       let(:apps) { { 'frontend' => 'abc', 'backend' => 'def', 'other' => 'xyz' } }
 
       it 'returns multiple builds' do
-        repository.apply(build(:jenkins_event, success?: false, version: 'abc'))
-        repository.apply(build(:circle_ci_event, success?: true, version: 'def'))
+        repository.apply(build(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
+        repository.apply(build(:circle_ci_event, success?: true, app_name: 'backend', version: 'def'))
 
-        expect(repository.builds_for(apps: apps)).to eq(
-          'frontend' => Build.new(source: 'Jenkins', success: false, version: 'abc'),
-          'backend'  => Build.new(source: 'CircleCi', success: true, version: 'def'),
+        expect(repository.unit_test_results_for(apps: apps)).to eq(
+          'frontend' => Build.new(source: 'Jenkins',
+                                  build_type: 'unit',
+                                  url: 'http://example.com',
+                                  success: false,
+                                  app_name: 'frontend',
+                                  version: 'abc'),
+          'backend'  => Build.new(source: 'CircleCi',
+                                  build_type: 'unit',
+                                  url: 'http://example.com',
+                                  success: true,
+                                  app_name: 'backend',
+                                  version: 'def'),
           'other'    => Build.new,
         )
       end
     end
 
     context 'with at specified' do
-      it 'returns the state at that moment' do
-        repository.apply(build(:circle_ci_event, success?: true, version: 'abc', created_at: 3.hours.ago))
-        repository.apply(build(:circle_ci_event, success?: true, version: 'def', created_at: 2.hours.ago))
-        repository.apply(build(:circle_ci_event, success?: false, version: 'abc', created_at: 1.hour.ago))
-        repository.apply(build(:circle_ci_event, success?: false, version: 'def', created_at: Time.current))
+      def create_event(options = {})
+        default = {
+          app_name: 'abc',
+          build_type: 'unit',
+          version: 'ab91d954a51ddc74e29e7582d9a2efe8bb6d480f',
+          success?: true,
+          build_url: 'http://example.com',
+          created_at: Time.now,
+        }
 
-        result = repository.builds_for(
+        build(:circle_ci_event, default.merge(options))
+      end
+
+      it 'returns the state at that moment' do
+        repository.apply(create_event(success?: true, app_name: 'app1', version: 'abc', created_at: 3.hours.ago))
+        repository.apply(create_event(success?: true, app_name: 'app2', version: 'def', created_at: 2.hours.ago))
+        repository.apply(create_event(success?: false, app_name: 'app1', version: 'ghi', created_at: Time.current))
+        repository.apply(create_event(success?: false, app_name: 'app2', version: 'jkl', created_at: 1.hour.ago))
+
+        result = repository.unit_test_results_for(
           apps: {
             'app1' => 'abc',
             'app2' => 'def',
@@ -60,8 +93,114 @@ RSpec.describe Repositories::BuildRepository do
         )
 
         expect(result).to eq(
-          'app1' => Build.new(source: 'CircleCi', success: true, version: 'abc'),
-          'app2' => Build.new(source: 'CircleCi', success: true, version: 'def'),
+          'app1' => Build.new(source: 'CircleCi',
+                              build_type: 'unit',
+                              url: 'http://example.com',
+                              success: true,
+                              app_name: 'app1',
+                              version: 'abc'),
+          'app2' => Build.new(source: 'CircleCi',
+                              build_type: 'unit',
+                              url: 'http://example.com',
+                              success: true,
+                              app_name: 'app2',
+                              version: 'def'),
+        )
+      end
+    end
+  end
+
+  describe '#integration_test_results_for' do
+    def create_event(build_type = :jenkins_event, options = {})
+      default = {
+        app_name: 'abc',
+        build_type: 'integration',
+        version: 'ab91d954a51ddc74e29e7582d9a2efe8bb6d480f',
+        success?: true,
+        build_url: 'http://example.com',
+        created_at: Time.now,
+      }
+
+      build(build_type, default.merge(options))
+    end
+
+    let(:apps) { { 'frontend' => 'abc' } }
+
+    it 'projects last build' do
+      repository.apply(create_event(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
+      expect(repository.integration_test_results_for(apps: apps)).to eq(
+        'frontend' => Build.new(source: 'Jenkins',
+                                build_type: 'integration',
+                                url: 'http://example.com',
+                                success: false,
+                                app_name: 'frontend',
+                                version: 'abc'),
+      )
+
+      repository.apply(create_event(:jenkins_event, success?: true, app_name: 'frontend', version: 'abc'))
+      expect(repository.integration_test_results_for(apps: apps)).to eq(
+        'frontend' => Build.new(source: 'Jenkins',
+                                build_type: 'integration',
+                                url: 'http://example.com',
+                                success: true,
+                                app_name: 'frontend',
+                                version: 'abc'),
+      )
+    end
+
+    context 'with multiple apps' do
+      let(:apps) { { 'frontend' => 'abc', 'backend' => 'def', 'other' => 'xyz' } }
+
+      it 'returns multiple builds' do
+        repository.apply(create_event(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
+        repository.apply(create_event(:circle_ci_event, success?: true, app_name: 'backend', version: 'def'))
+
+        expect(repository.integration_test_results_for(apps: apps)).to eq(
+          'frontend' => Build.new(source: 'Jenkins',
+                                  build_type: 'integration',
+                                  url: 'http://example.com',
+                                  success: false,
+                                  app_name: 'frontend',
+                                  version: 'abc'),
+          'backend'  => Build.new(source: 'CircleCi',
+                                  build_type: 'integration',
+                                  url: 'http://example.com',
+                                  success: true,
+                                  app_name: 'backend',
+                                  version: 'def'),
+          'other'    => Build.new,
+        )
+      end
+    end
+
+    context 'with at specified' do
+      it 'returns the state at that moment' do
+        repository.apply(create_event(:circle_ci_event, app_name: 'app1', version: 'abc', created_at: 3.hours.ago))
+        repository.apply(create_event(:circle_ci_event, app_name: 'app2', version: 'def', created_at: 2.hours.ago))
+        repository.apply(create_event(:circle_ci_event, app_name: 'app1', version: 'ghi', created_at: Time.current))
+        repository.apply(create_event(:circle_ci_event, app_name: 'app2', version: 'jkl', created_at: 1.hour.ago))
+
+        result = repository.integration_test_results_for(
+          apps: {
+            'app1' => 'abc',
+            'app2' => 'def',
+          },
+          at: 2.hours.ago,
+        )
+
+        expect(result).to eq(
+          'app1' => Build.new(source: 'CircleCi',
+                              build_type: 'integration',
+                              url: 'http://example.com',
+                              success: true,
+                              app_name: 'app1',
+                              version: 'abc'),
+          'app2' => Build.new(source: 'CircleCi',
+                              build_type: 'integration',
+                              url: 'http://example.com',
+                              success: true,
+                              app_name: 'app2',
+                              version: 'def'),
         )
       end
     end

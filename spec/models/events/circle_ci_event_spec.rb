@@ -14,6 +14,7 @@ RSpec.describe Events::CircleCiEvent do
     let(:success_payload) {
       {
         'payload' => {
+          'build_url' => 'http://example.com',
           'outcome' => 'success',
           'vcs_revision' => version,
         },
@@ -22,6 +23,9 @@ RSpec.describe Events::CircleCiEvent do
     let(:failure_payload) {
       {
         'payload' => {
+          'app_name' => 'example',
+          'build_type' => 'integration',
+          'build_url' => 'http://example.com',
           'outcome' => 'failed',
           'vcs_revision' => version,
         },

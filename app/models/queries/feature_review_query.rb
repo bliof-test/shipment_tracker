@@ -22,12 +22,13 @@ module Queries
     private
 
     attr_reader :build_repository, :manual_test_repository, :release_exception_repository,
-      :ticket_repository, :feature_review, :time
+      :integration_test_repository, :ticket_repository, :feature_review, :time
 
     def build_feature_review_with_statuses
       @feature_review_with_statuses = FeatureReviewWithStatuses.new(
         feature_review,
-        builds: builds,
+        unit_test_results: unit_test_results,
+        integration_test_results: integration_test_results,
         qa_submissions: qa_submissions,
         release_exception: release_exception,
         tickets: tickets,
@@ -35,8 +36,15 @@ module Queries
       )
     end
 
-    def builds
-      build_repository.builds_for(
+    def unit_test_results
+      build_repository.unit_test_results_for(
+        apps: feature_review.app_versions,
+        at: time,
+      )
+    end
+
+    def integration_test_results
+      build_repository.integration_test_results_for(
         apps: feature_review.app_versions,
         at: time,
       )
