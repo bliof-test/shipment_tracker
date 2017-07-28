@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 require 'feature_review_with_statuses'
 require 'repositories/build_repository'
-require 'repositories/deploy_repository'
 require 'repositories/manual_test_repository'
 require 'repositories/ticket_repository'
 
@@ -11,7 +10,6 @@ module Queries
 
     def initialize(feature_review, at:)
       @build_repository = Repositories::BuildRepository.new
-      @deploy_repository = Repositories::DeployRepository.new
       @manual_test_repository = Repositories::ManualTestRepository.new
       @ticket_repository = Repositories::TicketRepository.new
       @release_exception_repository = Repositories::ReleaseExceptionRepository.new
@@ -23,7 +21,7 @@ module Queries
 
     private
 
-    attr_reader :build_repository, :deploy_repository, :manual_test_repository, :release_exception_repository,
+    attr_reader :build_repository, :manual_test_repository, :release_exception_repository,
       :ticket_repository, :feature_review, :time
 
     def build_feature_review_with_statuses
@@ -40,19 +38,22 @@ module Queries
     def builds
       build_repository.builds_for(
         apps: feature_review.app_versions,
-        at: time)
+        at: time,
+      )
     end
 
     def qa_submission
       manual_test_repository.qa_submission_for(
         versions: feature_review.versions,
-        at: time)
+        at: time,
+      )
     end
 
     def release_exception
       release_exception_repository.release_exception_for(
         versions: feature_review.versions,
-        at: time)
+        at: time,
+      )
     end
 
     def tickets
