@@ -35,7 +35,7 @@ RSpec.describe Queries::DecoratedFeatureReviewsQuery do
         let(:release_exception) {
           ReleaseException.new(
             approved: true,
-            path: '/feature_reviews?apps%5Bapp1%5D=abcuat_url=uat.com',
+            path: '/feature_reviews?apps%5Bapp1%5D=abc',
           )
         }
 
@@ -69,7 +69,7 @@ RSpec.describe Queries::DecoratedFeatureReviewsQuery do
 
           it 'includes the UAT URL in the link' do
             feature_reviews = described_class.new('app1', [GitCommit.new(id: 'abc')]).get
-            expect(feature_reviews.first.path).to eq('/feature_reviews?apps%5Bapp1%5D=abc&uat_url=uat.com')
+            expect(feature_reviews.first.path).to eq('/feature_reviews?apps%5Bapp1%5D=abc')
           end
         end
       end

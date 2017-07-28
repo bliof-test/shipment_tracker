@@ -7,7 +7,7 @@ Scenario: Opening a pull request
   And a commit "#master1" with message "master commit" is created at "2014-09-28 00:01:00"
   And the branch "important-branch" is checked out
   And a commit "#branch1" with message "branch commit" is created at "2014-09-28 00:02:00"
-  And developer prepares review known as "Important-Review" for UAT "uat.example.com" with apps
+  And developer prepares review known as "Important-Review" with apps
     | app_name | version  |
     | frontend | #branch1 |
   And a ticket "JIRA-100" with summary "Important ticket" is started at "2014-09-29 15:02:00"

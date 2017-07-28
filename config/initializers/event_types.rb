@@ -21,10 +21,6 @@ Rails.application.config.event_types = [
     endpoint: 'jira',
     event_class: Events::JiraEvent),
   EventType.new(
-    name: 'UAT',
-    endpoint: 'uat',
-    event_class: Events::UatEvent),
-  EventType.new(
     name: 'Manual test',
     endpoint: 'manual_test',
     event_class: Events::ManualTestEvent, internal: true),

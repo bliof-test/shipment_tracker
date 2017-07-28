@@ -5,59 +5,44 @@ require 'feature_review_with_statuses'
 RSpec.describe FeatureReviewWithStatuses do
   let(:tickets) { double(:tickets) }
   let(:builds) { double(:builds) }
-  let(:deploys) { double(:deploys) }
   let(:qa_submission) { double(:qa_submission) }
   let(:release_exception) { double(:release_exception) }
-  let(:uatest) { double(:uatest) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
   let(:app_names) { apps.keys }
   let(:versions) { apps.values }
 
-  let(:uat_url) { 'http://uat.com' }
-  let(:feature_review) {
-    instance_double(FeatureReview, uat_url: uat_url, app_versions: apps, versions: versions)
-  }
+  let(:feature_review) { instance_double(FeatureReview, app_versions: apps, versions: versions) }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
   subject(:decorator) {
     FeatureReviewWithStatuses.new(
       feature_review,
       builds: builds,
-      deploys: deploys,
       release_exception: release_exception,
       qa_submission: qa_submission,
       tickets: tickets,
-      uatest: uatest,
       at: query_time,
     )
   }
 
   it 'returns all necessary fields as initialized' do
     expect(decorator.builds).to eq(builds)
-    expect(decorator.deploys).to eq(deploys)
     expect(decorator.release_exception).to eq(release_exception)
     expect(decorator.qa_submission).to eq(qa_submission)
     expect(decorator.tickets).to eq(tickets)
-    expect(decorator.uatest).to eq(uatest)
     expect(decorator.time).to eq(query_time)
   end
 
   context 'when initialized without parameters' do
     let(:decorator) { described_class.new(feature_review) }
 
-    it 'returns default values for #builds, #deploys, #qa_submission, #tickets, #uatest and #time' do
+    it 'returns default values for #builds, #qa_submission, #tickets and #time' do
       expect(decorator.builds).to eq({})
-      expect(decorator.deploys).to eq([])
       expect(decorator.release_exception).to eq(nil)
       expect(decorator.qa_submission).to eq(nil)
       expect(decorator.tickets).to eq([])
-      expect(decorator.uatest).to eq(nil)
       expect(decorator.time).to eq(nil)
     end
-  end
-
-  it 'delegates unknown messages to the feature_review' do
-    expect(decorator.uat_url).to eq(feature_review.uat_url)
   end
 
   describe '#apps_with_latest_commit' do
@@ -182,41 +167,6 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
-  describe '#deploy_status' do
-    context 'when all deploys are correct' do
-      let(:deploys) do
-        [
-          Deploy.new(correct: true),
-        ]
-      end
-
-      it 'returns :success' do
-        expect(decorator.deploy_status).to eq(:success)
-      end
-    end
-
-    context 'when any deploy is not correct' do
-      let(:deploys) do
-        [
-          Deploy.new(correct: true),
-          Deploy.new(correct: false),
-        ]
-      end
-
-      it 'returns :failure' do
-        expect(decorator.deploy_status).to eq(:failure)
-      end
-    end
-
-    context 'when there are no deploys' do
-      let(:deploys) { [] }
-
-      it 'returns nil' do
-        expect(decorator.deploy_status).to be nil
-      end
-    end
-  end
-
   describe '#release_exception_status' do
     context 'when the repo owner has approved the feature_review' do
       let(:release_exception) { ReleaseException.new(approved: true) }
@@ -269,36 +219,9 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
-  describe '#uatest_status' do
-    context 'when User Acceptance Tests have passed' do
-      let(:uatest) { Uatest.new(success: true) }
-
-      it 'returns :success' do
-        expect(decorator.uatest_status).to eq(:success)
-      end
-    end
-
-    context 'when User Acceptance Tests have failed' do
-      let(:uatest) { Uatest.new(success: false) }
-
-      it 'returns :failure' do
-        expect(decorator.uatest_status).to eq(:failure)
-      end
-    end
-
-    context 'when User Acceptance Tests are missing' do
-      let(:uatest) { nil }
-
-      it 'returns nil' do
-        expect(decorator.uatest_status).to be nil
-      end
-    end
-  end
-
   describe '#summary_status' do
-    context 'when status of deploys, builds, and QA submission are success' do
+    context 'when status of builds, and QA submission are success' do
       let(:builds) { { 'frontend' => Build.new(success: true) } }
-      let(:deploys) { [Deploy.new(correct: true)] }
       let(:qa_submission) { QaSubmission.new(accepted: true) }
 
       it 'returns :success' do
@@ -306,9 +229,8 @@ RSpec.describe FeatureReviewWithStatuses do
       end
     end
 
-    context 'when any status of deploys, builds, or QA submission is failed' do
+    context 'when any status of builds, or QA submission is failed' do
       let(:builds) { { 'frontend' => Build.new(success: true) } }
-      let(:deploys) { [Deploy.new(correct: true)] }
       let(:qa_submission) { QaSubmission.new(accepted: false) }
 
       it 'returns :failure' do
@@ -318,7 +240,6 @@ RSpec.describe FeatureReviewWithStatuses do
 
     context 'when no status is a failure but at least one is a warning' do
       let(:builds) { { 'frontend' => Build.new } }
-      let(:deploys) { [Deploy.new(correct: true)] }
       let(:qa_submission) { QaSubmission.new(accepted: true) }
 
       it 'returns nil' do
@@ -511,7 +432,7 @@ RSpec.describe FeatureReviewWithStatuses do
       instance_double(
         FeatureReview,
         base_path: '/feature_reviews',
-        query_hash: { 'apps' => apps, 'uat_url' => 'http://uat.com' },
+        query_hash: { 'apps' => apps },
         app_versions: apps,
         versions: apps.values,
       )
@@ -529,8 +450,7 @@ RSpec.describe FeatureReviewWithStatuses do
       it 'returns the path as at the latest approval time' do
         expect(subject).to eq(
           '/feature_reviews?apps%5Bapp1%5D=xxx&apps%5Bapp2%5D=yyy'\
-          '&time=2013-09-05+14%3A56%3A52+UTC'\
-          '&uat_url=http%3A%2F%2Fuat.com',
+          '&time=2013-09-05+14%3A56%3A52+UTC',
         )
       end
     end

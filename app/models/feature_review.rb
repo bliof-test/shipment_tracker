@@ -20,26 +20,11 @@ class FeatureReview
     app_versions.keys
   end
 
-  def uat_url
-    uat_uri&.to_s
-  end
-
-  def uat_host
-    uat_uri&.host
-  end
-
   def query_hash
     Rack::Utils.parse_nested_query(URI(path).query)
   end
 
   def base_path
     Addressable::URI.parse(path).omit(:query).to_s
-  end
-
-  private
-
-  def uat_uri
-    uat_url_param = query_hash.fetch('uat_url', nil)
-    Addressable::URI.heuristic_parse(uat_url_param, scheme: 'http')
   end
 end

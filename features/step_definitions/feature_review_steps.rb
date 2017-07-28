@@ -25,8 +25,8 @@ Then 'I should see the feature review page with the applications:' do |table|
   expect(feature_review_page.app_info).to match_array(expected_app_info)
 end
 
-Given 'developer prepares review known as "$a" for UAT "$b" with apps' do |known_as, uat_url, apps_table|
-  scenario_context.prepare_review(apps_table.hashes, uat_url, known_as)
+Given 'developer prepares review known as "$a" with apps' do |known_as, apps_table|
+  scenario_context.prepare_review(apps_table.hashes, known_as)
 end
 
 When 'I visit the feature review known as "$known_as"' do |known_as|
@@ -41,19 +41,6 @@ Then 'I should see the builds with heading "$status" and content' do |status, bu
   expected_builds = builds_table.hashes
   expect(feature_review_page.panel_heading_status('builds')).to eq(status)
   expect(feature_review_page.builds).to match_array(expected_builds)
-end
-
-Then 'I can see the UAT environment "$uat"' do |uat|
-  expect(feature_review_page.uat_url).to eq(uat)
-end
-
-Then 'I should see the deploys to UAT with heading "$status" and content' do |status, deploys_table|
-  expected_deploys = deploys_table.hashes.map {|ticket|
-    ticket.merge('Version' => scenario_context.resolve_version(ticket['Version']).slice(0..6))
-  }
-
-  expect(feature_review_page.panel_heading_status('deploys')).to eq(status)
-  expect(feature_review_page.deploys).to match_array(expected_deploys)
 end
 
 Then 'I should see the tickets' do |ticket_table|
@@ -117,13 +104,6 @@ Then 'I should see the Repo Owner Commentary' do |table|
 
   expect(panel.status).to eq(status)
   expect(panel.items.first).to eq(expected_release_exception_comment_info)
-end
-
-Then 'I should see the results of the User Acceptance Tests with heading "$s" and version "$v"' do |s, v|
-  panel = feature_review_page.uatest_panel
-
-  expect(panel.status).to eq(s)
-  expect(panel.items.first).to eq('test_suite_version' => v)
 end
 
 Then 'I should see the time "$time" for the Feature Review' do |time|

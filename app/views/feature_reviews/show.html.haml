@@ -29,32 +29,8 @@
             = text_field_tag('jira_key', '', placeholder: 'e.g: ENG-123', class: 'form-control input-sm', required: true)
           = submit_tag('Link', class: 'btn btn-primary btn-sm')
 .row
-  .col-lg-6
-    - panel(heading: 'Summary', status: @feature_review_with_statuses.summary_status, klass: 'summary') do
-      %ul.list-group
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.build_status))
-            %span.title Test Results
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.deploy_status))
-            %span.title UAT Environment
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.qa_status))
-            %span.title QA Acceptance
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.uatest_status))
-            %span.title User Acceptance Tests
-        %li.list-group-item
-          %strong
-            - icon(item_status_icon_class(@feature_review_with_statuses.release_exception_status))
-            %span.title Repo Owner Commentary
-
-  .col-lg-6
-    - panel(heading: 'Apps Under Review', klass: 'app-info', button_link: { text: 'Modify', url: edit_url(@feature_review_with_statuses.app_versions, @feature_review_with_statuses.uat_host)}) do
+  .col-lg-6.col-lg-push-6
+    - panel(heading: 'Apps Under Review', klass: 'app-info', button_link: { text: 'Modify', url: edit_url(@feature_review_with_statuses.app_versions) }) do
       - table(headers: %w(App Commit Author Time)) do
         - @feature_review_with_statuses.apps_with_latest_commit.each do |app_name, latest_commit|
           %tr
@@ -62,31 +38,7 @@
             %td= commit_link(latest_commit.id, @feature_review_with_statuses.github_repo_urls[app_name])
             %td= latest_commit.author_name || 'unknown'
             %td= latest_commit.time || 'unknown'
-      %ul.list-group
-        %li.list-group-item
-          - if @feature_review_with_statuses.uat_url
-            Deployed to UAT
-            %strong.uat-url= to_link(@feature_review_with_statuses.uat_url, target: '_blank')
-          - else
-            No UAT specified
 
-.row
-  .col-lg-6
-    - panel(heading: 'UAT Environment', klass: 'deploys', status: @feature_review_with_statuses.deploy_status) do
-      - if @feature_review_with_statuses.uat_url.blank?
-        .panel-body No UAT Environment specified
-      - elsif @feature_review_with_statuses.deploys.empty?
-        .panel-body Could not find any deploys to #{@feature_review_with_statuses.uat_url}
-      - else
-        - table(headers: %w(Correct App Version)) do
-          - @feature_review_with_statuses.deploys.each do |deploy|
-            %tr.deploy
-              %td
-                - icon(item_status_icon_class(deploy.correct))
-              %td= deploy.app_name
-              %td.monospace= short_sha(deploy.version)
-
-  .col-lg-6
     - panel(heading: 'Test Results', klass: 'builds', status: @feature_review_with_statuses.build_status) do
       - if @feature_review_with_statuses.builds.empty?
         .panel-body No builds found
@@ -99,45 +51,6 @@
               %td= app_name
               %td= build.source
 
-.row
-  .col-lg-6
-    - panel(heading: 'QA Acceptance', klass: 'qa-submission', status: @feature_review_with_statuses.qa_status) do
-      .panel-body
-        - if @feature_review_with_statuses.qa_submission
-          %p
-            %span.qa-email
-              %strong= @feature_review_with_statuses.qa_submission.email
-            at
-            %span.qa-time= @feature_review_with_statuses.qa_submission.created_at
-          = simple_format(@feature_review_with_statuses.qa_submission.comment, class: 'qa-comment')
-        - else
-          Not reviewed by QA
-      .panel-footer
-        = form_tag(events_path(type: 'manual_test', return_to: @return_to), method: 'post') do
-          - @feature_review_with_statuses.app_versions.each do |app_name, version|
-            = hidden_field_tag('apps[][name]', app_name)
-            = hidden_field_tag('apps[][version]', version)
-          %label.radio-inline.feature-review-accept
-            = radio_button_tag 'status', 'success', false, required: true
-            Accept
-          %label.radio-inline.feature-review-reject
-            = radio_button_tag 'status', 'failed', false, required: true
-            Reject
-          .form-group
-            = label_tag('comment', 'Comment', class: 'control-label sr-only', id: 'qa-comment')
-            = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
-          = submit_tag('Submit', class: 'btn btn-primary', id: '#qa-submit')
-  .col-lg-6
-    - panel(heading: 'User Acceptance Tests', klass: 'uatest', status: @feature_review_with_statuses.uatest_status) do
-      .panel-body
-        - if @feature_review_with_statuses.uatest
-          Ran test suite version
-          %span.uat-version= @feature_review_with_statuses.uatest.test_suite_version
-        - else
-          Could not find User Acceptance Tests that ran against expected UAT
-          = "(#{@feature_review_with_statuses.uat_url})" if @feature_review_with_statuses.uat_url
-          with the app versions that are under review.
-  .col-lg-6
     - panel(heading: 'Repo Owner Commentary', klass: 'release-exception', status: @feature_review_with_statuses.release_exception_status) do
       .panel-body
         - if @feature_review_with_statuses.release_exception
@@ -155,13 +68,59 @@
             - @feature_review_with_statuses.app_versions.each do |app_name, version|
               = hidden_field_tag('apps[][name]', app_name)
               = hidden_field_tag('apps[][version]', version)
-            %label.radio-inline.feature-review-accept
-              = radio_button_tag 'status', 'approved', false, required: true
-              Approve
-            %label.radio-inline.feature-review-reject
-              = radio_button_tag 'status', 'declined', false, required: true
-              Decline
+            %div.accept-reject-buttons
+              %label.radio-inline.feature-review-accept
+                = radio_button_tag 'status', 'approved', false, required: true
+                Approve
+              %label.radio-inline.feature-review-reject
+                = radio_button_tag 'status', 'declined', false, required: true
+                Decline
             .form-group
               = label_tag('comment', 'Comment', class: 'control-label sr-only')
               = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
             = submit_tag('Submit', class: 'btn btn-primary')
+
+  .col-lg-6.col-lg-pull-6
+    - panel(heading: 'Summary', status: @feature_review_with_statuses.summary_status, klass: 'summary') do
+      %ul.list-group
+        %li.list-group-item
+          %strong
+            - icon(item_status_icon_class(@feature_review_with_statuses.build_status))
+            %span.title Test Results
+        %li.list-group-item
+          %strong
+            - icon(item_status_icon_class(@feature_review_with_statuses.qa_status))
+            %span.title QA Acceptance
+        %li.list-group-item
+          %strong
+            - icon(item_status_icon_class(@feature_review_with_statuses.release_exception_status))
+            %span.title Repo Owner Commentary
+
+    - panel(heading: 'QA Acceptance', klass: 'qa-submission', status: @feature_review_with_statuses.qa_status) do
+      .panel-body
+        - if @feature_review_with_statuses.qa_submission
+          %p
+            %span.qa-email
+              %strong= @feature_review_with_statuses.qa_submission.email
+            at
+            %span.qa-time= @feature_review_with_statuses.qa_submission.created_at
+          = simple_format(@feature_review_with_statuses.qa_submission.comment, class: 'qa-comment')
+        - else
+          Not reviewed by QA
+      .panel-footer
+        = form_tag(events_path(type: 'manual_test', return_to: @return_to), method: 'post') do
+          - @feature_review_with_statuses.app_versions.each do |app_name, version|
+            = hidden_field_tag('apps[][name]', app_name)
+            = hidden_field_tag('apps[][version]', version)
+          %div.accept-reject-buttons
+            %label.radio-inline.feature-review-accept
+              = radio_button_tag 'status', 'success', false, required: true
+              Accept
+            %label.radio-inline.feature-review-reject
+              = radio_button_tag 'status', 'failed', false, required: true
+              Reject
+          .form-group
+            = label_tag('comment', 'Comment', class: 'control-label sr-only', id: 'qa-comment')
+            = text_area_tag('comment', '', placeholder: 'Comment', class: 'form-control', required: true, rows: 4)
+          = submit_tag('Submit', class: 'btn btn-primary', id: '#qa-submit')
+

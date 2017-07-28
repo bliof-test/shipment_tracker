@@ -14,12 +14,7 @@ RSpec.describe FeatureReviewsController do
 
     before do
       allow(GitRepositoryLocation).to receive(:app_names).and_return(%w(frontend backend))
-      allow(Forms::FeatureReviewForm).to receive(:new).with(
-        hash_including(
-          apps: nil,
-          uat_url: nil,
-        ),
-      ).and_return(feature_review_form)
+      allow(Forms::FeatureReviewForm).to receive(:new).with(hash_including(apps: nil)).and_return(feature_review_form)
     end
 
     it 'renders the form' do
@@ -38,7 +33,6 @@ RSpec.describe FeatureReviewsController do
     before do
       allow(Forms::FeatureReviewForm).to receive(:new).with(
         apps: { frontend: 'abc' },
-        uat_url: 'http://uat.example.com',
         git_repository_loader: git_repository_loader,
       ).and_return(feature_review_form)
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(git_repository_loader)
@@ -63,9 +57,7 @@ RSpec.describe FeatureReviewsController do
       end
 
       it 'renders the new page' do
-        post :create, forms_feature_review_form: {
-          apps: { frontend: 'abc' }, uat_url: 'http://uat.example.com'
-        }
+        post :create, forms_feature_review_form: { apps: { frontend: 'abc' } }
 
         is_expected.to render_template('new')
         expect(assigns(:feature_review_form)).to eql(feature_review_form)
@@ -80,9 +72,7 @@ RSpec.describe FeatureReviewsController do
       end
 
       it 'redirects to #show' do
-        post :create, forms_feature_review_form: {
-          apps: { frontend: 'abc' }, uat_url: 'http://uat.example.com'
-        }
+        post :create, forms_feature_review_form: { apps: { frontend: 'abc' } }
 
         is_expected.to redirect_to('/the/url')
       end
@@ -90,7 +80,6 @@ RSpec.describe FeatureReviewsController do
   end
 
   describe 'GET #show', :logged_in do
-    let(:uat_url) { 'http://uat.fundingcircle.com' }
     let(:apps_with_versions) { { 'frontend' => 'abc', 'backend' => 'def' } }
     let(:feature_review) {
       instance_double(FeatureReview)
@@ -115,21 +104,21 @@ RSpec.describe FeatureReviewsController do
     end
 
     context 'when time is NOT specified' do
-      let(:whitelisted_path) { feature_review_path(apps_with_versions, uat_url) }
+      let(:whitelisted_path) { feature_review_path(apps_with_versions) }
 
       it 'sets up the correct query parameters' do
         expect(Queries::FeatureReviewQuery).to receive(:new)
           .with(feature_review, at: nil)
           .and_return(feature_review_query)
 
-        get :show, apps: apps_with_versions, uat_url: uat_url
+        get :show, apps: apps_with_versions
 
         expect(assigns(:feature_review_with_statuses)).to eq(feature_review_with_statuses)
       end
     end
 
     context 'when time is specified' do
-      let(:whitelisted_path) { feature_review_path(apps_with_versions, uat_url, time) }
+      let(:whitelisted_path) { feature_review_path(apps_with_versions, time) }
       let(:time) { Time.parse('2015-09-09 12:00:00 UTC') }
       let(:precise_time) { time.change(usec: 999_999.999) }
 
@@ -138,7 +127,7 @@ RSpec.describe FeatureReviewsController do
           .with(feature_review, at: precise_time)
           .and_return(feature_review_query)
 
-        get :show, apps: apps_with_versions, uat_url: uat_url, time: time
+        get :show, apps: apps_with_versions, time: time
 
         expect(assigns(:feature_review_with_statuses)).to eq(feature_review_with_statuses)
       end

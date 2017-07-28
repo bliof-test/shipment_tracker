@@ -60,7 +60,7 @@ Scenario: User finds ticket by commit version deployed inherently
   # First feature developed and merged but not deployed
   And a commit "#master1" with message "first commit" is created at "2016-01-18 09:10:57"
   And a ticket "JIRA-ONE" with summary "Ticket ONE" is started at "2016-01-18 09:13:00"
-  And developer prepares review known as "FR_ONE" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_ONE" with apps
     | app_name | version  |
     | frontend | #master1 |
   And at time "2016-01-20 14:52:45" adds link for review "FR_ONE" to comment for ticket "JIRA-ONE"
@@ -68,7 +68,7 @@ Scenario: User finds ticket by commit version deployed inherently
   # Second feature developed, merged and deployed to production
   And a commit "#master2" with message "second commit" is created at "2016-02-18 09:10:57"
   And a ticket "JIRA-TWO" with summary "Ticket TWO" is started at "2016-02-18 09:13:00"
-  And developer prepares review known as "FR_TWO" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_TWO" with apps
     | app_name | version  |
     | frontend | #master2 |
   And at time "2016-02-20 14:52:45" adds link for review "FR_TWO" to comment for ticket "JIRA-TWO"

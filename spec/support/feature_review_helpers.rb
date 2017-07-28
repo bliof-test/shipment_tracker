@@ -30,9 +30,8 @@ module Support
         @host = URI.parse(host)
       end
 
-      def build(apps_hash = {}, uat_url = nil, time = nil)
+      def build(apps_hash = {}, time = nil)
         hash = { apps: apps_hash }
-        hash['uat_url'] = uat_url if uat_url
         hash['time'] = time if time
         host.merge("/feature_reviews?#{hash.to_query}")
       end

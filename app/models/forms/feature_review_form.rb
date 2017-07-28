@@ -9,16 +9,15 @@ module Forms
     include ActiveModel::AttributeMethods
     include ActiveModel::Validations
 
-    attr_reader :uat_url, :apps
+    attr_reader :apps
 
     def to_key
       nil
     end
 
-    def initialize(apps:, git_repository_loader: nil, uat_url:)
+    def initialize(apps:, git_repository_loader: nil)
       @apps = apps
       @git_repository_loader = git_repository_loader
-      @uat_url = Addressable::URI.heuristic_parse(uat_url, scheme: 'http')&.host
     end
 
     def valid?
@@ -37,7 +36,6 @@ module Forms
     def path
       hash = {}
       hash[:apps] = apps
-      hash[:uat_url] = uat_url if uat_url.present?
       "/feature_reviews?#{hash.to_query}"
     end
 

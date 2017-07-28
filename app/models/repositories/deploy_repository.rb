@@ -10,10 +10,6 @@ module Repositories
       @store = store
     end
 
-    def deploys_for(apps: nil, server:, at: nil)
-      deploys(apps, server, at)
-    end
-
     def unapproved_production_deploys_for(app_name:, region:, from_date: nil, to_date: nil)
       time_period_query = if from_date.present? && to_date.present?
                             store.arel_table['deployed_at'].between(from_date.beginning_of_day..to_date.end_of_day)
@@ -100,15 +96,6 @@ module Repositories
       data['deployed_at'] = data['deployed_at'].to_s
 
       data
-    end
-
-    def deploys(apps, server, at)
-      query = store.select('DISTINCT ON (server, app_name) *').where(server: server)
-      query = query.where(store.arel_table['deployed_at'].lteq(at)) if at
-      query = query.where(store.arel_table['app_name'].in(apps.keys)) if apps
-      query.order('server, app_name, id DESC').map { |deploy_record|
-        build_deploy(deploy_record.attributes, apps)
-      }
     end
 
     def build_deploy(deploy_attr, apps)

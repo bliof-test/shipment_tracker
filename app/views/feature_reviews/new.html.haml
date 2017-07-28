@@ -1,8 +1,7 @@
 - title 'Prepare feature for review', help_url: wiki_links(:prepare_fr)
 
 %p
-  Specify the software versions for all the affected applications, then specify the UAT URL if you have or
-  will deploy the changes to a UAT.
+  Specify the software versions for all the affected applications.
 
 = form_for(@feature_review_form, url: feature_reviews_path, html: { class: 'form-horizontal' }) do |f|
   %ul.list-group
@@ -22,13 +21,6 @@
           - @feature_review_form.errors[app_name].each do |error|
             %span.help-inline= error
 
-  .row
-    .col-md-6
-      %h3 User Acceptance Testing
-  .form-group.row
-    = f.label(:uat_url, "UAT environment", class: 'col-md-2 control-label')
-    .col-md-4
-      = f.text_field(:uat_url, value: @feature_review_form.uat_url, placeholder: "Enter URL for the UAT used (optional)", class: 'form-control')
   .row
     .col-md-6
       = f.submit("Submit", class: "btn btn-primary pull-right")

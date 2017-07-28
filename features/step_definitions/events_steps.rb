@@ -31,7 +31,7 @@ Given 'the following tickets are created:' do |tickets_table|
       And the branch "master" is checked out
       And the branch "feature" is merged with merge commit "#{deploy_sha}" at "#{(datetime - 3.hours)}"
 
-      And developer prepares review known as "#{fr}" for UAT "uat.fundingcircle.com" with apps
+      And developer prepares review known as "#{fr}" with apps
         | app_name    | version             |
         | #{app_name} | #feat_1_#{app_name} |
 
@@ -115,21 +115,6 @@ Given 'commit "$ver" of "$app" is deployed by "$name" to production at "$time"' 
     scenario_context.post_event 'deploy', payload
   end
 end
-
-# rubocop:disable LineLength
-Given 'User Acceptance Tests at version "$sha" which "$outcome" on server "$server" at "$time"' do |sha, outcome, server, time|
-  payload = build(
-    :uat_event,
-    success: outcome == 'passed',
-    test_suite_version: sha,
-    server: server,
-  ).details
-
-  travel_to Time.zone.parse(time) do
-    scenario_context.post_event 'uat', payload
-  end
-end
-# rubocop:enable LineLength
 
 When 'snapshots are regenerated' do
   Repositories::Updater.from_rails_config.recreate

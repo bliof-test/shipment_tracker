@@ -25,11 +25,6 @@ module Pages
       ).items
     end
 
-    def uat_url
-      verify!
-      page.find('.uat-url').text
-    end
-
     def panel_heading_status(panel_class)
       verify!
       page.find(".panel.#{panel_class}")[:class].match(/panel-(?<status>\w+)/)[:status]
@@ -97,16 +92,6 @@ module Pages
     def tickets
       verify!
       Sections::TableSection.new(page.find('.feature-status table')).items.map { |row| row.except('Actions') }
-    end
-
-    def uatest_panel
-      verify!
-      Sections::PanelListSection.new(
-        page.find('.uatest.panel'),
-        item_config: {
-          'test_suite_version' => '.uat-version',
-        },
-      )
     end
 
     def summary_panel

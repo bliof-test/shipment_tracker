@@ -17,12 +17,10 @@ Scenario: Preparing a Feature Review
     | field name      | content             |
     | frontend        | #abc                |
     | backend         | #def                |
-    | UAT environment | http://www.some.url |
   Then I should see the feature review page with the applications:
     | app_name | version |
     | frontend | #abc    |
     | backend  | #def    |
-  And I can see the UAT environment "http://www.some.url"
 
 @logged_in
 Scenario: Editing a Feature Review not yet linked to a ticket
@@ -39,19 +37,17 @@ Scenario: Editing a Feature Review not yet linked to a ticket
     And I fill in the data for a feature review:
       | field name      | content             |
       | backend         | #def                |
-      | UAT environment | http://www.some.url |
   Then I should see the feature review page with the applications:
     | app_name | version |
     | frontend | #abc    |
     | backend  | #def    |
-    And I can see the UAT environment "http://www.some.url"
 
 @logged_in @disable_jira_client
 Scenario: Linking a Feature Review
   Given an application called "frontend"
     And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
     And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
-    And developer prepares review known as "FR_view" for UAT "uat.fundingcircle.com" with apps
+    And developer prepares review known as "FR_view" with apps
       | app_name | version |
       | frontend | #abc    |
 
@@ -73,7 +69,7 @@ Scenario: Unlinking a ticket from a Feature Review
   And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
   And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
   And a ticket "JIRA-789" with summary "Urgent ticket" is started at "2014-10-04 13:01:17"
-  And developer prepares review known as "FR_view" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_view" with apps
     | app_name | version |
     | frontend | #abc    |
 
@@ -93,34 +89,6 @@ Scenario: Unlinking a ticket from a Feature Review
   Then I should see the tickets
     | Ticket   | Summary       | Status      |
     | JIRA-789 | Urgent ticket | In Progress |
-
-@logged_in
-Scenario: Viewing User Acceptance Tests results on a Feature review
-  Given an application called "frontend"
-  And an application called "backend"
-
-  # 2014-10-04
-  And a commit "#abc" by "Alice" is created at "2014-10-04 09:00:00" for app "frontend"
-  And commit "#abc" of "frontend" is deployed by "Alice" to server "uat.fundingcircle.com" at "2014-10-04 12:00:00"
-
-  # 2014-10-05
-  And a commit "#def" by "Bob" is created at "2014-10-05 10:00:00" for app "backend"
-  And commit "#def" of "backend" is deployed by "Bob" to server "uat.fundingcircle.com" at "2014-10-05 11:00:00"
-  And developer prepares review known as "FR_visit" for UAT "uat.fundingcircle.com" with apps
-    | app_name | version |
-    | frontend | #abc    |
-    | backend  | #def    |
-
-  # 2014-10-06
-  And User Acceptance Tests at version "abc123" which "passed" on server "uat.fundingcircle.com" at "2014-10-06 11:00:00"
-  And User Acceptance Tests at version "abc123" which "failed" on server "other-uat.fundingcircle.com" at "2014-10-06 11:03:25"
-
-  # Today
-  When I visit the feature review known as "FR_visit"
-  Then I should see a summary that includes
-    | status  | title                 |
-    | success | User Acceptance Tests |
-  And I should see the results of the User Acceptance Tests with heading "success" and version "abc123"
 
 @logged_in
 Scenario: Viewing a Feature Review
@@ -146,7 +114,7 @@ Scenario: Viewing a Feature Review
   And commit "#old" of "backend" is deployed by "Bob" to server "uat.fundingcircle.com" at "2014-10-05 13:11:00"
   And commit "#def" of "backend" is deployed by "Bob" to server "other-uat.fundingcircle.com" at "2014-10-05 13:48:00"
   And commit "#xyz" of "irrelevant" is deployed by "Wendy" to server "uat.fundingcircle.com" at "2014-10-05 14:05:00"
-  And developer prepares review known as "FR_view" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_view" with apps
     | app_name | version |
     | frontend | #abc    |
     | backend  | #def    |
@@ -162,12 +130,10 @@ Scenario: Viewing a Feature Review
     | Ticket   | Summary       | Status               |
     | JIRA-123 | Urgent ticket | Ready for Deployment |
 
-  And I should see a summary with heading "danger" and content
+  And I should see a summary with heading "warning" and content
     | status  | title                 |
     | warning | Test Results          |
-    | failed  | UAT Environment       |
     | warning | QA Acceptance         |
-    | warning | User Acceptance Tests |
     | warning | Repo Owner Commentary |
 
   And I should see the builds with heading "warning" and content
@@ -176,18 +142,13 @@ Scenario: Viewing a Feature Review
     | success | backend  | CircleCi |
     | warning | mobile   |          |
 
-  And I should see the deploys to UAT with heading "danger" and content
-    | App      | Version | Correct |
-    | frontend | #abc    | yes     |
-    | backend  | #old    | no      |
-
 @logged_in
 Scenario: Viewing a Feature Review that requires re-approval
   Given an application called "frontend"
   And a ticket "JIRA-1" with summary "Some work" is started at "2014-10-11 13:01:17"
   And a commit "#abc" by "Alice" is created at "2014-10-12 11:01:00" for app "frontend"
   And ticket "JIRA-1" is approved by "jim@fundingcircle.com" at "2014-10-13 17:30:10"
-  And developer prepares review known as "FR" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR" with apps
     | app_name | version |
     | frontend | #abc    |
   And at time "2014-10-14 16:00:01" adds link for review "FR" to comment for ticket "JIRA-1"
@@ -205,7 +166,7 @@ Scenario: Viewing a Feature Review as at a specified time
 
   And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:00:00"
   And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
-  And developer prepares review known as "FR_123" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_123" with apps
     | app_name | version |
     | frontend | #abc    |
   And at time "2014-10-04 14:00:00.500" adds link for review "FR_123" to comment for ticket "JIRA-123"
@@ -224,7 +185,7 @@ Scenario: Viewing an approved Feature Review after regenerating snapshots
 
   And a ticket "JIRA-123" with summary "Urgent ticket" is started at "2014-10-04 13:00:00"
   And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
-  And developer prepares review known as "FR_123" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_123" with apps
     | app_name | version |
     | frontend | #abc    |
   And at time "2014-10-04 14:00:00.500" adds link for review "FR_123" to comment for ticket "JIRA-123"
@@ -250,7 +211,7 @@ Scenario: QA rejects feature
   And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
   And a commit "#def" by "Alice" is created at "2014-10-04 13:05:00" for app "backend"
   And I am logged in as "foo@bar.com"
-  And developer prepares review known as "FR_qa_rejects" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_qa_rejects" with apps
     | app_name | version |
     | frontend | #abc    |
     | backend  | #def    |
@@ -279,7 +240,7 @@ Scenario: Repo Owner approves feature
   And a commit "#abc" by "Alice" is created at "2014-10-04 13:05:00" for app "frontend"
   And a commit "#def" by "Alice" is created at "2014-10-04 13:05:00" for app "backend"
   And I am logged in as "foo@bar.com"
-  And developer prepares review known as "FR_repo_owner_test" for UAT "uat.fundingcircle.com" with apps
+  And developer prepares review known as "FR_repo_owner_test" with apps
     | app_name | version |
     | frontend | #abc    |
     | backend  | #def    |

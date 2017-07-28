@@ -5,24 +5,19 @@ require 'git_repository_location'
 require 'git_repository_loader'
 require 'qa_submission'
 require 'ticket'
-require 'uatest'
 
 class FeatureReviewWithStatuses < SimpleDelegator
-  attr_reader :builds, :deploys, :qa_submission, :release_exception, :tickets, :uatest, :time
+  attr_reader :builds, :qa_submission, :release_exception, :tickets, :time
 
-  # rubocop:disable Metrics/LineLength, Metrics/ParameterLists
-  def initialize(feature_review, builds: {}, deploys: [], qa_submission: nil, tickets: [], uatest: nil, release_exception: nil, at: nil)
+  def initialize(feature_review, builds: {}, qa_submission: nil, tickets: [], release_exception: nil, at: nil)
     super(feature_review)
     @feature_review = feature_review
     @time = at
     @builds = builds
-    @deploys = deploys
     @release_exception = release_exception
     @qa_submission = qa_submission
     @tickets = tickets
-    @uatest = uatest
   end
-  # rubocop:enable Metrics/LineLength, Metrics/ParameterLists
 
   def github_repo_urls
     @github_repo_urls ||= GitRepositoryLocation.github_urls_for_apps(@feature_review.app_names)
@@ -50,11 +45,6 @@ class FeatureReviewWithStatuses < SimpleDelegator
     end
   end
 
-  def deploy_status
-    return if deploys.empty?
-    deploys.all?(&:correct) ? :success : :failure
-  end
-
   def release_exception_status
     return unless release_exception
     release_exception.approved? ? :success : :failure
@@ -65,13 +55,8 @@ class FeatureReviewWithStatuses < SimpleDelegator
     qa_submission.accepted ? :success : :failure
   end
 
-  def uatest_status
-    return unless uatest
-    uatest.success ? :success : :failure
-  end
-
   def summary_status
-    statuses = [deploy_status, qa_status, build_status]
+    statuses = [qa_status, build_status]
 
     if statuses.all? { |status| status == :success }
       :success

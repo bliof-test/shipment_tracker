@@ -149,7 +149,7 @@ RSpec.describe CommitStatus do
         before do
           release_exception = ReleaseException.new(
             approved: true,
-            path: '/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+            path: '/feature_reviews?apps%5Brepo%5D=abc123',
           )
           allow(exception_repository).to receive(:release_exception_for).and_return(release_exception)
         end
@@ -160,7 +160,7 @@ RSpec.describe CommitStatus do
             sha: 'abc123',
             state: 'success',
             description: 'Approved Feature Review found',
-            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
           )
 
           CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update
@@ -180,7 +180,7 @@ RSpec.describe CommitStatus do
       end
 
       context 'when there is a staging deploy for the software version under review' do
-        let(:deploy) { instance_double(Deploy, server: 'uat.com') }
+        let(:deploy) { instance_double(Deploy, server: 'staging.com') }
 
         it 'includes the UAT URL in the link' do
           expect(client).to receive(:create_status).with(
@@ -188,7 +188,7 @@ RSpec.describe CommitStatus do
             sha: 'abc123',
             state: 'failure',
             description: "No Feature Review found. Click 'Details' to create one.",
-            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123&uat_url=uat.com',
+            target_url: 'https://localhost/feature_reviews?apps%5Brepo%5D=abc123',
           )
 
           CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').update

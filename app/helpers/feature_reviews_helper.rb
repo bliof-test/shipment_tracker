@@ -63,7 +63,7 @@ module FeatureReviewsHelper
     )
   end
 
-  def edit_url(app_versions, uat_url)
-    new_feature_reviews_path(forms_feature_review_form: { apps: app_versions, uat_url: uat_url })
+  def edit_url(app_versions)
+    new_feature_reviews_path(forms_feature_review_form: { apps: app_versions })
   end
 end
