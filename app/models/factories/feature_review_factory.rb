@@ -24,7 +24,8 @@ module Factories
       uri = Addressable::URI.parse(url).normalize
       query_hash = Rack::Utils.parse_nested_query(uri.query)
       apps = query_hash.fetch('apps', {})
-      versions = get_app_versions(apps)
+      versions = get_related_versions(apps)
+
       create(
         path: whitelisted_path(uri, query_hash),
         versions: versions,
@@ -45,6 +46,14 @@ module Factories
 
     def create(attrs)
       FeatureReview.new(attrs)
+    end
+
+    def get_related_versions(apps)
+      related_versions = GitRepositoryLoader.from_rails_config
+                                            .load(apps.keys.first)
+                                            .get_dependent_commits(apps.values.first)
+                                            .map(&:id)
+      related_versions + get_app_versions(apps)
     end
 
     def get_app_versions(apps)
