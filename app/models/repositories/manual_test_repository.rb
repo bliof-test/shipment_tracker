@@ -31,14 +31,14 @@ module Repositories
       query = at ? table['created_at'].lteq(at) : nil
       store
         .where(query)
-        .where(table['versions'].eq(prepared_versions(versions)))
+        .where('versions && ?', prepared_versions(versions))
         .order('id DESC')
         .first
         .try { |result| QaSubmission.new(result.attributes) }
     end
 
     def prepared_versions(versions)
-      versions.sort
+      "{#{versions.sort.join(',')}}"
     end
 
     def table
