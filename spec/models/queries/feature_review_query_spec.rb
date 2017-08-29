@@ -27,6 +27,9 @@ RSpec.describe Queries::FeatureReviewQuery do
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
     allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(release_exception_repository)
 
+    repository1 = instance_double(GitRepository, get_dependent_commits: [])
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+
     allow(build_repository).to receive(:builds_for)
       .with(apps: expected_apps, at: time)
       .and_return(expected_builds)

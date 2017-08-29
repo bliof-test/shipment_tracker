@@ -9,6 +9,14 @@ RSpec.describe FeatureReviewsController do
     it { is_expected.to require_authentication_on(:post, :link_ticket) }
   end
 
+  before do
+    repository1 = instance_double(GitRepository, get_dependent_commits: [double(id: 'abc')])
+    repository2 = instance_double(GitRepository, get_dependent_commits: [double(id: 'def')])
+
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('frontend').and_return(repository1)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('backend').and_return(repository2)
+  end
+
   describe 'GET #new', :logged_in do
     let(:feature_review_form) { instance_double(Forms::FeatureReviewForm) }
 

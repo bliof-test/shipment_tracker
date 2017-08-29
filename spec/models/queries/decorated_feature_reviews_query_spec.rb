@@ -3,6 +3,11 @@ require 'rails_helper'
 
 RSpec.describe Queries::DecoratedFeatureReviewsQuery do
   describe '#get_commit' do
+    before do
+      repository1 = instance_double(GitRepository, get_dependent_commits: [double(id: 'abc')])
+      allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+    end
+
     context 'when tickets exist for the given commit' do
       let(:tickets) {
         [

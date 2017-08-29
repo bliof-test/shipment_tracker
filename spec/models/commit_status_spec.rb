@@ -6,6 +6,12 @@ RSpec.describe CommitStatus do
   before do
     stub_const('ShipmentTracker::GITHUB_REPO_STATUS_WRITE_TOKEN', 'token')
     allow(GithubClient).to receive(:new).and_return(client)
+
+    repository1     = instance_double(GitRepository, get_dependent_commits: [])
+    repository_repo = instance_double(GitRepository, get_dependent_commits: [])
+
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('repo').and_return(repository_repo)
   end
 
   let(:client) { instance_double(GithubClient) }

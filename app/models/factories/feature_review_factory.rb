@@ -26,7 +26,7 @@ module Factories
       apps = query_hash.fetch('apps', {})
       versions = get_related_versions(apps)
 
-      create(
+      FeatureReview.new(
         path: whitelisted_path(uri, query_hash),
         versions: versions,
       )
@@ -36,17 +36,13 @@ module Factories
       uri = Addressable::URI.parse('/feature_reviews').normalize
       query_hash = { 'apps' => apps }
 
-      create(
+      FeatureReview.new(
         path: whitelisted_path(uri, query_hash),
         versions: get_app_versions(apps),
       )
     end
 
     private
-
-    def create(attrs)
-      FeatureReview.new(attrs)
-    end
 
     def get_related_versions(apps)
       related_versions = GitRepositoryLoader.from_rails_config

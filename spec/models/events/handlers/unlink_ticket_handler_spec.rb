@@ -25,6 +25,9 @@ RSpec.describe Events::Handlers::UnlinkTicketHandler do
         created_at: time - 1.hour,
       )
 
+      repository2 = instance_double(GitRepository, get_dependent_commits: [double(id: 'two')])
+      allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app2').and_return(repository2)
+
       new_ticket = described_class.new(ticket, unlink_2_event).apply
       expect(new_ticket).to include(
         'key' => 'JIRA-1',
