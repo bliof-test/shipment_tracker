@@ -231,8 +231,9 @@ Scenario: QA rejects feature
 
   And I reload the page after a while
   Then I should see the QA acceptance
-    | status  | email       | comment |
-    | success | foo@bar.com | Superb! |
+    | status  | email       | comment         |
+    | danger  | foo@bar.com | Not good enough |
+    | success | foo@bar.com | Superb!         |
 
 Scenario: QA has approved previous commit
   Given an application called "frontend"
@@ -267,6 +268,7 @@ Scenario: QA has approved previous commit
   When I reload the page after a while
   Then I should see the QA acceptance
     | status   | email       | comment            |
+    | success  | foo@bar.com | All good           |
     | danger   | foo@bar.com | Needs improvements |
 
 Scenario: Repo Owner approves feature

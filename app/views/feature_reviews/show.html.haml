@@ -98,13 +98,22 @@
 
     - panel(heading: 'QA Acceptance', klass: 'qa-submission', status: @feature_review_with_statuses.qa_status) do
       .panel-body
-        - if @feature_review_with_statuses.qa_submission
-          %p
-            %span.qa-email
-              %strong= @feature_review_with_statuses.qa_submission.email
-            at
-            %span.qa-time= @feature_review_with_statuses.qa_submission.created_at
-          = simple_format(@feature_review_with_statuses.qa_submission.comment, class: 'qa-comment')
+        - if @feature_review_with_statuses.qa_submissions.present?
+          %ul.list-group{ style: 'list-style-type: none;' }
+            - @feature_review_with_statuses.qa_submissions.each do |qa_submission|
+              %li
+                %p
+                  - icon(item_status_icon_class(qa_submission.accepted))
+                  %span.qa-email
+                    %strong= qa_submission.email
+                  at
+                  %span.qa-time= qa_submission.created_at
+                - qa_submission.versions.each do |version|
+                  = commit_link(version, @feature_review_with_statuses.app_url_for_version(version))
+                = simple_format(qa_submission.comment, class: 'qa-comment')
+
+                - unless qa_submission == @feature_review_with_statuses.qa_submissions.last
+                  %hr
         - else
           Not reviewed by QA
       .panel-footer

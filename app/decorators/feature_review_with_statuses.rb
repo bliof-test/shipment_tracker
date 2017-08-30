@@ -7,15 +7,15 @@ require 'qa_submission'
 require 'ticket'
 
 class FeatureReviewWithStatuses < SimpleDelegator
-  attr_reader :builds, :qa_submission, :release_exception, :tickets, :time
+  attr_reader :builds, :qa_submissions, :release_exception, :tickets, :time
 
-  def initialize(feature_review, builds: {}, qa_submission: nil, tickets: [], release_exception: nil, at: nil)
+  def initialize(feature_review, builds: {}, qa_submissions: nil, tickets: [], release_exception: nil, at: nil)
     super(feature_review)
     @feature_review = feature_review
     @time = at
     @builds = builds
     @release_exception = release_exception
-    @qa_submission = qa_submission
+    @qa_submissions = qa_submissions
     @tickets = tickets
   end
 
@@ -31,6 +31,11 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
       [app_name, latest_commit]
     end
+  end
+
+  def app_url_for_version(version)
+    app_name = related_app_versions.find{ |_, versions| versions.include?(version) }.first
+    github_repo_urls[app_name]
   end
 
   def build_status
@@ -51,8 +56,8 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def qa_status
-    return unless qa_submission
-    qa_submission.accepted ? :success : :failure
+    return unless qa_submissions.present?
+    qa_submissions.last.accepted ? :success : :failure
   end
 
   def summary_status

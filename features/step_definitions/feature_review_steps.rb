@@ -85,12 +85,12 @@ Then 'I should see the QA acceptance with heading "$status"' do |status|
 end
 
 Then 'I should see the QA acceptance' do |table|
-  expected_qa_submission = table.hashes.first
+  expected_qa_submission = table.hashes.last
   status = expected_qa_submission.delete('status')
   panel = feature_review_page.qa_submission_panel
 
   expect(panel.status).to eq(status)
-  expect(panel.items.first).to eq(expected_qa_submission)
+  expect(panel.items.last).to eq(expected_qa_submission)
 end
 
 Then 'I should see the Repo Owner Commentary with heading "$status"' do |status|

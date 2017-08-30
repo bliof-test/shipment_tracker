@@ -14,7 +14,7 @@ RSpec.describe Repositories::ManualTestRepository do
     end
   end
 
-  describe '#qa_submission_for' do
+  describe '#qa_submissions_for' do
     it 'projects last QA submission' do
       # usec reset is required as the precision for the database column is not as great as the Time class,
       # without it, tests would fail on CI build.
@@ -25,17 +25,21 @@ RSpec.describe Repositories::ManualTestRepository do
         build(:manual_test_event, default.merge(accepted: false, created_at: t[0])),
         build(:manual_test_event, default.merge(apps: { 'app2' => '2' }, accepted: false, created_at: t[1])),
         build(:manual_test_event, default.merge(accepted: true, created_at: t[2])),
-        build(:manual_test_event, default.merge(apps: { 'app1' => '1' }, accepted: false, created_at: t[3])),
+        build(:manual_test_event, default.merge(apps: { 'app1' => '1' }, comment: 'Not good', accepted: false, created_at: t[3])),
       ]
 
       events.each do |event|
         repository.apply(event)
       end
 
-      result = repository.qa_submission_for(versions: %w(1 2))
+      result = repository.qa_submissions_for(versions: %w(1 2))
 
-      expect(result).to eq(
+      expect(result).to include(
         QaSubmission.new(email: 'foo@ex.io', accepted: true, comment: 'Good', created_at: t[2]),
+      )
+
+      expect(result.last).to eq(
+        QaSubmission.new(email: 'foo@ex.io', accepted: false, comment: 'Not good', created_at: t[3])
       )
     end
 
@@ -54,9 +58,9 @@ RSpec.describe Repositories::ManualTestRepository do
           repository.apply(event)
         end
 
-        result = repository.qa_submission_for(versions: %w(abc def), at: 2.hours.ago)
+        result = repository.qa_submissions_for(versions: %w(abc def), at: 2.hours.ago)
 
-        expect(result).to eq(
+        expect(result.last).to eq(
           QaSubmission.new(email: 'foo@ex.io', accepted: true, comment: 'Good', created_at: times[1]),
         )
       end

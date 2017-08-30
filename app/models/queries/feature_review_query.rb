@@ -28,7 +28,7 @@ module Queries
       @feature_review_with_statuses = FeatureReviewWithStatuses.new(
         feature_review,
         builds: builds,
-        qa_submission: qa_submission,
+        qa_submissions: qa_submissions,
         release_exception: release_exception,
         tickets: tickets,
         at: time,
@@ -42,16 +42,16 @@ module Queries
       )
     end
 
-    def qa_submission
-      manual_test_repository.qa_submission_for(
-        versions: feature_review.related_app_versions.values.flatten,
+    def qa_submissions
+      manual_test_repository.qa_submissions_for(
+        versions: feature_review.related_app_versions,
         at: time,
       )
     end
 
     def release_exception
       release_exception_repository.release_exception_for(
-        versions: feature_review.app_versions,
+        versions: feature_review.versions,
         at: time,
       )
     end

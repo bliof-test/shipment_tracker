@@ -9,11 +9,12 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
 
   let(:expected_builds) { double('expected builds') }
-  let(:expected_qa_submission) { double('expected qa submission') }
+  let(:expected_qa_submissions) { double('expected qa submissions') }
   let(:expected_tickets) { double('expected tickets') }
   let(:expected_release_exception) { double('release_exception') }
 
   let(:expected_apps) { { 'app1' => '123' } }
+  let(:versions) { {'app1' => ['123']} }
 
   let(:time) { Time.current }
   let(:feature_review) { new_feature_review(expected_apps) }
@@ -33,9 +34,9 @@ RSpec.describe Queries::FeatureReviewQuery do
     allow(build_repository).to receive(:builds_for)
       .with(apps: expected_apps, at: time)
       .and_return(expected_builds)
-    allow(manual_test_repository).to receive(:qa_submission_for)
-      .with(versions: expected_apps.values, at: time)
-      .and_return(expected_qa_submission)
+    allow(manual_test_repository).to receive(:qa_submissions_for)
+      .with(versions: versions, at: time)
+      .and_return(expected_qa_submissions)
     allow(release_exception_repository).to receive(:release_exception_for)
       .with(versions: expected_apps.values, at: time)
       .and_return(expected_release_exception)
@@ -50,7 +51,7 @@ RSpec.describe Queries::FeatureReviewQuery do
         .with(
           feature_review,
           builds: expected_builds,
-          qa_submission: expected_qa_submission,
+          qa_submissions: expected_qa_submissions,
           tickets: expected_tickets,
           release_exception: expected_release_exception,
           at: time,
