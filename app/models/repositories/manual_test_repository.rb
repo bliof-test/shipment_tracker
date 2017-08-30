@@ -10,7 +10,13 @@ module Repositories
     end
 
     def qa_submission_for(versions:, at: nil)
-      qa_submission(versions, at)
+      query = at ? table['created_at'].lteq(at) : nil
+      store
+        .where(query)
+        .where('versions && ?', prepared_versions(versions))
+        .order('id DESC')
+        .first
+        .try { |result| QaSubmission.new(result.attributes) }
     end
 
     def apply(event)
@@ -26,16 +32,6 @@ module Repositories
     end
 
     private
-
-    def qa_submission(versions, at)
-      query = at ? table['created_at'].lteq(at) : nil
-      store
-        .where(query)
-        .where('versions && ?', prepared_versions(versions))
-        .order('id DESC')
-        .first
-        .try { |result| QaSubmission.new(result.attributes) }
-    end
 
     def prepared_versions(versions)
       "{#{versions.sort.join(',')}}"

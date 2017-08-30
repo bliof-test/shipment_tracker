@@ -44,14 +44,14 @@ module Queries
 
     def qa_submission
       manual_test_repository.qa_submission_for(
-        versions: feature_review.versions,
+        versions: feature_review.related_app_versions.values.flatten,
         at: time,
       )
     end
 
     def release_exception
       release_exception_repository.release_exception_for(
-        versions: feature_review.versions,
+        versions: feature_review.app_versions,
         at: time,
       )
     end
