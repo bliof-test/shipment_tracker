@@ -34,7 +34,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def app_url_for_version(version)
-    app_name = related_app_versions.find{ |_, versions| versions.include?(version) }
+    app_name = related_app_versions.find { |_, versions| versions.include?(version) }
     return unless app_name
 
     github_repo_urls[app_name.first]

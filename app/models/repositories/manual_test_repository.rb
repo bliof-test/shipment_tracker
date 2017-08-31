@@ -15,7 +15,7 @@ module Repositories
         .where(query)
         .where('versions && ?', prepared_versions(versions))
         .order('id ASC')
-        .map{ |manual_test| create_qa_submission(manual_test) }
+        .map { |manual_test| create_qa_submission(manual_test) }
     end
 
     def apply(event)

@@ -14,7 +14,7 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:expected_release_exception) { double('release_exception') }
 
   let(:expected_apps) { { 'app1' => '123' } }
-  let(:versions) { {'app1' => ['123']} }
+  let(:versions) { { 'app1' => ['123'] } }
 
   let(:time) { Time.current }
   let(:feature_review) { new_feature_review(expected_apps) }
