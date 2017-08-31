@@ -44,7 +44,7 @@ module Queries
 
     def qa_submissions
       manual_test_repository.qa_submissions_for(
-        versions: feature_review.related_app_versions,
+        versions: feature_review.related_app_versions.values.flatten,
         at: time,
       )
     end

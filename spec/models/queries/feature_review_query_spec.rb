@@ -14,7 +14,6 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:expected_release_exception) { double('release_exception') }
 
   let(:expected_apps) { { 'app1' => '123' } }
-  let(:versions) { { 'app1' => ['123'] } }
 
   let(:time) { Time.current }
   let(:feature_review) { new_feature_review(expected_apps) }
@@ -35,7 +34,7 @@ RSpec.describe Queries::FeatureReviewQuery do
       .with(apps: expected_apps, at: time)
       .and_return(expected_builds)
     allow(manual_test_repository).to receive(:qa_submissions_for)
-      .with(versions: versions, at: time)
+      .with(versions: expected_apps.values, at: time)
       .and_return(expected_qa_submissions)
     allow(release_exception_repository).to receive(:release_exception_for)
       .with(versions: expected_apps.values, at: time)
