@@ -12,4 +12,12 @@
     = f.text_area(:repo_owners, placeholder: "John Doe <repo-owner@example.com>\nsecond-repo-owner@example.com, third-repo-owner@example.com", value: @form.repo_owners_data, class: 'form-control', rows: 5)
 
   .form-group
+    = f.label(:required_checks, class: 'control-label')
+    - GitRepositoryLocation::REQUIRED_CHECKS.each do |check|
+      .checkbox
+        %label
+          = check_box_tag 'required_checks', check, @form.git_repository_location.required_checks.include?(check), name: 'forms_edit_git_repository_location_form[required_checks][]'
+          = check
+
+  .form-group
     = f.submit('Update Git Repository', class: 'btn btn-primary')

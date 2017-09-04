@@ -64,6 +64,13 @@ module Queries
       )
     end
 
+    def unit_tests_result
+      build_repository.unit_tests_result_for(
+        versions: feature_review.versions,
+        at: time,
+      )
+    end
+
     def tickets
       ticket_repository.tickets_for_path(feature_review.path, at: time)
     end

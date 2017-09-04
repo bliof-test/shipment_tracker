@@ -12,7 +12,7 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:app_names) { apps.keys }
   let(:versions) { apps.values }
 
-  let(:feature_review) { instance_double(FeatureReview, app_versions: apps, versions: versions) }
+  let(:feature_review) { instance_double(FeatureReview, app_versions: apps, versions: versions, app_names: app_names) }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
   subject(:decorator) {
@@ -231,6 +231,32 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
+  describe '#unit_tests_result_status' do
+    context 'when the unit test is successful' do
+      let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+
+      it 'returns :success' do
+        expect(decorator.unit_tests_result_status).to eq(:success)
+      end
+    end
+
+    context 'when the unit test failed' do
+      let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+
+      it 'returns :failure' do
+        expect(decorator.unit_tests_result_status).to eq(:failure)
+      end
+    end
+
+    context 'when the release_exception is missing' do
+      let(:unit_tests_result) { nil }
+
+      it 'returns nil' do
+        expect(decorator.unit_tests_result_status).to eq(nil)
+      end
+    end
+  end
+
   describe '#qa_status' do
     context 'when QA submission is accepted' do
       let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
@@ -334,6 +360,35 @@ RSpec.describe FeatureReviewWithStatuses do
 
         it { is_expected.to be true }
       end
+    end
+  end
+
+  describe '#tickets_approval_status' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).tickets_approval_status }
+
+    context 'when there are no tickets' do
+      let(:tickets) { [] }
+      it { is_expected.to be nil }
+    end
+
+    context 'when all associated tickets are approved' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved?: true),
+          instance_double(Ticket, approved?: true),
+        ]
+      }
+      it { is_expected.to be :success }
+    end
+
+    context 'when some associated tickets are not approved' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, approved?: false),
+          instance_double(Ticket, approved?: true),
+        ]
+      }
+      it { is_expected.to be :failure }
     end
   end
 
@@ -466,6 +521,142 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
+  describe '#tickets_authorised?' do
+    subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).send(:tickets_authorised?) }
+
+    context 'when all tickets are authorised' do
+      let(:tickets) {
+        [
+          instance_double(Ticket, authorised?: true),
+          instance_double(Ticket, authorised?: true),
+        ]
+      }
+      it { is_expected.to be true }
+    end
+
+    context 'when some tickets are not authorised' do
+      let(:tickets){
+        [
+          instance_double(Ticket, authorised?: true),
+          instance_double(Ticket, authorised?: false),
+        ]
+      }
+      it { is_expected.to be false }
+    end
+
+    context 'when there are no tickets' do
+      let(:tickets) { [] }
+      it { is_expected.to be false }
+    end
+  end
+
+  describe '#required_checks_passed?' do
+    subject {
+      FeatureReviewWithStatuses.new(
+        feature_review,
+        tickets: tickets,
+        integration_tests_result: integration_tests_result,
+        unit_tests_result: unit_tests_result,
+      ).send(:required_checks_passed?)
+    }
+
+    let!(:repository) { GitRepositoryLocation.create(name: 'app1', uri: '/app1', required_checks: required_checks) }
+
+    context 'when no checks are set' do
+      let(:required_checks) { [] }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when integration_tests is selected' do
+      let(:required_checks) { ['integration_tests'] }
+
+      context 'when check has passed' do
+        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when check has not passed' do
+        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: false) }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when unit_tests is selected' do
+      let(:required_checks) { ['unit_tests'] }
+
+      context 'when check has passed' do
+        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when check has not passed' do
+        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when tickets_approval is selected' do
+      let(:required_checks) { ['tickets_approval'] }
+
+      context 'when check has passed' do
+        let(:tickets) {
+          [
+            instance_double(Ticket, approved?: true),
+            instance_double(Ticket, approved?: true),
+          ]
+        }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when check has not passed' do
+        let(:tickets) {
+          [
+            instance_double(Ticket, approved?: false),
+            instance_double(Ticket, approved?: true),
+          ]
+        }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when multiple checks are selected' do
+      let(:required_checks) { %w(integration_tests unit_tests tickets_approval) }
+
+      context 'when all checks have passed' do
+        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
+        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+        let(:tickets) {
+          [
+            instance_double(Ticket, approved?: true),
+            instance_double(Ticket, approved?: true),
+          ]
+        }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when some check has not passed' do
+        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
+        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+        let(:tickets) {
+          [
+            instance_double(Ticket, approved?: false),
+            instance_double(Ticket, approved?: true),
+          ]
+        }
+
+        it { is_expected.to be false }
+      end
+    end
+  end
+
   describe '#approved_path' do
     subject { FeatureReviewWithStatuses.new(feature_review, tickets: tickets).approved_path }
 
@@ -475,6 +666,7 @@ RSpec.describe FeatureReviewWithStatuses do
         base_path: '/feature_reviews',
         query_hash: { 'apps' => apps },
         app_versions: apps,
+        app_names: app_names,
         versions: apps.values,
       )
     }

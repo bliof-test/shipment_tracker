@@ -67,6 +67,11 @@ class FeatureReviewWithStatuses < SimpleDelegator
     qa_submissions.last.accepted ? :success : :failure
   end
 
+  def tickets_approval_status
+    return unless tickets.present?
+    tickets_approved? ? :success : :failure
+  end
+
   def summary_status
     statuses = [qa_status, unit_test_result_status, integration_test_result_status]
 
@@ -77,14 +82,14 @@ class FeatureReviewWithStatuses < SimpleDelegator
     end
   end
 
-  def authorised?
-    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions) })
-  end
-
   def authorisation_status
     return :approved if authorised?
 
     tickets_approved? ? :requires_reapproval : :not_approved
+  end
+
+  def authorised?
+    @authorised ||= approved_by_owner? || (tickets_authorised? && required_checks_passed?)
   end
 
   def approved_at
@@ -109,6 +114,30 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def approved_by_owner?
     release_exception_status == :success
+  end
+
+  def tickets_authorised?
+    tickets.present? && tickets.all? { |t| t.authorised?(versions) }
+  end
+
+  def required_checks_passed?
+    required_checks_for_apps.flatten.uniq.all? do |check|
+      status =
+        case check
+        when 'integration_tests'
+          integration_tests_result_status
+        when 'unit_tests'
+          unit_tests_result_status
+        when 'tickets_approval'
+          tickets_approval_status
+        end
+
+      status == :success
+    end
+  end
+
+  def required_checks_for_apps
+    GitRepositoryLocation.where(name: @feature_review.app_names).pluck(:required_checks)
   end
 
   def fetch_commit_for(app_name, version)

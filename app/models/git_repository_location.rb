@@ -10,6 +10,8 @@ class GitRepositoryLocation < ActiveRecord::Base
   validates :uri, presence: true
   validates :name, uniqueness: true
 
+  REQUIRED_CHECKS = %w(integration_tests unit_tests tickets_approval)
+
   def self.app_names
     all.order(name: :asc).pluck(:name)
   end

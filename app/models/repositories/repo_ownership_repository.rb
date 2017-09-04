@@ -13,6 +13,10 @@ module Repositories
       repo_ownership.repo_owners = event.repo_owners
       repo_ownership.save!
 
+      repo = GitRepositoryLocation.find_by(name: event.app_name)
+      repo.required_checks = event.required_checks
+      repo.save!
+
       repo_ownership.owner_emails.each do |email|
         owner = RepoOwner.find_or_initialize_by(email: email.address)
         owner.name = email.display_name if email.raw.include?('<')

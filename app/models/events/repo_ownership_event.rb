@@ -10,5 +10,9 @@ module Events
     def repo_owners
       details['repo_owners']
     end
+
+    def required_checks
+      details.fetch('required_checks')
+    end
   end
 end
