@@ -44,3 +44,12 @@ Scenario: Edit owners of a repository
   Then I should see the repository locations:
     | Name      | URI                | Repo Owners                                           |
     | new-app   | uri_for("new-app") | repo-owner@example.com, second-repo-owner@example.com |
+
+@disable_repo_verification
+Scenario: Edit required checks of a repository
+  Given "new-app" repository
+  And I am on the edit repository location form for "new-app"
+  When I select required checks "unit_tests,tickets_approval"
+  When I click "Update Git Repository"
+  And I am on the edit repository location form for "new-app"
+  Then the previously set "unit_tests,tickets_approval" checks should be selected

@@ -125,9 +125,9 @@ class FeatureReviewWithStatuses < SimpleDelegator
       status =
         case check
         when 'integration_tests'
-          integration_tests_result_status
+          integration_test_result_status
         when 'unit_tests'
-          unit_tests_result_status
+          unit_test_result_status
         when 'tickets_approval'
           tickets_approval_status
         end

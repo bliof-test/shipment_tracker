@@ -39,6 +39,12 @@ module Pages
       page.fill_in 'Repo Owners', with: repo_owners
     end
 
+    def select_required_checks(required_checks:)
+      required_checks.split(',').each do |required_check|
+        page.find("##{required_check}").set(true)
+      end
+    end
+
     def click(button)
       page.click_link_or_button(button)
     end

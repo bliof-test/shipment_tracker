@@ -42,6 +42,16 @@ When 'I enter owner emails "$repo_owners"' do |repo_owners|
   edit_git_repository_location_page.fill_in_repo_owners(repo_owners: repo_owners)
 end
 
+When 'I select required checks "$required_checks"' do |required_checks|
+  edit_git_repository_location_page.select_required_checks(required_checks: required_checks)
+end
+
 When 'I click "$button"' do |button|
   edit_git_repository_location_page.click(button)
+end
+
+Then 'the previously set "$required_checks" checks should be selected' do |required_checks|
+  required_checks.split(',').each do |required_check|
+    expect(find("##{required_check}")).to be_checked
+  end
 end

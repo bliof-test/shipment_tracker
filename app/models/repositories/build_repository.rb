@@ -50,16 +50,5 @@ module Repositories
         Build.new(d.attributes)
       }
     end
-
-    def test_results_for(versions:, build_type:, at: nil)
-      created_at_query = at ? store.arel_table['event_created_at'].lteq(at) : nil
-
-      store
-        .where(version: versions, build_type: build_type)
-        .where(created_at_query)
-        .order('id DESC')
-        .first
-        .try { |r| Build.new(r.attributes) }
-    end
   end
 end

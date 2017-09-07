@@ -231,28 +231,43 @@ RSpec.describe FeatureReviewWithStatuses do
     end
   end
 
-  describe '#unit_tests_result_status' do
-    context 'when the unit test is successful' do
-      let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+  describe '#unit_test_result_status' do
+    context 'when all unit test results pass' do
+      let(:unit_test_results) do
+        {
+          'frontend' => Build.new(success: true),
+          'backend'  => Build.new(success: true),
+        }
+      end
 
       it 'returns :success' do
-        expect(decorator.unit_tests_result_status).to eq(:success)
+        expect(decorator.unit_test_result_status).to eq(:success)
+      end
+
+      context 'but some unit test results are missing' do
+        let(:unit_test_results) do
+          {
+            'frontend' => Build.new(success: true),
+            'backend'  => Build.new,
+          }
+        end
+
+        it 'returns nil' do
+          expect(decorator.unit_test_result_status).to eq(nil)
+        end
       end
     end
 
-    context 'when the unit test failed' do
-      let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+    context 'when any of the unit test results fails' do
+      let(:unit_test_results) do
+        {
+          'frontend' => Build.new(success: false),
+          'backend'  => Build.new(success: true),
+        }
+      end
 
       it 'returns :failure' do
-        expect(decorator.unit_tests_result_status).to eq(:failure)
-      end
-    end
-
-    context 'when the release_exception is missing' do
-      let(:unit_tests_result) { nil }
-
-      it 'returns nil' do
-        expect(decorator.unit_tests_result_status).to eq(nil)
+        expect(decorator.unit_test_result_status).to eq(:failure)
       end
     end
   end
@@ -555,8 +570,8 @@ RSpec.describe FeatureReviewWithStatuses do
       FeatureReviewWithStatuses.new(
         feature_review,
         tickets: tickets,
-        integration_tests_result: integration_tests_result,
-        unit_tests_result: unit_tests_result,
+        integration_test_results: integration_test_results,
+        unit_test_results: unit_test_results,
       ).send(:required_checks_passed?)
     }
 
@@ -572,13 +587,13 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { ['integration_tests'] }
 
       context 'when check has passed' do
-        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
+        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
 
         it { is_expected.to be true }
       end
 
       context 'when check has not passed' do
-        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: false) }
+        let(:integration_test_results) { { 'frontend' => Build.new(success: false) } }
 
         it { is_expected.to be false }
       end
@@ -588,13 +603,13 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { ['unit_tests'] }
 
       context 'when check has passed' do
-        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+        let(:unit_test_results) { { 'frontend' => Build.new(success: true) } }
 
         it { is_expected.to be true }
       end
 
       context 'when check has not passed' do
-        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+        let(:unit_test_results) { { 'frontend' => Build.new(success: false) } }
 
         it { is_expected.to be false }
       end
@@ -630,8 +645,8 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { %w(integration_tests unit_tests tickets_approval) }
 
       context 'when all checks have passed' do
-        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
-        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: true) }
+        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
+        let(:unit_test_results) { { 'frontend' => Build.new(success: true) } }
         let(:tickets) {
           [
             instance_double(Ticket, approved?: true),
@@ -643,8 +658,8 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       context 'when some check has not passed' do
-        let(:integration_tests_result) { Build.new(source: 'IntegrationTest', success: true) }
-        let(:unit_tests_result) { Build.new(source: 'UnitTest', success: false) }
+        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
+        let(:unit_test_results) { { 'frontend' => Build.new(success: false) } }
         let(:tickets) {
           [
             instance_double(Ticket, approved?: false),

@@ -2,13 +2,13 @@
 require 'events/base_event'
 
 module Events
-  class RepoOwnershipEvent < Events::BaseEvent
+  class GitRepositoryLocationEvent < Events::BaseEvent
     def app_name
       details.fetch('app_name')
     end
 
-    def repo_owners
-      details['repo_owners']
+    def required_checks
+      details.fetch('required_checks', [])
     end
   end
 end

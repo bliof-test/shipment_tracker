@@ -21,23 +21,15 @@ module Forms
     attr_reader :repo, :params, :current_user
 
     validates :repo_owners, with: :validate_repo_owners, allow_blank: true
-    validates :required_checks, with: :validate_required_checks, allow_blank: true
+    validates :required_checks, with: :validate_required_checks, allow_nil: false
 
     alias git_repository_location repo
 
     def call
       return false unless valid?
 
-      event = Events::RepoOwnershipEvent.create!(
-        details: {
-          app_name: repo.name,
-          repo_owners: owners_address_list.format(keep_brackets: true),
-          email: current_user.email,
-          required_checks: required_checks,
-        },
-      )
-
-      repo_ownership_repository.apply(event)
+      apply_repo_ownership_event
+      apply_git_repo_location_event
     end
 
     def repo_owners_data
@@ -52,6 +44,10 @@ module Forms
 
     def repo_ownership_repository
       @repo_ownership_repository ||= Repositories::RepoOwnershipRepository.new
+    end
+
+    def git_repo_location_repository
+      @git_repo_location_repository ||= Repositories::GitRepoLocationRepository.new
     end
 
     def owners_address_list
@@ -78,6 +74,29 @@ module Forms
       return if required_checks_list_valid?
 
       errors.add(:required_checks, 'is invalid')
+    end
+
+    def apply_repo_ownership_event
+      event = Events::RepoOwnershipEvent.create!(
+        details: {
+          app_name: repo.name,
+          repo_owners: owners_address_list.format(keep_brackets: true),
+          email: current_user.email,
+        },
+      )
+
+      repo_ownership_repository.apply(event)
+    end
+
+    def apply_git_repo_location_event
+      event = Events::GitRepositoryLocationEvent.create!(
+        details: {
+          app_name: repo.name,
+          required_checks: required_checks,
+        },
+      )
+
+      git_repo_location_repository.apply(event)
     end
   end
 end

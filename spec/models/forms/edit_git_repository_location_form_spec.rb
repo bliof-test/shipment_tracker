@@ -16,7 +16,7 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
         expect(form_for(repo_owners: nil)).to be_valid
       end
 
-      describe 'a signle repo owner' do
+      describe 'a single repo owner' do
         it 'expects an email or a name with email' do
           expect(form_for(repo_owners: 'test@example.com')).to be_valid
           expect(form_for(repo_owners: 'Test Example<test@example.com>')).to be_valid
@@ -42,22 +42,52 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
         end
       end
     end
+
+    describe 'for required_checks' do
+      it 'could be blank' do
+        expect(form_for(required_checks: [])).to be_valid
+        expect(form_for(required_checks: nil)).to be_valid
+      end
+
+      it 'could contain only certain checks' do
+        expect(form_for(required_checks: %w(tickets_approval unit_tests))).to be_valid
+        expect(form_for(required_checks: %w(integration_tests invalid_check))).not_to be_valid
+      end
+    end
   end
 
   describe '#call' do
+    let(:form) {
+      form_for(
+        {
+          repo_owners: "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n",
+          required_checks: %w(unit_tests integration_tests tickets_approval),
+        },
+        repo: FactoryGirl.create(:git_repository_location, name: 'my-app'),
+        current_user: double('User', email: 'test@test.com'),
+      )
+    }
+
     it 'will generate a repo ownership event' do
-      repo = FactoryGirl.create(:git_repository_location, name: 'my-app')
-      current_user = double('User', email: 'test@test.com')
-      input_data = "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n"
-
-      form = form_for({ repo_owners: input_data }, repo: repo, current_user: current_user)
-
       expect(Events::RepoOwnershipEvent).to(
         receive(:create!).with(
           details: {
             app_name: 'my-app',
             repo_owners: 'test@example.com, test3@example.com, Test Example <test2@example.com>',
             email: 'test@test.com',
+          },
+        ),
+      )
+
+      form.call
+    end
+
+    it 'will generate a git repository location event' do
+      expect(Events::GitRepositoryLocationEvent).to(
+        receive(:create!).with(
+          details: {
+            app_name: 'my-app',
+            required_checks: %w(unit_tests integration_tests tickets_approval),
           },
         ),
       )

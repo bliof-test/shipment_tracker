@@ -65,7 +65,7 @@ module Queries
     end
 
     def unit_tests_result
-      build_repository.unit_tests_result_for(
+      build_repository.unit_test_results_for(
         versions: feature_review.versions,
         at: time,
       )

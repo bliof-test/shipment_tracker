@@ -16,8 +16,8 @@
     - GitRepositoryLocation::REQUIRED_CHECKS.each do |check|
       .checkbox
         %label
-          = check_box_tag 'required_checks', check, @form.git_repository_location.required_checks.include?(check), name: 'forms_edit_git_repository_location_form[required_checks][]'
-          = check
+          = check_box_tag check, check, @form.git_repository_location.required_checks.include?(check), name: 'forms_edit_git_repository_location_form[required_checks][]'
+          = check.titlecase
 
   .form-group
     = f.submit('Update Git Repository', class: 'btn btn-primary')
