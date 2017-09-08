@@ -27,6 +27,8 @@ module ApplicationHelper
   end
 
   def commit_link(version, github_repo_url)
+    return unless version && github_repo_url
+
     github_commit_url = "#{github_repo_url}/commit/#{version}"
     link_to short_sha(version), github_commit_url, target: '_blank'
   end

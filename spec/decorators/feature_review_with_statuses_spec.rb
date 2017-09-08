@@ -5,7 +5,7 @@ require 'feature_review_with_statuses'
 RSpec.describe FeatureReviewWithStatuses do
   let(:tickets) { double(:tickets) }
   let(:builds) { double(:builds) }
-  let(:qa_submission) { double(:qa_submission) }
+  let(:qa_submissions) { [] }
   let(:release_exception) { double(:release_exception) }
   let(:apps) { { 'app1' => 'xxx', 'app2' => 'yyy' } }
   let(:app_names) { apps.keys }
@@ -19,7 +19,7 @@ RSpec.describe FeatureReviewWithStatuses do
       feature_review,
       builds: builds,
       release_exception: release_exception,
-      qa_submission: qa_submission,
+      qa_submissions: qa_submissions,
       tickets: tickets,
       at: query_time,
     )
@@ -28,7 +28,7 @@ RSpec.describe FeatureReviewWithStatuses do
   it 'returns all necessary fields as initialized' do
     expect(decorator.builds).to eq(builds)
     expect(decorator.release_exception).to eq(release_exception)
-    expect(decorator.qa_submission).to eq(qa_submission)
+    expect(decorator.qa_submissions).to eq(qa_submissions)
     expect(decorator.tickets).to eq(tickets)
     expect(decorator.time).to eq(query_time)
   end
@@ -36,10 +36,10 @@ RSpec.describe FeatureReviewWithStatuses do
   context 'when initialized without parameters' do
     let(:decorator) { described_class.new(feature_review) }
 
-    it 'returns default values for #builds, #qa_submission, #tickets and #time' do
+    it 'returns default values for #builds, #qa_submissions, #tickets and #time' do
       expect(decorator.builds).to eq({})
       expect(decorator.release_exception).to eq(nil)
-      expect(decorator.qa_submission).to eq(nil)
+      expect(decorator.qa_submissions).to eq(nil)
       expect(decorator.tickets).to eq([])
       expect(decorator.time).to eq(nil)
     end
@@ -195,7 +195,7 @@ RSpec.describe FeatureReviewWithStatuses do
 
   describe '#qa_status' do
     context 'when QA submission is accepted' do
-      let(:qa_submission) { QaSubmission.new(accepted: true) }
+      let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
 
       it 'returns :success' do
         expect(decorator.qa_status).to eq(:success)
@@ -203,7 +203,7 @@ RSpec.describe FeatureReviewWithStatuses do
     end
 
     context 'when QA submission is rejected' do
-      let(:qa_submission) { QaSubmission.new(accepted: false) }
+      let(:qa_submissions) { [QaSubmission.new(accepted: false)] }
 
       it 'returns :failure' do
         expect(decorator.qa_status).to eq(:failure)
@@ -211,7 +211,7 @@ RSpec.describe FeatureReviewWithStatuses do
     end
 
     context 'when QA submission is missing' do
-      let(:qa_submission) { nil }
+      let(:qa_submissions) { nil }
 
       it 'returns nil' do
         expect(decorator.qa_status).to be nil
@@ -222,7 +222,7 @@ RSpec.describe FeatureReviewWithStatuses do
   describe '#summary_status' do
     context 'when status of builds, and QA submission are success' do
       let(:builds) { { 'frontend' => Build.new(success: true) } }
-      let(:qa_submission) { QaSubmission.new(accepted: true) }
+      let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
 
       it 'returns :success' do
         expect(decorator.summary_status).to eq(:success)
@@ -231,7 +231,7 @@ RSpec.describe FeatureReviewWithStatuses do
 
     context 'when any status of builds, or QA submission is failed' do
       let(:builds) { { 'frontend' => Build.new(success: true) } }
-      let(:qa_submission) { QaSubmission.new(accepted: false) }
+      let(:qa_submissions) { [QaSubmission.new(accepted: false)] }
 
       it 'returns :failure' do
         expect(decorator.summary_status).to eq(:failure)
@@ -240,7 +240,7 @@ RSpec.describe FeatureReviewWithStatuses do
 
     context 'when no status is a failure but at least one is a warning' do
       let(:builds) { { 'frontend' => Build.new } }
-      let(:qa_submission) { QaSubmission.new(accepted: true) }
+      let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
 
       it 'returns nil' do
         expect(decorator.summary_status).to be(nil)

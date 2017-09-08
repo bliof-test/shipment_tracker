@@ -9,7 +9,7 @@ RSpec.describe Queries::FeatureReviewQuery do
   let(:release_exception_repository) { instance_double(Repositories::ReleaseExceptionRepository) }
 
   let(:expected_builds) { double('expected builds') }
-  let(:expected_qa_submission) { double('expected qa submission') }
+  let(:expected_qa_submissions) { double('expected qa submissions') }
   let(:expected_tickets) { double('expected tickets') }
   let(:expected_release_exception) { double('release_exception') }
 
@@ -27,12 +27,15 @@ RSpec.describe Queries::FeatureReviewQuery do
     allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
     allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(release_exception_repository)
 
+    repository1 = instance_double(GitRepository, get_dependent_commits: [])
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+
     allow(build_repository).to receive(:builds_for)
       .with(apps: expected_apps, at: time)
       .and_return(expected_builds)
-    allow(manual_test_repository).to receive(:qa_submission_for)
+    allow(manual_test_repository).to receive(:qa_submissions_for)
       .with(versions: expected_apps.values, at: time)
-      .and_return(expected_qa_submission)
+      .and_return(expected_qa_submissions)
     allow(release_exception_repository).to receive(:release_exception_for)
       .with(versions: expected_apps.values, at: time)
       .and_return(expected_release_exception)
@@ -47,7 +50,7 @@ RSpec.describe Queries::FeatureReviewQuery do
         .with(
           feature_review,
           builds: expected_builds,
-          qa_submission: expected_qa_submission,
+          qa_submissions: expected_qa_submissions,
           tickets: expected_tickets,
           release_exception: expected_release_exception,
           at: time,

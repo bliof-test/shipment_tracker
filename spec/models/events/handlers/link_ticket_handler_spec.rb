@@ -20,7 +20,14 @@ RSpec.describe Events::Handlers::LinkTicketHandler do
         build(:jira_event, key: 'JIRA-1', comment_body: LinkTicket.build_comment(url1), created_at: time - 1.hour),
       ]
 
+      repository1 = instance_double(GitRepository, get_dependent_commits: [double(id: 'one')])
+      repository2 = instance_double(GitRepository, get_dependent_commits: [double(id: 'two')])
+
+      allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+      allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app2').and_return(repository2)
+
       final_ticket = events.reduce({}) { |ticket, event| described_class.new(ticket, event).apply }
+
       expect(final_ticket).to match(
         hash_including(
           'key' => 'JIRA-1',

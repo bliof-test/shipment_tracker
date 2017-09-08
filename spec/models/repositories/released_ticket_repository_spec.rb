@@ -151,6 +151,9 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       commit = instance_double(GitCommit, id: commit_version, associated_ids: %w(abc def))
       repository_loader = instance_double(GitRepositoryLoader)
 
+      allow(repository).to receive(:get_dependent_commits).with('abc').and_return([commit])
+      allow(repository).to receive(:get_dependent_commits).with('def').and_return([commit])
+
       allow(GitRepositoryLoader).to receive(:from_rails_config).and_return(repository_loader)
       allow(repository_loader).to receive(:load).and_return(repository)
       allow(repository).to receive(:commit_for_version).and_return(commit)

@@ -6,6 +6,14 @@ require 'ticket'
 RSpec.describe Factories::FeatureReviewFactory do
   subject(:factory) { described_class.new }
 
+  before do
+    repository = instance_double(GitRepository, get_dependent_commits: [])
+
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('foo').and_return(repository)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('a').and_return(repository)
+  end
+
   describe '#create_from_text' do
     let(:url1) { full_url('apps[app1]' => 'abc', 'apps[app2]' => 'def') }
     let(:url2) { full_url('apps[app1]' => 'abc') }

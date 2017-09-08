@@ -9,8 +9,13 @@ module Repositories
       @store = store
     end
 
-    def qa_submission_for(versions:, at: nil)
-      qa_submission(versions, at)
+    def qa_submissions_for(versions:, at: nil)
+      query = at ? table['created_at'].lteq(at) : nil
+      store
+        .where(query)
+        .where('versions && ?', prepared_versions(versions))
+        .order('id ASC')
+        .map { |manual_test| create_qa_submission(manual_test) }
     end
 
     def apply(event)
@@ -27,22 +32,16 @@ module Repositories
 
     private
 
-    def qa_submission(versions, at)
-      query = at ? table['created_at'].lteq(at) : nil
-      store
-        .where(query)
-        .where(table['versions'].eq(prepared_versions(versions)))
-        .order('id DESC')
-        .first
-        .try { |result| QaSubmission.new(result.attributes) }
-    end
-
     def prepared_versions(versions)
-      versions.sort
+      "{#{versions.sort.join(',')}}"
     end
 
     def table
       store.arel_table
+    end
+
+    def create_qa_submission(manual_test)
+      manual_test.try { |result| QaSubmission.new(result.attributes) }
     end
   end
 end

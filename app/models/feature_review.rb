@@ -9,7 +9,6 @@ class FeatureReview
 
   values do
     attribute :path, String
-    attribute :versions, Array
   end
 
   def app_versions
@@ -18,6 +17,19 @@ class FeatureReview
 
   def app_names
     app_versions.keys
+  end
+
+  def versions
+    app_versions.values.sort
+  end
+
+  def related_app_versions
+    app_versions.each_with_object({}) do |(app, version), hash|
+      hash[app] = GitRepositoryLoader.from_rails_config
+                                     .load(app)
+                                     .get_dependent_commits(version)
+                                     .map(&:id) + [version]
+    end
   end
 
   def query_hash

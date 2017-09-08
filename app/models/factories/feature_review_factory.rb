@@ -23,33 +23,18 @@ module Factories
     def create_from_url_string(url)
       uri = Addressable::URI.parse(url).normalize
       query_hash = Rack::Utils.parse_nested_query(uri.query)
-      apps = query_hash.fetch('apps', {})
-      versions = get_app_versions(apps)
-      create(
-        path: whitelisted_path(uri, query_hash),
-        versions: versions,
-      )
+
+      FeatureReview.new(path: whitelisted_path(uri, query_hash))
     end
 
     def create_from_apps(apps)
       uri = Addressable::URI.parse('/feature_reviews').normalize
       query_hash = { 'apps' => apps }
 
-      create(
-        path: whitelisted_path(uri, query_hash),
-        versions: get_app_versions(apps),
-      )
+      FeatureReview.new(path: whitelisted_path(uri, query_hash))
     end
 
     private
-
-    def create(attrs)
-      FeatureReview.new(attrs)
-    end
-
-    def get_app_versions(apps)
-      apps.values.reject(&:blank?)
-    end
 
     def whitelisted_path(uri, query_hash)
       "#{uri.path}?#{query_hash.extract!(*QUERY_PARAM_WHITELIST).to_query}"

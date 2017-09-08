@@ -7,6 +7,17 @@ RSpec.describe Repositories::TicketRepository do
 
   let(:git_repo_location) { class_double(GitRepositoryLocation) }
 
+  before do
+    repository_foo = instance_double(GitRepository, get_dependent_commits: [double(id: 'foo')])
+    repository1    = instance_double(GitRepository, get_dependent_commits: [double(id: 'one')])
+    repository2    = instance_double(GitRepository, get_dependent_commits: [double(id: 'two')])
+
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app').and_return(repository_foo)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app1').and_return(repository1)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('app2').and_return(repository2)
+    allow_any_instance_of(GitRepositoryLoader).to receive(:load).with('frontend').and_return(repository2)
+  end
+
   describe '#table_name' do
     it 'delegates to the active record class backing the repository' do
       active_record_class = class_double(Snapshots::Ticket, table_name: 'tickets')

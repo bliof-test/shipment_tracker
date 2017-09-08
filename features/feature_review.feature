@@ -231,8 +231,45 @@ Scenario: QA rejects feature
 
   And I reload the page after a while
   Then I should see the QA acceptance
-    | status  | email       | comment |
-    | success | foo@bar.com | Superb! |
+    | status  | email       | comment         |
+    | danger  | foo@bar.com | Not good enough |
+    | success | foo@bar.com | Superb!         |
+
+Scenario: QA has approved previous commit
+  Given an application called "frontend"
+  And a commit "#initial" by "Bob" is created at "2017-08-24 08:00:00" for app "frontend"
+  And the branch "new-branch" is checked out
+  And the branch "new-branch" is merged with merge commit "#merge1" at "2017-08-24 09:00:00"
+  And a commit "#abc" by "Alice" is created at "2017-08-24 10:00:00" for app "frontend"
+  And a commit "#def" by "Alice" is created at "2017-08-24 11:00:00" for app "frontend"
+  And I am logged in as "foo@bar.com"
+  And developer prepares review known as "review1" with apps
+    | app_name | version |
+    | frontend | #abc    |
+  And developer prepares review known as "review2" with apps
+    | app_name | version |
+    | frontend | #def    |
+
+  When I visit the feature review known as "review1"
+  Then I should see the QA acceptance with heading "warning"
+  When I "accept" the feature with comment "All good" as a QA
+  Then I should see an alert: "Thank you for your submission. It will appear in a moment."
+  When I reload the page after a while
+  Then I should see the QA acceptance
+    | status   | email       | comment  |
+    | success  | foo@bar.com | All good |
+
+  When I visit the feature review known as "review2"
+  Then I should see the QA acceptance
+    | status   | email       | comment  |
+    | success  | foo@bar.com | All good |
+  When I "reject" the feature with comment "Needs improvements" as a QA
+  Then I should see an alert: "Thank you for your submission. It will appear in a moment."
+  When I reload the page after a while
+  Then I should see the QA acceptance
+    | status   | email       | comment            |
+    | success  | foo@bar.com | All good           |
+    | danger   | foo@bar.com | Needs improvements |
 
 Scenario: Repo Owner approves feature
   Given an application with owner "foo@bar.com" called "frontend"
