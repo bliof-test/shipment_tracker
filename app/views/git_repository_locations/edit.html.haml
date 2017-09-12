@@ -13,7 +13,7 @@
 
   .form-group
     = f.label(:required_checks, class: 'control-label')
-    - GitRepositoryLocation::REQUIRED_CHECKS.each do |check|
+    - GitRepositoryLocation::AVAILABLE_CHECKS.keys.each do |check|
       .checkbox
         %label
           = check_box_tag check, check, @form.git_repository_location.required_checks.include?(check), name: 'forms_edit_git_repository_location_form[required_checks][]'

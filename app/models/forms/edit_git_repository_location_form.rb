@@ -55,7 +55,7 @@ module Forms
     end
 
     def required_checks_list_valid?
-      @required_checks.all? { |check| GitRepositoryLocation::REQUIRED_CHECKS.include?(check) }
+      @required_checks.all? { |check| GitRepositoryLocation::AVAILABLE_CHECKS.keys.include?(check) }
     end
 
     def parse_repo_owners

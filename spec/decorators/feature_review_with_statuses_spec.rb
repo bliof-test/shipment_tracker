@@ -572,6 +572,8 @@ RSpec.describe FeatureReviewWithStatuses do
         tickets: tickets,
         integration_test_results: integration_test_results,
         unit_test_results: unit_test_results,
+        qa_submissions: qa_submissions,
+        release_exception: release_exception,
       ).send(:required_checks_passed?)
     }
 
@@ -636,6 +638,38 @@ RSpec.describe FeatureReviewWithStatuses do
             instance_double(Ticket, approved?: true),
           ]
         }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when qa_approval is selected' do
+      let(:required_checks) { ['qa_approval'] }
+
+      context 'when check has passed' do
+        let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when check has not passed' do
+        let(:qa_submissions) { [QaSubmission.new(accepted: false)] }
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'when repo_owner_approval is selected' do
+      let(:required_checks) { ['repo_owner_approval'] }
+
+      context 'when check has passed' do
+        let(:release_exception) { ReleaseException.new(approved: true) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when check has not passed' do
+        let(:release_exception) { ReleaseException.new(approved: false) }
 
         it { is_expected.to be false }
       end

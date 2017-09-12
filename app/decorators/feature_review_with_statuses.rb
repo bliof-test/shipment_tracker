@@ -122,17 +122,13 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def required_checks_passed?
     required_checks_for_apps.flatten.uniq.all? do |check|
-      status =
-        case check
-        when 'integration_tests'
-          integration_test_result_status
-        when 'unit_tests'
-          unit_test_result_status
-        when 'tickets_approval'
-          tickets_approval_status
-        end
+      status_method = GitRepositoryLocation::AVAILABLE_CHECKS.fetch(check, nil)
 
-      status == :success
+      if status_method
+        send(:"#{status_method}") == :success
+      else
+        false
+      end
     end
   end
 
