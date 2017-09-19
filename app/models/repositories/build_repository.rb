@@ -37,7 +37,7 @@ module Repositories
     private
 
     def test_results_for(apps:, build_type:, at: nil)
-      default_builds = apps.keys.map { |app_name| [app_name, Build.new] }.to_h
+      default_builds = apps.keys.map { |app_name| [app_name, Build.new(build_type: build_type)] }.to_h
       builds = builds(apps.values, build_type, at).map { |build| [apps.invert[build.version], build] }.to_h
       default_builds.merge(builds)
     end

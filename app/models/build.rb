@@ -2,7 +2,7 @@
 require 'virtus'
 
 class Build
-  include Virtus.value_object
+  include Virtus.model
 
   values do
     attribute :source, String

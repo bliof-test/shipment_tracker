@@ -127,8 +127,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when all unit test results pass' do
       let(:unit_test_results) do
         {
-          'frontend' => Build.new(success: true),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:unit_test_build, success: true),
+          'backend'  => FactoryGirl.build(:unit_test_build, success: true),
         }
       end
 
@@ -139,8 +139,8 @@ RSpec.describe FeatureReviewWithStatuses do
       context 'but some unit test results are missing' do
         let(:unit_test_results) do
           {
-            'frontend' => Build.new(success: true),
-            'backend'  => Build.new,
+            'frontend' => FactoryGirl.build(:unit_test_build, success: true),
+            'backend'  => FactoryGirl.build(:unit_test_build),
           }
         end
 
@@ -153,8 +153,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when any of the unit test results fails' do
       let(:unit_test_results) do
         {
-          'frontend' => Build.new(success: false),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:unit_test_build, success: false),
+          'backend'  => FactoryGirl.build(:unit_test_build, success: true),
         }
       end
 
@@ -168,8 +168,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when all integration test results pass' do
       let(:integration_test_results) do
         {
-          'frontend' => Build.new(success: true),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:integration_test_build, success: true),
+          'backend'  => FactoryGirl.build(:integration_test_build, success: true),
         }
       end
 
@@ -180,8 +180,8 @@ RSpec.describe FeatureReviewWithStatuses do
       context 'but some unit test results are missing' do
         let(:integration_test_results) do
           {
-            'frontend' => Build.new(success: true),
-            'backend'  => Build.new,
+            'frontend' => FactoryGirl.build(:integration_test_build, success: true),
+            'backend'  => FactoryGirl.build(:integration_test_build),
           }
         end
 
@@ -194,8 +194,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when any of the unit test results is failure' do
       let(:integration_test_results) do
         {
-          'frontend' => Build.new(success: false),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:integration_test_build, success: false),
+          'backend'  => FactoryGirl.build(:integration_test_build, success: true),
         }
       end
 
@@ -259,7 +259,8 @@ RSpec.describe FeatureReviewWithStatuses do
 
   describe '#summary_status' do
     context 'when status of builds, and QA submission are success' do
-      let(:builds) { { 'frontend' => Build.new(success: true) } }
+      let(:integration_test_build) { { 'frontend' => FactoryGirl.build(:integration_test_build, success: true) } }
+      let(:unit_test_build) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
       let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
 
       it 'returns :success' do
@@ -268,7 +269,8 @@ RSpec.describe FeatureReviewWithStatuses do
     end
 
     context 'when any status of builds, or QA submission is failed' do
-      let(:builds) { { 'frontend' => Build.new(success: true) } }
+      let(:integration_test_build) { { 'frontend' => FactoryGirl.build(:integration_test_build, success: true) } }
+      let(:unit_test_build) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
       let(:qa_submissions) { [QaSubmission.new(accepted: false)] }
 
       it 'returns :failure' do
@@ -278,8 +280,8 @@ RSpec.describe FeatureReviewWithStatuses do
 
     context 'when no status is a failure but at least one is a warning' do
       let(:qa_submissions) { [QaSubmission.new(accepted: true)] }
-      let(:unit_test_results) { { 'frontend' => Build.new } }
-      let(:integration_test_results) { { 'frontend' => Build.new } }
+      let(:unit_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build) } }
+      let(:integration_test_results) { { 'frontend' => FactoryGirl.build(:integration_test_build) } }
 
       it 'returns nil' do
         expect(decorator.summary_status).to be(nil)
