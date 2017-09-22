@@ -235,8 +235,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when all unit test results pass' do
       let(:unit_test_results) do
         {
-          'frontend' => Build.new(success: true),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:unit_test_build, success: true),
+          'backend'  => FactoryGirl.build(:unit_test_build, success: true),
         }
       end
 
@@ -247,8 +247,8 @@ RSpec.describe FeatureReviewWithStatuses do
       context 'but some unit test results are missing' do
         let(:unit_test_results) do
           {
-            'frontend' => Build.new(success: true),
-            'backend'  => Build.new,
+            'frontend' => FactoryGirl.build(:unit_test_build, success: true),
+            'backend'  => FactoryGirl.build(:unit_test_build),
           }
         end
 
@@ -261,8 +261,8 @@ RSpec.describe FeatureReviewWithStatuses do
     context 'when any of the unit test results fails' do
       let(:unit_test_results) do
         {
-          'frontend' => Build.new(success: false),
-          'backend'  => Build.new(success: true),
+          'frontend' => FactoryGirl.build(:unit_test_build, success: false),
+          'backend'  => FactoryGirl.build(:unit_test_build, success: true),
         }
       end
 
@@ -589,13 +589,13 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { ['integration_tests'] }
 
       context 'when check has passed' do
-        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
+        let(:integration_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
 
         it { is_expected.to be true }
       end
 
       context 'when check has not passed' do
-        let(:integration_test_results) { { 'frontend' => Build.new(success: false) } }
+        let(:integration_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: false) } }
 
         it { is_expected.to be false }
       end
@@ -605,13 +605,13 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { ['unit_tests'] }
 
       context 'when check has passed' do
-        let(:unit_test_results) { { 'frontend' => Build.new(success: true) } }
+        let(:unit_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
 
         it { is_expected.to be true }
       end
 
       context 'when check has not passed' do
-        let(:unit_test_results) { { 'frontend' => Build.new(success: false) } }
+        let(:unit_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: false) } }
 
         it { is_expected.to be false }
       end
@@ -679,8 +679,8 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:required_checks) { %w(integration_tests unit_tests tickets_approval) }
 
       context 'when all checks have passed' do
-        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
-        let(:unit_test_results) { { 'frontend' => Build.new(success: true) } }
+        let(:integration_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
+        let(:unit_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
         let(:tickets) {
           [
             instance_double(Ticket, approved?: true),
@@ -692,8 +692,8 @@ RSpec.describe FeatureReviewWithStatuses do
       end
 
       context 'when some check has not passed' do
-        let(:integration_test_results) { { 'frontend' => Build.new(success: true) } }
-        let(:unit_test_results) { { 'frontend' => Build.new(success: false) } }
+        let(:integration_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: true) } }
+        let(:unit_test_results) { { 'frontend' => FactoryGirl.build(:unit_test_build, success: false) } }
         let(:tickets) {
           [
             instance_double(Ticket, approved?: false),
