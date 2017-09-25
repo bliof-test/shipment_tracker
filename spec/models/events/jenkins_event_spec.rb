@@ -13,6 +13,9 @@ RSpec.describe Events::JenkinsEvent do
     let(:success_payload) {
       {
         'build' => {
+          'app_name' => 'example',
+          'build_type' => 'integration',
+          'full_url' => 'http://example.com',
           'scm' => {
             'commit' => version,
           },
@@ -23,6 +26,9 @@ RSpec.describe Events::JenkinsEvent do
     let(:failure_payload) {
       {
         'build' => {
+          'app_name' => 'example',
+          'build_type' => 'integration',
+          'full_url' => 'http://example.com',
           'scm' => {
             'commit' => version,
           },

@@ -2,11 +2,14 @@
 require 'virtus'
 
 class Build
-  include Virtus.value_object
+  include Virtus.model
 
   values do
     attribute :source, String
+    attribute :url, String
     attribute :success, Boolean
+    attribute :app_name, String
     attribute :version, String
+    attribute :build_type, String
   end
 end

@@ -131,10 +131,11 @@ Scenario: Viewing a Feature Review
     | JIRA-123 | Urgent ticket | Ready for Deployment |
 
   And I should see a summary with heading "warning" and content
-    | status  | title                 |
-    | warning | Test Results          |
-    | warning | QA Acceptance         |
-    | warning | Repo Owner Commentary |
+    | status  | title                    |
+    | warning | Unit Test Results        |
+    | warning | Integration Test Results |
+    | warning | QA Acceptance            |
+    | warning | Repo Owner Commentary    |
 
   And I should see the builds with heading "warning" and content
     | Status  | App      | Source   |

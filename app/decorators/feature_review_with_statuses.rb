@@ -7,13 +7,14 @@ require 'qa_submission'
 require 'ticket'
 
 class FeatureReviewWithStatuses < SimpleDelegator
-  attr_reader :builds, :qa_submissions, :release_exception, :tickets, :time
+  attr_reader :unit_test_results, :qa_submissions, :release_exception, :integration_test_results, :tickets, :time
 
-  def initialize(feature_review, builds: {}, qa_submissions: nil, tickets: [], release_exception: nil, at: nil)
+  def initialize(feature_review, unit_test_results: {}, qa_submissions: nil, integration_test_results: {}, tickets: [], release_exception: nil, at: nil)
     super(feature_review)
     @feature_review = feature_review
     @time = at
-    @builds = builds
+    @unit_test_results = unit_test_results
+    @integration_test_results = integration_test_results
     @release_exception = release_exception
     @qa_submissions = qa_submissions
     @tickets = tickets
@@ -40,14 +41,18 @@ class FeatureReviewWithStatuses < SimpleDelegator
     github_repo_urls[app_name.first]
   end
 
-  def build_status
-    build_results = builds.values
+  def unit_test_result_status
+    test_status(unit_test_results.values)
+  end
 
-    return if build_results.empty?
+  def integration_test_result_status
+    test_status(integration_test_results.values)
+  end
 
-    if build_results.all? { |b| b.success == true }
+  def test_status(test_results)
+    if test_results.all?(&:success)
       :success
-    elsif build_results.any? { |b| b.success == false }
+    elsif test_results.any? { |build| build.success == false }
       :failure
     end
   end
@@ -63,7 +68,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def summary_status
-    statuses = [qa_status, build_status]
+    statuses = [qa_status, unit_test_result_status, integration_test_result_status]
 
     if statuses.all? { |status| status == :success }
       :success
