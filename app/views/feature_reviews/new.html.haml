@@ -21,6 +21,10 @@
           - @feature_review_form.errors[app_name].each do |error|
             %span.help-inline= error
 
-  .row
-    .col-md-6
-      = f.submit("Submit", class: "btn btn-primary pull-right")
+  - if @app_names.present?
+    .row
+      .col-md-6
+        = f.submit("Submit", class: "btn btn-primary pull-right")
+  - else
+    There are no applications. You can add some in
+    = link_to 'Repositories', git_repository_locations_path
