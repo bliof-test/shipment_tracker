@@ -28,13 +28,7 @@ class GitRepositoryLoader
   def load(repository_name, update_repo: Rails.configuration.allow_git_fetch_on_request)
     git_repository_location = find_repo_location(repository_name)
 
-    repository = if update_repo
-                   options_for(git_repository_location.uri) { |options|
-                     updated_rugged_repository(git_repository_location, options)
-                   }
-                 else
-                   rugged_repository(git_repository_location)
-                 end
+    repository = load_rugged_repository(update: update_repo, location: git_repository_location)
 
     GitRepository.new(repository)
   end
@@ -70,8 +64,7 @@ class GitRepositoryLoader
     dir = repository_dir_name(git_repository_location)
     Rugged::Repository.new(dir)
   rescue Rugged::RepositoryError
-    raise GitRepositoryLoader::BadLocation,
-      "Invalid directory location for repository: #{git_repository_location.name}"
+    load_rugged_repository(update: true, location: git_repository_location)
   end
 
   def repository_dir_name(git_repository_location)
@@ -125,5 +118,15 @@ class GitRepositoryLoader
       "#{name}.git_repository_loader",
       &block
     )
+  end
+
+  def load_rugged_repository(update:, location:)
+    if update
+      options_for(location.uri) { |options|
+        updated_rugged_repository(location, options)
+      }
+    else
+      rugged_repository(location)
+    end
   end
 end

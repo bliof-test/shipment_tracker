@@ -223,13 +223,8 @@ RSpec.describe GitRepositoryLoader do
           allow(Rugged::Repository).to receive(:new) { fail Rugged::RepositoryError }
         end
 
-        it 'raised a BadLocation error' do
-          expect {
-            git_repository_loader.load('repo', update_repo: false)
-          }.to raise_error(
-            GitRepositoryLoader::BadLocation,
-            "Invalid directory location for repository: #{git_repository_location.name}",
-          )
+        it 'updates rugged repository' do
+          expect(git_repository_loader.load('repo', update_repo: true)).to be_instance_of(GitRepository)
         end
       end
     end
