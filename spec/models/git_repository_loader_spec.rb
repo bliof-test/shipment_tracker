@@ -218,13 +218,15 @@ RSpec.describe GitRepositoryLoader do
         git_repository_loader.load('repo', update_repo: false)
       end
 
-      context 'when the location given is not valid' do
-        before do
-          allow(Rugged::Repository).to receive(:new) { fail Rugged::RepositoryError }
+      describe 'automatic recovery' do
+        it 'tries to update the repository if there is an Rugged::RepositoryError' do
+          allow(Rugged::Repository).to receive(:new).and_raise(Rugged::RepositoryError)
+          expect(git_repository_loader.load('repo', update_repo: false)).to be_instance_of(GitRepository)
         end
 
-        it 'updates rugged repository' do
-          expect(git_repository_loader.load('repo', update_repo: true)).to be_instance_of(GitRepository)
+        it 'tries to update the repository if there is a Rugged::OSError - e.g. no directory for the repository' do
+          allow(Rugged::Repository).to receive(:new).and_raise(Rugged::OSError)
+          expect(git_repository_loader.load('repo', update_repo: false)).to be_instance_of(GitRepository)
         end
       end
     end
