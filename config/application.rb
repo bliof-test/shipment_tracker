@@ -56,6 +56,6 @@ module ShipmentTracker
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
 
     # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2' codes
-    config.deploy_regions = ENV.fetch('DEPLOY_REGIONS', 'gb,us').split(',')
+    config.deploy_regions = ENV.fetch('DEPLOY_REGIONS', 'gb,us,de,nl,es').split(',')
   end
 end
