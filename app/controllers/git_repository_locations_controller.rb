@@ -31,7 +31,7 @@ class GitRepositoryLocationsController < ApplicationController
   def update
     load_edit_env
 
-    edit_params = params.require(:forms_edit_git_repository_location_form).permit(:repo_owners)
+    edit_params = params.require(:forms_edit_git_repository_location_form).permit(:repo_owners, :repo_approvers)
     @form = form_for(@git_repository_location, edit_params)
 
     if @form.call

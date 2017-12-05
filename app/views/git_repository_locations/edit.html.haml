@@ -12,4 +12,8 @@
     = f.text_area(:repo_owners, placeholder: "John Doe <repo-owner@example.com>\nsecond-repo-owner@example.com, third-repo-owner@example.com", value: @form.repo_owners_data, class: 'form-control', rows: 5)
 
   .form-group
+    = f.label(:repo_approvers, class: 'control-label')
+    = f.text_area(:repo_approvers, placeholder: "John Doe <repo-owner@example.com>\nsecond-repo-owner@example.com, third-repo-owner@example.com", value: @form.repo_approvers_data, class: 'form-control', rows: 5)
+
+  .form-group
     = f.submit('Update Git Repository', class: 'btn btn-primary')
