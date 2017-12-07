@@ -18,10 +18,11 @@
     .col-md-offset-1.col-md-4
       = form.submit('Add Git Repository', class: 'btn btn-primary')
 
-- table headers: ['Name', 'URI', t('.repo_owners')], classes: 'git_repository_locations' do
+- table headers: ['Name', 'URI', t('.repo_owners'), t('repo_approvers')], classes: 'git_repository_locations' do
   - @git_repository_locations.each do |git_repository_location|
     %tr
       %td= git_repository_location.name
       %td= git_repository_location.uri
-      %td= format_owner_emails(git_repository_location.owners)
+      %td= format_emails(git_repository_location.owners)
+      %td= format_emails(git_repository_location.approvers)
       %td= link_to 'edit', edit_git_repository_location_path(git_repository_location)
