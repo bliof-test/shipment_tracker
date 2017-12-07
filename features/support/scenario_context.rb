@@ -51,6 +51,16 @@ module Support
       fail "Could not add owners #{owners} to #{repository_location.name}" unless result
     end
 
+    def add_approvers_to(repository_location, approvers:)
+      result = Forms::EditGitRepositoryLocationForm.new(
+        repo: repository_location,
+        current_user: User.new(email: 'current-user@example.com'),
+        params: { repo_approvers: approvers },
+      ).call
+
+      fail "Could not add approvers #{approvers} to #{repository_location.name}" unless result
+    end
+
     def repository_for(application)
       @repos[application]
     end

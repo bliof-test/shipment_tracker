@@ -38,8 +38,17 @@ Given 'owner of "$application" is "$owner"' do |application, owner|
   scenario_context.add_owners_to(repo, owners: owner)
 end
 
+Given 'approver of "$application" is "$approver"' do |application, approver|
+  repo = scenario_context.repository_location_for(application)
+  scenario_context.add_approvers_to(repo, approvers: approver)
+end
+
 When 'I enter owner emails "$repo_owners"' do |repo_owners|
   edit_git_repository_location_page.fill_in_repo_owners(repo_owners: repo_owners)
+end
+
+When 'I enter approver emails "$repo_approvers"' do |repo_approvers|
+  edit_git_repository_location_page.fill_in_repo_approvers(repo_approvers: repo_approvers)
 end
 
 When 'I click "$button"' do |button|

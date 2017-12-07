@@ -10,9 +10,9 @@ Scenario: Add repositories
   When I enter a valid uri "ssh://github.com/new_app"
   When I enter a valid uri "ssh://github.com/new_app_2.git"
   Then I should see the repository locations:
-    | Name      | URI                            | Repo Owners |
-    | new_app   | ssh://github.com/new_app       |             |
-    | new_app_2 | ssh://github.com/new_app_2.git |             |
+    | Name      | URI                            | Repo Owners | Repo Approvers |
+    | new_app   | ssh://github.com/new_app       |             |                |
+    | new_app_2 | ssh://github.com/new_app_2.git |             |                |
 
 @disable_repo_verification
 Scenario: Add repository with auto-generated tokens
@@ -31,8 +31,18 @@ Scenario: Add owners of a repository
   When I enter owner emails "repo-owner@example.com, second-repo-owner@example.com"
   And I click "Update Git Repository"
   Then I should see the repository locations:
-    | Name      | URI                | Repo Owners                                           |
-    | new-app   | uri_for("new-app") | repo-owner@example.com, second-repo-owner@example.com |
+    | Name      | URI                | Repo Owners                                           | Repo Approvers |
+    | new-app   | uri_for("new-app") | repo-owner@example.com, second-repo-owner@example.com |                |
+
+@disable_repo_verification
+  Scenario: Add approvers of a repository
+    Given "new-app" repository
+    And I am on the edit repository location form for "new-app"
+    When I enter approver emails "repo-approver@example.com, second-repo-approver@example.com"
+    And I click "Update Git Repository"
+    Then I should see the repository locations:
+    | Name      | URI                | Repo Owners | Repo Approvers                                              |
+    | new-app   | uri_for("new-app") |             | repo-approver@example.com, second-repo-approver@example.com |
 
 @disable_repo_verification
 Scenario: Edit owners of a repository
@@ -42,5 +52,16 @@ Scenario: Edit owners of a repository
   When I enter owner emails "repo-owner@example.com, second-repo-owner@example.com"
   And I click "Update Git Repository"
   Then I should see the repository locations:
-    | Name      | URI                | Repo Owners                                           |
-    | new-app   | uri_for("new-app") | repo-owner@example.com, second-repo-owner@example.com |
+    | Name      | URI                | Repo Owners                                           | Repo Approvers |
+    | new-app   | uri_for("new-app") | repo-owner@example.com, second-repo-owner@example.com |                |
+
+@disable_repo_verification
+Scenario: Edit approvers of a repository
+  Given "new-app" repository
+  And approver of "new-app" is "test@example.com"
+  And I am on the edit repository location form for "new-app"
+  When I enter approver emails "repo-approver@example.com, second-repo-approver@example.com"
+  And I click "Update Git Repository"
+  Then I should see the repository locations:
+    | Name      | URI                | Repo Owners | Repo Approvers                                              |
+    | new-app   | uri_for("new-app") |             | repo-approver@example.com, second-repo-approver@example.com |
