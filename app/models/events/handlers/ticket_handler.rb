@@ -37,9 +37,8 @@ module Events
       end
 
       def merge_approved_by_email(event)
-        if event.approval? && event.details['user']
-          event.details['user']['emailAddress']
-        end
+        return unless event.approval? && event.details['user']
+        event.details['user']['emailAddress']
       end
     end
   end

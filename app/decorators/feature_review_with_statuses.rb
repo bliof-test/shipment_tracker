@@ -78,7 +78,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def authorised?
-    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions) })
+    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions, apps_with_approver_emails) })
   end
 
   def authorisation_status
@@ -98,11 +98,15 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def tickets_approved?
-    @approved ||= tickets.present? && tickets.all? { |ticket| ticket.approved? }
+    @approved ||= tickets.present? && tickets.all?(&:approved?)
   end
 
   def approved_path
     "#{base_path}?#{query_hash.merge(time: approved_at.utc).to_query}" if authorised?
+  end
+
+  def apps_with_approver_emails
+    GitRepositoryLocation.where(name: @feature_review.app_names).map { |app| [app.name, app.approvers.map(&:email)] }.to_h
   end
 
   private

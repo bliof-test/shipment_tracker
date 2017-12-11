@@ -17,8 +17,8 @@
               %td= jira_link(ticket.key)
               %td= ticket.summary
               %td
-                - icon(item_status_icon_class(ticket.authorised?(@feature_review_with_statuses.versions)))
-                = ticket.authorisation_status(@feature_review_with_statuses.versions)
+                - icon(item_status_icon_class(ticket.authorised?(@feature_review_with_statuses.versions, @feature_review_with_statuses.apps_with_approver_emails)))
+                = ticket.authorisation_status(@feature_review_with_statuses.versions, @feature_review_with_statuses.apps_with_approver_emails)
               %td
                 = link_to 'unlink', {controller: :feature_reviews, action: :unlink_ticket, apps: @feature_review_with_statuses.app_versions, jira_key: ticket.key, return_to: @return_to}, {class: 'btn btn-danger btn-xs', role: 'button'}
 
