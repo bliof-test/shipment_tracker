@@ -11,6 +11,7 @@ class Ticket
     attribute :status, String, default: 'To Do'
     attribute :paths, Array, default: []
     attribute :approved_at, DateTime
+    attribute :approved_by_email, String
     attribute :version_timestamps, Hash[String => DateTime]
     attribute :versions, Array, default: []
   end
