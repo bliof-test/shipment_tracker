@@ -31,6 +31,10 @@ module Events
       details.dig('comment', 'body') || ''
     end
 
+    def approved_by_email
+      details.dig('user', 'emailAddress') || ''
+    end
+
     def approval?
       status_item &&
         !approved_status?(status_item['fromString']) &&

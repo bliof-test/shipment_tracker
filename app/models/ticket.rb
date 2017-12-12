@@ -16,7 +16,7 @@ class Ticket
     attribute :versions, Array, default: []
   end
 
-  def authorisation_status(versions_under_review, apps_with_approver_emails = [])
+  def authorisation_status(versions_under_review, apps_with_approver_emails = {})
     return 'Requires reapproval' if approved? && !authorised?(versions_under_review, apps_with_approver_emails)
     status
   end
@@ -25,9 +25,9 @@ class Ticket
     Rails.application.config.approved_statuses.include?(status)
   end
 
-  def authorised?(versions_under_review, apps_with_approver_emails = [])
-    return false if approved_at.nil? || !apps_with_approver_emails.all? { |_, emails|
-      emails.include?(approved_by_email.downcase)
+  def authorised?(versions_under_review, apps_with_approver_emails = {})
+    return false if approved_at.nil? || apps_with_approver_emails.any? { |_, emails|
+      emails.present? && !emails.include?(approved_by_email.downcase)
     }
 
     linked_at = versions_under_review.map { |v| version_timestamps[v] }.compact.min

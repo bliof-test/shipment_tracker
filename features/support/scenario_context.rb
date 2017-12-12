@@ -106,7 +106,7 @@ module Support
 
     def post_jira_comment(jira_key:, feature_review_nickname:, time: Time.current.to_s, comment_type:)
       url = review_url(feature_review_nickname: feature_review_nickname)
-      ticket_details = @tickets.fetch(jira_key).merge!(
+      ticket_details = @tickets.fetch(jira_key).except(:approved_by_email).merge!(
         comment_body: comment_type.build_comment(url),
         updated: time,
       )
@@ -120,7 +120,7 @@ module Support
     end
 
     def approve_ticket(jira_key:, approver_email:, approve:, time: nil)
-      ticket_details = @tickets.fetch(jira_key).except(:status, :comment_body)
+      ticket_details = @tickets.fetch(jira_key).except(:status, :comment_body, :approved_by_email)
       ticket_details[:user_email] = approver_email
       ticket_details[:updated] = time
       event = build(
@@ -128,7 +128,7 @@ module Support
         approve ? :approved : :unapproved,
         ticket_details,
       )
-      @tickets[jira_key] = ticket_details.merge(status: event.status)
+      @tickets[jira_key] = ticket_details.merge(status: event.status, approved_by_email: approver_email)
 
       @stubbed_requests['success'] = stub_request(:post, %r{https://api.github.com/.*})
                                      .with(body: /"state":"success"/)

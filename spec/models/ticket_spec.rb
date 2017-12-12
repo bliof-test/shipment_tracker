@@ -25,6 +25,29 @@ RSpec.describe Ticket do
 
     let(:versions) { %w(abc def) }
     let(:current_time) { Time.current }
+    let(:email1) { 'joe.bloggs@example.com' }
+    let(:email2) { 'jane.bloggs@example.com' }
+    let(:apps_with_approver_emails) { { 'app1' => [email1, email2], 'app2' => [email1] } }
+
+    context 'when the ticket was approved by the approver of all repositories' do
+      subject { ticket.authorised?(versions, apps_with_approver_emails) }
+
+      let(:ticket_attributes) {
+        { approved_at: current_time, version_timestamps: { versions.first => 1.hour.ago }, approved_by_email: email1 }
+      }
+
+      it { is_expected.to be true }
+    end
+
+    context 'when the ticket was approved by user who is not the approver of all repositories' do
+      subject { ticket.authorised?(versions, apps_with_approver_emails) }
+
+      let(:ticket_attributes) {
+        { approved_at: current_time, version_timestamps: { versions.first => 1.hour.ago }, approved_by_email: email2 }
+      }
+
+      it { is_expected.to be false }
+    end
 
     context 'when the ticket was approved after it was linked' do
       let(:ticket_attributes) {

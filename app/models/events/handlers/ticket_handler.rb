@@ -14,7 +14,7 @@ module Events
           'status' => event.status,
           'event_created_at' => event.created_at,
           'approved_at' => merge_approved_at(ticket, event),
-          'approved_by_email' => merge_approved_by_email(event),
+          'approved_by_email' => merge_approved_by_email(ticket, event),
         )
       end
 
@@ -36,9 +36,12 @@ module Events
         end
       end
 
-      def merge_approved_by_email(event)
-        return unless event.approval? && event.details['user']
-        event.details['user']['emailAddress']
+      def merge_approved_by_email(last_ticket, event)
+        if event.approval? && event.details['user']
+          event.approved_by_email
+        elsif last_ticket.present? && Ticket.new(status: event.status).approved?
+          last_ticket['approved_by_email']
+        end
       end
     end
   end

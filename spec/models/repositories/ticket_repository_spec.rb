@@ -341,6 +341,7 @@ RSpec.describe Repositories::TicketRepository do
               approved_at: times[1],
               event_created_at: times[1],
               version_timestamps: { 'foo' => times[0] },
+              approved_by_email: 'joe.bloggs@example.com',
             ),
           ),
         ])

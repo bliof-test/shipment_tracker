@@ -26,22 +26,26 @@ RSpec.describe Events::Handlers::TicketHandler do
     context 'when the event is approval' do
       it 'updates approved_at with events created_at' do
         ticket = {}
-        created_ticket_event = build(:jira_event, :approved, created_at: time + 1.hour)
+        created_ticket_event = build(
+          :jira_event,
+          :approved,
+          created_at: time + 1.hour,
+        )
 
         new_ticket = described_class.new(ticket, created_ticket_event).apply
 
-        expect(new_ticket).to include('approved_at' => time + 1.hour)
+        expect(new_ticket).to include('approved_at' => time + 1.hour, 'approved_by_email' => 'joe.bloggs@example.com')
       end
     end
 
     context 'when ticket is present and event is PAST approval' do
       it 'uses approved_at from previous event' do
-        ticket = { 'approved_at' => 123 }
+        ticket = { 'approved_at' => 123, 'approved_by_email' => 'joe.bloggs@example.com' }
         created_ticket_event = build(:jira_event, :deployed, created_at: time + 1.hour)
 
         new_ticket = described_class.new(ticket, created_ticket_event).apply
 
-        expect(new_ticket).to include('approved_at' => 123)
+        expect(new_ticket).to include('approved_at' => 123, 'approved_by_email' => 'joe.bloggs@example.com')
       end
     end
   end

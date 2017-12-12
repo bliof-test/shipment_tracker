@@ -12,7 +12,7 @@ RSpec.describe FeatureReviewWithStatuses do
   let(:app_names) { apps.keys }
   let(:versions) { apps.values }
 
-  let(:feature_review) { instance_double(FeatureReview, app_versions: apps, versions: versions) }
+  let(:feature_review) { instance_double(FeatureReview, app_versions: apps, versions: versions, app_names: app_names) }
   let(:query_time) { Time.parse('2014-08-10 14:40:48 UTC') }
 
   subject(:decorator) {
@@ -475,6 +475,7 @@ RSpec.describe FeatureReviewWithStatuses do
         base_path: '/feature_reviews',
         query_hash: { 'apps' => apps },
         app_versions: apps,
+        app_names: app_names,
         versions: apps.values,
       )
     }
