@@ -69,8 +69,8 @@ RSpec.describe DeployAlertJob do
       allow_any_instance_of(Repositories::RepoOwnershipRepository).to(
         receive(:owners_of).with('frontend').and_return(
           [
-            build(:repo_owner, name: 'John', email: 'john@test.com'),
-            build(:repo_owner, name: 'Ivan', email: 'ivan@test.com'),
+            build(:repo_admin, name: 'John', email: 'john@test.com'),
+            build(:repo_admin, name: 'Ivan', email: 'ivan@test.com'),
           ],
         ),
       )

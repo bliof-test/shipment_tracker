@@ -3,7 +3,7 @@ require 'events/base_event'
 
 module Events
   class ReleaseExceptionEvent < Events::BaseEvent
-    validate :validate_repo_owner_permissions
+    validate :validate_repo_admin_permissions
 
     def apps
       details.fetch('apps', [])
@@ -24,7 +24,7 @@ module Events
     end
 
     def repo_owner
-      RepoOwner.find_or_initialize_by(email: email)
+      RepoAdmin.find_or_initialize_by(email: email)
     end
 
     def versions
@@ -49,7 +49,7 @@ module Events
       apps.map { |app| app['name'] }
     end
 
-    def validate_repo_owner_permissions
+    def validate_repo_admin_permissions
       return if git_repos.any? { |repo| repo_owner.owner_of?(repo) }
 
       errors.add(:repo_owner, :not_allowed_to_add_release_exception)

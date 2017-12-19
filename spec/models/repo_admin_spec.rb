@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 require 'rails_helper'
 
-RSpec.describe RepoOwner do
+RSpec.describe RepoAdmin do
   describe '.to_mail_address_list' do
     it 'will return a MailAddressList with the emails of the repo owners' do
-      mail_list = RepoOwner.to_mail_address_list([
-        FactoryGirl.build(:repo_owner, name: 'John', email: 'john@test.com'),
-        FactoryGirl.build(:repo_owner, name: nil, email: 'ivan@test.com'),
+      mail_list = RepoAdmin.to_mail_address_list([
+        FactoryGirl.build(:repo_admin, name: 'John', email: 'john@test.com'),
+        FactoryGirl.build(:repo_admin, name: nil, email: 'ivan@test.com'),
       ])
 
       expect(mail_list).to be_kind_of(MailAddressList)
@@ -16,8 +16,8 @@ RSpec.describe RepoOwner do
 
   describe 'validations' do
     it 'is invalid when there is already a project owner with that email' do
-      FactoryGirl.create(:repo_owner, email: 'test@duplication.com')
-      repo_owner = FactoryGirl.build(:repo_owner, email: 'test@duplication.com')
+      FactoryGirl.create(:repo_admin, email: 'test@duplication.com')
+      repo_owner = FactoryGirl.build(:repo_admin, email: 'test@duplication.com')
 
       repo_owner.valid?
 
@@ -25,7 +25,7 @@ RSpec.describe RepoOwner do
     end
 
     it 'is invalid if there is no email' do
-      repo_owner = FactoryGirl.build(:repo_owner, email: nil)
+      repo_owner = FactoryGirl.build(:repo_admin, email: nil)
 
       repo_owner.valid?
 
@@ -33,7 +33,7 @@ RSpec.describe RepoOwner do
     end
 
     it 'is invalid if the email is bad' do
-      repo_owner = FactoryGirl.build(:repo_owner, email: 'ninja')
+      repo_owner = FactoryGirl.build(:repo_admin, email: 'ninja')
 
       repo_owner.valid?
 
@@ -43,7 +43,7 @@ RSpec.describe RepoOwner do
 
   describe '#owner_of?' do
     it 'is true when there is an active ownership between the repo and the owner' do
-      repo_owner = FactoryGirl.build(:repo_owner)
+      repo_owner = FactoryGirl.build(:repo_admin)
       repo = double('Repo')
 
       expect(repo).to receive(:owners).and_return([repo_owner])
@@ -52,7 +52,7 @@ RSpec.describe RepoOwner do
     end
 
     it "is false when there isn't an active ownership" do
-      repo_owner = FactoryGirl.build(:repo_owner)
+      repo_owner = FactoryGirl.build(:repo_admin)
       repo = double('Repo')
 
       expect(repo).to receive(:owners).and_return([])

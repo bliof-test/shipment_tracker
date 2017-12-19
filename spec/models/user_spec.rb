@@ -16,29 +16,29 @@ RSpec.describe User do
     end
   end
 
-  describe '.as_repo_owner' do
+  describe '.as_repo_admin' do
     it 'will return a repo owner that has the same email if such exists' do
-      repo_owner = FactoryGirl.create(:repo_owner, email: 'test@example.com')
+      repo_owner = FactoryGirl.create(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
-      expect(user.as_repo_owner).to eq(repo_owner)
+      expect(user.as_repo_admin).to eq(repo_owner)
     end
 
     it 'will return a new repo owner when there is none in the database' do
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
-      expect(user.as_repo_owner.name).to eq('Test')
-      expect(user.as_repo_owner.email).to eq('test@example.com')
-      expect(user.as_repo_owner).to_not be_persisted
+      expect(user.as_repo_admin.name).to eq('Test')
+      expect(user.as_repo_admin.email).to eq('test@example.com')
+      expect(user.as_repo_admin).to_not be_persisted
     end
   end
 
   describe '#owner_of?' do
     it 'is true when the related repo owner has access to the repo' do
-      repo_owner = FactoryGirl.build(:repo_owner, email: 'test@example.com')
+      repo_owner = FactoryGirl.build(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
-      allow(RepoOwner).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
+      allow(RepoAdmin).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
 
       repo = instance_double(GitRepositoryLocation)
 
@@ -47,10 +47,10 @@ RSpec.describe User do
     end
 
     it "is false when the related repo owner doesn't have access to the repo" do
-      repo_owner = FactoryGirl.build(:repo_owner, email: 'test@example.com')
+      repo_owner = FactoryGirl.build(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
-      allow(RepoOwner).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
+      allow(RepoAdmin).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
 
       repo = instance_double(GitRepositoryLocation)
 

@@ -277,7 +277,8 @@ CREATE TABLE git_repository_locations (
     name character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    remote_head character varying
+    remote_head character varying,
+    required_checks text[] DEFAULT '{}'::text[]
 );
 
 
@@ -406,10 +407,10 @@ ALTER SEQUENCE released_tickets_id_seq OWNED BY released_tickets.id;
 
 
 --
--- Name: repo_owners; Type: TABLE; Schema: public; Owner: -
+-- Name: repo_admins; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE repo_owners (
+CREATE TABLE repo_admins (
     id integer NOT NULL,
     name character varying,
     email character varying NOT NULL,
@@ -419,10 +420,10 @@ CREATE TABLE repo_owners (
 
 
 --
--- Name: repo_owners_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+-- Name: repo_admins_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE repo_owners_id_seq
+CREATE SEQUENCE repo_admins_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -431,10 +432,10 @@ CREATE SEQUENCE repo_owners_id_seq
 
 
 --
--- Name: repo_owners_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+-- Name: repo_admins_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE repo_owners_id_seq OWNED BY repo_owners.id;
+ALTER SEQUENCE repo_admins_id_seq OWNED BY repo_admins.id;
 
 
 --
@@ -492,7 +493,8 @@ CREATE TABLE tickets (
     event_created_at timestamp without time zone,
     versions text[] DEFAULT '{}'::text[],
     approved_at timestamp without time zone,
-    version_timestamps hstore DEFAULT ''::hstore NOT NULL
+    version_timestamps hstore DEFAULT ''::hstore NOT NULL,
+    approved_by_email character varying
 );
 
 
@@ -645,10 +647,10 @@ ALTER TABLE ONLY released_tickets ALTER COLUMN id SET DEFAULT nextval('released_
 
 
 --
--- Name: repo_owners id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: repo_admins id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY repo_owners ALTER COLUMN id SET DEFAULT nextval('repo_owners_id_seq'::regclass);
+ALTER TABLE ONLY repo_admins ALTER COLUMN id SET DEFAULT nextval('repo_admins_id_seq'::regclass);
 
 
 --
@@ -752,11 +754,11 @@ ALTER TABLE ONLY released_tickets
 
 
 --
--- Name: repo_owners repo_owners_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: repo_admins repo_admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY repo_owners
-    ADD CONSTRAINT repo_owners_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY repo_admins
+    ADD CONSTRAINT repo_admins_pkey PRIMARY KEY (id);
 
 
 --
@@ -897,10 +899,10 @@ CREATE INDEX index_released_tickets_on_versions ON released_tickets USING gin (v
 
 
 --
--- Name: index_repo_owners_on_email; Type: INDEX; Schema: public; Owner: -
+-- Name: index_repo_admins_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX index_repo_owners_on_email ON repo_owners USING btree (email);
+CREATE UNIQUE INDEX index_repo_admins_on_email ON repo_admins USING btree (email);
 
 
 --
@@ -964,7 +966,7 @@ CREATE TRIGGER released_tickets_tsv_update BEFORE INSERT OR UPDATE ON released_t
 --
 
 ALTER TABLE ONLY release_exceptions
-    ADD CONSTRAINT fk_rails_90b3b0f798 FOREIGN KEY (repo_owner_id) REFERENCES repo_owners(id);
+    ADD CONSTRAINT fk_rails_90b3b0f798 FOREIGN KEY (repo_owner_id) REFERENCES repo_admins(id);
 
 
 --
@@ -1065,5 +1067,11 @@ INSERT INTO schema_migrations (version) VALUES ('20170407150443');
 
 INSERT INTO schema_migrations (version) VALUES ('20170808075905');
 
+INSERT INTO schema_migrations (version) VALUES ('20170901114312');
+
 INSERT INTO schema_migrations (version) VALUES ('20171205132454');
+
+INSERT INTO schema_migrations (version) VALUES ('20171208143840');
+
+INSERT INTO schema_migrations (version) VALUES ('20171219093236');
 

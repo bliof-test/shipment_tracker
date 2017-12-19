@@ -58,7 +58,7 @@ module Forms
     private
 
     def mail_address_list(emails)
-      RepoOwner.to_mail_address_list(emails).format.gsub(', ', "\n")
+      RepoAdmin.to_mail_address_list(emails).format.gsub(', ', "\n")
     end
 
     def repo_ownership_repository

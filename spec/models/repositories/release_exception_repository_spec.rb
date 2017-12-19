@@ -4,7 +4,7 @@ require 'rails_helper'
 RSpec.describe Repositories::ReleaseExceptionRepository do
   subject(:repository) { Repositories::ReleaseExceptionRepository.new }
 
-  let(:repo_owner) { FactoryGirl.create(:repo_owner, email: 'test@example.com') }
+  let(:repo_owner) { FactoryGirl.create(:repo_admin, email: 'test@example.com') }
 
   before do
     FactoryGirl.create(:git_repository_location, name: 'app1', uri: 'http://example.com/app1.git')

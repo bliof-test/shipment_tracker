@@ -20,13 +20,13 @@ module Repositories
 
     def owners_of(repo)
       store.for(repo).owner_emails.addresses.map do |email|
-        RepoOwner.find_by!(email: email.address)
+        RepoAdmin.find_by!(email: email.address)
       end
     end
 
     def approvers_of(repo)
       store.for(repo).approver_emails.addresses.map do |email|
-        RepoOwner.find_by!(email: email.address)
+        RepoAdmin.find_by!(email: email.address)
       end
     end
 
@@ -34,7 +34,7 @@ module Repositories
 
     def save_emails(emails)
       emails.each do |email|
-        owner = RepoOwner.find_or_initialize_by(email: email.address)
+        owner = RepoAdmin.find_or_initialize_by(email: email.address)
         owner.name = email.display_name if email.raw.include?('<')
         owner.save!
         owner

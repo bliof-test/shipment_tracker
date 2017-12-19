@@ -16,7 +16,7 @@ class ReleaseException
   end
 
   def repo_owner
-    RepoOwner.find(repo_owner_id)
+    RepoAdmin.find(repo_owner_id)
   end
 
   def approved_at

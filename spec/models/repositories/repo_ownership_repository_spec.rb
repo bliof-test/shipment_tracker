@@ -24,7 +24,7 @@ RSpec.describe Repositories::RepoOwnershipRepository do
         .to have_attributes(app_name: 'test', repo_owners: 'Test <test@test.com>, test2@test.com')
     end
 
-    it 'will create a RepoOwner record each of the owner without existing one' do
+    it 'will create a RepoAdmin record each of the owner without existing one' do
       event = build(
         :repo_ownership_event,
         app_name: 'test',
@@ -33,16 +33,16 @@ RSpec.describe Repositories::RepoOwnershipRepository do
 
       repository.apply(event)
 
-      repo_owners = RepoOwner.all
+      repo_admins = RepoAdmin.all
 
-      expect(repo_owners.size).to eq(2)
-      expect(repo_owners.first).to have_attributes(name: 'Test', email: 'test@test.com')
-      expect(repo_owners.second).to have_attributes(name: nil, email: 'test2@test.com')
+      expect(repo_admins.size).to eq(2)
+      expect(repo_admins.first).to have_attributes(name: 'Test', email: 'test@test.com')
+      expect(repo_admins.second).to have_attributes(name: nil, email: 'test2@test.com')
     end
 
     it 'will update already existing repo owners' do
-      repo_owner = create(:repo_owner, name: 'Test', email: 'test@test.com')
-      repo_owner2 = create(:repo_owner, name: 'Test2', email: 'test2@test.com')
+      repo_owner = create(:repo_admin, name: 'Test', email: 'test@test.com')
+      repo_owner2 = create(:repo_admin, name: 'Test2', email: 'test2@test.com')
 
       event = build(
         :repo_ownership_event,
@@ -52,7 +52,7 @@ RSpec.describe Repositories::RepoOwnershipRepository do
 
       repository.apply(event)
 
-      expect(RepoOwner.count).to eq(2)
+      expect(RepoAdmin.count).to eq(2)
 
       expect(repo_owner.reload).to have_attributes(name: 'Hello', email: 'test@test.com')
       expect(repo_owner2.reload).to have_attributes(name: nil, email: 'test2@test.com')
