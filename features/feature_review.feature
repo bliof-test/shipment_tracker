@@ -57,8 +57,8 @@ Scenario: Linking a Feature Review
 
   When I reload the page after a while
   Then I should see the tickets
-    | Ticket   | Summary       | Status      |
-    | JIRA-123 | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      | Approved by |
+    | JIRA-123 | Urgent ticket | In Progress |             |
 
   When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
   Then I should see an alert: "Failed to link JIRA-123. Duplicate tickets should not be added."
@@ -79,16 +79,16 @@ Scenario: Unlinking a ticket from a Feature Review
 
   When I reload the page after a while
   Then I should see the tickets
-    | Ticket   | Summary       | Status      |
-    | JIRA-123 | Urgent ticket | In Progress |
-    | JIRA-789 | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      | Approved by |
+    | JIRA-123 | Urgent ticket | In Progress |             |
+    | JIRA-789 | Urgent ticket | In Progress |             |
 
   When I unlink the feature review "FR_view" from the Jira ticket "JIRA-123"
 
   When I reload the page after a while
   Then I should see the tickets
-    | Ticket   | Summary       | Status      |
-    | JIRA-789 | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      | Approved by |
+    | JIRA-789 | Urgent ticket | In Progress |             |
 
 @logged_in
 Scenario: Viewing a Feature Review
@@ -127,8 +127,8 @@ Scenario: Viewing a Feature Review
   Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
 
   And I should see the tickets
-    | Ticket   | Summary       | Status               |
-    | JIRA-123 | Urgent ticket | Ready for Deployment |
+    | Ticket   | Summary       | Status               | Approved by           |
+    | JIRA-123 | Urgent ticket | Ready for Deployment | jim@fundingcircle.com |
 
   And I should see a summary with heading "warning" and content
     | status  | title                    |
@@ -158,8 +158,8 @@ Scenario: Viewing a Feature Review that requires re-approval
 
   Then I should see that the Feature Review requires reapproval
   And I should see the tickets
-    | Ticket | Summary   | Status              |
-    | JIRA-1 | Some work | Requires reapproval |
+    | Ticket | Summary   | Status              | Approved by |
+    | JIRA-1 | Some work | Requires reapproval |             |
 
 @logged_in
 Scenario: Viewing a Feature Review as at a specified time
@@ -175,8 +175,8 @@ Scenario: Viewing a Feature Review as at a specified time
   When I visit feature review "FR_123" as at "2014-10-04 14:00:00"
 
   Then I should see the tickets
-    | Ticket   | Summary       | Status      |
-    | JIRA-123 | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      | Approved by |
+    | JIRA-123 | Urgent ticket | In Progress |             |
 
   And I should see the time "2014-10-04 14:00:00" for the Feature Review
 
@@ -197,14 +197,14 @@ Scenario: Viewing an approved Feature Review after regenerating snapshots
   When I visit feature review "FR_123" as at "2014-10-04 15:00:00"
   Then I should see that the Feature Review was not approved
   Then I should see the tickets
-    | Ticket   | Summary       | Status      |
-    | JIRA-123 | Urgent ticket | In Progress |
+    | Ticket   | Summary       | Status      | Approved by |
+    | JIRA-123 | Urgent ticket | In Progress |             |
 
   When I visit feature review "FR_123" as at "2014-10-06 10:00:00"
   Then I should see that the Feature Review was approved at "2014-10-05 17:30:10"
   And I should see the tickets
-    | Ticket   | Summary       | Status               |
-    | JIRA-123 | Urgent ticket | Ready for Deployment |
+    | Ticket   | Summary       | Status               | Approved by           |
+    | JIRA-123 | Urgent ticket | Ready for Deployment | jim@fundingcircle.com |
 
 Scenario: QA rejects feature
   Given an application called "frontend"
