@@ -67,7 +67,7 @@
         - if @feature_review_with_statuses.release_exception
           %p
             %span.repo-owner-email
-              %strong= format_owner_emails([@feature_review_with_statuses.release_exception.repo_owner])
+              %strong= format_emails([@feature_review_with_statuses.release_exception.repo_owner])
             at
             %span.repo-owner-time= @feature_review_with_statuses.release_exception.submitted_at
           = simple_format(@feature_review_with_statuses.release_exception.comment, class: 'repo-owner-comment')

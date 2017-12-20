@@ -48,15 +48,21 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
     it 'will generate a repo ownership event' do
       repo = FactoryGirl.create(:git_repository_location, name: 'my-app')
       current_user = double('User', email: 'test@test.com')
-      input_data = "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n"
+      owner_data = "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n"
+      approver_data = "test4@example.com, test5@example.com \n\n\nTest Example <test6@example.com>  \n\n\n"
 
-      form = form_for({ repo_owners: input_data }, repo: repo, current_user: current_user)
+      form = form_for(
+        { repo_owners: owner_data, repo_approvers: approver_data },
+        repo: repo,
+        current_user: current_user,
+      )
 
       expect(Events::RepoOwnershipEvent).to(
         receive(:create!).with(
           details: {
             app_name: 'my-app',
             repo_owners: 'test@example.com, test3@example.com, Test Example <test2@example.com>',
+            repo_approvers: 'test4@example.com, test5@example.com, Test Example <test6@example.com>',
             email: 'test@test.com',
           },
         ),

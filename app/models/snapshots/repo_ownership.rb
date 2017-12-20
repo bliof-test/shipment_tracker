@@ -13,5 +13,9 @@ module Snapshots
     def owner_emails
       MailAddressList.new(repo_owners)
     end
+
+    def approver_emails
+      MailAddressList.new(repo_approvers)
+    end
   end
 end

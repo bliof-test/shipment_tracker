@@ -155,7 +155,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
     it 'returns an array the current repo owners' do
       repo = described_class.new(name: 'test-repo')
-      repo_owners = [RepoOwner.new]
+      repo_owners = [RepoAdmin.new]
 
       expect_any_instance_of(Repositories::RepoOwnershipRepository)
         .to receive(:owners_of).with(repo).and_return(repo_owners)

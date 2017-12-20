@@ -53,6 +53,10 @@ class GitRepositoryLocation < ActiveRecord::Base
     repo_ownership_repository.owners_of(self)
   end
 
+  def approvers
+    repo_ownership_repository.approvers_of(self)
+  end
+
   private
 
   def repo_ownership_repository

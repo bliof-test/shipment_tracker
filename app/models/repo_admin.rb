@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-class RepoOwner < ActiveRecord::Base
+class RepoAdmin < ActiveRecord::Base
   class << self
     def to_mail_address_list(owners)
       MailAddressList.new(owners.map { |owner| { name: owner.name, email: owner.email } })

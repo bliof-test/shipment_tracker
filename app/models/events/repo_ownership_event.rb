@@ -10,5 +10,9 @@ module Events
     def repo_owners
       details['repo_owners']
     end
+
+    def repo_approvers
+      details['repo_approvers']
+    end
   end
 end

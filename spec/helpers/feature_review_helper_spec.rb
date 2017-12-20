@@ -12,7 +12,7 @@ RSpec.describe FeatureReviewsHelper do
   end
 
   describe '#owner_of_any_repo?' do
-    let!(:repo_owner) { FactoryGirl.create(:repo_owner, email: 'test@example.com') }
+    let!(:repo_owner) { FactoryGirl.create(:repo_admin, email: 'test@example.com') }
     let!(:git_repos) { [FactoryGirl.create(:git_repository_location, name: 'app1')] }
     let(:feature_review) { double(:feature_review, app_names: %w(app1)) }
 

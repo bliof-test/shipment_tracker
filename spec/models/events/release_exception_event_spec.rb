@@ -86,7 +86,7 @@ RSpec.describe Events::ReleaseExceptionEvent do
     context 'when the owner owns at least 1 of the repos' do
       it 'creates an exception' do
         repo = create(:git_repository_location, name: 'frontend')
-        owner = create(:repo_owner, email: 'test@example.com')
+        owner = create(:repo_admin, email: 'test@example.com')
 
         expect_any_instance_of(Repositories::RepoOwnershipRepository)
           .to receive(:owners_of).with(repo).and_return([owner])

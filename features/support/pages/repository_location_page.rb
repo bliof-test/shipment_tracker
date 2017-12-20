@@ -39,6 +39,10 @@ module Pages
       page.fill_in 'Repo Owners', with: repo_owners
     end
 
+    def fill_in_repo_approvers(repo_approvers:)
+      page.fill_in 'Repo Approvers', with: repo_approvers
+    end
+
     def click(button)
       page.click_link_or_button(button)
     end
