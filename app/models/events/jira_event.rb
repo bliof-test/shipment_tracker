@@ -31,6 +31,14 @@ module Events
       details.dig('comment', 'body') || ''
     end
 
+    def changelog_old_key
+      key_item.fetch('fromString')
+    end
+
+    def changelog_new_key
+      key_item.fetch('toString')
+    end
+
     def approval?
       status_item &&
         !approved_status?(status_item['fromString']) &&
@@ -41,6 +49,12 @@ module Events
       status_item &&
         approved_status?(status_item['fromString']) &&
         !approved_status?(status_item['toString'])
+    end
+
+    def transfer?
+      return false unless key_item.present?
+
+      changelog_old_key != changelog_new_key
     end
 
     def apply(ticket)
@@ -69,6 +83,10 @@ module Events
 
     def status_item
       @status_item ||= changelog_items.find { |item| item['field'] == 'status' }
+    end
+
+    def key_item
+      @key_item ||= changelog_items.find { |item| item['field'] == 'Key' }
     end
 
     def changelog_items
