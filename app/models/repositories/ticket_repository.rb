@@ -55,7 +55,7 @@ module Repositories
     end
 
     def previous_ticket_data(event)
-      key = event.transfer? ? event.changelog_new_key : event.key
+      key = event.transfer? ? event.changelog_old_key : event.key
       attrs = store.where(key: key).last&.attributes || {}
       attrs.except!('id')
     end

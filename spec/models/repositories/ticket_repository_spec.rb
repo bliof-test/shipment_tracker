@@ -564,6 +564,43 @@ RSpec.describe Repositories::TicketRepository do
         end
       end
     end
+
+    describe 'updating of ticket keys' do
+      let(:attrs_1) {
+        { key: 'ONEJIRA-1',
+          summary: 'ONEJIRA-1 summary',
+          status: 'Done',
+          paths: [
+            feature_review_path(frontend: 'NON3', backend: 'NON2'),
+            feature_review_path(frontend: 'abc', backend: 'NON1'),
+          ],
+          event_created_at: 9.days.ago,
+          versions: %w(abc NON1 NON3 NON2) }
+      }
+
+      context 'when the event does not contain a moved ticket' do
+        let(:event) { build(:jira_event, :started, key: 'ONEJIRA-1') }
+
+        it 'does not change the ticket keys' do
+          Snapshots::Ticket.create!(attrs_1)
+          repository.apply(event)
+
+          expect(Snapshots::Ticket.where(key: 'ONEJIRA-1').count).to eq 2
+        end
+      end
+
+      context 'when the event contains a moved ticket' do
+        let(:event) { build(:jira_event, :moved, key: 'TWOJIRA-2') }
+
+        it 'changes the ticket keys' do
+          Snapshots::Ticket.create!(attrs_1)
+          repository.apply(event)
+
+          expect(Snapshots::Ticket.where(key: 'ONEJIRA-1').count).to eq 0
+          expect(Snapshots::Ticket.where(key: 'TWOJIRA-2').count).to eq 2
+        end
+      end
+    end
   end
 
   def ticket_snapshot

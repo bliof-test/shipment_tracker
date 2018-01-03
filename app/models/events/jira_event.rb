@@ -32,11 +32,11 @@ module Events
     end
 
     def changelog_old_key
-      key_item.fetch('fromString')
+      key_item['fromString']
     end
 
     def changelog_new_key
-      key_item.fetch('toString')
+      key_item['toString']
     end
 
     def approval?
@@ -86,7 +86,7 @@ module Events
     end
 
     def key_item
-      @key_item ||= changelog_items.find { |item| item['field'] == 'Key' }
+      @key_item ||= changelog_items.find { |item| item['field'] == 'Key' } || {}
     end
 
     def changelog_items

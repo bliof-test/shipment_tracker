@@ -159,6 +159,21 @@ FactoryGirl.define do
       )
       in_progress
     end
+
+    trait :moved do
+      changelog_details(
+        'changelog' => {
+          'items' => [
+            {
+              'field' => 'Key',
+              'fromString' => 'ONEJIRA-1',
+              'toString' => 'TWOJIRA-2',
+            },
+          ],
+        },
+      )
+      todo
+    end
   end
 
   factory :jira_event_user_created, class: Events::JiraEvent do
