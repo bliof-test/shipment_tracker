@@ -34,12 +34,13 @@ module Repositories
       return unless event.is_a?(Events::JiraEvent) && event.issue?
 
       feature_reviews = feature_review_factory.create_from_text(event.comment)
-      last_ticket = previous_ticket_data(event.key)
+      last_ticket = previous_ticket_data(event)
 
       return if last_ticket.empty? && feature_reviews.empty?
 
-      new_ticket = event.apply(last_ticket)
+      update_keys(event)
 
+      new_ticket = event.apply(last_ticket)
       store.create!(new_ticket)
 
       update_github_status_for([new_ticket, last_ticket]) if update_github_status?(event, feature_reviews)
@@ -49,14 +50,19 @@ module Repositories
 
     attr_reader :git_repository_location, :feature_review_factory
 
-    def previous_ticket_data(key)
+    def update_keys(event)
+      store.where(key: event.changelog_old_key).update_all(key: event.changelog_new_key) if event.transfer?
+    end
+
+    def previous_ticket_data(event)
+      key = event.transfer? ? event.changelog_old_key : event.key
       attrs = store.where(key: key).last&.attributes || {}
       attrs.except!('id')
     end
 
     def update_github_status?(event, feature_reviews)
       return false if Rails.configuration.data_maintenance_mode
-      event.approval? || event.unapproval? || feature_reviews.present?
+      event.approval? || event.unapproval? || event.transfer? || feature_reviews.present?
     end
 
     def update_github_status_for(ticket_hashes)

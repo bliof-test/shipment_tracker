@@ -53,4 +53,30 @@ RSpec.describe Events::JiraEvent do
       end
     end
   end
+
+  describe '#transfer?' do
+    it 'returns true' do
+      expect(build(:jira_event, :moved).transfer?).to be true
+    end
+  end
+
+  describe 'changelog_old_key' do
+    it 'returns old key of a moved ticket' do
+      expect(build(:jira_event, :moved).changelog_old_key).to eq 'ONEJIRA-1'
+    end
+
+    it 'return of ticket that is not moved' do
+      expect(build(:jira_event, :started).changelog_old_key).to be nil
+    end
+  end
+
+  describe 'changelog_new_key' do
+    it 'returns old key of a moved ticket' do
+      expect(build(:jira_event, :moved).changelog_new_key).to eq 'TWOJIRA-2'
+    end
+
+    it 'return of ticket that is not moved' do
+      expect(build(:jira_event, :started).changelog_new_key).to be nil
+    end
+  end
 end
