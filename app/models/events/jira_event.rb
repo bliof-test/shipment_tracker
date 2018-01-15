@@ -39,6 +39,10 @@ module Events
       key_item['toString']
     end
 
+    def user_email
+      details.dig('user', 'emailAddress') || ''
+    end
+
     def approval?
       status_item &&
         !approved_status?(status_item['fromString']) &&
@@ -55,6 +59,11 @@ module Events
       return false unless key_item.present?
 
       changelog_old_key != changelog_new_key
+    end
+
+    def development?
+      status_item &&
+        development_status?(status_item['toString'])
     end
 
     def apply(ticket)
@@ -95,6 +104,10 @@ module Events
 
     def approved_status?(status)
       Rails.application.config.approved_statuses.include?(status)
+    end
+
+    def development_status?(status)
+      Rails.application.config.development_statuses.include?(status)
     end
   end
 end

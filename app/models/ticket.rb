@@ -10,7 +10,9 @@ class Ticket
     attribute :description, String, default: ''
     attribute :status, String, default: 'To Do'
     attribute :paths, Array, default: []
+    attribute :developed_by, String
     attribute :approved_at, DateTime
+    attribute :approved_by, String
     attribute :version_timestamps, Hash[String => DateTime]
     attribute :versions, Array, default: []
   end
@@ -25,9 +27,13 @@ class Ticket
   end
 
   def authorised?(versions_under_review)
-    return false if approved_at.nil?
+    return false if approved_at.nil? || authorised_by_developer
     linked_at = versions_under_review.map { |v| version_timestamps[v] }.compact.min
     return false if linked_at.nil?
     approved_at >= linked_at
+  end
+
+  def authorised_by_developer
+    developed_by.present? && approved_by.present? && developed_by == approved_by
   end
 end
