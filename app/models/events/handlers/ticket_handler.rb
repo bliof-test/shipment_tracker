@@ -46,7 +46,7 @@ module Events
       end
 
       def merge_approved_by(last_ticket, event)
-        if event.approval? && event.details['user']
+        if event.approval?
           event.user_email
         elsif last_ticket.present? && Ticket.new(status: event.status).approved?
           last_ticket['approved_by']

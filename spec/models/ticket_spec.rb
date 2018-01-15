@@ -64,6 +64,12 @@ RSpec.describe Ticket do
       }
       it { is_expected.to be false }
     end
+
+    context 'when the ticket was approved by the same user who worked on it' do
+      let(:email) { 'some.user@example.com' }
+      let(:ticket_attributes) { { approved_at: current_time, developed_by: email, approved_by: email } }
+      it { is_expected.to be false }
+    end
   end
 
   describe '#authorisation_status' do

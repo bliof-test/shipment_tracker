@@ -60,6 +60,12 @@ RSpec.describe Events::JiraEvent do
     end
   end
 
+  describe '#development?' do
+    it 'returns true' do
+      expect(build(:jira_event, :started).development?).to be true
+    end
+  end
+
   describe 'changelog_old_key' do
     it 'returns old key of a moved ticket' do
       expect(build(:jira_event, :moved).changelog_old_key).to eq 'ONEJIRA-1'
@@ -77,6 +83,12 @@ RSpec.describe Events::JiraEvent do
 
     it 'return of ticket that is not moved' do
       expect(build(:jira_event, :started).changelog_new_key).to be nil
+    end
+  end
+
+  describe '#user_email' do
+    it 'returns the email of the user' do
+      expect(build(:jira_event, :created).user_email).to eq 'joe.bloggs@example.com'
     end
   end
 end

@@ -55,15 +55,14 @@ module Events
         !approved_status?(status_item['toString'])
     end
 
+    def development?
+      status_item && development_status?(status_item['toString'])
+    end
+
     def transfer?
       return false unless key_item.present?
 
       changelog_old_key != changelog_new_key
-    end
-
-    def development?
-      status_item &&
-        development_status?(status_item['toString'])
     end
 
     def apply(ticket)
