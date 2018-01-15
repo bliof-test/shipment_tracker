@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 9.4.14
+-- Dumped from database version 9.4.15
 -- Dumped by pg_dump version 9.6.3
 
 SET statement_timeout = 0;
@@ -277,8 +277,7 @@ CREATE TABLE git_repository_locations (
     name character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    remote_head character varying,
-    required_checks text[] DEFAULT '{}'::text[]
+    remote_head character varying
 );
 
 
@@ -494,7 +493,8 @@ CREATE TABLE tickets (
     versions text[] DEFAULT '{}'::text[],
     approved_at timestamp without time zone,
     version_timestamps hstore DEFAULT ''::hstore NOT NULL,
-    approved_by_email character varying
+    approved_by character varying,
+    developed_by character varying
 );
 
 
@@ -1067,11 +1067,9 @@ INSERT INTO schema_migrations (version) VALUES ('20170407150443');
 
 INSERT INTO schema_migrations (version) VALUES ('20170808075905');
 
-INSERT INTO schema_migrations (version) VALUES ('20170901114312');
-
 INSERT INTO schema_migrations (version) VALUES ('20171205132454');
 
-INSERT INTO schema_migrations (version) VALUES ('20171208143840');
-
 INSERT INTO schema_migrations (version) VALUES ('20171219093236');
+
+INSERT INTO schema_migrations (version) VALUES ('20180115135632');
 
