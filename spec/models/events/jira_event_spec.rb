@@ -64,6 +64,10 @@ RSpec.describe Events::JiraEvent do
     it 'returns true' do
       expect(build(:jira_event, :started).development?).to be true
     end
+
+    it 'returns false' do
+      expect(build(:jira_event, :approved).development?).to be false
+    end
   end
 
   describe 'changelog_old_key' do
