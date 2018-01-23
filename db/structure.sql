@@ -277,7 +277,8 @@ CREATE TABLE git_repository_locations (
     name character varying,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    remote_head character varying
+    remote_head character varying,
+    audit_options text[] DEFAULT '{}'::text[]
 );
 
 
@@ -1072,4 +1073,6 @@ INSERT INTO schema_migrations (version) VALUES ('20171205132454');
 INSERT INTO schema_migrations (version) VALUES ('20171219093236');
 
 INSERT INTO schema_migrations (version) VALUES ('20180115135632');
+
+INSERT INTO schema_migrations (version) VALUES ('20180123100359');
 

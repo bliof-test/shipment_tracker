@@ -10,6 +10,8 @@ class GitRepositoryLocation < ActiveRecord::Base
   validates :uri, presence: true
   validates :name, uniqueness: true
 
+  AUDIT_OPTIONS = { 'isae_3402' => 'ISAE 3402' }
+
   def self.app_names
     all.order(name: :asc).pluck(:name)
   end

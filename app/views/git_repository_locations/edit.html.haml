@@ -16,4 +16,12 @@
     = f.text_area(:repo_approvers, placeholder: "John Doe <repo-owner@example.com>\nsecond-repo-owner@example.com, third-repo-owner@example.com", value: @form.repo_approvers_data, class: 'form-control', rows: 5)
 
   .form-group
+    = f.label(:audit_options, class: 'control-label')
+    - GitRepositoryLocation::AUDIT_OPTIONS.each do |option, option_name|
+      .checkbox
+        %label
+          = check_box_tag option, option, @form.git_repository_location.audit_options.include?(option), name: 'forms_edit_git_repository_location_form[audit_options][]'
+          = option_name
+
+  .form-group
     = f.submit('Update Git Repository', class: 'btn btn-primary')
