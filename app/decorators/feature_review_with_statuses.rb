@@ -78,7 +78,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def authorised?
-    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions, isae_auditable?) })
+    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions, isae_3402_auditable?) })
   end
 
   def authorisation_status
@@ -129,7 +129,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
     GitRepositoryLoader.from_rails_config.load(app_name)
   end
 
-  def isae_auditable?
-    (@feature_review.app_names - Rails.application.config.isae_auditable).empty?
+  def isae_3402_auditable?
+    GitRepositoryLocation.where(name: @feature_review.app_names).all?(&:isae_3402_auditable?)
   end
 end

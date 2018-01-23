@@ -26,8 +26,8 @@ class Ticket
     Rails.application.config.approved_statuses.include?(status)
   end
 
-  def authorised?(versions_under_review, isae_auditable = false)
-    return false if approved_at.nil? || (isae_auditable && authorised_by_developer?)
+  def authorised?(versions_under_review, isae_3402_auditable = false)
+    return false if approved_at.nil? || (isae_3402_auditable && authorised_by_developer?)
     linked_at = versions_under_review.map { |v| version_timestamps[v] }.compact.min
     return false if linked_at.nil?
     approved_at >= linked_at

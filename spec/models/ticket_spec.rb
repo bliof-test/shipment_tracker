@@ -21,10 +21,10 @@ RSpec.describe Ticket do
   end
 
   describe '#authorised?' do
-    subject { ticket.authorised?(versions, isae_auditable) }
+    subject { ticket.authorised?(versions, isae_3402_auditable) }
 
     let(:versions) { %w(abc def) }
-    let(:isae_auditable) { false }
+    let(:isae_3402_auditable) { false }
     let(:current_time) { Time.current }
 
     context 'when the ticket was approved after it was linked' do
@@ -76,13 +76,13 @@ RSpec.describe Ticket do
         }
       }
 
-      context 'and the repos are in the ISAE critical list' do
-        let(:isae_auditable) { true }
+      context 'and the repos are in the ISAE 3402 critical list' do
+        let(:isae_3402_auditable) { true }
 
         it { is_expected.to be false }
       end
 
-      context 'and the repos are not ISAE critical' do
+      context 'and the repos are not ISAE 3402 critical' do
         it { is_expected.to be true }
       end
     end

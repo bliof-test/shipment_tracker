@@ -105,6 +105,7 @@ module Forms
         details: {
           app_name: repo.name,
           repo_owners: owners_address_list.format(keep_brackets: true),
+          repo_approvers: approvers_address_list.format(keep_brackets: true),
           email: current_user.email,
         },
       )

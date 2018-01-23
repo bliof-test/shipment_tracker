@@ -59,6 +59,10 @@ class GitRepositoryLocation < ActiveRecord::Base
     repo_ownership_repository.approvers_of(self)
   end
 
+  def isae_3402_auditable?
+    audit_options.include?('isae_3402')
+  end
+
   private
 
   def repo_ownership_repository
