@@ -65,3 +65,12 @@ Scenario: Edit approvers of a repository
   Then I should see the repository locations:
     | Name      | URI                | Repo Owners | Repo Approvers                                              |
     | new-app   | uri_for("new-app") |             | repo-approver@example.com, second-repo-approver@example.com |
+
+@disable_repo_verification
+Scenario: Select ISAE 3402 audit option for a repository
+  Given "new-app" repository
+  And I am on the edit repository location form for "new-app"
+  When I select audit options "isae_3402"
+  When I click "Update Git Repository"
+  And I am on the edit repository location form for "new-app"
+  Then the previously set "isae_3402" audit options should be selected
