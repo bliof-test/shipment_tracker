@@ -13,7 +13,7 @@ module Events
           'summary' => event.summary,
           'status' => event.status,
           'event_created_at' => event.created_at,
-          'developed_by' => merge_developed_by(ticket, event),
+          'authored_by' => merge_authored_by(ticket, event),
           'approved_at' => merge_approved_at(ticket, event),
           'approved_by' => merge_approved_by(ticket, event),
         )
@@ -29,11 +29,11 @@ module Events
 
       private
 
-      def merge_developed_by(last_ticket, event)
+      def merge_authored_by(last_ticket, event)
         if event.development?
           event.user_email
         elsif last_ticket.present?
-          last_ticket['developed_by']
+          last_ticket['authored_by']
         end
       end
 

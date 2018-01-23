@@ -71,7 +71,7 @@ RSpec.describe Ticket do
       let(:ticket_attributes) {
         { approved_at: current_time,
           version_timestamps: { versions.first => 1.hour.ago },
-          developed_by: email,
+          authored_by: email,
           approved_by: email,
         }
       }

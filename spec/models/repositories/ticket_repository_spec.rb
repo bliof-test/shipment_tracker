@@ -338,7 +338,7 @@ RSpec.describe Repositories::TicketRepository do
               approved_at: times[2],
               event_created_at: times[2],
               version_timestamps: { 'foo' => times[0] },
-              developed_by: 'some.user@example.com',
+              authored_by: 'some.user@example.com',
               approved_by: 'another.user@example.com',
             ),
           ),

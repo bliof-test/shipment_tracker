@@ -495,7 +495,7 @@ CREATE TABLE tickets (
     approved_at timestamp without time zone,
     version_timestamps hstore DEFAULT ''::hstore NOT NULL,
     approved_by character varying,
-    developed_by character varying
+    authored_by character varying
 );
 
 

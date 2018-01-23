@@ -10,7 +10,7 @@ class Ticket
     attribute :description, String, default: ''
     attribute :status, String, default: 'To Do'
     attribute :paths, Array, default: []
-    attribute :developed_by, String
+    attribute :authored_by, String
     attribute :approved_at, DateTime
     attribute :approved_by, String
     attribute :version_timestamps, Hash[String => DateTime]
@@ -34,6 +34,6 @@ class Ticket
   end
 
   def authorised_by_developer?
-    developed_by.present? && approved_by.present? && developed_by == approved_by
+    authored_by.present? && approved_by.present? && authored_by == approved_by
   end
 end
