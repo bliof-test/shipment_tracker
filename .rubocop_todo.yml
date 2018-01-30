@@ -25,3 +25,8 @@ Metrics/ParameterLists:
   Max: 6
   Exclude:
     - 'app/decorators/feature_review_with_statuses.rb'
+
+Metrics/AbcSize:
+  Exclude:
+    - 'app/decorators/feature_review_with_statuses.rb'
+    - 'app/models/events/jira_event.rb'
