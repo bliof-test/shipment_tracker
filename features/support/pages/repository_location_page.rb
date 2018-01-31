@@ -43,6 +43,12 @@ module Pages
       page.fill_in 'Repo Approvers', with: repo_approvers
     end
 
+    def select_audit_options(audit_options:)
+      audit_options.split(',').each do |audit_option|
+        page.find("##{audit_option}").set(true)
+      end
+    end
+
     def click(button)
       page.click_link_or_button(button)
     end

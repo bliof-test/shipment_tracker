@@ -51,6 +51,16 @@ When 'I enter approver emails "$repo_approvers"' do |repo_approvers|
   edit_git_repository_location_page.fill_in_repo_approvers(repo_approvers: repo_approvers)
 end
 
+When 'I select audit options "$audit_options"' do |audit_options|
+  edit_git_repository_location_page.select_audit_options(audit_options: audit_options)
+end
+
 When 'I click "$button"' do |button|
   edit_git_repository_location_page.click(button)
+end
+
+Then 'the previously set "$audit_options" audit options should be selected' do |audit_options|
+  audit_options.split(',').each do |audit_option|
+    expect(find("##{audit_option}")).to be_checked
+  end
 end

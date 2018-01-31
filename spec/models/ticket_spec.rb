@@ -21,9 +21,10 @@ RSpec.describe Ticket do
   end
 
   describe '#authorised?' do
-    subject { ticket.authorised?(versions) }
+    subject { ticket.authorised?(versions, isae_3402_auditable) }
 
     let(:versions) { %w(abc def) }
+    let(:isae_3402_auditable) { false }
     let(:current_time) { Time.current }
 
     context 'when the ticket was approved after it was linked' do
@@ -63,6 +64,27 @@ RSpec.describe Ticket do
         { approved_at: current_time, version_timestamps: { versions.first => 1.hour.ago } }
       }
       it { is_expected.to be false }
+    end
+
+    context 'when the ticket was approved by the same user who worked on it' do
+      let(:email) { 'some.user@example.com' }
+      let(:ticket_attributes) {
+        { approved_at: current_time,
+          version_timestamps: { versions.first => 1.hour.ago },
+          authored_by: email,
+          approved_by: email,
+        }
+      }
+
+      context 'and the repos are in the ISAE 3402 critical list' do
+        let(:isae_3402_auditable) { true }
+
+        it { is_expected.to be false }
+      end
+
+      context 'and the repos are not ISAE 3402 critical' do
+        it { is_expected.to be true }
+      end
     end
   end
 

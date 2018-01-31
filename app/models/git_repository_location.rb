@@ -10,6 +10,8 @@ class GitRepositoryLocation < ActiveRecord::Base
   validates :uri, presence: true
   validates :name, uniqueness: true
 
+  AUDIT_OPTIONS = { 'isae_3402' => 'ISAE 3402' }.freeze
+
   def self.app_names
     all.order(name: :asc).pluck(:name)
   end
@@ -55,6 +57,10 @@ class GitRepositoryLocation < ActiveRecord::Base
 
   def approvers
     repo_ownership_repository.approvers_of(self)
+  end
+
+  def isae_3402_auditable?
+    audit_options.include?('isae_3402')
   end
 
   private

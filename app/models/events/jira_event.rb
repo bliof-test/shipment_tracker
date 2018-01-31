@@ -39,6 +39,10 @@ module Events
       key_item['toString']
     end
 
+    def user_email
+      details.dig('user', 'emailAddress') || ''
+    end
+
     def approval?
       status_item &&
         !approved_status?(status_item['fromString']) &&
@@ -49,6 +53,10 @@ module Events
       status_item &&
         approved_status?(status_item['fromString']) &&
         !approved_status?(status_item['toString'])
+    end
+
+    def development?
+      status_item && development_status?(status_item['toString'])
     end
 
     def transfer?
@@ -95,6 +103,10 @@ module Events
 
     def approved_status?(status)
       Rails.application.config.approved_statuses.include?(status)
+    end
+
+    def development_status?(status)
+      Rails.application.config.development_statuses.include?(status)
     end
   end
 end

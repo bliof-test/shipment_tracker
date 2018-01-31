@@ -163,7 +163,7 @@ RSpec.describe Repositories::TicketRepository do
 
   describe '#apply' do
     let(:time) { Time.current.change(usec: 0) }
-    let(:times) { [time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute] }
+    let(:times) { [time - 4.hours, time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute] }
     let(:url) { LinkTicket.build_comment(feature_review_url(app: 'foo')) }
     let(:path) { feature_review_path(app: 'foo') }
     let(:ticket_defaults) { { paths: [path], versions: %w(foo), version_timestamps: { 'foo' => nil } } }
@@ -322,14 +322,11 @@ RSpec.describe Repositories::TicketRepository do
         ticket_1 = jira_1.merge(ticket_defaults)
 
         [
-          build(:jira_event, :created, jira_1.merge(
-                                         comment_body: LinkTicket.build_comment(url), created_at: times[0])
-               ),
-          build(:jira_event, :approved, jira_1.merge(created_at: times[1])),
-          build(:jira_event, :created, jira_2.merge(created_at: times[2])),
-          build(:jira_event, :created, jira_2.merge(
-                                         comment_body: LinkTicket.build_comment(url), created_at: times[3])
-               ),
+          build(:jira_event, :created, jira_1.merge(comment_body: LinkTicket.build_comment(url), created_at: times[0])),
+          build(:jira_event, :started, jira_1.merge(created_at: times[1], user_email: 'some.user@example.com')),
+          build(:jira_event, :approved, jira_1.merge(created_at: times[2], user_email: 'another.user@example.com')),
+          build(:jira_event, :created, jira_2.merge(created_at: times[3])),
+          build(:jira_event, :created, jira_2.merge(comment_body: LinkTicket.build_comment(url), created_at: times[4])),
         ].each do |event|
           repository.apply(event)
         end
@@ -338,9 +335,11 @@ RSpec.describe Repositories::TicketRepository do
           Ticket.new(
             ticket_1.merge(
               status: 'Ready for Deployment',
-              approved_at: times[1],
-              event_created_at: times[1],
+              approved_at: times[2],
+              event_created_at: times[2],
               version_timestamps: { 'foo' => times[0] },
+              authored_by: 'some.user@example.com',
+              approved_by: 'another.user@example.com',
             ),
           ),
         ])
