@@ -2,6 +2,9 @@ version: 2
 
 jobs:
   build:
+    branches:
+      ignore:
+        - /dependabot\/.*/
     docker:
       - image: circleci/ruby:2.3.6
         environment:
