@@ -146,7 +146,7 @@ GEM
       activerecord (>= 3.0)
     hashdiff (0.2.3)
     hashie (3.4.3)
-    honeybadger (2.3.3)
+    honeybadger (3.3.0)
     html2haml (2.0.0)
       erubis (~> 2.7.0)
       haml (~> 4.0.0)
@@ -398,7 +398,7 @@ DEPENDENCIES
   guard-rspec
   haml-rails
   has_secure_token
-  honeybadger (~> 2.0)
+  honeybadger (~> 3.3)
   jira-ruby
   jquery-rails
   mailcatcher
