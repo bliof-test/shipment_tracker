@@ -25,6 +25,8 @@ RSpec.describe CommitStatus do
 
       allow(Repositories::ReleaseExceptionRepository).to receive(:new).and_return(exception_repository)
       allow(exception_repository).to receive(:release_exception_for).and_return(nil)
+
+      allow(client).to receive(:last_status_for).with(any_args)
     end
 
     context 'when a single Feature Review exists for the relevant commit' do
@@ -242,6 +244,17 @@ RSpec.describe CommitStatus do
       )
 
       CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').not_found
+    end
+  end
+
+  describe '#last_status' do
+    it 'requests status for the given repository and SHA' do
+      expect(client).to receive(:last_status_for).with(
+        repo: 'owner/repo',
+        sha: 'abc123',
+      )
+
+      CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').last_status
     end
   end
 end

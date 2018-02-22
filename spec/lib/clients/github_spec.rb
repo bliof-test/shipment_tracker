@@ -52,4 +52,52 @@ RSpec.describe GithubClient do
       end
     end
   end
+
+  describe '#last_status_for' do
+    let(:status_pending) {
+      {
+        'created_at': '2018-02-22T01:19:13Z',
+        'updated_at': '2018-02-22T01:19:13Z',
+        'state': 'pending',
+        'target_url': 'https://shipment-tracker.example.com/feature_reviews?apps%5Brepo%5D=abc123',
+        'description': 'Re-approval required for Feature Review',
+        'id': 1,
+        'url': 'https://api.github.com/repos/owner/repo/statuses/abc123',
+        'context': 'shipment-tracker',
+      }
+    }
+
+    let(:status_success) {
+      {
+        'created_at': '2018-02-22T01:20:00Z',
+        'updated_at': '2018-02-22T01:20:00Z',
+        'state': 'success',
+        'target_url': 'https://shipment-tracker.example.com/feature_reviews?apps%5Brepo%5D=abc123',
+        'description': 'Approved Feature Review found',
+        'id': 1,
+        'url': 'https://api.github.com/repos/owner/repo/statuses/abc123',
+        'context': 'shipment-tracker',
+      }
+    }
+
+    let(:combined_status) {
+      {
+        statuses: [status_pending, status_success],
+      }
+    }
+
+    it 'fetches the last status' do
+      expect_any_instance_of(Octokit::Client).to receive(:combined_status).with(
+        'owner/repo', 'abc123'
+      ).and_return(combined_status)
+
+      expect(github.last_status_for(repo: 'owner/repo', sha: 'abc123')).to eq(status_success)
+    end
+
+    it 'does not raise if status fetch failed' do
+      expect_any_instance_of(Octokit::Client).to receive(:combined_status).and_raise(Octokit::Error)
+
+      expect { github.last_status_for(repo: 'owner/repo', sha: 'abc123') }.to_not raise_error
+    end
+  end
 end

@@ -19,7 +19,9 @@ class CommitStatus
   def update
     status, description = feature_reviews_status.values_at(:status, :description)
 
-    post_status({ status: status, description: description }, target_url)
+    if !last_status || (last_status.state != status && last_status.description != description)
+      post_status({ status: status, description: description }, target_url)
+    end
   end
 
   def reset
@@ -32,6 +34,10 @@ class CommitStatus
 
   def not_found
     post_status(not_found_status, target_url)
+  end
+
+  def last_status
+    github.last_status_for(repo: full_repo_name, sha: sha)
   end
 
   private
