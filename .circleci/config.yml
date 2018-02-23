@@ -24,7 +24,7 @@ jobs:
     steps:
       - run: sudo apt-get install -y cmake postgresql-client
       - checkout
-      - run: cp .env.development.example .env.development
+      - run: cp .env.development.example .env.test
       - run:  gem install bundler
       - restore_cache:
           key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
