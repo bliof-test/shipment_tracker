@@ -34,8 +34,8 @@ class GithubClient
     client.combined_status(repo, sha)[:statuses].reverse.find do |status|
       status[:context] == 'shipment-tracker'
     end
-  rescue Octokit::Error
-    Rails.logger.warn "Failed to fetch status for #{repo} at #{sha}"
+  rescue Octokit::Error => e
+    Rails.logger.warn "Failed to fetch status for #{repo} at #{sha}: #{e.class.name} #{e.message}"
     nil
   end
 
