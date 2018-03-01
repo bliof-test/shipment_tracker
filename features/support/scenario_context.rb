@@ -114,7 +114,7 @@ module Support
       @stubbed_requests['pending'] = stub_request(:post, %r{https://api.github.com/.*})
                                      .with(body: /"state":"pending"/)
                                      .and_return(status: 201)
-      stub_github_status
+      stub_github_commit_status_checks
 
       event = build(:jira_event, ticket_details)
       travel_to Time.zone.parse(time) do
@@ -149,7 +149,7 @@ module Support
                                  .and_return(status: 201)
     end
 
-    def stub_github_status
+    def stub_github_commit_status_checks
       stub_request(:get, %r{https://api.github.com/.*/status})
         .to_return(status: 201, headers: { content_type: 'json' }, body: { statuses: [] }.to_json)
     end

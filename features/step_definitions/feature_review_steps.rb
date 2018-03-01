@@ -125,7 +125,7 @@ Then 'I should see that the Feature Review requires reapproval' do
 end
 
 When 'I reload the page after a while' do
-  scenario_context.stub_github_status
+  scenario_context.stub_github_commit_status_checks
   Repositories::Updater.from_rails_config.run
   page.visit(page.current_url)
 end
