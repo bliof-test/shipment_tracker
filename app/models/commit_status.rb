@@ -37,7 +37,7 @@ class CommitStatus
   end
 
   def last_status
-    github.last_status_for(repo: full_repo_name, sha: sha)
+    @last_status ||= github.last_status_for(repo: full_repo_name, sha: sha)
   end
 
   private
