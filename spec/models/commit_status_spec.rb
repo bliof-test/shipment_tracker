@@ -203,6 +203,60 @@ RSpec.describe CommitStatus do
         end
       end
     end
+
+    describe 'reduced status updates' do
+      let(:tickets) {
+        [
+          Ticket.new(
+            paths: [feature_review_path(app1: 'abc')],
+            status: 'In Progress',
+          ),
+        ]
+      }
+
+      it 'will update the github status if there is a change in the status state' do
+        expect(client).to receive(:last_status_for).with(
+          repo: 'owner/app1',
+          sha: 'abc',
+        ).and_return(double('github_response', state: 'failure', description: 'Awaiting approval for Feature Review'))
+
+        expect(client).to receive(:create_status).with(
+          hash_including(
+            state: 'pending',
+            description: 'Awaiting approval for Feature Review',
+          ),
+        )
+
+        CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
+      end
+
+      it 'will update the github status if there is a change in the status description' do
+        expect(client).to receive(:last_status_for).with(
+          repo: 'owner/app1',
+          sha: 'abc',
+        ).and_return(double('github_response', state: 'pending', description: 'Searching for Feature Review'))
+
+        expect(client).to receive(:create_status).with(
+          hash_including(
+            state: 'pending',
+            description: 'Awaiting approval for Feature Review',
+          ),
+        )
+
+        CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
+      end
+
+      it 'will not try to update the github status if there is no change' do
+        expect(client).to receive(:last_status_for).with(
+          repo: 'owner/app1',
+          sha: 'abc',
+        ).and_return(double('github_response', state: 'pending', description: 'Awaiting approval for Feature Review'))
+
+        expect(client).not_to receive(:create_status)
+
+        CommitStatus.new(full_repo_name: 'owner/app1', sha: 'abc').update
+      end
+    end
   end
 
   describe '#reset' do
