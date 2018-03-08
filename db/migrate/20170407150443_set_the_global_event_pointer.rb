@@ -13,7 +13,7 @@ class SetTheGlobalEventPointer < ActiveRecord::Migration
   def up
     record = Snapshots::EventCount.create!(
       snapshot_name: 'global_event_pointer',
-      event_id: Events::BaseEvent.last.id,
+      event_id: Events::BaseEvent.last.try(:id) || 0,
     )
 
     say "Global Event Pointer (last applied event id): #{record.event_id}"
