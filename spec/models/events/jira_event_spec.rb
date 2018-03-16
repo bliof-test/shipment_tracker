@@ -97,7 +97,7 @@ RSpec.describe Events::JiraEvent do
   end
 
   describe '#assignee_email' do
-    it 'return the email of the assignee' do
+    it 'returns the email of the assignee' do
       expect(build(:jira_event, :development_completed).assignee_email).to eq 'joe.assignee@example.com'
     end
   end
