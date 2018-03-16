@@ -27,6 +27,10 @@ module Events
       details.dig('issue', 'fields', 'status', 'name')
     end
 
+    def assignee_email
+      details.dig('issue', 'fields', 'assignee', 'emailAddress')
+    end
+
     def comment
       details.dig('comment', 'body') || ''
     end

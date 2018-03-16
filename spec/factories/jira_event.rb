@@ -11,6 +11,7 @@ FactoryGirl.define do
       description ''
       display_name 'joe'
       user_email 'joe.bloggs@example.com'
+      assignee_email 'joe.assignee@example.com'
       status 'To Do'
       updated '2015-05-07T15:24:34.957+0100'
       comment_body nil
@@ -32,6 +33,9 @@ FactoryGirl.define do
               'description' => description,
               'status' => { 'name' => status },
               'updated' => updated,
+              'assignee' => {
+                'emailAddress' => assignee_email,
+              },
             },
           },
         }
