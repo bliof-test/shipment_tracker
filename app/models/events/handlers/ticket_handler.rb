@@ -34,6 +34,8 @@ module Events
           event.user_email
         elsif last_ticket.present?
           last_ticket['authored_by']
+        elsif event.approval?
+          event.assignee_email
         end
       end
 
