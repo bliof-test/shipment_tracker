@@ -300,7 +300,7 @@ GEM
     ruby_dep (1.5.0)
     ruby_parser (3.11.0)
       sexp_processor (~> 4.9)
-    rugged (0.26.0)
+    rugged (0.27.0)
     safe_yaml (1.0.4)
     sass (3.4.21)
     sass-rails (5.0.4)
@@ -417,7 +417,7 @@ DEPENDENCIES
   rails_12factor
   rspec-rails
   rubocop
-  rugged (~> 0.26.0)
+  rugged (~> 0.27.0)
   sass-rails
   shoulda-matchers
   simplecov
