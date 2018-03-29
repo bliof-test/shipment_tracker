@@ -46,7 +46,7 @@ RSpec.describe GitRepositoryLocationsController do
 
   describe 'GET #edit', :logged_in do
     it 'can be rendered' do
-      repo = FactoryGirl.create(:git_repository_location)
+      repo = FactoryBot.create(:git_repository_location)
 
       get :edit, id: repo
 
@@ -56,7 +56,7 @@ RSpec.describe GitRepositoryLocationsController do
 
   describe 'PATCH #update', :logged_in do
     context 'with correct parameters' do
-      let(:repo) { FactoryGirl.create(:git_repository_location) }
+      let(:repo) { FactoryBot.create(:git_repository_location) }
       let(:params) {
         {
           id: repo,
@@ -79,7 +79,7 @@ RSpec.describe GitRepositoryLocationsController do
     end
 
     context 'with incorrect parameters' do
-      let(:repo) { FactoryGirl.create(:git_repository_location) }
+      let(:repo) { FactoryBot.create(:git_repository_location) }
       let(:params) {
         {
           id: repo,

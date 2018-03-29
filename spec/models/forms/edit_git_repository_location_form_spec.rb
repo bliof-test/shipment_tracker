@@ -3,7 +3,7 @@ require 'rails_helper'
 
 RSpec.describe Forms::EditGitRepositoryLocationForm do
   def form_for(form_data = {}, options = {})
-    repo = options.fetch(:repo, FactoryGirl.create(:git_repository_location))
+    repo = options.fetch(:repo, FactoryBot.create(:git_repository_location))
     current_user = options.fetch('current_user', double('User', email: 'test@test.com'))
 
     described_class.new(repo: repo, params: form_data, current_user: current_user)
@@ -63,13 +63,13 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
           repo_owners: "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n",
           audit_options: %w(isae_3402),
         },
-        repo: FactoryGirl.create(:git_repository_location, name: 'my-app'),
+        repo: FactoryBot.create(:git_repository_location, name: 'my-app'),
         current_user: double('User', email: 'test@test.com'),
       )
     }
 
     it 'will generate a repo ownership event' do
-      repo = FactoryGirl.create(:git_repository_location, name: 'my-app')
+      repo = FactoryBot.create(:git_repository_location, name: 'my-app')
       current_user = double('User', email: 'test@test.com')
       owner_data = "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n"
       approver_data = "test4@example.com, test5@example.com \n\n\nTest Example <test6@example.com>  \n\n\n"

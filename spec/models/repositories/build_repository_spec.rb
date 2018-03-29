@@ -20,7 +20,7 @@ RSpec.describe Repositories::BuildRepository do
     it 'projects last build' do
       repository.apply(build(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
       expect(repository.unit_test_results_for(apps: apps)).to eq(
-        'frontend' => FactoryGirl.build(
+        'frontend' => FactoryBot.build(
           :unit_test_build,
           source: 'Jenkins',
           url: 'http://example.com',
@@ -32,7 +32,7 @@ RSpec.describe Repositories::BuildRepository do
 
       repository.apply(build(:jenkins_event, success?: true, app_name: 'frontend', version: 'abc'))
       expect(repository.unit_test_results_for(apps: apps)).to eq(
-        'frontend' => FactoryGirl.build(
+        'frontend' => FactoryBot.build(
           :unit_test_build,
           source: 'Jenkins',
           url: 'http://example.com',
@@ -51,7 +51,7 @@ RSpec.describe Repositories::BuildRepository do
         repository.apply(build(:circle_ci_event, success?: true, app_name: 'backend', version: 'def'))
 
         expect(repository.unit_test_results_for(apps: apps)).to eq(
-          'frontend' => FactoryGirl.build(
+          'frontend' => FactoryBot.build(
             :unit_test_build,
             source: 'Jenkins',
             url: 'http://example.com',
@@ -59,7 +59,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'frontend',
             version: 'abc',
           ),
-          'backend' => FactoryGirl.build(
+          'backend' => FactoryBot.build(
             :unit_test_build,
             source: 'CircleCi',
             url: 'http://example.com',
@@ -67,7 +67,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'backend',
             version: 'def',
           ),
-          'other' => FactoryGirl.build(:unit_test_build),
+          'other' => FactoryBot.build(:unit_test_build),
         )
       end
     end
@@ -101,7 +101,7 @@ RSpec.describe Repositories::BuildRepository do
         )
 
         expect(result).to eq(
-          'app1' => FactoryGirl.build(
+          'app1' => FactoryBot.build(
             :unit_test_build,
             source: 'CircleCi',
             url: 'http://example.com',
@@ -109,7 +109,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'app1',
             version: 'abc',
           ),
-          'app2' => FactoryGirl.build(
+          'app2' => FactoryBot.build(
             :unit_test_build,
             source: 'CircleCi',
             url: 'http://example.com',
@@ -141,7 +141,7 @@ RSpec.describe Repositories::BuildRepository do
     it 'projects last build' do
       repository.apply(create_event(:jenkins_event, success?: false, app_name: 'frontend', version: 'abc'))
       expect(repository.integration_test_results_for(apps: apps)).to eq(
-        'frontend' => FactoryGirl.build(
+        'frontend' => FactoryBot.build(
           :integration_test_build,
           source: 'Jenkins',
           url: 'http://example.com',
@@ -153,7 +153,7 @@ RSpec.describe Repositories::BuildRepository do
 
       repository.apply(create_event(:jenkins_event, success?: true, app_name: 'frontend', version: 'abc'))
       expect(repository.integration_test_results_for(apps: apps)).to eq(
-        'frontend' => FactoryGirl.build(
+        'frontend' => FactoryBot.build(
           :integration_test_build,
           source: 'Jenkins',
           url: 'http://example.com',
@@ -172,7 +172,7 @@ RSpec.describe Repositories::BuildRepository do
         repository.apply(create_event(:circle_ci_event, success?: true, app_name: 'backend', version: 'def'))
 
         expect(repository.integration_test_results_for(apps: apps)).to eq(
-          'frontend' => FactoryGirl.build(
+          'frontend' => FactoryBot.build(
             :integration_test_build,
             source: 'Jenkins',
             url: 'http://example.com',
@@ -180,7 +180,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'frontend',
             version: 'abc',
           ),
-          'backend' => FactoryGirl.build(
+          'backend' => FactoryBot.build(
             :integration_test_build,
             source: 'CircleCi',
             url: 'http://example.com',
@@ -188,7 +188,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'backend',
             version: 'def',
           ),
-          'other' => FactoryGirl.build(:integration_test_build),
+          'other' => FactoryBot.build(:integration_test_build),
         )
       end
     end
@@ -209,7 +209,7 @@ RSpec.describe Repositories::BuildRepository do
         )
 
         expect(result).to eq(
-          'app1' => FactoryGirl.build(
+          'app1' => FactoryBot.build(
             :integration_test_build,
             source: 'CircleCi',
             url: 'http://example.com',
@@ -217,7 +217,7 @@ RSpec.describe Repositories::BuildRepository do
             app_name: 'app1',
             version: 'abc',
           ),
-          'app2' => FactoryGirl.build(
+          'app2' => FactoryBot.build(
             :integration_test_build,
             source: 'CircleCi',
             url: 'http://example.com',

@@ -57,7 +57,7 @@ group :test do
   gem 'codeclimate-test-reporter', require: false
   gem 'cucumber-rails', require: false
   gem 'database_cleaner'
-  gem 'factory_girl'
+  gem 'factory_bot'
   gem 'rack-test', require: 'rack/test'
   gem 'shoulda-matchers', require: false
   gem 'simplecov', require: false

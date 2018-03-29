@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/repo_ownership_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :repo_ownership_event, class: Events::RepoOwnershipEvent do
     transient do
       app_name 'test-app'

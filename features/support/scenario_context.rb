@@ -190,7 +190,7 @@ module Support
     end
 
     def build(*args)
-      FactoryGirl.build(*args)
+      FactoryBot.build(*args)
     end
   end
 

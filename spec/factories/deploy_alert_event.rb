@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/deploy_alert_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :deploy_alert_event, class: Events::DeployAlertEvent do
     transient do
       uuid { SecureRandom.uuid }

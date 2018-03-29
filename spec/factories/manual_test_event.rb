@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/manual_test_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :manual_test_event, class: Events::ManualTestEvent do
     transient do
       accepted true

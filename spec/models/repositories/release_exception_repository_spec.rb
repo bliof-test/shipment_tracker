@@ -4,11 +4,11 @@ require 'rails_helper'
 RSpec.describe Repositories::ReleaseExceptionRepository do
   subject(:repository) { Repositories::ReleaseExceptionRepository.new }
 
-  let(:repo_owner) { FactoryGirl.create(:repo_admin, email: 'test@example.com') }
+  let(:repo_owner) { FactoryBot.create(:repo_admin, email: 'test@example.com') }
 
   before do
-    FactoryGirl.create(:git_repository_location, name: 'app1', uri: 'http://example.com/app1.git')
-    FactoryGirl.create(:git_repository_location, name: 'app2', uri: 'http://example.com/app2.git')
+    FactoryBot.create(:git_repository_location, name: 'app1', uri: 'http://example.com/app1.git')
+    FactoryBot.create(:git_repository_location, name: 'app2', uri: 'http://example.com/app2.git')
 
     allow_any_instance_of(Repositories::RepoOwnershipRepository)
       .to receive(:owners_of).and_return([repo_owner])

@@ -70,8 +70,8 @@ end
 # https://github.com/cucumber/cucumber-rails/blob/master/features/choose_javascript_database_strategy.feature
 Cucumber::Rails::Database.javascript_strategy = :truncation
 
-FactoryGirl.find_definitions
-World(FactoryGirl::Syntax::Methods)
+FactoryBot.find_definitions
+World(FactoryBot::Syntax::Methods)
 
 require 'rack/test'
 World(Rack::Test::Methods)
