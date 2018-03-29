@@ -96,7 +96,7 @@ GEM
     deterministic (0.6.0)
     diff-lcs (1.2.5)
     docile (1.1.5)
-    dotenv (2.0.2)
+    dotenv (2.2.1)
     equalizer (0.0.11)
     erubi (1.7.0)
     erubis (2.7.0)
