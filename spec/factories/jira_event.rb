@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/jira_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :jira_event, class: Events::JiraEvent do
     transient do
       sequence(:issue_id)

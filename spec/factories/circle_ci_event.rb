@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/circle_ci_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :circle_ci_event, class: Events::CircleCiEvent do
     transient do
       success? true

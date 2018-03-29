@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/jenkins_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :jenkins_event, class: Events::JenkinsEvent do
     transient do
       success? true

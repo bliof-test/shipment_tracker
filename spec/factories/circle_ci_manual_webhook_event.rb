@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/circle_ci_manual_webhook_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :circle_ci_manual_webhook_event, class: Events::CircleCiManualWebhookEvent do
     transient do
       success? true

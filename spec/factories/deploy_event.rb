@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/deploy_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :deploy_event, class: Events::DeployEvent do
     transient do
       server 'uat.example.com'

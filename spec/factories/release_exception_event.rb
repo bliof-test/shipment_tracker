@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'events/release_exception_event'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :release_exception_event, class: Events::ReleaseExceptionEvent do
     transient do
       approved true

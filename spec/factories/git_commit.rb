@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'git_commit'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :git_commit do
     sequence(:id) { |n| "abc#{n}" }
     author_name 'Frank'

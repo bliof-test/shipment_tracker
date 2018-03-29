@@ -18,7 +18,7 @@ RSpec.describe User do
 
   describe '.as_repo_admin' do
     it 'will return a repo owner that has the same email if such exists' do
-      repo_owner = FactoryGirl.create(:repo_admin, email: 'test@example.com')
+      repo_owner = FactoryBot.create(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
       expect(user.as_repo_admin).to eq(repo_owner)
@@ -35,7 +35,7 @@ RSpec.describe User do
 
   describe '#owner_of?' do
     it 'is true when the related repo owner has access to the repo' do
-      repo_owner = FactoryGirl.build(:repo_admin, email: 'test@example.com')
+      repo_owner = FactoryBot.build(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
       allow(RepoAdmin).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
@@ -47,7 +47,7 @@ RSpec.describe User do
     end
 
     it "is false when the related repo owner doesn't have access to the repo" do
-      repo_owner = FactoryGirl.build(:repo_admin, email: 'test@example.com')
+      repo_owner = FactoryBot.build(:repo_admin, email: 'test@example.com')
       user = create_user(first_name: 'Test', email: 'test@example.com')
 
       allow(RepoAdmin).to receive(:find_by).with(email: 'test@example.com').and_return(repo_owner)
@@ -61,7 +61,7 @@ RSpec.describe User do
     it 'is false when there is no related repo owner' do
       user = create_user(first_name: 'Test', email: 'different@example.com')
 
-      repo = FactoryGirl.build(:git_repository_location)
+      repo = FactoryBot.build(:git_repository_location)
 
       expect(user.owner_of?(repo)).to be false
     end

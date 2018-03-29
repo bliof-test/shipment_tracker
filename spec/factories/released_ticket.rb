@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'released_ticket'
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :released_ticket do
     sequence(:key) { |n| "DS-#{n}" }
     summary 'Example summary'

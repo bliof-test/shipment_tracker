@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-FactoryGirl.define do
+FactoryBot.define do
   factory :unit_test_build, class: Build do
     build_type 'unit'
   end
