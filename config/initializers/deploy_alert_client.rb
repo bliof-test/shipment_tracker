@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'clients/slack'
 
 class DeployAlertClient

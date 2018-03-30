@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/git_repository_location_event'
 
 FactoryBot.define do

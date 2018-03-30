@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Sections
   class TableSection
     def initialize(table_element, icon_translations: {})
@@ -36,7 +37,7 @@ module Sections
     end
 
     def icon_translation_for(icon_element)
-      icon_element['class'].split(' ').map {|klass|
+      icon_element['class'].split(' ').map { |klass|
         icon_translations[klass]
       }.compact.first
     end

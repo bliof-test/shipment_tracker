@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ReleasesHelper
   def feature_review_link(feature_review)
     if feature_review.approved_path

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'active_record'
 
 module Snapshots
@@ -9,11 +10,11 @@ module Snapshots
       end
 
       def global_event_pointer=(event_id)
-        transaction do
+        transaction {
           record = find_or_create_by(snapshot_name: 'global_event_pointer')
           record.event_id = event_id
           record.save!
-        end
+        }
 
         event_id
       end

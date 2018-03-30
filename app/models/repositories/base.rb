@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Repositories
   class Base
     attr_reader :store

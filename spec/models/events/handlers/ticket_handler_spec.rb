@@ -1,10 +1,11 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Events::Handlers::TicketHandler do
   describe '#apply' do
     let(:time) { Time.current.change(usec: 0) }
-    let(:ticket_defaults) { { paths: [path], versions: %w(foo), version_timestamps: { 'foo' => nil } } }
+    let(:ticket_defaults) { { paths: [path], versions: %w[foo], version_timestamps: { 'foo' => nil } } }
     let(:url) { feature_review_url(app: 'foo') }
     let(:path) { feature_review_path(app: 'foo') }
     let(:email) { 'test@example.com' }

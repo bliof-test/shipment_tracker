@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module FormHelper
   def form_errors(record)
     return if record.errors.blank?

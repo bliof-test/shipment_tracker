@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'handle_push_event'
 require 'payloads/github'
@@ -308,7 +309,7 @@ RSpec.describe HandlePushEvent do
       it 'rescues and continues to link other tickets' do
         allow_any_instance_of(CommitStatus).to receive(:error)
         allow(JiraClient).to receive(:post_comment).with(tickets.first.key, anything)
-          .and_raise(JiraClient::InvalidKeyError)
+                                                   .and_raise(JiraClient::InvalidKeyError)
 
         expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)
 

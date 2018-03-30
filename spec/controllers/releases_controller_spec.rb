@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe ReleasesController do
@@ -8,7 +9,7 @@ RSpec.describe ReleasesController do
   end
 
   describe 'GET #index', :logged_in do
-    let(:app_names) { %w(frontend backend) }
+    let(:app_names) { %w[frontend backend] }
 
     before do
       allow(GitRepositoryLocation).to receive(:app_names).and_return(app_names)

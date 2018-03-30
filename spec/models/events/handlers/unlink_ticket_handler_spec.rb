@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Events::Handlers::UnlinkTicketHandler do
@@ -15,7 +16,7 @@ RSpec.describe Events::Handlers::UnlinkTicketHandler do
       ticket = {
         'key' => 'JIRA-1',
         'paths' => [path1, path2],
-        'versions' => %w(one two),
+        'versions' => %w[one two],
         'version_timestamps' => { 'one' => time1, 'two' => time - 2.hours },
       }
       unlink_2_event = build(
@@ -32,7 +33,7 @@ RSpec.describe Events::Handlers::UnlinkTicketHandler do
       expect(new_ticket).to include(
         'key' => 'JIRA-1',
         'paths' => [path1],
-        'versions' => %w(one),
+        'versions' => %w[one],
         'version_timestamps' => { 'one' => time1 },
       )
     end

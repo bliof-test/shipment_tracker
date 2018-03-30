@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'snapshots/repo_ownership'
 
 FactoryBot.define do

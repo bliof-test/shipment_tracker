@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'addressable/uri'
 require 'ticket'
@@ -28,14 +29,14 @@ RSpec.describe Factories::FeatureReviewFactory do
     let(:feature_review1) {
       FeatureReview.new(
         path: '/feature_reviews?apps%5Bapp1%5D=abc&apps%5Bapp2%5D=def',
-        versions: %w(abc def),
+        versions: %w[abc def],
       )
     }
 
     let(:feature_review2) {
       FeatureReview.new(
         path: '/feature_reviews?apps%5Bapp1%5D=abc',
-        versions: %w(abc),
+        versions: %w[abc],
       )
     }
 
@@ -67,7 +68,7 @@ RSpec.describe Factories::FeatureReviewFactory do
 
       it 'filters them out' do
         expect(feature_reviews).to match_array([
-          FeatureReview.new(path: '/feature_reviews?apps%5Bfoo%5D=bar', versions: %w(bar)),
+          FeatureReview.new(path: '/feature_reviews?apps%5Bfoo%5D=bar', versions: %w[bar]),
         ])
       end
     end
@@ -106,7 +107,7 @@ RSpec.describe Factories::FeatureReviewFactory do
       expected_path = '/feature_reviews?apps%5Ba%5D=123&apps%5Bb%5D=456'
 
       feature_review = factory.create_from_url_string(actual_url)
-      expect(feature_review.versions).to eq(%w(123 456))
+      expect(feature_review.versions).to eq(%w[123 456])
       expect(feature_review.path).to eq(expected_path)
     end
 
@@ -119,7 +120,7 @@ RSpec.describe Factories::FeatureReviewFactory do
       expected_path = '/feature_reviews?apps%5Ba%5D=123'
 
       feature_review = factory.create_from_url_string(actual_url)
-      expect(feature_review.versions).to eq(%w(123))
+      expect(feature_review.versions).to eq(%w[123])
       expect(feature_review.path).to eq(expected_path)
     end
 
@@ -158,11 +159,11 @@ RSpec.describe Factories::FeatureReviewFactory do
         expect(factory.create_from_tickets(tickets)).to match_array([
           FeatureReview.new(
             path: feature_review_path(app1: 'abc', app2: 'def'),
-            versions: %w(abc def),
+            versions: %w[abc def],
           ),
           FeatureReview.new(
             path: feature_review_path(app1: 'abc'),
-            versions: %w(abc),
+            versions: %w[abc],
           ),
         ])
       end
@@ -174,7 +175,7 @@ RSpec.describe Factories::FeatureReviewFactory do
       apps = { 'abc' => 'apple' }
 
       feature_review = factory.create_from_apps(apps)
-      expect(feature_review.versions).to eq(%w(apple))
+      expect(feature_review.versions).to eq(%w[apple])
       expect(feature_review.path).to eq('/feature_reviews?apps%5Babc%5D=apple')
     end
   end

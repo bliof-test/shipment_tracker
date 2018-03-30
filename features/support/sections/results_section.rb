@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Sections
   class ResultsSection
     def initialize(panel_elements)
@@ -11,7 +12,7 @@ module Sections
           'Jira Key' => jira_element(panel_element, 'key')&.text,
           'Summary' =>  jira_element(panel_element, 'summary')&.text,
           'Description' => jira_element(panel_element, 'description')&.text,
-          'Deploys' => jira_elements(panel_element, 'deploy').map {|e|
+          'Deploys' => jira_elements(panel_element, 'deploy').map { |e|
                          "#{e.find('span.flag-icon')[:class].split('-').last.upcase} #{e.text}"
                        },
         }

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Queries::DecoratedFeatureReviewsQuery do
@@ -60,7 +61,7 @@ RSpec.describe Queries::DecoratedFeatureReviewsQuery do
         it 'returns a new feature review' do
           feature_reviews = described_class.new('app1', [GitCommit.new(id: 'abc')]).get
           expect(feature_reviews.first.path).to eq('/feature_reviews?apps%5Bapp1%5D=abc')
-          expect(feature_reviews.first.versions).to eq(%w(abc))
+          expect(feature_reviews.first.versions).to eq(%w[abc])
         end
 
         context 'when there is a staging deploy for the software version under review' do

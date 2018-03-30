@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Repositories::ManualTestRepository do
@@ -32,14 +33,14 @@ RSpec.describe Repositories::ManualTestRepository do
         repository.apply(event)
       end
 
-      result = repository.qa_submissions_for(versions: %w(1 2))
+      result = repository.qa_submissions_for(versions: %w[1 2])
 
       expect(result).to include(
-        QaSubmission.new(email: 'foo@ex.io', accepted: true, comment: 'Good', created_at: t[2], versions: %w(1 2)),
+        QaSubmission.new(email: 'foo@ex.io', accepted: true, comment: 'Good', created_at: t[2], versions: %w[1 2]),
       )
 
       expect(result.last).to eq(
-        QaSubmission.new(email: 'foo@ex.io', accepted: false, comment: 'Good', created_at: t[3], versions: %w(1)),
+        QaSubmission.new(email: 'foo@ex.io', accepted: false, comment: 'Good', created_at: t[3], versions: %w[1]),
       )
     end
 
@@ -58,7 +59,7 @@ RSpec.describe Repositories::ManualTestRepository do
           repository.apply(event)
         end
 
-        result = repository.qa_submissions_for(versions: %w(abc def), at: 2.hours.ago)
+        result = repository.qa_submissions_for(versions: %w[abc def], at: 2.hours.ago)
 
         expect(result.last).to eq(
           QaSubmission.new(
@@ -66,7 +67,7 @@ RSpec.describe Repositories::ManualTestRepository do
             accepted: true,
             comment: 'Good',
             created_at: times[1],
-            versions: %w(abc def),
+            versions: %w[abc def],
           ),
         )
       end

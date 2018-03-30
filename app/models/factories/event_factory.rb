@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Factories
   class EventFactory
     def initialize(event_type_repository)
@@ -24,9 +25,7 @@ module Factories
     def format_payload(payload, type, user)
       metadata = {}
 
-      if type.internal? && user && user.email.present?
-        metadata = { 'email' => user.email }
-      end
+      metadata = { 'email' => user.email } if type.internal? && user && user.email.present?
 
       { details: payload.merge(metadata) }
     end

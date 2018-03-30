@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'clients/github'
 require 'git_clone_url'
 require 'token'
@@ -14,10 +15,10 @@ module Forms
       nil
     end
 
-    WHITELIST_DOMAINS = %w(github.com).freeze
+    WHITELIST_DOMAINS = %w[github.com].freeze
     REPO_GIT_URI_REGEX = %r{(git)@([\w\.]+):([\w\.\/\-]+)(\.git)$}
     REPO_VCS_URI_REGEX = %r{(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?/([\w\.\-]+)(\.git)?(/)?}
-    DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
+    DEFAULT_SELECTED_TOKENS = %w[circleci deploy].freeze
 
     attr_reader :uri, :token_types
 

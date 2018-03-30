@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'deploy_alert'
 require 'deploy'
@@ -198,7 +199,7 @@ RSpec.describe DeployAlert do
       context 'when an old release is deployed' do
         it 'returns an alert message for rollback' do
           allow(git_repo).to receive(:ancestor_of?).with(current_deploy.version, previous_deploy.version)
-            .and_return(true)
+                                                   .and_return(true)
 
           actual = DeployAlert.audit_message(current_deploy, previous_deploy)
           expected = message(current_deploy, 'Old release deployed. Was the rollback intentional?')
@@ -231,7 +232,7 @@ RSpec.describe DeployAlert do
       context 'when a new release is deployed' do
         it 'does not alert' do
           allow(git_repo).to receive(:ancestor_of?).with(current_deploy.version, previous_deploy.version)
-            .and_return(false)
+                                                   .and_return(false)
 
           expect(DeployAlert.audit_message(current_deploy, previous_deploy)).to be nil
         end

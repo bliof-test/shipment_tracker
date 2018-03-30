@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rack/utils'
 require 'uri'
 
@@ -6,10 +7,10 @@ require 'feature_review'
 
 module Factories
   class FeatureReviewFactory
-    QUERY_PARAM_WHITELIST = %w(apps).freeze
+    QUERY_PARAM_WHITELIST = %w[apps].freeze
 
     def create_from_text(text)
-      URI.extract(text, %w(http https))
+      URI.extract(text, %w[http https])
          .map { |uri| parse_uri(uri) }
          .compact
          .select { |url| url.path == '/feature_reviews' }

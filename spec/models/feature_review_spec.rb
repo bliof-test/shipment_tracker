@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 require 'feature_review'
 
@@ -18,13 +19,13 @@ RSpec.describe FeatureReview do
 
     subject { FeatureReview.new(path: path).app_names }
 
-    it { is_expected.to eq(%w(app1 app2)) }
+    it { is_expected.to eq(%w[app1 app2]) }
   end
 
   describe '#base_path' do
     let(:path) { '/something?apps%5Bapp1%5D=xxx&apps%5Bapp2%5D=yyy' }
 
-    subject { FeatureReview.new(path: path, versions: %w(xxx yyy)).base_path }
+    subject { FeatureReview.new(path: path, versions: %w[xxx yyy]).base_path }
 
     it { is_expected.to eq('/something') }
   end
@@ -32,7 +33,7 @@ RSpec.describe FeatureReview do
   describe '#query_hash' do
     let(:path) { '/something?apps%5Bapp1%5D=xxx&apps%5Bapp2%5D=yyy' }
 
-    subject { FeatureReview.new(path: path, versions: %w(xxx yyy)).query_hash }
+    subject { FeatureReview.new(path: path, versions: %w[xxx yyy]).query_hash }
 
     it { is_expected.to eq('apps' => { 'app1' => 'xxx', 'app2' => 'yyy' }) }
   end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 namespace :git do
   def root
     File.expand_path(File.join(File.dirname(__FILE__), '..', '..'))

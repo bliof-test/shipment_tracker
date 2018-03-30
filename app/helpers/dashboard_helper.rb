@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module DashboardHelper
   def result_message_for(query: nil, from_date: nil, to_date: nil, found: false)
     today_string = Time.zone.today.to_s

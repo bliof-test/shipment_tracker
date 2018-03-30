@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module RepoAdminsHelper
   def format_emails(admins = [])
     admins = Array.wrap(admins)

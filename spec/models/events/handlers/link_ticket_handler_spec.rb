@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Events::Handlers::LinkTicketHandler do
@@ -32,7 +33,7 @@ RSpec.describe Events::Handlers::LinkTicketHandler do
         hash_including(
           'key' => 'JIRA-1',
           'paths' => [path1, path2],
-          'versions' => %w(one two),
+          'versions' => %w[one two],
           'version_timestamps' => { 'one' => time1, 'two' => time2 },
         ),
       )

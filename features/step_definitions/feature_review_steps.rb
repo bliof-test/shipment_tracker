@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Given 'I prepare a feature review for:' do |table|
   prepare_feature_review_page.visit
   step 'I fill in the data for a feature review:', table

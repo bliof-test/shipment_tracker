@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class DeployAlertMailer < ApplicationMailer
   # rubocop:disable Metrics/ParameterLists
   def deploy_alert_email(repo_owners:, repo:, region:, deployer:, deployed_at:, alert:, releases_url:)

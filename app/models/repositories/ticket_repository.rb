@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/jira_event'
 require 'factories/feature_review_factory'
 require 'git_repository_location'
@@ -72,10 +73,11 @@ module Repositories
 
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
+        next unless repository_location
         CommitStatusUpdateJob.perform_later(
           full_repo_name: repository_location.full_repo_name,
           sha: version,
-        ) if repository_location
+        )
       end
     end
   end

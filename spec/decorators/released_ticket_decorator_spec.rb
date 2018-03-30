@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe ReleasedTicketDecorator do
@@ -12,7 +13,7 @@ RSpec.describe ReleasedTicketDecorator do
     let(:commits) {
       [
         GitCommit.new(id: 'abc', message: 'new commit on master', time: time - 1.hour, parent_ids: ['def']),
-        GitCommit.new(id: 'def', message: 'merge commit', time: time - 2.hours, parent_ids: %w(ghi xyz)),
+        GitCommit.new(id: 'def', message: 'merge commit', time: time - 2.hours, parent_ids: %w[ghi xyz]),
         GitCommit.new(id: 'ghi', message: 'first commit on master branch', time: time - 3.hours),
       ]
     }

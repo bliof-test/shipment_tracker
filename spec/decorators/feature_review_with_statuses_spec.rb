@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'feature_review_with_statuses'
 
@@ -62,9 +63,9 @@ RSpec.describe FeatureReviewWithStatuses do
       allow(repository_loader).to receive(:load).and_return(repository)
 
       allow(repository).to receive(:get_descendant_commits_of_branch).with(versions.first)
-        .and_return(dependent_commits_1)
+                                                                     .and_return(dependent_commits_1)
       allow(repository).to receive(:get_descendant_commits_of_branch).with(versions.second)
-        .and_return(dependent_commits_2)
+                                                                     .and_return(dependent_commits_2)
     end
 
     context 'when the latest commit is not a merge commit' do
@@ -79,9 +80,9 @@ RSpec.describe FeatureReviewWithStatuses do
 
       before do
         allow(repository).to receive(:commit_for_version).with(versions.first)
-          .and_return(commit_1)
+                                                         .and_return(commit_1)
         allow(repository).to receive(:commit_for_version).with(versions.second)
-          .and_return(commit_2)
+                                                         .and_return(commit_2)
       end
 
       it 'returns the app_name and the very same commit' do
@@ -110,7 +111,7 @@ RSpec.describe FeatureReviewWithStatuses do
   end
 
   describe '#github_repo_urls' do
-    let(:app_names) { %w(app1 app2) }
+    let(:app_names) { %w[app1 app2] }
     let(:feature_review) { instance_double(FeatureReview, app_names: app_names) }
     let(:github_urls) { { 'app1' => 'url1', 'app2' => 'url2' } }
 
@@ -327,7 +328,8 @@ RSpec.describe FeatureReviewWithStatuses do
           FeatureReviewWithStatuses.new(
             feature_review,
             tickets: tickets,
-            release_exception: release_exception)
+            release_exception: release_exception,
+          )
         }
 
         subject { feature_review_with_statuses.authorised? }

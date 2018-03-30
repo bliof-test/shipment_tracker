@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/jira_event'
 require 'factories/feature_review_factory'
 require 'git_repository_loader'
@@ -23,7 +24,7 @@ module Repositories
                 store
               end
 
-      query = query.search_for(query_text) unless query_text.blank?
+      query = query.search_for(query_text) if query_text.present?
 
       ticket_keys = filter_tickets_by_date(from_date, to_date)
       query = query.where(key: ticket_keys) if ticket_keys

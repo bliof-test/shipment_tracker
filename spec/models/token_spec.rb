@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Token do
@@ -58,7 +59,7 @@ RSpec.describe Token do
     end
 
     it 'returns all event enpoints plus github_notifications' do
-      expect(Token.sources.map(&:endpoint)).to eq(%w(circle_ci github_notifications))
+      expect(Token.sources.map(&:endpoint)).to eq(%w[circle_ci github_notifications])
     end
 
     it 'returns all event names plus Github Notifications' do

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ReleasesController < ApplicationController
   before_action :force_html_format, only: :show
 
@@ -25,7 +26,8 @@ class ReleasesController < ApplicationController
       per_page: 50,
       region: region,
       git_repo: git_repository,
-      app_name: app_name)
+      app_name: app_name,
+    )
   end
 
   def app_name

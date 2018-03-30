@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'deploy'
 require 'deploy_alert'
 require 'clients/slack'

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'build'
 require 'events/circle_ci_event'
 require 'events/jenkins_event'

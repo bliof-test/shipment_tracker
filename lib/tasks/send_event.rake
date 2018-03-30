@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 namespace :send do
   desc 'Sends a sample deploy event'
   task :deploy_event, [:app_name, :version, :server, :environment, :url, :region, :deployer] do |_, args|

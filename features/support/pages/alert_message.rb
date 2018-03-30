@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Pages
   class AlertMessage
     def initialize(page:, url_helpers:)

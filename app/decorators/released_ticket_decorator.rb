@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ReleasedTicketDecorator < SimpleDelegator
   def initialize(released_ticket)
     super(released_ticket)

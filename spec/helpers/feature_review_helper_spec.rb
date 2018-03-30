@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe FeatureReviewsHelper do
@@ -14,7 +15,7 @@ RSpec.describe FeatureReviewsHelper do
   describe '#owner_of_any_repo?' do
     let!(:repo_owner) { FactoryBot.create(:repo_admin, email: 'test@example.com') }
     let!(:git_repos) { [FactoryBot.create(:git_repository_location, name: 'app1')] }
-    let(:feature_review) { double(:feature_review, app_names: %w(app1)) }
+    let(:feature_review) { double(:feature_review, app_names: %w[app1]) }
 
     before do
       allow_any_instance_of(Repositories::RepoOwnershipRepository)

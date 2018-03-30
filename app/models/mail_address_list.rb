@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'mail'
 
 class MailAddressList
@@ -28,7 +29,7 @@ class MailAddressList
     address_list.addresses.all? do |email|
       email.address =~ /\A#{EmailValidator::EMAIL_REGEX}\z/i
     end
-  rescue => _
+  rescue StandardError => _
     false
   end
 

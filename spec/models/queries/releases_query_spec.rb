@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Queries::ReleasesQuery do
@@ -21,13 +22,13 @@ RSpec.describe Queries::ReleasesQuery do
   let(:commits) {
     [
       GitCommit.new(id: 'abc', message: 'new commit on master', time: time - 1.hour, parent_ids: ['def']),
-      GitCommit.new(id: 'def', message: 'merge commit', time: time - 2.hours, parent_ids: %w(ghi xyz)),
+      GitCommit.new(id: 'def', message: 'merge commit', time: time - 2.hours, parent_ids: %w[ghi xyz]),
       GitCommit.new(id: 'ghi', message: 'first commit on master branch', time: time - 3.hours),
     ]
   }
 
   let(:versions) { commits.map(&:id) }
-  let(:associated_versions) { %w(abc def xyz ghi) }
+  let(:associated_versions) { %w[abc def xyz ghi] }
   let(:deploy_time) { time - 1.hour }
 
   let(:deploys) {
@@ -67,7 +68,7 @@ RSpec.describe Queries::ReleasesQuery do
   describe '#versions' do
     subject(:query_versions) { releases_query.versions }
     it 'returns all versions' do
-      expect(query_versions).to eq(%w(abc def ghi))
+      expect(query_versions).to eq(%w[abc def ghi])
     end
   end
 
@@ -95,7 +96,7 @@ RSpec.describe Queries::ReleasesQuery do
 
     subject(:deployed_releases) { releases_query.deployed_releases }
     it 'returns list of releases deployed to production in region "gb"' do
-      expect(deployed_releases.map(&:version)).to eq(%w(def ghi))
+      expect(deployed_releases.map(&:version)).to eq(%w[def ghi])
       expect(deployed_releases.map(&:subject)).to eq(['merge commit', 'first commit on master branch'])
       expect(deployed_releases.map(&:production_deploy_time)).to eq([deploy_time, nil])
       expect(deployed_releases.map(&:deployed_by)).to eq(['auser', nil])

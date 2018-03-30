@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Repositories
   class RepoOwnershipRepository < Base
     def initialize(store = Snapshots::RepoOwnership)

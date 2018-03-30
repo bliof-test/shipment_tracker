@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Repositories::ReleaseExceptionRepository do
@@ -18,9 +19,9 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
   describe '#release_exception_for_application' do
     it 'returns all release exceptions for a given app' do
       events = [
-        create_exception_event(apps: [%w(app1 3)]),
-        create_exception_event(apps: [%w(app2 2)]),
-        create_exception_event(apps: [%w(app1 1)]),
+        create_exception_event(apps: [%w[app1 3]]),
+        create_exception_event(apps: [%w[app2 2]]),
+        create_exception_event(apps: [%w[app1 1]]),
       ]
 
       events.each { |event| repository.apply(event) }
@@ -33,9 +34,9 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
     context 'with specified time period' do
       it 'returns all release exceptions made within the given time period' do
         events = [
-          create_exception_event(apps: [%w(app1 3)], created_at: Date.parse('01-05-2017')),
-          create_exception_event(apps: [%w(app1 1)], created_at: Date.parse('01-03-2017')),
-          create_exception_event(apps: [%w(app2 2)]),
+          create_exception_event(apps: [%w[app1 3]], created_at: Date.parse('01-05-2017')),
+          create_exception_event(apps: [%w[app1 1]], created_at: Date.parse('01-03-2017')),
+          create_exception_event(apps: [%w[app2 2]]),
         ]
 
         events.each { |event| repository.apply(event) }
@@ -47,7 +48,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
         expect(result.count).to eq(1)
         expect(result.first).to have_attributes(
           submitted_at: Date.parse('01-03-2017'),
-          versions: %w(1),
+          versions: %w[1],
         )
       end
     end
@@ -58,7 +59,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
       let(:event) {
         build(
           :release_exception_event,
-          apps: [%w(app1 1), %w(app2 2)],
+          apps: [%w[app1 1], %w[app2 2]],
           email: 'test@example.com',
           comment: 'Good to go',
           approved: false,
@@ -85,7 +86,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
       let(:event) {
         build(
           :release_exception_event,
-          apps: [%w(app1 1), %w(app2 2)],
+          apps: [%w[app1 1], %w[app2 2]],
           email: 'test2@example.com',
           comment: 'Good to go',
           approved: false,
@@ -111,7 +112,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
 
   def create_exception_event(options = {})
     default = {
-      apps: [%w(app1 1), %w(app2 2)],
+      apps: [%w[app1 1], %w[app2 2]],
       email: 'test@example.com',
       comment: 'Good to go',
       approved: false,
@@ -127,8 +128,8 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
 
       events = [
         create_exception_event(created_at: t[0]),
-        create_exception_event(apps: [%w(app2 2)], created_at: t[1]),
-        create_exception_event(apps: [%w(app1 1)], created_at: t[3]),
+        create_exception_event(apps: [%w[app2 2]], created_at: t[1]),
+        create_exception_event(apps: [%w[app1 1]], created_at: t[3]),
         create_exception_event(approved: true, created_at: t[2]),
       ]
 
@@ -136,7 +137,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
         repository.apply(event)
       end
 
-      result = repository.release_exception_for(versions: %w(1 2))
+      result = repository.release_exception_for(versions: %w[1 2])
 
       expect(result).to eq(
         ReleaseException.new(
@@ -145,7 +146,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
           comment: 'Good to go',
           submitted_at: t[2],
           path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
-          versions: %w(1 2),
+          versions: %w[1 2],
         ),
       )
     end
@@ -164,7 +165,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
           repository.apply(event)
         end
 
-        result = repository.release_exception_for(versions: %w(1 2), at: 2.hours.ago)
+        result = repository.release_exception_for(versions: %w[1 2], at: 2.hours.ago)
 
         expect(result).to eq(
           ReleaseException.new(
@@ -173,7 +174,7 @@ RSpec.describe Repositories::ReleaseExceptionRepository do
             comment: 'Good to go',
             submitted_at: times[1],
             path: '/feature_reviews?apps%5Bapp1%5D=1&apps%5Bapp2%5D=2',
-            versions: %w(1 2),
+            versions: %w[1 2],
           ),
         )
       end

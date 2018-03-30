@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class HomeController < ApplicationController
   SHA_REGEX = /\b[0-9a-f]{40}\b/
 

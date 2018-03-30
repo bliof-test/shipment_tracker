@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'git_clone_url'
 require 'git_repository'
 
@@ -39,8 +40,10 @@ class GitRepositoryLoader
 
   def find_repo_location(repository_name)
     git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
-    fail GitRepositoryLoader::NotFound,
-      "Cannot find GitRepositoryLocation record for #{repository_name.inspect}" unless git_repository_location
+    unless git_repository_location
+      fail GitRepositoryLoader::NotFound,
+        "Cannot find GitRepositoryLocation record for #{repository_name.inspect}"
+    end
     git_repository_location
   end
 
@@ -110,8 +113,8 @@ class GitRepositoryLoader
       privatekey: ssh_private_key_file.path,
     )
   ensure
-    ssh_public_key_file.unlink if ssh_public_key_file
-    ssh_private_key_file.unlink if ssh_private_key_file
+    ssh_public_key_file&.unlink
+    ssh_private_key_file&.unlink
   end
 
   def instrument(name, &block)

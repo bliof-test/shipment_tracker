@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Payloads
   class Github
     def initialize(data)
