@@ -5,7 +5,7 @@ require 'git_repository_location'
 
 require 'webmock'
 require 'rack/test'
-require 'factory_girl'
+require 'factory_bot'
 
 module Support
   class ScenarioContext
