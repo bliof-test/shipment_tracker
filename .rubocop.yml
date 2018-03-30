@@ -1,3 +1,5 @@
+inherit_from: .rubocop_todo.yml
+
 AllCops:
   TargetRubyVersion: 2.3
   TargetRailsVersion: 4.2
@@ -21,6 +23,8 @@ Rails/DynamicFindBy:
 
 Metrics/LineLength:
   Max: 120
+  Exclude:
+    - 'app/decorators/feature_review_with_statuses.rb'
 
 Style/SingleLineBlockParams:
   Enabled: false
@@ -31,10 +35,15 @@ Metrics/MethodLength:
     - 'spec/**/*'
     - 'features/**/*'
 
+# TODO - fix app/
 Metrics/ClassLength:
   Exclude:
     - 'spec/**/*'
     - 'features/**/*'
+    - 'app/models/repositories/released_ticket_repository.rb'
+    - 'app/models/commit_status.rb'
+    - 'app/models/git_repository.rb'
+    - 'app/models/git_repository_loader.rb'
 
 Metrics/BlockLength:
   Exclude:
@@ -42,10 +51,6 @@ Metrics/BlockLength:
     - 'features/**/*'
     - 'lib/tasks/**/*'
     - 'config/environments/**/*'
-
-Metrics/ClassLength:
-  Exclude:
-    - 'app/models/git_repository.rb'
 
 Metrics/AbcSize:
   Max: 20
@@ -99,9 +104,12 @@ Lint/AmbiguousBlockAssociation:
   Exclude:
     - 'spec/**/*'
 
+# TODO - fix app/decorators
 Metrics/ParameterLists:
   Exclude:
     - 'app/mailers/**/*'
+    - 'app/decorators/feature_review_with_statuses.rb'
+    - 'spec/support/git_test_repository.rb'
 
 # Complains for `_` or `at:`
 Naming/UncommunicativeMethodParamName:
