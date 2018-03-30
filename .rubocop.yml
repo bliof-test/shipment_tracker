@@ -1,5 +1,6 @@
 AllCops:
   TargetRubyVersion: 2.3
+  TargetRailsVersion: 4.2
   Exclude:
     - 'bin/**/*'
     - 'db/**/*'
@@ -15,6 +16,9 @@ Rails:
 Rails/TimeZone:
   Enabled: false
 
+Rails/DynamicFindBy:
+  Enabled: false
+
 Metrics/LineLength:
   Max: 120
 
@@ -23,6 +27,21 @@ Style/SingleLineBlockParams:
 
 Metrics/MethodLength:
   Max: 15
+  Exclude:
+    - 'spec/**/*'
+    - 'features/**/*'
+
+Metrics/ClassLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'features/**/*'
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'features/**/*'
+    - 'lib/tasks/**/*'
+    - 'config/environments/**/*'
 
 Metrics/ClassLength:
   Exclude:
@@ -31,8 +50,11 @@ Metrics/ClassLength:
 Metrics/AbcSize:
   Max: 20
 
-Style/IndentArray:
+Layout/IndentArray:
   EnforcedStyle: consistent
+
+Layout/AlignParameters:
+  EnforcedStyle: with_fixed_indentation
 
 Style/NestedParenthesizedCalls:
   Enabled: false  # TODO: Enable when possible to configure for method arity.
@@ -48,11 +70,11 @@ Style/BlockDelimiters:
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
 
-Style/TrailingCommaInLiteral:
+Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
 
-Style/AlignParameters:
-  EnforcedStyle: with_fixed_indentation
+Style/TrailingCommaInHashLiteral:
+  EnforcedStyleForMultiline: comma
 
 Style/MultilineBlockChain:
   Enabled: false
@@ -69,4 +91,18 @@ Style/FrozenStringLiteralComment:
 Style/DoubleNegation:
   Enabled: false
 
-inherit_from: .rubocop_todo.yml
+Naming/HeredocDelimiterNaming:
+  Exclude:
+    - 'spec/**/*'
+
+Lint/AmbiguousBlockAssociation:
+  Exclude:
+    - 'spec/**/*'
+
+Metrics/ParameterLists:
+  Exclude:
+    - 'app/mailers/**/*'
+
+# Complains for `_` or `at:`
+Naming/UncommunicativeMethodParamName:
+  Enabled: false
