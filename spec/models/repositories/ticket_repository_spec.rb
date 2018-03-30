@@ -317,23 +317,23 @@ RSpec.describe Repositories::TicketRepository do
 
     context 'with at specified' do
       it 'returns the state at that moment' do
-        jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
-        jira_2 = { key: 'JIRA-2', summary: 'Ticket 2' }
-        ticket_1 = jira_1.merge(ticket_defaults)
+        jira1 = { key: 'JIRA-1', summary: 'Ticket 1' }
+        jira2 = { key: 'JIRA-2', summary: 'Ticket 2' }
+        ticket1 = jira1.merge(ticket_defaults)
 
         [
-          build(:jira_event, :created, jira_1.merge(comment_body: LinkTicket.build_comment(url), created_at: times[0])),
-          build(:jira_event, :started, jira_1.merge(created_at: times[1], user_email: 'some.user@example.com')),
-          build(:jira_event, :approved, jira_1.merge(created_at: times[2], user_email: 'another.user@example.com')),
-          build(:jira_event, :created, jira_2.merge(created_at: times[3])),
-          build(:jira_event, :created, jira_2.merge(comment_body: LinkTicket.build_comment(url), created_at: times[4])),
+          build(:jira_event, :created, jira1.merge(comment_body: LinkTicket.build_comment(url), created_at: times[0])),
+          build(:jira_event, :started, jira1.merge(created_at: times[1], user_email: 'some.user@example.com')),
+          build(:jira_event, :approved, jira1.merge(created_at: times[2], user_email: 'another.user@example.com')),
+          build(:jira_event, :created, jira2.merge(created_at: times[3])),
+          build(:jira_event, :created, jira2.merge(comment_body: LinkTicket.build_comment(url), created_at: times[4])),
         ].each do |event|
           repository.apply(event)
         end
 
         expect(repository.tickets_for_path(path, at: times[2])).to match_array([
           Ticket.new(
-            ticket_1.merge(
+            ticket1.merge(
               status: 'Ready for Deployment',
               approved_at: times[2],
               event_created_at: times[2],

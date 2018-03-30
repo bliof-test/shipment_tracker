@@ -99,7 +99,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def tickets_approved?
-    @approved ||= tickets.present? && tickets.all?(&:approved?)
+    @tickets_approved ||= tickets.present? && tickets.all?(&:approved?)
   end
 
   def approved_path

@@ -10,8 +10,6 @@ module Forms
     include ActiveModel::AttributeMethods
     include ActiveModel::Validations
 
-    attr_reader :apps
-
     def to_key
       nil
     end
