@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 ruby '2.3.6'
 
-gem 'rails', '~> 4.2.1'
+gem 'rails', '~> 4.2.10'
 
 gem 'addressable', require: 'addressable/uri'
 gem 'bootstrap-sass'
