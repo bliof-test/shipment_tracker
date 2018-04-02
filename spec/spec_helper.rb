@@ -8,6 +8,7 @@
 if ENV['COVERAGE']
   require 'simplecov'
   SimpleCov.start('rails') do
+    command_name 'specs'
     add_filter 'lib/tasks/'
   end
 end

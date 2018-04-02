@@ -1,48 +1,154 @@
 version: 2
 
+ruby_image: &ruby_image
+  image: circleci/ruby:2.3.6
+  environment:
+    BUNDLE_JOBS: 3
+    BUNDLE_RETRY: 3
+    BUNDLE_PATH: vendor/bundle
+    RAILS_ENV: test
+    SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker_test
+    SHIPMENT_TRACKER_DATABASE_HOST: 127.0.0.1
+    SHIPMENT_TRACKER_DATABASE_USERNAME: st_test
+    SHIPMENT_TRACKER_DATABASE_PASSWORD: ""
+    CODECLIMATE_REPO_TOKEN: $CODECLIMATE_REPO_TOKEN
+    CC_TEST_REPORTER_ID: $CODECLIMATE_REPO_TOKEN
+
+defaults: &defaults
+  working_directory: ~/shipment_tracker
+  docker:
+    - *ruby_image
+    - image: circleci/postgres:9.4-alpine
+      environment:
+        POSTGRES_DB: shipment_tracker_test
+        POSTGRES_USER: st_test
+        POSTGRES_PASSWORD: ""
+
+install_system_packages: &install_system_packages
+  run:
+    name: Install system packages
+    command: sudo apt-get install -y cmake postgresql-client
+
+restore_gems: &restore_gems
+  restore_cache:
+    key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
+
+bundle_install: &bundle_install
+  run:
+    name: Install gems
+    command: bundle check || bundle install
+
+cache_gems: &cache_gems
+  save_cache:
+    key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
+    paths:
+      - vendor/bundle
+
 jobs:
   build:
-    branches:
-      ignore:
-        - /dependabot\/.*/
-    docker:
-      - image: circleci/ruby:2.3.6
-        environment:
-          BUNDLE_JOBS: 3
-          BUNDLE_RETRY: 3
-          BUNDLE_PATH: vendor/bundle
-          RAILS_ENV: test
-          SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker_test
-          SHIPMENT_TRACKER_DATABASE_HOST: 127.0.0.1
-          SHIPMENT_TRACKER_DATABASE_USERNAME: st_test
-          SHIPMENT_TRACKER_DATABASE_PASSWORD: ""
-      - image: circleci/postgres:9.4-alpine
-        environment:
-          POSTGRES_DB: shipment_tracker_test
-          POSTGRES_USER: st_test
-          POSTGRES_PASSWORD: ""
+    <<: *defaults
     steps:
-      - run: sudo apt-get install -y cmake postgresql-client
+      - *install_system_packages
       - checkout
-      - run: cp .env.development.example .env.test
-      - run:  gem install bundler
-      - restore_cache:
-          key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
-      - run: bundle check || bundle install
-      - save_cache:
-          key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
+      - *restore_gems
+      - *bundle_install
+      - *cache_gems
+      - run:
+          name: Download cc-test-reporter
+          command: |
+            mkdir -p tmp/
+            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./tmp/cc-test-reporter
+            chmod +x ./tmp/cc-test-reporter
+      - persist_to_workspace:
+          root: ./tmp
           paths:
-            - vendor/bundle
+            - cc-test-reporter
+  specs:
+    <<: *defaults
+    steps:
+      - *install_system_packages
+      - checkout
+      - attach_workspace:
+          at: ./tmp
+      - *restore_gems
+      - *bundle_install
+      - *cache_gems
       - run: bundle exec rake db:create_database_yml
       - run: bundle exec rake db:setup
-      - run: bundle exec rake spec
-      - run: bundle exec rake cucumber
-      - run: bundle exec rubocop -D
-      - run: bundle exec rake codeclimate
       - run:
-          name: Submit build status
+          name: Run specs
           command: |
-            if [ "$CIRCLE_PROJECT_USERNAME" == "FundingCircle" ]; then
-              curl --header 'Accept: application/json' https://circleci.com/api/v1/project/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/$CIRCLE_BUILD_NUM?circle-token=$CIRCLE_TOKEN \
-              | curl --request POST --header 'Content-Type:application/json' --data @- --fail $SHIPMENT_TRACKER_POST_URL
-            fi
+            bundle exec rake spec
+            ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.specs.json coverage/.resultset.json
+      - store_artifacts:
+          path: coverage
+          destination: specs-coverage
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.specs.json
+  features:
+    <<: *defaults
+    steps:
+      - *install_system_packages
+      - checkout
+      - attach_workspace:
+          at: ./tmp
+      - *restore_gems
+      - *bundle_install
+      - *cache_gems
+      - run: bundle exec rake db:create_database_yml
+      - run: bundle exec rake db:setup
+      - run:
+          name: Run features
+          command: |
+            bundle exec rake cucumber
+            ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.features.json coverage/features/.resultset.json
+      - store_artifacts:
+          path: coverage
+          destination: features-coverage
+      - persist_to_workspace:
+          root: tmp
+          paths:
+            - codeclimate.features.json
+  rubocop:
+    <<: *defaults
+    steps:
+      - *install_system_packages
+      - checkout
+      - *restore_gems
+      - *bundle_install
+      - *cache_gems
+      - run: bundle exec rubocop -D
+
+  upload-coverage:
+    working_directory: ~/shipment_tracker
+    docker:
+      - *ruby_image
+    steps:
+      - attach_workspace:
+          at: ./tmp
+      - run:
+          name: Upload coverage results to Code Climate
+          command: |
+            ./tmp/cc-test-reporter sum-coverage tmp/codeclimate.*.json -p 2 -o tmp/codeclimate.total.json
+            ./tmp/cc-test-reporter upload-coverage -i tmp/codeclimate.total.json -r $CODECLIMATE_REPO_TOKEN
+
+workflows:
+  version: 2
+  commit:
+    jobs:
+      - build
+      - specs:
+          requires:
+            - build
+      - features:
+          requires:
+            - build
+      - rubocop:
+          requires:
+            - build
+      - upload-coverage:
+          requires:
+            - specs
+            - features
