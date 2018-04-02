@@ -28,12 +28,6 @@ rescue LoadError
   task :spec
 end
 
-task :codeclimate do
-  require 'simplecov'
-  require 'codeclimate-test-reporter'
-  CodeClimate::TestReporter::Formatter.new.format(SimpleCov.result)
-end
-
 namespace :heroku do
   desc 'Replaces local development database with Heroku database'
   task pull: :environment do

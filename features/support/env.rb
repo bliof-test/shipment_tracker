@@ -9,6 +9,7 @@
 if ENV['COVERAGE']
   require 'simplecov'
   SimpleCov.start do
+    command_name 'features'
     add_filter 'lib/tasks/'
     add_filter 'features/'
     add_filter 'spec/'
