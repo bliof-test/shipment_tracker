@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/base_event'
 
 module Events
@@ -64,7 +65,7 @@ module Events
     end
 
     def transfer?
-      return false unless key_item.present?
+      return false if key_item.blank?
 
       changelog_old_key != changelog_new_key
     end

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'benchmark'
 require 'csv'
 
@@ -9,7 +10,7 @@ namespace :stats do
   end
 
   desc 'Counts releases'
-  task :approved_releases, [:from_date, :to_date, :per_page] => :environment do |_, args|
+  task :approved_releases, %i[from_date to_date per_page] => :environment do |_, args|
     args.with_defaults(date_from: nil, date_to: nil, per_page: 50)
     to_date = args.to_date ? Time.parse(args.to_date) : Time.current.beginning_of_day
     from_date = args.from_date ? Time.parse(args.from_date) : to_date - 7.days
@@ -60,7 +61,7 @@ namespace :stats do
       end
 
       total_count = releases_in_time.count
-      unapproved_releases = releases_in_time.select { |r| !r.approved? }
+      unapproved_releases = releases_in_time.reject(&:approved?)
       unapproved_count = unapproved_releases.count
 
       puts "STATS INFO: Total releases: #{total_count}"

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Ticket do
@@ -23,7 +24,7 @@ RSpec.describe Ticket do
   describe '#authorised?' do
     subject { ticket.authorised?(versions, isae_3402_auditable) }
 
-    let(:versions) { %w(abc def) }
+    let(:versions) { %w[abc def] }
     let(:isae_3402_auditable) { false }
     let(:current_time) { Time.current }
 
@@ -72,8 +73,7 @@ RSpec.describe Ticket do
         { approved_at: current_time,
           version_timestamps: { versions.first => 1.hour.ago },
           authored_by: email,
-          approved_by: email,
-        }
+          approved_by: email }
       }
 
       context 'and the repos are in the ISAE 3402 critical list' do
@@ -91,7 +91,7 @@ RSpec.describe Ticket do
   describe '#authorisation_status' do
     subject { ticket.authorisation_status(versions) }
 
-    let(:versions) { %w(abc def) }
+    let(:versions) { %w[abc def] }
 
     context 'when ticket is not done' do
       let(:ticket_attributes) { { status: 'Ready for Acceptance' } }

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'repositories/base'
 
@@ -8,8 +9,7 @@ module Spec
       @store = store
     end
 
-    def apply
-    end
+    def apply; end
   end
 end
 

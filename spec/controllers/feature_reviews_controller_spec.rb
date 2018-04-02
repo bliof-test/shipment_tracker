@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe FeatureReviewsController do
@@ -21,7 +22,7 @@ RSpec.describe FeatureReviewsController do
     let(:feature_review_form) { instance_double(Forms::FeatureReviewForm) }
 
     before do
-      allow(GitRepositoryLocation).to receive(:app_names).and_return(%w(frontend backend))
+      allow(GitRepositoryLocation).to receive(:app_names).and_return(%w[frontend backend])
       allow(Forms::FeatureReviewForm).to receive(:new).with(hash_including(apps: nil)).and_return(feature_review_form)
     end
 
@@ -29,7 +30,7 @@ RSpec.describe FeatureReviewsController do
       get :new
       is_expected.to render_template('new')
       expect(assigns(:feature_review_form)).to eq(feature_review_form)
-      expect(assigns(:app_names)).to eq(%w(frontend backend))
+      expect(assigns(:app_names)).to eq(%w[frontend backend])
     end
   end
 
@@ -61,7 +62,7 @@ RSpec.describe FeatureReviewsController do
     context 'when the feature review form is invalid' do
       before do
         allow(feature_review_form).to receive(:valid?).and_return(false)
-        allow(GitRepositoryLocation).to receive(:app_names).and_return(%w(frontend backend))
+        allow(GitRepositoryLocation).to receive(:app_names).and_return(%w[frontend backend])
       end
 
       it 'renders the new page' do
@@ -69,7 +70,7 @@ RSpec.describe FeatureReviewsController do
 
         is_expected.to render_template('new')
         expect(assigns(:feature_review_form)).to eql(feature_review_form)
-        expect(assigns(:app_names)).to eql(%w(frontend backend))
+        expect(assigns(:app_names)).to eql(%w[frontend backend])
       end
     end
 

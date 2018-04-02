@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/release_exception_event'
 
 FactoryBot.define do

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Repositories
   class GitRepoLocationRepository < Base
     def initialize(store = Snapshots::GitRepositoryLocation)

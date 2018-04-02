@@ -1,10 +1,11 @@
 # frozen_string_literal: true
+
 require 'events/base_event'
 require 'git_repository_loader'
 
 module Events
   class DeployEvent < Events::BaseEvent
-    ENVIRONMENTS = %w(uat staging production).freeze
+    ENVIRONMENTS = %w[uat staging production].freeze
 
     def app_name
       if deployed_to_heroku?

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'repositories/ticket_repository'
 
@@ -37,7 +38,7 @@ RSpec.describe Repositories::TicketRepository do
           feature_review_path(frontend: 'abc', backend: 'NON1'),
         ],
         event_created_at: 9.days.ago,
-        versions: %w(abc NON1 NON3 NON2) }
+        versions: %w[abc NON1 NON3 NON2] }
     }
 
     let(:attrs_a2) {
@@ -49,7 +50,7 @@ RSpec.describe Repositories::TicketRepository do
           feature_review_path(frontend: 'abc', backend: 'NON1'),
         ],
         event_created_at: 3.days.ago,
-        versions: %w(abc NON1 NON3 NON2) }
+        versions: %w[abc NON1 NON3 NON2] }
     }
 
     let(:attrs_b) {
@@ -61,7 +62,7 @@ RSpec.describe Repositories::TicketRepository do
           feature_review_path(frontend: 'NON3', backend: 'ghi'),
         ],
         event_created_at: 7.days.ago,
-        versions: %w(def NON4 NON3 ghi) }
+        versions: %w[def NON4 NON3 ghi] }
     }
 
     let(:attrs_c) {
@@ -70,7 +71,7 @@ RSpec.describe Repositories::TicketRepository do
         status: 'Done',
         paths: [feature_review_path(frontend: 'NON3', backend: 'NON2')],
         event_created_at: 5.days.ago,
-        versions: %w(NON3 NON2) }
+        versions: %w[NON3 NON2] }
     }
 
     let(:attrs_d) {
@@ -79,7 +80,7 @@ RSpec.describe Repositories::TicketRepository do
         status: 'Done',
         paths: [feature_review_path(frontend: 'NON3', backend: 'ghi')],
         event_created_at: 3.days.ago,
-        versions: %w(NON3 ghi) }
+        versions: %w[NON3 ghi] }
     }
 
     let(:attrs_e1) {
@@ -88,7 +89,7 @@ RSpec.describe Repositories::TicketRepository do
         status: 'Done',
         paths: [feature_review_path(frontend: 'abc', backend: 'NON1')],
         event_created_at: 1.day.ago,
-        versions: %w(abc NON1) }
+        versions: %w[abc NON1] }
     }
 
     let(:attrs_e2) {
@@ -97,7 +98,7 @@ RSpec.describe Repositories::TicketRepository do
         status: 'Done',
         paths: [feature_review_path(frontend: 'abc', backend: 'NON1')],
         event_created_at: 1.day.ago,
-        versions: %w(abc NON1) }
+        versions: %w[abc NON1] }
     }
 
     before :each do
@@ -138,7 +139,7 @@ RSpec.describe Repositories::TicketRepository do
     describe '#tickets_for_versions' do
       context 'when given an array' do
         it 'returns all tickets containing the versions' do
-          tickets = repository.tickets_for_versions(%w(abc def))
+          tickets = repository.tickets_for_versions(%w[abc def])
 
           expect(tickets).to match_array([
             Ticket.new(attrs_a1),
@@ -166,7 +167,7 @@ RSpec.describe Repositories::TicketRepository do
     let(:times) { [time - 4.hours, time - 3.hours, time - 2.hours, time - 1.hour, time - 1.minute] }
     let(:url) { LinkTicket.build_comment(feature_review_url(app: 'foo')) }
     let(:path) { feature_review_path(app: 'foo') }
-    let(:ticket_defaults) { { paths: [path], versions: %w(foo), version_timestamps: { 'foo' => nil } } }
+    let(:ticket_defaults) { { paths: [path], versions: %w[foo], version_timestamps: { 'foo' => nil } } }
     let(:repository_location) { instance_double(GitRepositoryLocation, full_repo_name: 'owner/frontend') }
 
     before do
@@ -272,8 +273,9 @@ RSpec.describe Repositories::TicketRepository do
             Ticket.new(
               key: 'JIRA-1',
               paths: [path1, path2],
-              versions: %w(one two),
-              version_timestamps: { 'one' => times[0], 'two' => times[1] }),
+              versions: %w[one two],
+              version_timestamps: { 'one' => times[0], 'two' => times[1] },
+            ),
           ])
         end
       end
@@ -285,8 +287,7 @@ RSpec.describe Repositories::TicketRepository do
           build(:jira_event,
             key: 'JIRA-1',
             comment_body: LinkTicket.build_comment(url1),
-            created_at: times[0],
-               )
+            created_at: times[0])
         }
         let(:unlink_jira_event1) {
           build(:jira_event, key: 'JIRA-1', comment_body: UnlinkTicket.build_comment(url1))
@@ -298,8 +299,7 @@ RSpec.describe Repositories::TicketRepository do
           build(:jira_event,
             key: 'JIRA-1',
             comment_body: LinkTicket.build_comment(url2),
-            created_at: times[1],
-               )
+            created_at: times[1])
         }
 
         it 'removes the feature review link from a ticket' do
@@ -309,7 +309,7 @@ RSpec.describe Repositories::TicketRepository do
 
           last_snapshot = Snapshots::Ticket.where(key: 'JIRA-1').last
           expect(last_snapshot.paths).to eq([path2])
-          expect(last_snapshot.versions).to eq %w(two)
+          expect(last_snapshot.versions).to eq %w[two]
           expect(last_snapshot.version_timestamps).to eq('two' => times[1].to_s)
         end
       end
@@ -317,23 +317,23 @@ RSpec.describe Repositories::TicketRepository do
 
     context 'with at specified' do
       it 'returns the state at that moment' do
-        jira_1 = { key: 'JIRA-1', summary: 'Ticket 1' }
-        jira_2 = { key: 'JIRA-2', summary: 'Ticket 2' }
-        ticket_1 = jira_1.merge(ticket_defaults)
+        jira1 = { key: 'JIRA-1', summary: 'Ticket 1' }
+        jira2 = { key: 'JIRA-2', summary: 'Ticket 2' }
+        ticket1 = jira1.merge(ticket_defaults)
 
         [
-          build(:jira_event, :created, jira_1.merge(comment_body: LinkTicket.build_comment(url), created_at: times[0])),
-          build(:jira_event, :started, jira_1.merge(created_at: times[1], user_email: 'some.user@example.com')),
-          build(:jira_event, :approved, jira_1.merge(created_at: times[2], user_email: 'another.user@example.com')),
-          build(:jira_event, :created, jira_2.merge(created_at: times[3])),
-          build(:jira_event, :created, jira_2.merge(comment_body: LinkTicket.build_comment(url), created_at: times[4])),
+          build(:jira_event, :created, jira1.merge(comment_body: LinkTicket.build_comment(url), created_at: times[0])),
+          build(:jira_event, :started, jira1.merge(created_at: times[1], user_email: 'some.user@example.com')),
+          build(:jira_event, :approved, jira1.merge(created_at: times[2], user_email: 'another.user@example.com')),
+          build(:jira_event, :created, jira2.merge(created_at: times[3])),
+          build(:jira_event, :created, jira2.merge(comment_body: LinkTicket.build_comment(url), created_at: times[4])),
         ].each do |event|
           repository.apply(event)
         end
 
         expect(repository.tickets_for_path(path, at: times[2])).to match_array([
           Ticket.new(
-            ticket_1.merge(
+            ticket1.merge(
               status: 'Ready for Deployment',
               approved_at: times[2],
               event_created_at: times[2],
@@ -472,8 +472,7 @@ RSpec.describe Repositories::TicketRepository do
             :approved,
             key: 'JIRA-XYZ',
             created_at: time,
-            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
-               )
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')))
         }
 
         before do
@@ -501,8 +500,7 @@ RSpec.describe Repositories::TicketRepository do
             :unapproved,
             key: 'JIRA-XYZ',
             created_at: time,
-            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')),
-               )
+            comment_body: LinkTicket.build_comment(feature_review_url(frontend: 'abc')))
         }
 
         before do
@@ -574,7 +572,7 @@ RSpec.describe Repositories::TicketRepository do
             feature_review_path(frontend: 'abc', backend: 'NON1'),
           ],
           event_created_at: 9.days.ago,
-          versions: %w(abc NON1 NON3 NON2) }
+          versions: %w[abc NON1 NON3 NON2] }
       }
 
       context 'when the event does not contain a moved ticket' do

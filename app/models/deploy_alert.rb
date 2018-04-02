@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'repositories/deploy_repository'
 require 'git_repository_loader'
 require 'git_repository_location'

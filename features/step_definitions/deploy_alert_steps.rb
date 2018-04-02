@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Then 'a deploy alert should be dispatched for' do |table|
   table.hashes.each do |row|
     method, app, time, deployer, version, msg, to =

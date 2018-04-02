@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'clients/github'
 
@@ -28,11 +29,10 @@ RSpec.describe GithubClient do
   describe '#repo_accessible?' do
     context 'when repo is on GitHub' do
       it 'checks that the repo is accessible' do
-        %w(git@github.com:owner/repo.git
+        %w[git@github.com:owner/repo.git
            git://github.com/owner/repo.git
            ssh://github.com/owner/repo.git
-           http://github.com/owner/repo
-        ).each do |uri|
+           http://github.com/owner/repo].each do |uri|
           expect_any_instance_of(Octokit::Client).to receive(:repository?).with('owner/repo')
           github.repo_accessible?(uri)
         end

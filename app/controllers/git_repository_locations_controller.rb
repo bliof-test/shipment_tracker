@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class GitRepositoryLocationsController < ApplicationController
   def index
     @git_repository_locations = GitRepositoryLocation.all.order(:name)

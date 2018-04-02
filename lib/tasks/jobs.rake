@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'honeybadger'
 
 namespace :jobs do
@@ -108,8 +109,8 @@ namespace :jobs do
       }.each(&:join)
 
       repos_hash_after = GitRepositoryLocation.app_remote_head_hash
-      repos_hash_changed = repos_hash_after.select { |name, remote_head|
-        remote_head != repos_hash_before[name]
+      repos_hash_changed = repos_hash_after.reject { |name, remote_head|
+        remote_head == repos_hash_before[name]
       }
       repos_hash_before = repos_hash_after.dup
 

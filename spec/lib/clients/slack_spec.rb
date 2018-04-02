@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'clients/slack'
 
@@ -19,8 +20,7 @@ RSpec.describe SlackClient do
           fields: [
             { title: 'Project', value: 'frontend', short: true },
             { title: 'Deployer', value: 'Jeff', short: true },
-          ],
-        },
+          ] },
       ]
     }
 

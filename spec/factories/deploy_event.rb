@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/deploy_event'
 
 FactoryBot.define do

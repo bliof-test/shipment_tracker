@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class SessionsController < ApplicationController
   skip_before_action :require_authentication
   skip_before_action :verify_authenticity_token
@@ -10,7 +11,7 @@ class SessionsController < ApplicationController
   end
 
   def auth0_failure_callback
-    render text: 'Sorry - you are not authorized to use this application.', status: 401
+    render text: 'Sorry - you are not authorized to use this application.', status: :unauthorized
   end
 
   def destroy

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
+
 class Token < ActiveRecord::Base
   has_secure_token :value
 
-  before_validation(on: [:create, :update]) do
+  before_validation(on: %i[create update]) do
     lowercase_name
   end
 
@@ -30,6 +31,6 @@ class Token < ActiveRecord::Base
   private
 
   def lowercase_name
-    name.downcase! if name
+    name&.downcase!
   end
 end

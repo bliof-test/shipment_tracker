@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 When 'I search tickets with keywords "$query"' do |query|
   dashboard_page.search_for(query: scenario_context.resolve_version(query))
 end

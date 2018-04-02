@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'addressable/uri'
 
 When 'I generate a token for "$source" with name "$name"' do |source, name|

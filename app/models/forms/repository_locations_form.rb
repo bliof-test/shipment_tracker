@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'clients/github'
 require 'git_clone_url'
 require 'token'
@@ -14,10 +15,10 @@ module Forms
       nil
     end
 
-    WHITELIST_DOMAINS = %w(github.com).freeze
-    REPO_GIT_URI_REGEX = %r{(git)@([\w\.]+):([\w\.\/\-]+)(\.git)$}
-    REPO_VCS_URI_REGEX = %r{(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?/([\w\.\-]+)(\.git)?(/)?}
-    DEFAULT_SELECTED_TOKENS = %w(circleci deploy).freeze
+    WHITELIST_DOMAINS = %w[github.com].freeze
+    REPO_GIT_URI_REGEX = %r{\A(git)@([\w\.]+):([\w\.\/\-]+)(\.git)\z}
+    REPO_VCS_URI_REGEX = %r{\A(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?(/[\w\.\-]+)+(\.git)?(/)?\z}
+    DEFAULT_SELECTED_TOKENS = %w[circleci deploy].freeze
 
     attr_reader :uri, :token_types
 
@@ -37,8 +38,6 @@ module Forms
     end
 
     private
-
-    attr_reader :parsed_uri
 
     def parsed_uri
       @parsed_uri ||= GitCloneUrl.parse(uri)
@@ -74,9 +73,9 @@ module Forms
 
     def valid_uri_format?
       if uri.start_with?('git@')
-        (REPO_GIT_URI_REGEX =~ uri) == 0
+        REPO_GIT_URI_REGEX =~ uri
       else
-        (REPO_VCS_URI_REGEX =~ uri) == 0
+        REPO_VCS_URI_REGEX =~ uri
       end
     end
 
@@ -87,7 +86,7 @@ module Forms
     end
 
     def github
-      @github_client ||= GithubClient.new(ShipmentTracker::GITHUB_REPO_READ_TOKEN)
+      @github ||= GithubClient.new(ShipmentTracker::GITHUB_REPO_READ_TOKEN)
     end
   end
 end

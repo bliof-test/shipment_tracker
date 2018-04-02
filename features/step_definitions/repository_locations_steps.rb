@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Given 'I am on the new repository location form' do
   git_repository_location_page.visit
 end
@@ -11,9 +12,7 @@ Then 'I should see the repository locations:' do |table|
   expected_git_repository_locations = table.hashes.map { |row|
     expand_uri = row['URI'].strip.match(/uri_for\("(.*)"\)/)
 
-    if expand_uri
-      row['URI'] = scenario_context.repository_location_for(expand_uri[1]).uri
-    end
+    row['URI'] = scenario_context.repository_location_for(expand_uri[1]).uri if expand_uri
 
     row
   }

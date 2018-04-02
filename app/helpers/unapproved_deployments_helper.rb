@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module UnapprovedDeploymentsHelper
   def tickets_for_versions(versions)
     Repositories::TicketRepository.new.tickets_for_versions(versions)

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'add_repository_location'
 require 'forms/repository_locations_form'
@@ -14,7 +15,7 @@ RSpec.describe AddRepositoryLocation do
   end
 
   context 'when valid URI and a token selected' do
-    let(:token_types) { %w(system_1 system2) }
+    let(:token_types) { %w[system_1 system2] }
     let(:token_mock) { instance_double(Token) }
 
     before do
@@ -39,7 +40,8 @@ RSpec.describe AddRepositoryLocation do
       AddRepositoryLocation.run(
         validation_form: form,
         uri: 'git@github.com:owner/repo.git',
-        token_types: token_types)
+        token_types: token_types,
+      )
     end
 
     it 'generates token for each toke_type using repo name' do
@@ -51,7 +53,8 @@ RSpec.describe AddRepositoryLocation do
       AddRepositoryLocation.run(
         validation_form: form,
         uri: 'git@github.com:owner/repo.git',
-        token_types: token_types)
+        token_types: token_types,
+      )
     end
 
     context 'token can not be saved' do

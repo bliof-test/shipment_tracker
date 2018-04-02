@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 require 'repositories/released_ticket_repository'
 require 'snapshots/released_ticket'
@@ -148,7 +149,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
     }
 
     before do
-      commit = instance_double(GitCommit, id: commit_version, associated_ids: %w(abc def))
+      commit = instance_double(GitCommit, id: commit_version, associated_ids: %w[abc def])
       repository_loader = instance_double(GitRepositoryLoader)
 
       allow(repository).to receive(:get_dependent_commits).with('abc').and_return([commit])
@@ -177,7 +178,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           'key' => 'JIRA-1',
           'summary' => 'new title',
           'description' => 'new description',
-          'versions' => %w(abc def ghi),
+          'versions' => %w[abc def ghi],
         }
         expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attributes)
       end
@@ -196,7 +197,7 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           'key' => 'JIRA-1',
           'summary' => 'new title',
           'description' => 'new description',
-          'versions' => %w(abc),
+          'versions' => %w[abc],
         }
         expect(Snapshots::ReleasedTicket.last.attributes).to include(expected_attributes)
       end
@@ -352,13 +353,11 @@ RSpec.describe Repositories::ReleasedTicketRepository do
           context 'when deploying to different regons' do
             let(:deploy_event_gb) {
               build(:deploy_event, environment: 'production', version: version, created_at: time_string,
-                                   locale: 'gb'
-                   )
+                                   locale: 'gb')
             }
             let(:deploy_event_us) {
               build(:deploy_event, environment: 'production', version: version, created_at: time_string,
-                                   locale: 'us'
-                   )
+                                   locale: 'us')
             }
             let!(:released_ticket) {
               Snapshots::ReleasedTicket.create(

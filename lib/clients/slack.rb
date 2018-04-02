@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'slack-notifier'
 
 class SlackClient
@@ -11,7 +12,6 @@ class SlackClient
   def initialize(webhook, channel)
     @notifier = Slack::Notifier.new(webhook)
     notifier.channel = prepend_hash(channel)
-    self
   end
 
   def send_with_attachments(attachments)

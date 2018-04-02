@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Forms::EditGitRepositoryLocationForm do
@@ -50,8 +51,8 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
       end
 
       it 'could contain only certain checks' do
-        expect(form_for(audit_options: %w(isae_3402))).to be_valid
-        expect(form_for(audit_options: %w(invalid_check))).not_to be_valid
+        expect(form_for(audit_options: %w[isae_3402])).to be_valid
+        expect(form_for(audit_options: %w[invalid_check])).not_to be_valid
       end
     end
   end
@@ -61,7 +62,7 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
       form_for(
         {
           repo_owners: "test@example.com, test3@example.com \n\n\nTest Example <test2@example.com>  \n\n\n",
-          audit_options: %w(isae_3402),
+          audit_options: %w[isae_3402],
         },
         repo: FactoryBot.create(:git_repository_location, name: 'my-app'),
         current_user: double('User', email: 'test@test.com'),
@@ -99,7 +100,7 @@ RSpec.describe Forms::EditGitRepositoryLocationForm do
         receive(:create!).with(
           details: {
             app_name: 'my-app',
-            audit_options: %w(isae_3402),
+            audit_options: %w[isae_3402],
           },
         ),
       )

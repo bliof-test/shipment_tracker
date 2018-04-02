@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'git_repository_loader'
 
 require 'active_model'
@@ -8,8 +9,6 @@ module Forms
     extend ActiveModel::Naming
     include ActiveModel::AttributeMethods
     include ActiveModel::Validations
-
-    attr_reader :apps
 
     def to_key
       nil

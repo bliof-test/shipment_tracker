@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class ApplicationController < ActionController::Base
   # Prevent CSRF attacks by raising an exception.
   # For APIs, you may want to use :null_session instead.
@@ -24,7 +25,7 @@ class ApplicationController < ActionController::Base
   end
 
   def path_from_url(url_or_path)
-    return nil unless url_or_path.present?
+    return nil if url_or_path.blank?
     URI.parse('http://domain.com').merge(url_or_path).request_uri
   rescue URI::InvalidURIError
     nil

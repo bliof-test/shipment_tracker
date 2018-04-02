@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Events::ReleaseExceptionEvent do
@@ -93,7 +94,7 @@ RSpec.describe Events::ReleaseExceptionEvent do
 
         event = build(
           :release_exception_event,
-          apps: [%w(frontend abc)],
+          apps: [%w[frontend abc]],
           email: 'test@example.com',
         )
 
@@ -105,7 +106,7 @@ RSpec.describe Events::ReleaseExceptionEvent do
       it 'create an exception' do
         event = build(
           :release_exception_event,
-          apps: [%w(frontend abc)],
+          apps: [%w[frontend abc]],
           email: 'test2@example.com',
         )
 

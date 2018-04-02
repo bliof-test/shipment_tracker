@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'build'
 require 'deploy'
 require 'git_repository_location'
@@ -63,7 +64,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def qa_status
-    return unless qa_submissions.present?
+    return if qa_submissions.blank?
     qa_submissions.last.accepted ? :success : :failure
   end
 
@@ -98,7 +99,7 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def tickets_approved?
-    @approved ||= tickets.present? && tickets.all?(&:approved?)
+    @tickets_approved ||= tickets.present? && tickets.all?(&:approved?)
   end
 
   def approved_path

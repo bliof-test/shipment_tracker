@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'spec_helper'
 require 'payloads/github'
 
@@ -67,8 +68,7 @@ RSpec.describe Payloads::Github do
       it 'returns sha' do
         data = { 'head_commit' => {
           'id' => 'abc123',
-        },
-        }
+        } }
         payload = Payloads::Github.new(data)
 
         expect(payload.head_sha).to eq('abc123')

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe GitRepositoryLocation, :disable_repo_verification do
@@ -25,7 +26,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
 
   describe '.uris' do
     it 'returns an array of URIs' do
-      uris = %w(ssh://git@github.com/owner/foo.git git@github.com:owner/bar.git)
+      uris = %w[ssh://git@github.com/owner/foo.git git@github.com:owner/bar.git]
       uris.each do |uri|
         GitRepositoryLocation.create(uri: uri)
       end
@@ -86,7 +87,7 @@ RSpec.describe GitRepositoryLocation, :disable_repo_verification do
       end
 
       it 'returns a hash of app names and urls' do
-        result = GitRepositoryLocation.github_urls_for_apps(%w(app1 app2 app3))
+        result = GitRepositoryLocation.github_urls_for_apps(%w[app1 app2 app3])
         expect(result).to eq(
           'app1' => 'https://github.com/owner/app1',
           'app2' => 'https://github.com/owner/app2',

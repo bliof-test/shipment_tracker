@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'events/repo_ownership_event'
 
 FactoryBot.define do

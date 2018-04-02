@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module ApplicationHelper
   WIKI_URL = 'https://github.com/FundingCircle/shipment_tracker/wiki'
 

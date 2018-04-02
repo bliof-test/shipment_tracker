@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module Pages
   def git_repository_location_page
     Pages::GitRepositoryLocationPage.new(

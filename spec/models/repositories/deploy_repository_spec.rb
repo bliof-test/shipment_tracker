@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe Repositories::DeployRepository do
@@ -38,7 +39,7 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#apply' do
-    let(:versions) { %w(abc def xyz jkl).map { |sha| expand_sha(sha) } }
+    let(:versions) { %w[abc def xyz jkl].map { |sha| expand_sha(sha) } }
     let(:environment) { 'production' }
     let(:defaults) {
       { app_name: 'frontend', server: 'test.com', deployed_by: 'Bob', environment: environment, locale: 'us' }
@@ -115,7 +116,7 @@ RSpec.describe Repositories::DeployRepository do
   end
 
   describe '#deploys_for_versions' do
-    let(:versions) { %w(abc def xyz jkl).map { |sha| expand_sha(sha) } }
+    let(:versions) { %w[abc def xyz jkl].map { |sha| expand_sha(sha) } }
     let(:environment) { 'production' }
     let(:defaults) {
       { app_name: 'frontend', server: 'test.com', deployed_by: 'Bob', environment: environment, locale: 'us' }

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'forms/repository_locations_form'
 
 class AddRepositoryLocation

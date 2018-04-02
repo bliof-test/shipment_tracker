@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class TokensController < ApplicationController
   def index
     @token = Token.new
