@@ -3,7 +3,11 @@
 require 'rails_helper'
 
 RSpec.describe Events::ManualTestEvent do
-  subject(:event) { described_class.new(details: details) }
+  def event_for(details)
+    described_class.new(details: details)
+  end
+
+  subject(:event) { event_for(details) }
 
   let(:apps) { [{ 'name' => 'frontend', 'version' => 'abc' }] }
   let(:email) { 'alice@example.com' }
@@ -51,16 +55,20 @@ RSpec.describe Events::ManualTestEvent do
   end
 
   describe '#accepted?' do
-    it 'returns the status' do
-      expect(event.accepted?).to be true
+    it 'is true for "success"' do
+      expect(event_for(details.merge(status: 'success')).accepted?).to be true
     end
 
-    context 'when there is no status' do
-      let(:details) { default_details.except('status') }
+    it 'is true for SUccess' do
+      expect(event_for(details.merge(status: 'SUccess')).accepted?).to be true
+    end
 
-      it 'returns nil' do
-        expect(event.accepted?).to be false
-      end
+    it 'is false for "failure"' do
+      expect(event_for(details.merge(status: 'failure')).accepted?).to be false
+    end
+
+    it 'is false if there is no status' do
+      expect(event_for(details.except('status')).accepted?).to be false
     end
   end
 
