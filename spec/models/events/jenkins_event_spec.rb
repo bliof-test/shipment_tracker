@@ -41,4 +41,43 @@ RSpec.describe Events::JenkinsEvent do
       { some: 'nonsense' }
     }
   end
+
+  describe 'case insensitive build.status' do
+    it_behaves_like 'a test build subclass' do
+      subject { described_class.new(details: payload) }
+      let(:expected_source) { 'Jenkins' }
+
+      let(:version) { '123' }
+      let(:payload) { success_payload }
+      let(:success_payload) {
+        {
+          'build' => {
+            'app_name' => 'example',
+            'build_type' => 'integration',
+            'full_url' => 'http://example.com',
+            'scm' => {
+              'commit' => version,
+            },
+            'status' => 'sUccEss',
+          },
+        }
+      }
+      let(:failure_payload) {
+        {
+          'build' => {
+            'app_name' => 'example',
+            'build_type' => 'integration',
+            'full_url' => 'http://example.com',
+            'scm' => {
+              'commit' => version,
+            },
+            'status' => 'FaiLuRe',
+          },
+        }
+      }
+      let(:invalid_payload) {
+        { some: 'nonsense' }
+      }
+    end
+  end
 end
