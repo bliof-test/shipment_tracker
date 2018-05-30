@@ -17,7 +17,7 @@ module Events
     end
 
     def success
-      details.dig('payload', 'outcome') == 'success'
+      details.dig('payload', 'outcome')&.downcase == 'success'
     end
 
     def app_name
