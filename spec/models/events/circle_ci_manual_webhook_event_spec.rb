@@ -40,4 +40,42 @@ RSpec.describe Events::CircleCiManualWebhookEvent do
       { some: 'nonsense' }
     }
   end
+
+  describe 'case insensitive steps.actions.status and status' do
+    it_behaves_like 'a test build subclass' do
+      subject { described_class.new(details: payload) }
+
+      let(:expected_source) { 'CircleCi' }
+
+      let(:version) { '123' }
+      let(:payload) { success_payload }
+      let(:success_payload) {
+        {
+          'steps' => [
+            { 'actions' => [{ 'status' => 'sUcceSs' }] },
+            { 'actions' => [{ 'status' => 'succEss' }] },
+            { 'actions' => [{ 'status' => 'runnIng' }] },
+          ],
+          'outcome' => nil,
+          'status' => 'runNing',
+          'vcs_revision' => version,
+        }
+      }
+      let(:failure_payload) {
+        {
+          'steps' => [
+            { 'actions' => [{ 'status' => 'sucCess' }] },
+            { 'actions' => [{ 'status' => 'faILed' }] },
+            { 'actions' => [{ 'status' => 'ruNning' }] },
+          ],
+          'outcome' => nil,
+          'status' => 'runninG',
+          'vcs_revision' => version,
+        }
+      }
+      let(:invalid_payload) {
+        { some: 'nonsense' }
+      }
+    end
+  end
 end
