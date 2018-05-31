@@ -17,7 +17,7 @@ module Events
     end
 
     def success
-      details.dig('build', 'status') == 'SUCCESS'
+      details.dig('build', 'status')&.downcase == 'success'
     end
 
     def app_name

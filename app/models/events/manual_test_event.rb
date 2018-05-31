@@ -21,7 +21,7 @@ module Events
     end
 
     def accepted?
-      details.fetch('status', nil) == 'success'
+      details.fetch('status', nil)&.downcase == 'success'
     end
   end
 end

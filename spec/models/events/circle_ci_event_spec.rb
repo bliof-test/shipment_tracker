@@ -36,4 +36,38 @@ RSpec.describe Events::CircleCiEvent do
       { some: 'nonsense' }
     }
   end
+
+  describe 'case insensitive payload.outcome' do
+    it_behaves_like 'a test build subclass' do
+      subject { described_class.new(details: payload) }
+
+      let(:expected_source) { 'CircleCi' }
+
+      let(:version) { '123' }
+      let(:payload) { success_payload }
+      let(:success_payload) {
+        {
+          'payload' => {
+            'build_url' => 'http://example.com',
+            'outcome' => 'sUccEss',
+            'vcs_revision' => version,
+          },
+        }
+      }
+      let(:failure_payload) {
+        {
+          'payload' => {
+            'app_name' => 'example',
+            'build_type' => 'integration',
+            'build_url' => 'http://example.com',
+            'outcome' => 'FaiLeD',
+            'vcs_revision' => version,
+          },
+        }
+      }
+      let(:invalid_payload) {
+        { some: 'nonsense' }
+      }
+    end
+  end
 end
