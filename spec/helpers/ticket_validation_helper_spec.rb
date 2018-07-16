@@ -16,11 +16,22 @@ RSpec.describe TicketValidationHelper do
 
   describe '#validate_id_format' do
     context 'when jira key is valid' do
-      let(:args) { { jira_key: 'NS-123' } }
+      context 'when Jira board does not have a number' do
+        let(:args) { { jira_key: 'NS-123' } }
 
-      it 'continues' do
-        expect(object).to receive(:continue).with(args)
-        object.validate_id_format(args)
+        it 'continues' do
+          expect(object).to receive(:continue).with(args)
+          object.validate_id_format(args)
+        end
+      end
+
+      context 'when Jira board has a number' do
+        let(:args) { { jira_key: 'MAE2-54' } }
+
+        it 'continues' do
+          expect(object).to receive(:continue).with(args)
+          object.validate_id_format(args)
+        end
       end
     end
 
