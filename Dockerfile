@@ -39,5 +39,9 @@ WORKDIR /app
 RUN touch .env.development
 
 COPY --from=builder --chown=shipment_tracker:shipment_tracker /tmp .
+COPY --chown=shipment_tracker:shipment_tracker docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+COPY --chown=shipment_tracker:shipment_tracker docker/dropzone.yaml /usr/local/deploy/dropzone.yaml
 COPY --chown=shipment_tracker:shipment_tracker config/database.yml.erb config/database.yml
 COPY --chown=shipment_tracker:shipment_tracker . .
+
+ENTRYPOINT ["/app/docker/entrypoint.sh"]
