@@ -27,7 +27,9 @@ defaults: &defaults
 install_system_packages: &install_system_packages
   run:
     name: Install system packages
-    command: sudo apt-get install -y cmake postgresql-client
+    command: |
+      sudo apt-get update -qq
+      sudo apt-get install -qqy cmake postgresql-client
 
 restore_gems: &restore_gems
   restore_cache:
