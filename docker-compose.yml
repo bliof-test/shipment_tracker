@@ -1,0 +1,50 @@
+version: '2.4'
+services:
+  web:
+    build:
+      context: .
+    image: shipment_tracker
+    command: sh -c 'bundle exec rake db:setup && exec bundle exec rails server --binding=0.0.0.0 --port 1201'
+    environment:
+      AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
+      AUTH0_CLIENT_SECRET:
+      AUTH0_CONNECTION: fundingcircle.com
+      AUTH0_DOMAIN: fundingcircle.auth0.com
+      GITHUB_REPO_READ_TOKEN:
+      PROTECT_STDOUT: 'true'
+      RAILS_ENV: "${RAILS_ENV:-development}"
+      SHIPMENT_TRACKER_DATABASE_HOST: postgres
+      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
+      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
+      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
+      SSH_USER: git
+      SSH_PUBLIC_KEY:
+      SSH_PRIVATE_KEY:
+    ports:
+      - 127.0.0.1:1201:1201
+    depends_on:
+      - postgres
+
+  update_git_loop:
+    image: shipment_tracker
+    command: sh -c 'bundle exec rake db:setup && exec bundle exec rake jobs:update_git_loop'
+    environment:
+      PROTECT_STDOUT: 'true'
+      RAILS_ENV: "${RAILS_ENV:-development}"
+      SHIPMENT_TRACKER_DATABASE_HOST: postgres
+      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
+      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
+      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
+      SSH_USER: git
+      SSH_PUBLIC_KEY:
+      SSH_PRIVATE_KEY:
+
+  postgres:
+    image: postgres:9.4-alpine
+    environment:
+      POSTGRES_DB: shipment_tracker
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

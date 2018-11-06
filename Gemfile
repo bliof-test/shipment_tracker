@@ -25,11 +25,14 @@ gem 'rugged', '~> 0.27.0'
 gem 'sass-rails'
 gem 'slack-notifier'
 gem 'solid_use_case'
-gem 'therubyracer'
 gem 'uglifier'
 gem 'unicorn-rails'
 gem 'unicorn'
 gem 'virtus'
+
+group :dockerignore do
+  gem 'therubyracer'
+end
 
 group :development do
   gem 'better_errors'

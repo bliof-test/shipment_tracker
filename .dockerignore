@@ -1,0 +1,12 @@
+.bundle
+.circleci
+.dockerignore
+.env*
+.git
+.ruby-gemset
+.ruby-version
+*~
+log/*.log
+tmp
+docker-compose.yml
+config/database.yml
