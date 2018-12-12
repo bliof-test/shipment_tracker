@@ -42,6 +42,8 @@ services:
       SSH_USER: git
       SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+    tty: true
+    stdin_open: true
     user: root
     depends_on:
       - postgres

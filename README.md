@@ -147,7 +147,8 @@ To configure Slack alerts
 Start the application with docker-compose:
 ```
 docker-compose build
-docker-compose up -d
+docker-compose up -d web
+docker-compose run update_git_loop
 ```
 
 ## License
