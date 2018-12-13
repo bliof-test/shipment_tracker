@@ -3,8 +3,10 @@ FROM quay.io/fundingcircle/alpine-ruby:2.3 as builder
 RUN apk --no-cache add \
   cmake \
   linux-headers \
+  nodejs \
   postgresql-dev \
   sqlite-dev \
+  tzdata \
   zlib-dev \
  && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.8/main \
   libgit2-dev \
@@ -14,6 +16,23 @@ WORKDIR /tmp
 COPY Gemfile* ./
 RUN bundle config build.rugged --use-system-libraries \
  && bundle install --deployment --without deployment dockerignore
+
+ARG RAILS_ENV=production
+
+COPY Rakefile ./
+
+COPY \
+ config/application.rb \
+ config/boot.rb \
+ config/environment.rb \
+ config/
+
+COPY config/environments/production.rb config/environments/
+
+COPY app/assets app/assets
+COPY vendor/assets vendor/assets
+
+RUN DATABASE_URL=postgresql:/// bundle exec rake assets:precompile
 
 FROM quay.io/fundingcircle/alpine-ruby:2.3
 LABEL maintainer="Funding Circle Engineering <engineering@fundingcircle.com>"
