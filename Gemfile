@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-ruby '2.3.6'
 
 gem 'rails', '~> 4.2.11'
 
@@ -25,11 +24,14 @@ gem 'rugged', '~> 0.27.0'
 gem 'sass-rails'
 gem 'slack-notifier'
 gem 'solid_use_case'
-gem 'therubyracer'
 gem 'uglifier'
 gem 'unicorn-rails'
 gem 'unicorn'
 gem 'virtus'
+
+group :dockerignore do
+  gem 'therubyracer'
+end
 
 group :development do
   gem 'better_errors'
@@ -45,7 +47,7 @@ end
 group :development, :test do
   gem 'rspec-rails'
   gem 'rubocop'
-  gem 'pry', require: false
+  gem 'pry-byebug'
 end
 
 group :production do

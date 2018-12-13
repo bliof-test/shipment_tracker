@@ -142,6 +142,14 @@ To configure Slack alerts
 1. Create a Slack webhook for a specific channel and copy the webhook URL
 1. Set the environment variable `SLACK_WEBHOOK` with the webhook URL
 
+### Docker Compose
+
+Start the application with docker-compose:
+```
+docker-compose build
+docker-compose up -d web
+docker-compose run update_git_loop
+```
 
 ## License
 
