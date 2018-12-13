@@ -20,6 +20,11 @@ deploy_tasks:
         cpus: 0.25
         mem: 256
         args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
+        container:
+          volumes:
+            - hostPath: /efs/shipment_tracker
+              containerPath: /git
+              mode: RW
       - id: web
         cpus: 0.25
         mem: 256
@@ -32,7 +37,6 @@ deploy_tasks:
             portMappings:
               - containerPort: 9292
                 hostPort: 0
-            forcePullImage: true
         healthChecks:
           - path: "/heartbeat"
             portIndex: 0
