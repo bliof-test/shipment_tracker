@@ -12,14 +12,11 @@ services:
       AUTH0_CLIENT_SECRET:
       AUTH0_CONNECTION: fundingcircle.com
       AUTH0_DOMAIN: fundingcircle.auth0.com
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GITHUB_REPO_READ_TOKEN:
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
       SSH_USER: git
       SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
@@ -34,13 +31,10 @@ services:
     image: shipment_tracker
     command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_git_loop'
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
       SSH_USER: git
       SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
@@ -56,12 +50,9 @@ services:
     image: shipment_tracker
     command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_events_loop'
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
     tty: true
     stdin_open: true
     depends_on:
