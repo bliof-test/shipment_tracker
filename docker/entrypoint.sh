@@ -1,3 +1,3 @@
 #!/bin/sh -e
-/usr/bin/envconsul-launch -prefix shipment_tracker/config \
+exec envconsul-launch -prefix shipment_tracker/config \
                           "$@"

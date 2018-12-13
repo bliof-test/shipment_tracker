@@ -42,4 +42,4 @@ COPY --chown=shipment_tracker:shipment_tracker docker/dropzone.yaml /usr/local/d
 COPY --chown=shipment_tracker:shipment_tracker config/database.yml.erb config/database.yml
 COPY --chown=shipment_tracker:shipment_tracker . .
 
-ENTRYPOINT ["/app/docker/entrypoint.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]

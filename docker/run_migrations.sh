@@ -1,2 +1,2 @@
 #!/bin/sh -e
-/app/docker/entrypoint.sh /usr/bin/bundle exec rake --trace db:migrate
+exec docker-entrypoint.sh bundle exec rake --trace db:migrate
