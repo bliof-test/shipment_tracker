@@ -50,6 +50,21 @@ services:
     volumes:
       - git:/tmp/git
 
+  update_events_loop:
+    image: shipment_tracker
+    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_events_loop'
+    environment:
+      PROTECT_STDOUT: 'true'
+      RAILS_ENV: "${RAILS_ENV:-development}"
+      SHIPMENT_TRACKER_DATABASE_HOST: postgres
+      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
+      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
+      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
+    tty: true
+    stdin_open: true
+    depends_on:
+      - postgres
+
   postgres:
     image: postgres:9.4-alpine
     environment:
