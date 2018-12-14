@@ -28,14 +28,16 @@ deploy_tasks:
       - id: web
         cpus: 0.25
         mem: 256
-        args: ["bundle", "exec", "unicorn", "-o", "0.0.0.0", "-p", "9292"]
+        args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
         constraints:
           - - hostname
             - UNIQUE
         container:
           docker:
             portMappings:
-              - containerPort: 9292
+              # Set PORT_HTTP to a random port number
+              - name: http
+                containerPort: 0
                 hostPort: 0
         healthChecks:
           - path: "/heartbeat"

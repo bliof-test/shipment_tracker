@@ -15,6 +15,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GITHUB_REPO_READ_TOKEN:
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
+      PORT_HTTP: 1201
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_USER: git
