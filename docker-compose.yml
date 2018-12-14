@@ -24,13 +24,17 @@ services:
     ports:
       - 127.0.0.1:1201:1201
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - git:/tmp/git
+    healthcheck:
+      test: curl localhost:1201/heartbeat
+      interval: 10s
 
   update_git_loop:
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_git_loop'
+    command: bundle exec rake jobs:update_git_loop
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
@@ -43,13 +47,14 @@ services:
     stdin_open: true
     user: root
     depends_on:
-      - postgres
+      web:
+        condition: service_healthy
     volumes:
       - git:/tmp/git
 
   update_events_loop:
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_events_loop'
+    command: bundle exec rake jobs:update_events_loop
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       PROTECT_STDOUT: 'true'
@@ -57,7 +62,8 @@ services:
     tty: true
     stdin_open: true
     depends_on:
-      - postgres
+      web:
+        condition: service_healthy
 
   postgres:
     image: postgres:9.4-alpine
@@ -65,6 +71,9 @@ services:
       POSTGRES_DB: shipment_tracker
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
+      interval: 10s
 
 volumes:
   pgdata:
