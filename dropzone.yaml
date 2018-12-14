@@ -8,11 +8,11 @@ deploy_tasks:
     deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
   marathon:
     apps:
-      - id: work
+      - id: delayed-job
         cpus: 0.25
         mem: 256
         args: ["bundle", "exec", "rake", "jobs:work"]
-      - id: update-events-loop
+      - id: event-worker
         cpus: 0.25
         mem: 256
         args: ["bundle", "exec", "rake", "jobs:update_events_loop"]
