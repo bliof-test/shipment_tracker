@@ -62,5 +62,6 @@ module ShipmentTracker
     config.deploy_regions = ENV.fetch('DEPLOY_REGIONS', 'gb,us').split(',')
 
     config.loga = { service_name: 'shipment-tracker' }
+    config.log_level = ENV.fetch('LOG_LEVEL', 'info')
   end
 end
