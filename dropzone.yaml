@@ -1,7 +1,9 @@
 vars:
   production:
+    web_instances: 6
     web_memory: 768
   default:
+    web_instances: 2
     web_memory: 512
 github:
   project_name: shipment_tracker 
@@ -31,6 +33,7 @@ deploy_tasks:
               containerPath: /git
               mode: RW
       - id: web
+        instances: {{ web_instances }}
         cpus: 0.25
         mem: {{ web_memory }}
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
