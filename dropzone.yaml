@@ -1,3 +1,8 @@
+vars:
+  production:
+    web_memory: 768
+  default:
+    web_memory: 512
 github:
   project_name: shipment_tracker 
 deploy_tasks:
@@ -27,7 +32,7 @@ deploy_tasks:
               mode: RW
       - id: web
         cpus: 0.25
-        mem: 256
+        mem: {{ web_memory }}
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
         constraints:
           - - hostname
