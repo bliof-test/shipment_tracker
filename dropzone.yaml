@@ -1,10 +1,10 @@
 vars:
   production:
     web_instances: 6
-    web_memory: 768
+    web_memory: 1024
   default:
     web_instances: 2
-    web_memory: 512
+    web_memory: 1024
 github:
   project_name: shipment_tracker 
 deploy_tasks:
