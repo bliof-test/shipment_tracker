@@ -235,6 +235,8 @@ GEM
     pry-byebug (3.6.0)
       byebug (~> 10.0)
       pry (~> 0.10)
+    pry-rails (0.3.8)
+      pry (>= 0.10.4)
     rack (1.6.11)
     rack-protection (1.5.5)
       rack
@@ -425,6 +427,7 @@ DEPENDENCIES
   pg
   pg_search
   pry-byebug
+  pry-rails
   rack-test
   rack-timeout
   rails (~> 4.2.11)
