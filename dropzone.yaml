@@ -40,7 +40,7 @@ deploy_tasks:
                 containerPort: 0
                 hostPort: 0
         healthChecks:
-          - path: "/heartbeat"
+          - path: /healthcheck
             portIndex: 0
             protocol: HTTP
             gracePeriodSeconds: 30

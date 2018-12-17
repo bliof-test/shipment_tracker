@@ -2,6 +2,10 @@
 
 # This file is used by Rack-based servers to start the application.
 
+map '/healthcheck' do
+  run(proc { [200, {}, ['ok']] })
+end
+
 map '/healthcheck-haproxy' do
   run(proc { $healthcheck == 'term' ? [404, {}, ['term']] : [200, {}, ['ok']] })
 end

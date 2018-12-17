@@ -29,7 +29,7 @@ services:
     volumes:
       - git:/tmp/git
     healthcheck:
-      test: curl localhost:1201/heartbeat
+      test: curl localhost:1201/healthcheck
       interval: 10s
 
   update_git_loop:
