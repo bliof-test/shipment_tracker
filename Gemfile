@@ -13,6 +13,7 @@ gem 'has_secure_token'
 gem 'honeybadger', '~> 3.3'
 gem 'jira-ruby', require: 'jira'
 gem 'jquery-rails'
+gem 'loga'
 gem 'newrelic_rpm'
 gem 'octokit', '4.1.0', require: false
 gem 'omniauth-auth0'

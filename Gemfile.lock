@@ -170,6 +170,9 @@ GEM
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
       ruby_dep (~> 1.2)
+    loga (2.3.0)
+      activesupport (>= 2.3.8)
+      rack
     loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -413,6 +416,7 @@ DEPENDENCIES
   honeybadger (~> 3.3)
   jira-ruby
   jquery-rails
+  loga
   mailcatcher
   newrelic_rpm
   octokit (= 4.1.0)
