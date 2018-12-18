@@ -18,6 +18,11 @@ services:
       HONEYBADGER_API_KEY:
       HONEYBADGER_ENV: development
       HONEYBADGER_REPORT_DATA: 'true'
+      JIRA_FQDN: http://jira:8080
+      JIRA_PASSWD: shipment_tracker
+      JIRA_PATH: ''
+      JIRA_USER: shipment_tracker
+      JIRA_USE_SSL: 'false'
       PORT_HTTP: 1201
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
@@ -29,6 +34,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      jira:
+        condition: service_started
     volumes:
       - git:/tmp/git
     healthcheck:
@@ -78,6 +85,14 @@ services:
       test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
       interval: 10s
 
+  jira:
+    image: dchevell/jira-core
+    volumes:
+      - jira:/var/atlassian/application-data/jira
+    ports:
+      - 127.0.0.1:8080:8080
+
 volumes:
   pgdata:
   git:
+  jira:
