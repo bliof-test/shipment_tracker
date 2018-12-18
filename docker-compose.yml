@@ -29,6 +29,8 @@ services:
       SSH_USER: git
       SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+    tty: true
+    stdin_open: true
     ports:
       - 127.0.0.1:1201:1201
     depends_on:
