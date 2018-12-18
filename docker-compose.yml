@@ -4,7 +4,9 @@ services:
     build:
       context: .
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rails server --binding=0.0.0.0 --port 1201'
+    command: >
+      sh -c 'bundle exec rake db:structure:load && \
+             exec bundle exec rails server --binding=0.0.0.0 --port 1201'
     environment:
       AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
       AUTH0_CLIENT_SECRET:
