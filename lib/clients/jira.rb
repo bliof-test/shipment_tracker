@@ -27,7 +27,7 @@ class JiraClient
       context_path: ShipmentTracker::JIRA_PATH,
       auth_type: :basic,
       read_timeout: 120,
-      use_ssl: true,
+      use_ssl: ShipmentTracker::JIRA_USE_SSL,
       ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE,
     }
 

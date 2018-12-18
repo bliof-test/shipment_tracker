@@ -21,6 +21,7 @@ module ShipmentTracker
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
   JIRA_FQDN ||= ENV.fetch('JIRA_FQDN', nil)
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
+  JIRA_USE_SSL ||= ENV.fetch('JIRA_USE_SSL', 'true') == 'true'
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
   DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # For older events without locale
