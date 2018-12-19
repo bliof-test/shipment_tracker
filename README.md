@@ -163,6 +163,11 @@ docker-compose up -d web
 docker-compose run update_git_loop
 ```
 
+To debug the web service with pry:
+```
+docker-compose run --service-ports web
+```
+
 ## License
 
 Copyright © 2015-2016 Funding Circle Ltd.

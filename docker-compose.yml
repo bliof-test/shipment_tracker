@@ -25,6 +25,7 @@ services:
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
       SSH_USER: git
+      UNICORN_TIMEOUT: 3600
     env_file: secrets.env
     tty: true
     stdin_open: true
