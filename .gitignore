@@ -32,3 +32,5 @@
 /config/database.yml
 
 .rspec
+
+secrets.env

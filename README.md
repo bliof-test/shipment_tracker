@@ -144,6 +144,18 @@ To configure Slack alerts
 
 ### Docker Compose
 
+```
+cp secrets.env.example secrets.env
+```
+
+Add secrets to `secrets.env`
+
+`SSH_PRIVATE_KEY` is multi line so cannot be added to `secrets.env`. It must be set in the environment.
+
+```
+export SSH_PRIVATE_KEY=...
+```
+
 Start the application with docker-compose:
 ```
 docker-compose build

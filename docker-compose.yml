@@ -9,13 +9,10 @@ services:
              exec bundle exec unicorn --config-file config/unicorn.rb'
     environment:
       AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
-      AUTH0_CLIENT_SECRET:
       AUTH0_CONNECTION: fundingcircle.com
       AUTH0_DOMAIN: fundingcircle.auth0.com
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
-      GITHUB_REPO_READ_TOKEN:
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
-      HONEYBADGER_API_KEY:
       HONEYBADGER_ENV: development
       HONEYBADGER_REPORT_DATA: 'true'
       JIRA_FQDN: http://jira:8080
@@ -26,9 +23,9 @@ services:
       PORT_HTTP: 1201
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SSH_USER: git
-      SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+      SSH_USER: git
+    env_file: secrets.env
     tty: true
     stdin_open: true
     ports:
@@ -52,9 +49,9 @@ services:
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SSH_USER: git
-      SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+      SSH_USER: git
+    env_file: secrets.env
     tty: true
     stdin_open: true
     user: root
@@ -71,6 +68,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
+    env_file: secrets.env
     tty: true
     stdin_open: true
     depends_on:
