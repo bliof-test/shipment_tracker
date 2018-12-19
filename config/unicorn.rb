@@ -2,7 +2,7 @@
 
 worker_processes Integer(ENV['WEB_CONCURRENCY'] || 1)
 preload_app true
-listen ENV['PORT_HTTP']
+listen ENV.fetch('PORT_HTTP')
 timeout ENV.fetch('UNICORN_TIMEOUT', 60).to_i
 
 unless ENV['PROTECT_STDOUT'] == 'true'
