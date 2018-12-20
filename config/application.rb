@@ -20,6 +20,7 @@ module ShipmentTracker
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
   JIRA_FQDN ||= ENV.fetch('JIRA_FQDN', nil)
+  JIRA_EXTERNAL_FQDN ||= ENV.fetch('JIRA_EXTERNAL_FQDN', JIRA_FQDN)
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
   JIRA_USE_SSL ||= ENV.fetch('JIRA_USE_SSL', 'true') == 'true'
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
