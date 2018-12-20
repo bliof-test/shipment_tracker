@@ -56,7 +56,7 @@ deploy_tasks:
             timeoutSeconds: 20
             maxConsecutiveFailures: 3
         labels:
-          tags: http
+          tags: http,public-http
           overrideTaskName: shipment-tracker
   postgres:
     migrations_path: /app/docker/run_migrations.sh
