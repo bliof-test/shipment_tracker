@@ -1,3 +1,7 @@
+git_volume: &git_volume
+  hostPath: /efs/shipment_tracker
+  containerPath: /git
+  mode: RW
 vars:
   production:
     web_instances: 6
@@ -29,9 +33,7 @@ deploy_tasks:
         args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
         container:
           volumes:
-            - hostPath: /efs/shipment_tracker
-              containerPath: /git
-              mode: RW
+            - *git_volume
       - id: web
         instances: {{ web_instances }}
         cpus: 0.25
@@ -41,6 +43,8 @@ deploy_tasks:
           - - hostname
             - UNIQUE
         container:
+          volumes:
+            - *git_volume
           docker:
             portMappings:
               # Set PORT_HTTP to a random port number
