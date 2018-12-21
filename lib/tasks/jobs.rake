@@ -5,24 +5,24 @@ require 'honeybadger'
 namespace :jobs do
   desc 'Reset and recreate event snapshots (new events received during execution are not snapshotted)'
   task recreate_snapshots: :environment do
-    puts "[#{Time.current}] Running recreate_snapshots"
+    Rails.logger.info 'Running recreate_snapshots'
 
     Repositories::Updater.from_rails_config.recreate
 
-    puts "[#{Time.current}] Completed recreate_snapshots"
+    Rails.logger.info 'Completed recreate_snapshots'
   end
 
   desc 'Continuously updates event cache'
   task update_events_loop: :environment do
     Signal.trap('TERM') do
-      warn 'Terminating rake task jobs:update_events_loop...'
+      Rails.logger.warn 'Terminating rake task jobs:update_events_loop...'
       @shutdown = true
     end
 
     Rails.logger.tagged('update_events_loop') do
       until @shutdown
         start_time = Time.current
-        puts "[#{start_time}] Running update_events"
+        Rails.logger.info 'Running update_events'
 
         from_event_id = Snapshots::EventCount.global_event_pointer
 
@@ -33,7 +33,7 @@ namespace :jobs do
         num_events = Events::BaseEvent.where('id > ?', from_event_id).where('id <= ?', last_event_id).count
 
         end_time = Time.current
-        puts "[#{end_time}] Applied #{num_events} events in #{end_time - start_time} seconds"
+        Rails.logger.info "Applied #{num_events} events in #{end_time - start_time} seconds"
 
         sleep 5 unless @shutdown
       end
@@ -43,7 +43,7 @@ namespace :jobs do
   desc 'Continuously updates the local git repositories'
   task update_git_loop: :environment do
     Signal.trap('TERM') do
-      warn 'Terminating rake task jobs:update_git_loop...'
+      Rails.logger.warn 'Terminating rake task jobs:update_git_loop...'
       @shutdown = true
     end
 
@@ -53,7 +53,7 @@ namespace :jobs do
 
     until @shutdown
       start_time = Time.current
-      puts "[#{start_time}] Updating #{repos_hash_changed.size} git repositories"
+      Rails.logger.info "Updating #{repos_hash_changed.size} git repositories"
 
       repos_hash_changed.keys.in_groups(4).map { |group|
         Thread.new do # Limited to 4 threads to avoid running out of memory.
@@ -82,7 +82,7 @@ namespace :jobs do
       repos_hash_before = repos_hash_after.dup
 
       end_time = Time.current
-      puts "[#{end_time}] Updated git repositories in #{end_time - start_time} seconds"
+      Rails.logger.info "Updated git repositories in #{end_time - start_time} seconds"
       sleep 5 unless @shutdown
     end
   end
