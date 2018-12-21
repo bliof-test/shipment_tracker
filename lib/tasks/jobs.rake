@@ -4,7 +4,7 @@ require 'honeybadger'
 
 namespace :jobs do
   def shutdown(task)
-    warn "Terminating rake task #{task.name}..."
+    warn "Terminating rake task #{task}..."
     @shutdown = true
   end
 
@@ -27,10 +27,10 @@ namespace :jobs do
       shutdown(t)
     end
 
-    Rails.logger.tagged('update_events_loop') do
+    Rails.logger.info "Starting #{t}"
+    Rails.logger.tagged(t) do
       until @shutdown
         start_time = Time.current
-        Rails.logger.info 'Running update_events'
 
         from_event_id = Snapshots::EventCount.global_event_pointer
 
@@ -58,43 +58,50 @@ namespace :jobs do
       shutdown(t)
     end
 
-    loader = GitRepositoryLoader.from_rails_config
-    repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
-    repos_hash_before = repos_hash_changed.dup
+    Rails.logger.info "Starting #{t}"
+    Rails.logger.tagged(t) do
+      loader = GitRepositoryLoader.from_rails_config
+      repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+      repos_hash_before = repos_hash_changed.dup
 
-    until @shutdown
-      start_time = Time.current
-      Rails.logger.info "Updating #{repos_hash_changed.size} git repositories"
+      until @shutdown
+        Rails.logger.debug "Updating #{repos_hash_changed.size} git repositories"
+        start_time = Time.current
 
-      repos_hash_changed.keys.in_groups(4).map { |group|
-        Thread.new do # Limited to 4 threads to avoid running out of memory.
-          group.compact.each do |app_name|
-            break if @shutdown
+        repos_hash_changed.keys.in_groups(4).map { |group|
+          Thread.new do # Limited to 4 threads to avoid running out of memory.
+            group.compact.each do |app_name|
+              break if @shutdown
 
-            begin
-              loader.load(app_name, update_repo: true)
-            rescue StandardError => error
-              Honeybadger.notify(
-                error,
-                context: {
-                  app_name: app_name,
-                  remote_head: repos_hash_changed[app_name],
-                },
-              )
+              Rails.logger.tagged(t) do
+                Rails.logger.info "loading changes for #{app_name}"
+              end
+              begin
+                loader.load(app_name, update_repo: true)
+              rescue StandardError => error
+                Honeybadger.notify(
+                  error,
+                  context: {
+                    app_name: app_name,
+                    remote_head: repos_hash_changed[app_name],
+                  },
+                )
+              end
             end
           end
+        }.each(&:join)
+        unless repos_hash_changed.empty?
+          Rails.logger.debug "Updated git repositories in #{Time.current - start_time} seconds"
         end
-      }.each(&:join)
 
-      repos_hash_after = GitRepositoryLocation.app_remote_head_hash
-      repos_hash_changed = repos_hash_after.reject { |name, remote_head|
-        remote_head == repos_hash_before[name]
-      }
-      repos_hash_before = repos_hash_after.dup
+        repos_hash_after = GitRepositoryLocation.app_remote_head_hash
+        repos_hash_changed = repos_hash_after.reject { |name, remote_head|
+          remote_head == repos_hash_before[name]
+        }
+        repos_hash_before = repos_hash_after.dup
 
-      end_time = Time.current
-      Rails.logger.info "Updated git repositories in #{end_time - start_time} seconds"
-      sleep 5 unless @shutdown
+        sleep 5 unless @shutdown
+      end
     end
   end
 end
