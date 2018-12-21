@@ -42,7 +42,7 @@ services:
       test: curl localhost:1201/healthcheck
       interval: 10s
 
-  update_git_loop:
+  git-worker:
     image: shipment_tracker
     command: bundle exec rake jobs:update_git_loop
     environment:
@@ -62,9 +62,23 @@ services:
     volumes:
       - git:/tmp/git
 
-  update_events_loop:
+  event-worker:
     image: shipment_tracker
     command: bundle exec rake jobs:update_events_loop
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      PROTECT_STDOUT: 'true'
+      RAILS_ENV: "${RAILS_ENV:-development}"
+    env_file: secrets.env
+    tty: true
+    stdin_open: true
+    depends_on:
+      web:
+        condition: service_healthy
+
+  delayed-job:
+    image: shipment_tracker
+    command: bundle exec rake jobs:work
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       PROTECT_STDOUT: 'true'
