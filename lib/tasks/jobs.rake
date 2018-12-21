@@ -3,35 +3,8 @@
 require 'honeybadger'
 
 namespace :jobs do
-  def already_running?(pid_path)
-    pid = File.read(pid_path)
-    Process.kill(0, Integer(pid))
-    true
-  rescue Errno::ENOENT, Errno::ESRCH
-    # no such file or pid
-    false
-  end
-
-  def manage_pid(pid_path)
-    fail "Pid file with running process detected, aborting (#{pid_path})" if already_running?(pid_path)
-    puts "Writing pid file to #{pid_path}"
-    File.open(pid_path, 'w+') do |f|
-      f.write Process.pid
-    end
-    at_exit do
-      File.delete(pid_path)
-    end
-  end
-
-  def pid_path_for(name)
-    require 'tmpdir'
-    File.expand_path("#{name}.pid", Dir.tmpdir)
-  end
-
   desc 'Reset and recreate event snapshots (new events received during execution are not snapshotted)'
   task recreate_snapshots: :environment do
-    manage_pid pid_path_for('jobs_recreate_snapshots')
-
     puts "[#{Time.current}] Running recreate_snapshots"
 
     Repositories::Updater.from_rails_config.recreate
@@ -73,8 +46,6 @@ namespace :jobs do
 
   desc 'Continuously updates the local git repositories'
   task update_git_loop: :environment do
-    manage_pid pid_path_for('update_git_loop')
-
     Signal.trap('TERM') do
       warn 'Terminating rake task jobs:update_git_loop...'
       @shutdown = true
