@@ -20,9 +20,7 @@ namespace :jobs do
     end
 
     Rails.logger.tagged('update_events_loop') do
-      loop do
-        break if @shutdown
-
+      until @shutdown
         start_time = Time.current
         puts "[#{start_time}] Running update_events"
 
@@ -37,9 +35,7 @@ namespace :jobs do
         end_time = Time.current
         puts "[#{end_time}] Applied #{num_events} events in #{end_time - start_time} seconds"
 
-        break if @shutdown
-
-        sleep 5
+        sleep 5 unless @shutdown
       end
     end
   end
@@ -55,7 +51,7 @@ namespace :jobs do
     repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
     repos_hash_before = repos_hash_changed.dup
 
-    loop do
+    until @shutdown
       start_time = Time.current
       puts "[#{start_time}] Updating #{repos_hash_changed.size} git repositories"
 
@@ -87,7 +83,7 @@ namespace :jobs do
 
       end_time = Time.current
       puts "[#{end_time}] Updated git repositories in #{end_time - start_time} seconds"
-      sleep 5
+      sleep 5 unless @shutdown
     end
   end
 end
