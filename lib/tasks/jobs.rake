@@ -3,6 +3,11 @@
 require 'honeybadger'
 
 namespace :jobs do
+  def shutdown(task)
+    warn "Terminating rake task #{task.name}..."
+    @shutdown = true
+  end
+
   desc 'Reset and recreate event snapshots (new events received during execution are not snapshotted)'
   task recreate_snapshots: :environment do
     Rails.logger.info 'Running recreate_snapshots'
@@ -13,10 +18,13 @@ namespace :jobs do
   end
 
   desc 'Continuously updates event cache'
-  task update_events_loop: :environment do
+  task update_events_loop: :environment do |t|
     Signal.trap('TERM') do
-      Rails.logger.warn 'Terminating rake task jobs:update_events_loop...'
-      @shutdown = true
+      shutdown(t)
+    end
+
+    Signal.trap('INT') do
+      shutdown(t)
     end
 
     Rails.logger.tagged('update_events_loop') do
@@ -41,10 +49,13 @@ namespace :jobs do
   end
 
   desc 'Continuously updates the local git repositories'
-  task update_git_loop: :environment do
+  task update_git_loop: :environment do |t|
     Signal.trap('TERM') do
-      Rails.logger.warn 'Terminating rake task jobs:update_git_loop...'
-      @shutdown = true
+      shutdown(t)
+    end
+
+    Signal.trap('INT') do
+      shutdown(t)
     end
 
     loader = GitRepositoryLoader.from_rails_config
