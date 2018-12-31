@@ -20,6 +20,7 @@ services:
       JIRA_PATH: ''
       JIRA_USER: shipment_tracker
       JIRA_USE_SSL: 'false'
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PORT_HTTP: 1201
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
@@ -48,6 +49,7 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
@@ -67,6 +69,7 @@ services:
     command: bundle exec rake jobs:update_events_loop
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
     env_file: secrets.env
@@ -81,6 +84,7 @@ services:
     command: bundle exec rake jobs:work
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
     env_file: secrets.env
