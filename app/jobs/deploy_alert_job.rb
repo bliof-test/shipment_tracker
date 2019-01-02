@@ -40,10 +40,12 @@ class DeployAlertJob < ActiveJob::Base
     end
 
     def audit
+      Rails.logger.debug('Auditing deploy')
       message = DeployAlert.audit_message(current_deploy, previous_deploy)
 
       return unless message
 
+      Rails.logger.debug("Sending deploy alert with message '#{message}'")
       create_deploy_alert_event(message)
       notify_slack(message)
       notify_repo_owners(message)
