@@ -6,9 +6,15 @@ vars:
   production:
     web_instances: 6
     web_memory: 1024
+    new_relic_app_id: 7057912
+  staging:
+    new_relic_app_id: 
+  uat:
+    new_relic_app_id: 216487708
   default:
     web_instances: 2
     web_memory: 1024
+
 github:
   project_name: shipment_tracker 
 deploy_tasks:
@@ -66,3 +72,8 @@ deploy_tasks:
           overrideTaskName: shipment-tracker
   postgres:
     migrations_path: /app/docker/run_migrations.sh
+  log_deployment:
+    new_relic:
+      app_id: {{ new_relic_app_id }}
+  load_secrets:
+    enabled: true
