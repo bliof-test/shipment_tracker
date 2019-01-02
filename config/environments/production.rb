@@ -76,19 +76,15 @@ Rails.application.configure do
 
   config.active_job.queue_adapter = :delayed_job
 
-  if ENV['MAILGUN']
-    ActionMailer::Base.smtp_settings = {
-      port: ENV['MAILGUN_SMTP_PORT'],
-      address: ENV['MAILGUN_SMTP_SERVER'],
-      user_name: ENV['MAILGUN_SMTP_LOGIN'],
-      password: ENV['MAILGUN_SMTP_PASSWORD'],
-      domain: 'shipment-tracker.herokuapp.com',
-      authentication: :plain,
-    }
-    ActionMailer::Base.delivery_method = :smtp
-  else
-    config.action_mailer.delivery_method = :sendmail
-  end
+  ActionMailer::Base.smtp_settings = {
+    address: ENV['SMTP_SERVER'],
+    port: ENV['SMTP_PORT'],
+    user_name: ENV['SMTP_USER'],
+    password: ENV['SMTP_PASSWORD'],
+    authentication: :login,
+    enable_starttls_auto: true,
+  }
+  ActionMailer::Base.delivery_method = :smtp
 
   config.deploy_alert_email = ENV['DEPLOY_ALERT_EMAIL']
 end
