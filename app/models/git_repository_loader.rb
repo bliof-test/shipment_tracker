@@ -30,9 +30,11 @@ class GitRepositoryLoader
 
   def load(repository_name, update_repo: Rails.configuration.allow_git_fetch_on_request)
     FileUtils.makedirs(cache_dir)
+    Rails.logger.info "loading changes for #{repository_name}..."
     git_repository_location = find_repo_location(repository_name)
 
     repository = load_rugged_repository(update: update_repo, location: git_repository_location)
+    Rails.logger.info "loaded changes for #{repository_name}"
 
     GitRepository.new(repository)
   end

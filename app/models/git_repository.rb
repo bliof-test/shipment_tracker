@@ -17,10 +17,13 @@ class GitRepository
   end
 
   def exists?(sha, allow_short_sha: false)
-    return false if sha.nil?
-    return false if !allow_short_sha && sha.length != 40
-    sha.length.between?(7, 40) && rugged_repository.exists?(sha)
+    return false unless valid_sha?(sha, allow_short_sha)
+    Rails.logger.debug("Checking if SHA1 exists in local repository: #{sha}...")
+    rugged_repository.exists?(sha).tap do |exists|
+      Rails.logger.debug("SHA1 #{sha} #{exists ? 'exists' : 'does not exist'}")
+    end
   rescue Rugged::InvalidError
+    Rails.logger.warn("Invalid SHA1: #{sha}")
     false
   end
 
@@ -122,6 +125,13 @@ class GitRepository
   private
 
   attr_reader :rugged_repository
+
+  def valid_sha?(sha, allow_short_sha)
+    return false if sha.nil?
+    return false if !allow_short_sha && sha.length != 40
+    return false unless sha.length.between?(7, 40)
+    true
+  end
 
   def get_walker(push_commit_oid, hide_commit_oid, simplify: false, newest_first: false)
     sorting_strategy = Rugged::SORT_TOPO
