@@ -2,6 +2,7 @@ git_volume: &git_volume
   hostPath: /efs/shipment_tracker
   containerPath: /git
   mode: RW
+
 vars:
   production:
     web_instances: 6
@@ -15,13 +16,8 @@ vars:
     web_instances: 2
     web_memory: 1024
 
-github:
-  project_name: shipment_tracker 
 deploy_tasks:
-  lock_flight:
-    enabled: true
   shipment_tracker:
-    enabled: true
     deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
   marathon:
     apps:
@@ -32,6 +28,7 @@ deploy_tasks:
         container:
           volumes:
             - *git_volume
+
       - id: event-worker
         cpus: 0.25
         mem: 256
@@ -40,6 +37,7 @@ deploy_tasks:
         container:
           volumes:
             - *git_volume
+
       - id: git-worker
         cpus: 0.25
         mem: 256
@@ -48,6 +46,7 @@ deploy_tasks:
         container:
           volumes:
             - *git_volume
+
       - id: web
         instances: {{ web_instances }}
         cpus: 0.25
@@ -76,10 +75,13 @@ deploy_tasks:
         labels:
           tags: http,public-http
           overrideTaskName: shipment-tracker
+
   postgres:
     migrations_path: /app/docker/run_migrations.sh
+
   log_deployment:
     new_relic:
       app_id: {{ new_relic_app_id }}
+
   load_secrets:
     enabled: true
