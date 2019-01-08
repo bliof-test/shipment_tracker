@@ -54,18 +54,18 @@ class GitRepositoryLoader
 
   def updated_rugged_repository(git_repository_location, options)
     dir = repository_dir_name(git_repository_location)
-    Rugged::Repository.new(dir, options).tap do |repo|
-      fetch_repository(git_repository_location, repo, options)
+    Rugged::Repository.bare(dir, options).tap do |repository|
+      fetch_repository(git_repository_location, repository, options)
     end
   rescue Rugged::OSError, Rugged::RepositoryError, Rugged::InvalidError, Rugged::ReferenceError => error
     Rails.logger.warn "Exception while updating repository: #{error.message}"
     cloned_repository(git_repository_location, options)
   end
 
-  def fetch_repository(git_repository_location, repo, options)
+  def fetch_repository(git_repository_location, repository, options)
     retries ||= 0
     instrument('fetch') do
-      repo.fetch('origin', options) unless up_to_date?(git_repository_location, repo)
+      repository.fetch('origin', options) unless up_to_date?(git_repository_location, repository)
     end
   rescue Rugged::OSError => error
     raise unless fetch_in_progress?(error)
@@ -84,13 +84,13 @@ class GitRepositoryLoader
     Rails.logger.info "Wiping directory #{dir} and re-cloning repository to the same location..."
     FileUtils.rmtree(dir)
     instrument('clone') do
-      Rugged::Repository.clone_at(git_repository_location.uri, dir, options)
+      Rugged::Repository.clone_at(git_repository_location.uri, dir, options.merge(bare: true))
     end
   end
 
   def rugged_repository(git_repository_location)
     dir = repository_dir_name(git_repository_location)
-    Rugged::Repository.new(dir)
+    Rugged::Repository.bare(dir)
   rescue Rugged::OSError, Rugged::RepositoryError => error
     Rails.logger.warn "Cannot access repository, will try to re-clone/re-fetch. Exception: #{error.message}"
     load_rugged_repository(update: true, location: git_repository_location)
