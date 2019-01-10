@@ -15,7 +15,7 @@ RUN apk --no-cache add \
 WORKDIR /tmp
 COPY Gemfile* ./
 RUN bundle config build.rugged --use-system-libraries \
- && bundle install --deployment --without deployment dockerignore
+ && bundle install --deployment --without dockerignore development test
 
 ARG RAILS_ENV=production
 
