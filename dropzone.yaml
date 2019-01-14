@@ -9,7 +9,7 @@ vars:
     web_memory: 1024
     new_relic_app_id: 7057912
   staging:
-    new_relic_app_id: 
+    new_relic_app_id: 225742386
   uat:
     new_relic_app_id: 216487708
   default:
