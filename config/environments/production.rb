@@ -87,4 +87,7 @@ Rails.application.configure do
   ActionMailer::Base.delivery_method = :smtp
 
   config.deploy_alert_email = ENV['DEPLOY_ALERT_EMAIL']
+
+  # Show developer-friendly error page if set
+  config.consider_all_requests_local = ENV.key?('CONSIDER_ALL_REQUESTS_LOCAL')
 end
