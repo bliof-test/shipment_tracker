@@ -51,7 +51,7 @@ RUN apk --no-cache add \
 RUN addgroup -g 1101 -S shipment_tracker && \
   adduser -S -u 1101 -h /app -G shipment_tracker shipment_tracker
 
-USER shipment_tracker
+USER root
 
 WORKDIR /app
 
