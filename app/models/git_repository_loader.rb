@@ -114,7 +114,7 @@ class GitRepositoryLoader
   end
 
   def create_temporary_file(key)
-    file = Tempfile.open('key', cache_dir)
+    file = Tempfile.open('key')
     begin
       file.write(key.strip + "\n")
     ensure
