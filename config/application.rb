@@ -26,7 +26,6 @@ module ShipmentTracker
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
   DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # For older events without locale
-  DEFAULT_HEROKU_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_HEROKU_DEPLOY_LOCALE', 'us') # When locale not prefixed
   NUMBER_OF_TICKETS_TO_DISPLAY ||= ENV.fetch('NUMBER_OF_TICKETS_TO_DISPLAY', 100)
   # TODO: Move our constants here. Keep Rails config for actual Rails configuration.
 
