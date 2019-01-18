@@ -59,48 +59,50 @@ namespace :jobs do
     end
 
     Rails.logger.info "Starting #{t}"
-    Rails.logger.tagged(t) do
-      loader = GitRepositoryLoader.from_rails_config
-      repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
-      repos_hash_before = repos_hash_changed.dup
+    loader = GitRepositoryLoader.from_rails_config
+    repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
+    repos_hash_before = repos_hash_changed.to_h.dup
 
-      until @shutdown
-        Rails.logger.debug "Updating #{repos_hash_changed.size} git repositories"
-        start_time = Time.current
+    until @shutdown
+      total = repos_hash_changed.size
+      Rails.logger.debug "Updating #{total} git repositories"
+      start_time = Time.current
 
-        repos_hash_changed.keys.in_groups(4).map { |group|
-          Thread.new do # Limited to 4 threads to avoid running out of memory.
-            group.compact.each do |app_name|
-              break if @shutdown
+      num_threads = [1, [4, total].min].max
+      groups = repos_hash_changed.keys.in_groups(num_threads)
+      groups.each.with_index(1).map { |group, thread_num|
+        Thread.new do # Limited to 4 threads to avoid running out of memory.
+          group.compact!
+          group.each.with_index(1) do |app_name, index|
+            break if @shutdown
 
-              Rails.logger.tagged(t) do
-                begin
-                  loader.load(app_name, update_repo: true)
-                rescue StandardError => error
-                  Honeybadger.notify(
-                    error,
-                    context: {
-                      app_name: app_name,
-                      remote_head: repos_hash_changed[app_name],
-                    },
-                  )
-                end
+            Rails.logger.tagged("[thread #{thread_num}] #{app_name} (#{index}/#{group.size})") do
+              begin
+                loader.load(app_name, update_repo: true)
+              rescue StandardError => error
+                Honeybadger.notify(
+                  error,
+                  context: {
+                    app_name: app_name,
+                    remote_head: repos_hash_changed[app_name],
+                  },
+                )
               end
             end
           end
-        }.each(&:join)
-        unless repos_hash_changed.empty?
-          Rails.logger.debug "Updated git repositories in #{Time.current - start_time} seconds"
         end
-
-        repos_hash_after = GitRepositoryLocation.app_remote_head_hash
-        repos_hash_changed = repos_hash_after.reject { |name, remote_head|
-          remote_head == repos_hash_before[name]
-        }
-        repos_hash_before = repos_hash_after.dup
-
-        sleep Rails.configuration.git_fetch_interval_seconds unless @shutdown
+      }.each(&:join)
+      unless repos_hash_changed.empty?
+        Rails.logger.info "Updated #{total} git repositories in #{Time.current - start_time} seconds"
       end
+
+      repos_hash_after = GitRepositoryLocation.app_remote_head_hash.to_h
+      repos_hash_changed = repos_hash_after.reject { |name, remote_head|
+        remote_head == repos_hash_before[name]
+      }
+      repos_hash_before = repos_hash_after.dup
+
+      sleep Rails.configuration.git_fetch_interval_seconds unless @shutdown
     end
   end
 end

@@ -92,7 +92,8 @@ class GitRepositoryLoader
     dir = repository_dir_name(git_repository_location)
     Rugged::Repository.bare(dir)
   rescue Rugged::OSError, Rugged::RepositoryError => error
-    Rails.logger.warn "Cannot access repository, will try to re-clone/re-fetch. Exception: #{error.message}"
+    name = git_repository_location.name
+    Rails.logger.warn "Cannot access repository #{name}, will try to re-clone/re-fetch. Exception: #{error.message}"
     load_rugged_repository(update: true, location: git_repository_location)
   end
 
