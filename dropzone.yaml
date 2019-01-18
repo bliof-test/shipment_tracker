@@ -40,7 +40,7 @@ deploy_tasks:
 
       - id: git-worker
         cpus: 0.25
-        mem: 256
+        mem: 384
         args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
         taskKillGracePeriodSeconds: 30
         container:
