@@ -99,7 +99,7 @@ namespace :jobs do
         }
         repos_hash_before = repos_hash_after.dup
 
-        sleep 5 unless @shutdown
+        sleep Rails.configuration.git_fetch_interval_seconds unless @shutdown
       end
     end
   end

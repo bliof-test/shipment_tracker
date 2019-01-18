@@ -57,6 +57,7 @@ module ShipmentTracker
     config.git_repository_cache_dir = ENV.fetch('GIT_REPOSITORY_CACHE_DIR', Dir.tmpdir)
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
     config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
+    config.git_fetch_interval_seconds = ENV.fetch('GIT_FETCH_INTERVAL_SECONDS', 5).to_i
 
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
 
