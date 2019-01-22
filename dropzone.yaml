@@ -5,16 +5,11 @@ git_volume: &git_volume
 
 vars:
   production:
-    web_instances: 6
-    web_memory: 1024
     new_relic_app_id: 7057912
   staging:
     new_relic_app_id: 225742386
   uat:
     new_relic_app_id: 216487708
-  default:
-    web_instances: 2
-    web_memory: 1024
 
 deploy_tasks:
   shipment_tracker:
@@ -22,14 +17,16 @@ deploy_tasks:
   marathon:
     apps:
       - id: delayed-job
+        instances: 3
         cpus: 0.25
-        mem: 256
+        mem: 512
         args: ["bundle", "exec", "rake", "jobs:work"]
         container:
           volumes:
             - *git_volume
 
       - id: event-worker
+        instances: 1
         cpus: 0.25
         mem: 256
         args: ["bundle", "exec", "rake", "jobs:update_events_loop"]
@@ -39,6 +36,7 @@ deploy_tasks:
             - *git_volume
 
       - id: git-worker
+        instances: 1
         cpus: 0.25
         mem: 384
         args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
@@ -48,9 +46,9 @@ deploy_tasks:
             - *git_volume
 
       - id: web
-        instances: {{ web_instances }}
+        instances: 3
         cpus: 0.25
-        mem: {{ web_memory }}
+        mem: 512
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
         constraints:
           - - hostname
