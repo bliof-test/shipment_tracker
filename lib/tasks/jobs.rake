@@ -68,10 +68,10 @@ namespace :jobs do
       Rails.logger.debug "Updating #{total} git repositories"
       start_time = Time.current
 
-      num_threads = [1, [4, total].min].max
+      num_threads = [1, [Rails.configuration.git_worker_max_threads, total].min].max
       groups = repos_hash_changed.keys.in_groups(num_threads)
       groups.each.with_index(1).map { |group, thread_num|
-        Thread.new do # Limited to 4 threads to avoid running out of memory.
+        Thread.new do
           group.compact!
           group.each.with_index(1) do |app_name, index|
             break if @shutdown
@@ -102,7 +102,7 @@ namespace :jobs do
       }
       repos_hash_before = repos_hash_after.dup
 
-      sleep Rails.configuration.git_fetch_interval_seconds unless @shutdown
+      sleep Rails.configuration.git_worker_interval_seconds unless @shutdown
     end
   end
 end
