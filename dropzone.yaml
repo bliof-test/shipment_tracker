@@ -1,5 +1,5 @@
 git_volume: &git_volume
-  hostPath: /efs/shipment_tracker
+  hostPath: /nfs/shipment_tracker
   containerPath: /git
   mode: RW
 
