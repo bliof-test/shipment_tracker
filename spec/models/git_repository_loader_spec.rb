@@ -18,7 +18,7 @@ RSpec.describe GitRepositoryLoader do
     let(:git_repository_location) {
       instance_double(
         GitRepositoryLocation,
-        id: anything,
+        id: 1,
         name: repo_name,
         uri: repo_uri,
         remote_head: remote_head,
@@ -87,6 +87,55 @@ RSpec.describe GitRepositoryLoader do
             expect(Rugged::Repository).to receive(:clone_at).once
 
             git_repository_loader.load(repo_name, update_repo: true)
+          end
+        end
+
+        context 'when another process is updating the same reference' do
+          let(:remote_head) { 'newer-commit' }
+
+          context 'when there is a single failure and then a different error' do
+            before do
+              first = true
+              allow_any_instance_of(Rugged::Repository).to receive(:fetch) do
+                fail(Rugged::RepositoryError) unless first
+                first = false
+                fail(Rugged::OSError, "failed to create locked file '': File exists")
+              end
+            end
+
+            it 'retries the fetch once and then re-clones the repo' do
+              expect_any_instance_of(Rugged::Repository).to receive(:fetch).twice
+              expect(git_repository_loader).to receive(:sleep).with(1)
+              expect(Rugged::Repository).to receive(:clone_at)
+              expect(Rails.logger).to receive(:warn).with(
+                %r{Another fetch is in progress for [\w-]+, retrying in 1 second \(1\/10\)}
+              )
+              expect(Rails.logger).to receive(:warn).with(
+                'Exception while updating repository: Rugged::RepositoryError'
+              )
+              git_repository_loader.load(repo_name, update_repo: true)
+            end
+          end
+
+          context 'when there are multiple consecutive failures' do
+            before do
+              allow_any_instance_of(Rugged::Repository).to receive(:fetch).and_raise(
+                Rugged::OSError, "failed to create locked file '': File exists"
+              )
+            end
+
+            it 'retries the fetch up to 10 times and does not re-clone the repo' do
+              expect(Rugged::Repository).to_not receive(:clone_at)
+              expect(git_repository_loader).to receive(:sleep).with(1).exactly(10).times
+              expect_any_instance_of(Rugged::Repository).to receive(:fetch).exactly(11).times
+              expect(Rails.logger).to receive(:warn).with(
+                %r{Another fetch is in progress for [\w-]+, retrying in 1 second \(\d{1,2}\/10\)}
+              ).exactly(10).times
+              expect(Rails.logger).to receive(:warn).with(
+                /Reached retry limit for fetch of [\w-]+, giving up/
+              )
+              git_repository_loader.load(repo_name, update_repo: true)
+            end
           end
         end
       end

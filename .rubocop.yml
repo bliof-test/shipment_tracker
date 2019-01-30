@@ -74,6 +74,8 @@ Style/BlockDelimiters:
 
 Style/TrailingCommaInArguments:
   EnforcedStyleForMultiline: comma
+  Exclude:
+    - 'spec/**/*'
 
 Style/TrailingCommaInArrayLiteral:
   EnforcedStyleForMultiline: comma
