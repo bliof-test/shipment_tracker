@@ -55,7 +55,7 @@ class FeatureReviewsController < ApplicationController
   private
 
   def ticket_linking_options
-    { jira_key: params['jira_key'], feature_review_path: redirect_path, root_url: root_url }
+    { jira_key: params.fetch(:jira_key, '').strip, feature_review_path: redirect_path, root_url: root_url }
   end
 
   def time
