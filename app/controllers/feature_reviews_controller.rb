@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class FeatureReviewsController < ApplicationController
+  before_action :sanitize_jira_key_param, only: %i[link_ticket unlink_ticket]
+
   def new
     @app_names = GitRepositoryLocation.app_names
     @feature_review_form = feature_review_form
@@ -55,7 +57,7 @@ class FeatureReviewsController < ApplicationController
   private
 
   def ticket_linking_options
-    { jira_key: params.fetch(:jira_key, '').strip, feature_review_path: redirect_path, root_url: root_url }
+    { jira_key: params[:jira_key], feature_review_path: redirect_path, root_url: root_url }
   end
 
   def time
@@ -87,5 +89,9 @@ class FeatureReviewsController < ApplicationController
 
   def normalize_feature_review_path(path)
     factory.create_from_url_string(path).path
+  end
+
+  def sanitize_jira_key_param
+    params[:jira_key] = params[:jira_key].upcase.strip unless params[:jira_key].nil?
   end
 end
