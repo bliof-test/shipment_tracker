@@ -47,7 +47,7 @@ cache_gems: &cache_gems
       - vendor/bundle
 
 jobs:
-  build:
+  setup:
     <<: *defaults
     steps:
       - *install_system_packages
@@ -164,18 +164,18 @@ jobs:
 
 workflows:
   version: 2
-  commit:
+  test-then-publish-docker-image:
     jobs:
-      - build
+      - setup
       - specs:
           requires:
-            - build
+            - setup
       - features:
           requires:
-            - build
+            - setup
       - rubocop:
           requires:
-            - build
+            - setup
       - upload-coverage:
           requires:
             - specs
