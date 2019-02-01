@@ -47,7 +47,7 @@ cache_gems: &cache_gems
       - vendor/bundle
 
 jobs:
-  build:
+  setup:
     <<: *defaults
     steps:
       - *install_system_packages
@@ -80,8 +80,10 @@ jobs:
       - run:
           name: Run specs
           command: |
-            bundle exec rake spec
+            bundle exec rake spec SPEC_OPTS="--format progress --format RspecJunitFormatter --out test-results/rspec/results.xml"
             ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.specs.json coverage/.resultset.json
+      - store_test_results:
+          path: test-results
       - store_artifacts:
           path: coverage
           destination: specs-coverage
@@ -164,18 +166,18 @@ jobs:
 
 workflows:
   version: 2
-  commit:
+  test-then-publish-docker-image:
     jobs:
-      - build
+      - setup
       - specs:
           requires:
-            - build
+            - setup
       - features:
           requires:
-            - build
+            - setup
       - rubocop:
           requires:
-            - build
+            - setup
       - upload-coverage:
           requires:
             - specs

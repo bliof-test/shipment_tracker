@@ -295,6 +295,8 @@ GEM
       rspec-mocks (~> 3.4.0)
       rspec-support (~> 3.4.0)
     rspec-support (3.4.1)
+    rspec_junit_formatter (0.4.1)
+      rspec-core (>= 2, < 4, != 2.12.0)
     rubocop (0.54.0)
       parallel (~> 1.10)
       parser (>= 2.5)
@@ -424,6 +426,7 @@ DEPENDENCIES
   rails (~> 4.2.11)
   rails_12factor
   rspec-rails
+  rspec_junit_formatter
   rubocop
   rugged (~> 0.27.0)
   sass-rails
@@ -440,8 +443,5 @@ DEPENDENCIES
   virtus
   webmock
 
-RUBY VERSION
-   ruby 2.3.6p384
-
 BUNDLED WITH
-   1.16.4
+   1.17.2

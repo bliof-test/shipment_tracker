@@ -10,6 +10,8 @@ class GitRepositoryLoader
   class NotFound < RuntimeError; end
   class BadLocation < RuntimeError; end
 
+  RETRY_LIMIT = 10
+
   def self.from_rails_config
     @repo_loader ||= new(
       ssh_private_key: Rails.configuration.ssh_private_key,
@@ -49,13 +51,33 @@ class GitRepositoryLoader
 
   def updated_rugged_repository(git_repository_location, options)
     dir = repository_dir_name(git_repository_location)
-    Rugged::Repository.new(dir, options).tap do |repository|
-      instrument('fetch') do
-        repository.fetch('origin', options) unless up_to_date?(git_repository_location, repository)
-      end
+    Rugged::Repository.new(dir, options).tap do |repo|
+      fetch_repository(git_repository_location, repo, options)
     end
   rescue Rugged::OSError, Rugged::RepositoryError, Rugged::InvalidError, Rugged::ReferenceError => error
     Rails.logger.warn "Exception while updating repository: #{error.message}"
+    cloned_repository(git_repository_location, options)
+  end
+
+  def fetch_repository(git_repository_location, repo, options)
+    retries ||= 0
+    instrument('fetch') do
+      repo.fetch('origin', options) unless up_to_date?(git_repository_location, repo)
+    end
+  rescue Rugged::OSError => error
+    raise unless fetch_in_progress?(error)
+    name = git_repository_location.name
+    if retries < RETRY_LIMIT
+      retries += 1
+      Rails.logger.warn "Another fetch is in progress for #{name}, retrying in 1 second (#{retries}/#{RETRY_LIMIT})"
+      sleep 1
+      retry
+    end
+    Rails.logger.warn "Reached retry limit for fetch of #{name}, giving up"
+  end
+
+  def cloned_repository(git_repository_location, options)
+    dir = repository_dir_name(git_repository_location)
     Rails.logger.info "Wiping directory #{dir} and re-cloning repository to the same location..."
     FileUtils.rmtree(dir)
     instrument('clone') do
@@ -132,5 +154,11 @@ class GitRepositoryLoader
     else
       rugged_repository(location)
     end
+  end
+
+  def fetch_in_progress?(error)
+    return false unless error.class == Rugged::OSError
+
+    !!(error.message =~ /failed to create locked file/i && error.message =~ /File exists/i)
   end
 end
