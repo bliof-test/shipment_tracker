@@ -80,8 +80,10 @@ jobs:
       - run:
           name: Run specs
           command: |
-            bundle exec rake spec
+            bundle exec rake spec SPEC_OPTS="--format progress --format RspecJunitFormatter --out test-results/rspec/results.xml"
             ./tmp/cc-test-reporter format-coverage -t simplecov -o tmp/codeclimate.specs.json coverage/.resultset.json
+      - store_test_results:
+          path: test-results
       - store_artifacts:
           path: coverage
           destination: specs-coverage
