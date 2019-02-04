@@ -3,6 +3,11 @@ git_volume: &git_volume
   containerPath: /git
   mode: RW
 
+az_constraint: &az_constraint # Same availability zone as NFS server
+  - az
+  - LIKE
+  - ^a$
+
 vars:
   production:
     new_relic_app_id: 7057912
@@ -21,6 +26,8 @@ deploy_tasks:
         cpus: 0.25
         mem: 512
         args: ["bundle", "exec", "rake", "jobs:work"]
+        constraints:
+          - *az_constraint
         container:
           volumes:
             - *git_volume
@@ -31,6 +38,8 @@ deploy_tasks:
         mem: 512
         args: ["bundle", "exec", "rake", "jobs:update_events_loop"]
         taskKillGracePeriodSeconds: 30
+        constraints:
+          - *az_constraint
         container:
           volumes:
             - *git_volume
@@ -41,6 +50,8 @@ deploy_tasks:
         mem: 4096
         args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
         taskKillGracePeriodSeconds: 30
+        constraints:
+          - *az_constraint
         container:
           volumes:
             - *git_volume
@@ -51,6 +62,7 @@ deploy_tasks:
         mem: 512
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
         constraints:
+          - *az_constraint
           - - hostname
             - UNIQUE
         container:
