@@ -2,6 +2,21 @@
 
 require 'honeybadger'
 
+class Counter
+  def initialize
+    @value = 0
+    @lock = Mutex.new
+  end
+
+  def increment
+    @lock.synchronize { @value += 1 }
+  end
+
+  def to_s
+    @lock.synchronize { @value.to_s }
+  end
+end
+
 namespace :jobs do
   def shutdown(task)
     warn "Terminating rake task #{task}..."
@@ -65,6 +80,7 @@ namespace :jobs do
 
     until @shutdown
       total = repos_hash_changed.size
+      total_updated = Counter.new
       Rails.logger.debug "Updating #{total} git repositories"
       start_time = Time.current
 
@@ -88,12 +104,13 @@ namespace :jobs do
                   },
                 )
               end
+              total_updated.increment
             end
           end
         end
       }.each(&:join)
       unless repos_hash_changed.empty?
-        Rails.logger.info "Updated #{total} git repositories in #{Time.current - start_time} seconds"
+        Rails.logger.info "Updated #{total_updated} git repositories in #{Time.current - start_time} seconds"
       end
 
       repos_hash_after = GitRepositoryLocation.app_remote_head_hash.to_h
