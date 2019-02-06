@@ -18,6 +18,7 @@ gem 'newrelic_rpm'
 gem 'octokit', '4.1.0', require: false
 gem 'omniauth-auth0'
 gem 'omniauth'
+gem 'pg_failover'
 gem 'pg_search'
 gem 'pg'
 gem 'pry-rails'

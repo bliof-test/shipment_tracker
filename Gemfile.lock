@@ -224,6 +224,7 @@ GEM
     parser (2.5.0.5)
       ast (~> 2.4.0)
     pg (0.18.4)
+    pg_failover (1.0.0.pre.alpha)
     pg_search (1.0.5)
       activerecord (>= 3.1)
       activesupport (>= 3.1)
@@ -424,6 +425,7 @@ DEPENDENCIES
   omniauth
   omniauth-auth0
   pg
+  pg_failover
   pg_search
   pry-byebug
   pry-rails
