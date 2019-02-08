@@ -4,74 +4,115 @@ services:
     build:
       context: .
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rails server --binding=0.0.0.0 --port 1201'
+    command: >
+      sh -c 'bundle exec rake db:structure:load && \
+             exec bundle exec unicorn --config-file config/unicorn.rb'
     environment:
       AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
-      AUTH0_CLIENT_SECRET:
       AUTH0_CONNECTION: fundingcircle.com
       AUTH0_DOMAIN: fundingcircle.auth0.com
-      GITHUB_REPO_READ_TOKEN:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
+      HONEYBADGER_ENV: development
+      HONEYBADGER_REPORT_DATA: 'true'
+      JIRA_FQDN: http://jira:8080
+      JIRA_PASSWD: shipment_tracker
+      JIRA_PATH: ''
+      JIRA_USER: shipment_tracker
+      JIRA_USE_SSL: 'false'
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      PORT_HTTP: 1201
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
-      SSH_USER: git
-      SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+      SSH_USER: git
+      UNICORN_TIMEOUT: 3600
+    env_file: secrets.env
+    tty: true
+    stdin_open: true
     ports:
       - 127.0.0.1:1201:1201
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      jira:
+        condition: service_started
     volumes:
       - git:/tmp/git
+    healthcheck:
+      test: curl localhost:1201/healthcheck
+      interval: 10s
 
-  update_git_loop:
+  git-worker:
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_git_loop'
+    command: bundle exec rake jobs:update_git_loop
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
-      SSH_USER: git
-      SSH_PUBLIC_KEY:
       SSH_PRIVATE_KEY:
+      SSH_USER: git
+    env_file: secrets.env
     tty: true
     stdin_open: true
     user: root
     depends_on:
-      - postgres
+      web:
+        condition: service_healthy
     volumes:
       - git:/tmp/git
 
-  update_events_loop:
+  event-worker:
     image: shipment_tracker
-    command: sh -c 'bundle exec rake db:create db:migrate && exec bundle exec rake jobs:update_events_loop'
+    command: bundle exec rake jobs:update_events_loop
     environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
-      SHIPMENT_TRACKER_DATABASE_HOST: postgres
-      SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker
-      SHIPMENT_TRACKER_DATABASE_PASSWORD: postgres
-      SHIPMENT_TRACKER_DATABASE_USERNAME: postgres
+    env_file: secrets.env
     tty: true
     stdin_open: true
     depends_on:
-      - postgres
+      web:
+        condition: service_healthy
+
+  delayed-job:
+    image: shipment_tracker
+    command: bundle exec rake jobs:work
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      PROTECT_STDOUT: 'true'
+      RAILS_ENV: "${RAILS_ENV:-development}"
+    env_file: secrets.env
+    tty: true
+    stdin_open: true
+    depends_on:
+      web:
+        condition: service_healthy
 
   postgres:
     image: postgres:9.4-alpine
+    command: postgres -c log_statement=all
     environment:
       POSTGRES_DB: shipment_tracker
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
+      interval: 10s
+
+  jira:
+    image: dchevell/jira-core
+    volumes:
+      - jira:/var/atlassian/application-data/jira
+    ports:
+      - 127.0.0.1:8080:8080
 
 volumes:
   pgdata:
   git:
+  jira:

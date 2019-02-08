@@ -7,10 +7,7 @@ ruby_image: &ruby_image
     BUNDLE_RETRY: 3
     BUNDLE_PATH: vendor/bundle
     RAILS_ENV: test
-    SHIPMENT_TRACKER_DATABASE_NAME: shipment_tracker_test
-    SHIPMENT_TRACKER_DATABASE_HOST: 127.0.0.1
-    SHIPMENT_TRACKER_DATABASE_USERNAME: st_test
-    SHIPMENT_TRACKER_DATABASE_PASSWORD: ""
+    DATABASE_URL: postgresql://st_test@127.0.0.1/shipment_tracker_test
     CODECLIMATE_REPO_TOKEN: $CODECLIMATE_REPO_TOKEN
     CC_TEST_REPORTER_ID: $CODECLIMATE_REPO_TOKEN
 
@@ -18,7 +15,7 @@ defaults: &defaults
   working_directory: ~/shipment_tracker
   docker:
     - *ruby_image
-    - image: circleci/postgres:9.4-alpine
+    - image: circleci/postgres:9.6-alpine
       environment:
         POSTGRES_DB: shipment_tracker_test
         POSTGRES_USER: st_test
@@ -75,7 +72,6 @@ jobs:
       - *restore_gems
       - *bundle_install
       - *cache_gems
-      - run: bundle exec rake db:create_database_yml
       - run: bundle exec rake db:setup
       - run:
           name: Run specs
@@ -101,7 +97,6 @@ jobs:
       - *restore_gems
       - *bundle_install
       - *cache_gems
-      - run: bundle exec rake db:create_database_yml
       - run: bundle exec rake db:setup
       - run:
           name: Run features
@@ -150,7 +145,7 @@ jobs:
           command: echo "$DOCKER_PASSWORD" | docker login --username="$DOCKER_USERNAME" --password-stdin $DOCKER_REGISTRY
       - run:
           name: Build Docker image
-          command: docker build . --build-arg BUNDLE_GEM__FURY__IO --tag $CIRCLE_PROJECT_REPONAME --pull
+          command: docker build . --tag $CIRCLE_PROJECT_REPONAME --pull
       - run:
           name: Push to Docker registry
           command: |

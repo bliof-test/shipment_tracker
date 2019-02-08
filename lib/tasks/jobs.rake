@@ -2,56 +2,50 @@
 
 require 'honeybadger'
 
+class Counter
+  def initialize
+    @value = 0
+    @lock = Mutex.new
+  end
+
+  def increment
+    @lock.synchronize { @value += 1 }
+  end
+
+  def to_s
+    @lock.synchronize { @value.to_s }
+  end
+end
+
 namespace :jobs do
-  def already_running?(pid_path)
-    pid = File.read(pid_path)
-    Process.kill(0, Integer(pid))
-    true
-  rescue Errno::ENOENT, Errno::ESRCH
-    # no such file or pid
-    false
-  end
-
-  def manage_pid(pid_path)
-    fail "Pid file with running process detected, aborting (#{pid_path})" if already_running?(pid_path)
-    puts "Writing pid file to #{pid_path}"
-    File.open(pid_path, 'w+') do |f|
-      f.write Process.pid
-    end
-    at_exit do
-      File.delete(pid_path)
-    end
-  end
-
-  def pid_path_for(name)
-    require 'tmpdir'
-    File.expand_path("#{name}.pid", Dir.tmpdir)
+  def shutdown(task)
+    warn "Terminating rake task #{task}..."
+    @shutdown = true
   end
 
   desc 'Reset and recreate event snapshots (new events received during execution are not snapshotted)'
   task recreate_snapshots: :environment do
-    manage_pid pid_path_for('jobs_recreate_snapshots')
-
-    puts "[#{Time.current}] Running recreate_snapshots"
+    Rails.logger.info 'Running recreate_snapshots'
 
     Repositories::Updater.from_rails_config.recreate
 
-    puts "[#{Time.current}] Completed recreate_snapshots"
+    Rails.logger.info 'Completed recreate_snapshots'
   end
 
   desc 'Continuously updates event cache'
-  task update_events_loop: :environment do
+  task update_events_loop: :environment do |t|
     Signal.trap('TERM') do
-      warn 'Terminating rake task jobs:update_events_loop...'
-      @shutdown = true
+      shutdown(t)
     end
 
-    Rails.logger.tagged('update_events_loop') do
-      loop do
-        break if @shutdown
+    Signal.trap('INT') do
+      shutdown(t)
+    end
 
+    Rails.logger.info "Starting #{t}"
+    Rails.logger.tagged(t) do
+      until @shutdown
         start_time = Time.current
-        puts "[#{start_time}] Running update_events"
 
         from_event_id = Snapshots::EventCount.global_event_pointer
 
@@ -62,61 +56,70 @@ namespace :jobs do
         num_events = Events::BaseEvent.where('id > ?', from_event_id).where('id <= ?', last_event_id).count
 
         end_time = Time.current
-        puts "[#{end_time}] Applied #{num_events} events in #{end_time - start_time} seconds"
+        Rails.logger.info "Applied #{num_events} events in #{end_time - start_time} seconds"
 
-        break if @shutdown
-
-        sleep 5
+        sleep 5 unless @shutdown
       end
     end
   end
 
   desc 'Continuously updates the local git repositories'
-  task update_git_loop: :environment do
-    manage_pid pid_path_for('update_git_loop')
-
+  task update_git_loop: :environment do |t|
     Signal.trap('TERM') do
-      warn 'Terminating rake task jobs:update_git_loop...'
-      @shutdown = true
+      shutdown(t)
     end
 
+    Signal.trap('INT') do
+      shutdown(t)
+    end
+
+    Rails.logger.info "Starting #{t}"
     loader = GitRepositoryLoader.from_rails_config
     repos_hash_changed = GitRepositoryLocation.app_remote_head_hash
-    repos_hash_before = repos_hash_changed.dup
+    repos_hash_before = repos_hash_changed.to_h.dup
 
-    loop do
+    until @shutdown
+      total = repos_hash_changed.size
+      total_updated = Counter.new
+      Rails.logger.debug "Updating #{total} git repositories"
       start_time = Time.current
-      puts "[#{start_time}] Updating #{repos_hash_changed.size} git repositories"
 
-      repos_hash_changed.keys.in_groups(4).map { |group|
-        Thread.new do # Limited to 4 threads to avoid running out of memory.
-          group.compact.each do |app_name|
+      num_threads = [1, [Rails.configuration.git_worker_max_threads, total].min].max
+      groups = repos_hash_changed.keys.in_groups(num_threads)
+      groups.each.with_index(1).map { |group, thread_num|
+        Thread.new do
+          group.compact!
+          group.each.with_index(1) do |app_name, index|
             break if @shutdown
 
-            begin
-              loader.load(app_name, update_repo: true)
-            rescue StandardError => error
-              Honeybadger.notify(
-                error,
-                context: {
-                  app_name: app_name,
-                  remote_head: repos_hash_changed[app_name],
-                },
-              )
+            Rails.logger.tagged("[thread #{thread_num}] #{app_name} (#{index}/#{group.size})") do
+              begin
+                loader.load(app_name, update_repo: true)
+              rescue StandardError => error
+                Honeybadger.notify(
+                  error,
+                  context: {
+                    app_name: app_name,
+                    remote_head: repos_hash_changed[app_name],
+                  },
+                )
+              end
+              total_updated.increment
             end
           end
         end
       }.each(&:join)
+      unless repos_hash_changed.empty?
+        Rails.logger.info "Updated #{total_updated} git repositories in #{Time.current - start_time} seconds"
+      end
 
-      repos_hash_after = GitRepositoryLocation.app_remote_head_hash
+      repos_hash_after = GitRepositoryLocation.app_remote_head_hash.to_h
       repos_hash_changed = repos_hash_after.reject { |name, remote_head|
         remote_head == repos_hash_before[name]
       }
       repos_hash_before = repos_hash_after.dup
 
-      end_time = Time.current
-      puts "[#{end_time}] Updated git repositories in #{end_time - start_time} seconds"
-      sleep 5
+      sleep Rails.configuration.git_worker_interval_seconds unless @shutdown
     end
   end
 end

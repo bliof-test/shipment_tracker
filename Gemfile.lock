@@ -146,7 +146,7 @@ GEM
       activerecord (>= 3.0)
     hashdiff (0.2.3)
     hashie (3.5.7)
-    honeybadger (3.3.0)
+    honeybadger (4.1.0)
     html2haml (2.2.0)
       erubis (~> 2.7.0)
       haml (>= 4.0, < 6)
@@ -170,6 +170,9 @@ GEM
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
       ruby_dep (~> 1.2)
+    loga (2.3.0)
+      activesupport (>= 2.3.8)
+      rack
     loofah (2.2.3)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -194,7 +197,7 @@ GEM
     multi_xml (0.5.5)
     multipart-post (2.0.0)
     nenv (0.3.0)
-    newrelic_rpm (5.1.0.344)
+    newrelic_rpm (5.7.0.350)
     nokogiri (1.8.5)
       mini_portile2 (~> 2.3.0)
     notiffany (0.1.1)
@@ -221,6 +224,7 @@ GEM
     parser (2.5.0.5)
       ast (~> 2.4.0)
     pg (0.18.4)
+    pg_failover (1.0.0.pre.alpha)
     pg_search (1.0.5)
       activerecord (>= 3.1)
       activesupport (>= 3.1)
@@ -232,12 +236,13 @@ GEM
     pry-byebug (3.6.0)
       byebug (~> 10.0)
       pry (~> 0.10)
+    pry-rails (0.3.8)
+      pry (>= 0.10.4)
     rack (1.6.11)
     rack-protection (1.5.5)
       rack
     rack-test (0.6.3)
       rack (>= 1.0)
-    rack-timeout (0.4.2)
     rails (4.2.11)
       actionmailer (= 4.2.11)
       actionpack (= 4.2.11)
@@ -308,7 +313,7 @@ GEM
     ruby_dep (1.5.0)
     ruby_parser (3.11.0)
       sexp_processor (~> 4.9)
-    rugged (0.27.5)
+    rugged (0.27.7)
     safe_yaml (1.0.4)
     sass (3.7.2)
       sass-listen (~> 4.0.0)
@@ -369,7 +374,7 @@ GEM
       thread_safe (~> 0.1)
     uglifier (4.1.9)
       execjs (>= 0.3.0, < 3)
-    unicode-display_width (1.3.0)
+    unicode-display_width (1.4.0)
     unicorn (5.4.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
@@ -410,19 +415,21 @@ DEPENDENCIES
   guard-rspec
   haml-rails
   has_secure_token
-  honeybadger (~> 3.3)
+  honeybadger (< 5)
   jira-ruby
   jquery-rails
+  loga
   mailcatcher
   newrelic_rpm
   octokit (= 4.1.0)
   omniauth
   omniauth-auth0
   pg
+  pg_failover
   pg_search
   pry-byebug
+  pry-rails
   rack-test
-  rack-timeout
   rails (~> 4.2.11)
   rails_12factor
   rspec-rails

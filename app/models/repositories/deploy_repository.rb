@@ -50,23 +50,25 @@ module Repositories
       return unless event.is_a?(Events::DeployEvent)
 
       current_deploy = create_deploy_snapshot!(event)
+      Rails.logger.debug "Deploy snapshot: #{current_deploy.inspect}"
 
       if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
         audit_deploy(current_deploy)
       end
     rescue GitRepositoryLoader::NotFound => error
-      Honeybadger.notify(
-        error,
-        context: {
-          event_id: event.id,
-          app_name: event.app_name,
-          deployer: event.deployed_by,
-          deploy_time: event.created_at,
-        },
-      )
+      Honeybadger.notify(error, context: error_context(event))
     end
 
     private
+
+    def error_context(event)
+      {
+        event_id: event.id,
+        app_name: event.app_name,
+        deployer: event.deployed_by,
+        deploy_time: event.created_at,
+      }
+    end
 
     def create_deploy_snapshot!(event)
       store.create!(

@@ -20,7 +20,9 @@ module ShipmentTracker
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
   JIRA_FQDN ||= ENV.fetch('JIRA_FQDN', nil)
+  JIRA_EXTERNAL_FQDN ||= ENV.fetch('JIRA_EXTERNAL_FQDN', JIRA_FQDN)
   JIRA_PATH ||= ENV.fetch('JIRA_PATH', nil)
+  JIRA_USE_SSL ||= ENV.fetch('JIRA_USE_SSL', 'true') == 'true'
   GITHUB_REPO_READ_TOKEN ||= ENV.fetch('GITHUB_REPO_READ_TOKEN', nil)
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
   DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # For older events without locale
@@ -55,10 +57,15 @@ module ShipmentTracker
     config.git_repository_cache_dir = ENV.fetch('GIT_REPOSITORY_CACHE_DIR', Dir.tmpdir)
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
     config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
+    config.git_worker_interval_seconds = ENV.fetch('GIT_WORKER_INTERVAL_SECONDS', 5).to_i
+    config.git_worker_max_threads = ENV.fetch('GIT_WORKER_MAX_THREADS', 16).to_i
 
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
 
     # value is 'gb' and not 'uk' to comply with 'ISO 3166-1 alpha-2' codes
     config.deploy_regions = ENV.fetch('DEPLOY_REGIONS', 'gb,us').split(',')
+
+    config.loga = { service_name: 'shipment-tracker' }
+    config.log_level = ENV.fetch('LOG_LEVEL', 'info')
   end
 end

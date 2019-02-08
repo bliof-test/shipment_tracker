@@ -249,7 +249,7 @@ RSpec.describe GitRepositoryLoader do
 
     context 'when not updating repository' do
       before do
-        allow(Rugged::Repository).to receive(:new)
+        allow(Rugged::Repository).to receive(:bare)
       end
 
       it 'returns a GitRepository' do
@@ -270,12 +270,12 @@ RSpec.describe GitRepositoryLoader do
 
       describe 'automatic recovery' do
         it 'tries to update the repository if there is an Rugged::RepositoryError' do
-          allow(Rugged::Repository).to receive(:new).and_raise(Rugged::RepositoryError)
+          allow(Rugged::Repository).to receive(:bare).and_raise(Rugged::RepositoryError)
           expect(git_repository_loader.load('repo', update_repo: false)).to be_instance_of(GitRepository)
         end
 
         it 'tries to update the repository if there is a Rugged::OSError - e.g. no directory for the repository' do
-          allow(Rugged::Repository).to receive(:new).and_raise(Rugged::OSError)
+          allow(Rugged::Repository).to receive(:bare).and_raise(Rugged::OSError)
           expect(git_repository_loader.load('repo', update_repo: false)).to be_instance_of(GitRepository)
         end
       end

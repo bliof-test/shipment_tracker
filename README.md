@@ -93,7 +93,7 @@ Please make sure the following command runs as a background task:
 bundle exec rake jobs:update_git_loop
 ```
 
-*Warning:* This recurring task should run on **every** server that your application is running on.
+*Warning:* Unless the git cache is on a shared directory this recurring task should run on **every** server that your application is running on.
 
 In addition to the `update_git_loop` task, you can set the environment variable
 `ALLOW_GIT_FETCH_ON_REQUEST=true` if you also want the git repositories to be updated on web request
@@ -144,11 +144,28 @@ To configure Slack alerts
 
 ### Docker Compose
 
+```
+cp secrets.env.example secrets.env
+```
+
+Add secrets to `secrets.env`
+
+`SSH_PRIVATE_KEY` is multi line so cannot be added to `secrets.env`. It must be set in the environment.
+
+```
+export SSH_PRIVATE_KEY=...
+```
+
 Start the application with docker-compose:
 ```
 docker-compose build
 docker-compose up -d web
-docker-compose run update_git_loop
+docker-compose run git-worker
+```
+
+To debug the web service with pry:
+```
+docker-compose run --service-ports web
 ```
 
 ## License

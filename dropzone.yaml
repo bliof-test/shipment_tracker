@@ -1,0 +1,100 @@
+git_volume: &git_volume
+  hostPath: /nfs/shipment_tracker
+  containerPath: /git
+  mode: RW
+
+az_constraint: &az_constraint # Same availability zone as NFS server
+  - az
+  - LIKE
+  - ^a$
+
+vars:
+  production:
+    new_relic_app_id: 7057912
+    git_worker_memory: 4096
+  staging:
+    new_relic_app_id: 225742386
+  uat:
+    new_relic_app_id: 216487708
+  default:
+    git_worker_memory: 1024
+
+deploy_tasks:
+  shipment_tracker:
+    deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
+  marathon:
+    apps:
+      - id: delayed-job
+        instances: 3
+        cpus: 0.25
+        mem: 512
+        args: ["bundle", "exec", "rake", "jobs:work"]
+        constraints:
+          - *az_constraint
+        container:
+          volumes:
+            - *git_volume
+
+      - id: event-worker
+        instances: 1
+        cpus: 0.25
+        mem: 512
+        args: ["bundle", "exec", "rake", "jobs:update_events_loop"]
+        taskKillGracePeriodSeconds: 30
+        constraints:
+          - *az_constraint
+        container:
+          volumes:
+            - *git_volume
+
+      - id: git-worker
+        instances: 1
+        cpus: 0.25
+        mem: {{ git_worker_memory }}
+        args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
+        taskKillGracePeriodSeconds: 30
+        constraints:
+          - *az_constraint
+        container:
+          volumes:
+            - *git_volume
+
+      - id: web
+        instances: 3
+        cpus: 0.25
+        mem: 512
+        args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
+        constraints:
+          - *az_constraint
+          - - hostname
+            - UNIQUE
+        container:
+          volumes:
+            - *git_volume
+          docker:
+            portMappings:
+              # Set PORT_HTTP to a random port number
+              - name: http
+                containerPort: 0
+                hostPort: 0
+        healthChecks:
+          - path: /healthcheck
+            portIndex: 0
+            protocol: HTTP
+            gracePeriodSeconds: 30
+            intervalSeconds: 30
+            timeoutSeconds: 20
+            maxConsecutiveFailures: 3
+        labels:
+          tags: http,public-http
+          overrideTaskName: shipment-tracker
+
+  postgres:
+    migrations_path: /app/docker/run_migrations.sh
+
+  log_deployment:
+    new_relic:
+      app_id: {{ new_relic_app_id }}
+
+  load_secrets:
+    enabled: true
