@@ -12,12 +12,14 @@ vars:
   production:
     new_relic_app_id: 7057912
     git_worker_memory: 4096
+    web_memory: 1024
   staging:
     new_relic_app_id: 225742386
   uat:
     new_relic_app_id: 216487708
   default:
     git_worker_memory: 1024
+    web_memory: 512
 
 deploy_tasks:
   shipment_tracker:
@@ -62,7 +64,7 @@ deploy_tasks:
       - id: web
         instances: 3
         cpus: 0.25
-        mem: 512
+        mem: {{ web_memory }}
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
         constraints:
           - *az_constraint
