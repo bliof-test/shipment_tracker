@@ -23,6 +23,7 @@ vars:
 
 deploy_tasks:
   shipment_tracker:
+    enabled: true
     deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
   marathon:
     apps:
