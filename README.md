@@ -40,13 +40,6 @@ Set up Git hooks, for running tests and linters before pushing to master.
 bundle exec rake git:setup_hooks
 ```
 
-Pull sample data from a remote server (on Heroku - relies on the heroku toolbelt and a suitable git remote):
-
-```
-bundle exec rake heroku:pull
-```
-
-
 ### Enabling access to repositories via SSH
 
 Ensure that `libssh2` is installed and the `rugged` gem is reinstalled. On OSX:
@@ -69,10 +62,10 @@ rails s -p 1201
 
 Note that port 1201 is only needed in development; it's the expected port by auth0 (the service we use for authentication).
 
-You can also use Foreman to start the server and use settings from Heroku:
+You can also use Foreman to start the server
 
 ```
-bin/boot_with_heroku_settings
+foreman start --port 1201
 ```
 
 ### Snapshotting events

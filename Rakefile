@@ -29,25 +29,3 @@ if Rails.env.test?
     task :spec
   end
 end
-
-namespace :heroku do
-  desc 'Replaces local development database with Heroku database'
-  task pull: :environment do
-    fail "Halting to prevent dropping '#{Rails.env}'" unless Rails.env.development?
-
-    STDOUT.print 'This will overwrite your development DB with the Heroku DB. Are you sure? (Y/n) '
-    input = STDIN.gets.strip
-    case input
-    when 'Y', 'y', ''
-      config   = Rails.configuration.database_configuration.fetch(Rails.env)
-      database = config['database']
-
-      ENV['RAILS_ENV'] = 'development'
-      Rake::Task['db:drop'].invoke
-
-      Bundler.with_clean_env { sh "heroku pg:pull DATABASE_URL #{database}" }
-    else
-      STDOUT.puts 'Did not overwrite development DB.'
-    end
-  end
-end
