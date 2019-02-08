@@ -14,6 +14,7 @@ class DeployAlertMailer < ApplicationMailer
     mail(
       from: Rails.configuration.deploy_alert_email,
       to: owner_emails,
+      cc: deployer,
       subject: "Deploy alert for #{@repo} - #{@deployed_at}",
     )
   end
