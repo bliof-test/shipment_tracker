@@ -59,7 +59,10 @@ class RelinkTicketJob < ActiveJob::Base
   end
 
   def commit_on_master?(full_repo_name, sha)
-    git_repo = GitRepositoryLoader.from_rails_config.load(full_repo_name.split('/')[1], update_repo: true)
+    git_repo = GitRepositoryLoader.from_rails_config.load(
+      full_repo_name.split('/')[1],
+      update_repo: Rails.configuration.allow_git_fetch_in_job
+    )
 
     git_repo.commit_on_master?(sha)
   end

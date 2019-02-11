@@ -56,6 +56,7 @@ module ShipmentTracker
     config.git_repository_cache_dir = ENV.fetch('GIT_REPOSITORY_CACHE_DIR', Dir.tmpdir)
     config.data_maintenance_mode = ENV['DATA_MAINTENANCE'] == 'true'
     config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
+    config.allow_git_fetch_in_job = ENV['ALLOW_GIT_FETCH_IN_JOB'] == 'true'
     config.git_worker_interval_seconds = ENV.fetch('GIT_WORKER_INTERVAL_SECONDS', 5).to_i
     config.git_worker_max_threads = ENV.fetch('GIT_WORKER_MAX_THREADS', 16).to_i
 
