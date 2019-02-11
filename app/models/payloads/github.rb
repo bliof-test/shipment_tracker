@@ -22,6 +22,10 @@ module Payloads
       @data.dig('repository', 'html_url')
     end
 
+    def repo_name
+      @data.dig('repository', 'name')
+    end
+
     def full_repo_name
       @data.dig('repository', 'full_name')
     end

@@ -11,7 +11,6 @@ az_constraint: &az_constraint # Same availability zone as NFS server
 vars:
   production:
     new_relic_app_id: 7057912
-    git_worker_memory: 4096
     delayed_job_instances: 3
     delayed_job_memory: 1024
     web_instances: 3
@@ -21,7 +20,6 @@ vars:
   uat:
     new_relic_app_id: 216487708
   default:
-    git_worker_memory: 1024
     delayed_job_instances: 2
     delayed_job_memory: 512
     web_instances: 2
@@ -49,18 +47,6 @@ deploy_tasks:
         cpus: 0.25
         mem: 512
         args: ["bundle", "exec", "rake", "jobs:update_events_loop"]
-        taskKillGracePeriodSeconds: 30
-        constraints:
-          - *az_constraint
-        container:
-          volumes:
-            - *git_volume
-
-      - id: git-worker
-        instances: 1
-        cpus: 0.25
-        mem: {{ git_worker_memory }}
-        args: ["bundle", "exec", "rake", "jobs:update_git_loop"]
         taskKillGracePeriodSeconds: 30
         constraints:
           - *az_constraint

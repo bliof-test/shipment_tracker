@@ -11,9 +11,10 @@ class RelinkTicketJob < ActiveJob::Base
     before_sha = args.delete(:before_sha)
     after_sha = args.delete(:after_sha)
     full_repo_name = args.delete(:full_repo_name)
+    repo_name = args.delete(:repo_name)
     branch_created = args.delete(:branch_created)
 
-    if branch_created || commit_on_master?(full_repo_name, after_sha) ||
+    if branch_created || commit_on_master?(repo_name, after_sha) ||
        relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
@@ -59,8 +60,8 @@ class RelinkTicketJob < ActiveJob::Base
     CommitStatus.new(full_repo_name: full_repo_name, sha: sha).error
   end
 
-  def commit_on_master?(full_repo_name, sha)
-    git_repo = GitRepositoryLoader.from_rails_config.load(full_repo_name.split('/')[1], update_repo: true)
+  def commit_on_master?(repo_name, sha)
+    git_repo = GitRepositoryLoader.from_rails_config.load(repo_name)
 
     git_repo.commit_on_master?(sha)
   end

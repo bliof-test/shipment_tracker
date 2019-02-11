@@ -43,27 +43,6 @@ services:
       test: curl localhost:1201/healthcheck
       interval: 10s
 
-  git-worker:
-    image: shipment_tracker
-    command: bundle exec rake jobs:update_git_loop
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
-      GIT_REPOSITORY_CACHE_DIR: /tmp/git
-      LOG_LEVEL: "${LOG_LEVEL:-debug}"
-      PROTECT_STDOUT: 'true'
-      RAILS_ENV: "${RAILS_ENV:-development}"
-      SSH_PRIVATE_KEY:
-      SSH_USER: git
-    env_file: secrets.env
-    tty: true
-    stdin_open: true
-    user: root
-    depends_on:
-      web:
-        condition: service_healthy
-    volumes:
-      - git:/tmp/git
-
   event-worker:
     image: shipment_tracker
     command: bundle exec rake jobs:update_events_loop
