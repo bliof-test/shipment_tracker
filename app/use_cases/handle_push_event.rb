@@ -37,7 +37,7 @@ class HandlePushEvent
   end
 
   def relink_tickets(payload)
-    RelinkTicketJob.perform_later(
+    RelinkTicketJob.set(queue: payload.repo_name).perform_later(
       full_repo_name: payload.full_repo_name,
       repo_name: payload.repo_name,
       before_sha: payload.before_sha,
