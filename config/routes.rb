@@ -30,4 +30,6 @@ Rails.application.routes.draw do
   resources :tokens, only: %i[index create update destroy]
 
   resources :github_notifications, only: [:create]
+
+  match '/delayed_job' => DelayedJobWeb, anchor: false, via: %i[get post]
 end
