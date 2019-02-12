@@ -14,14 +14,17 @@ class GithubClient
   end
 
   def create_status(repo:, sha:, state:, description:, target_url: nil)
-    client.create_status(
-      repo, sha, state,
-      context: 'shipment-tracker',
-      description: description,
-      target_url: target_url
-    )
-  rescue Octokit::NotFound
-    Rails.logger.warn "Failed to set #{state} commit status for #{repo} at #{sha}"
+    return if Rails.configuration.disable_github_status_update
+    begin
+      client.create_status(
+        repo, sha, state,
+        context: 'shipment-tracker',
+        description: description,
+        target_url: target_url
+      )
+    rescue Octokit::NotFound
+      Rails.logger.warn "Failed to set #{state} commit status for #{repo} at #{sha}"
+    end
   end
 
   def repo_accessible?(uri)

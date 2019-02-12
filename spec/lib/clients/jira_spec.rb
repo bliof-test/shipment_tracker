@@ -35,6 +35,17 @@ RSpec.describe JiraClient do
       JiraClient.post_comment('ISSUE-ID', 'comment text')
     end
 
+    context 'when disabled' do
+      before do
+        allow(Rails.configuration).to receive(:disable_jira_comments).and_return(true)
+      end
+
+      it 'does not post a comment' do
+        expect(comment_mock).not_to receive(:save)
+        JiraClient.post_comment('ISSUE-ID', 'comment text')
+      end
+    end
+
     context 'when posting fails' do
       context 'because of HTTP 404' do
         let(:error) { JIRA::HTTPError.new(response) }
