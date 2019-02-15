@@ -58,6 +58,8 @@ module ShipmentTracker
     config.allow_git_fetch_on_request = ENV['ALLOW_GIT_FETCH_ON_REQUEST'] == 'true'
     config.git_worker_interval_seconds = ENV.fetch('GIT_WORKER_INTERVAL_SECONDS', 5).to_i
     config.git_worker_max_threads = ENV.fetch('GIT_WORKER_MAX_THREADS', 16).to_i
+    config.disable_github_status_update = ENV['DISABLE_GITHUB_STATUS_UPDATE'] == 'true'
+    config.disable_jira_comments = ENV['DISABLE_JIRA_COMMENTS'] == 'true'
 
     config.default_deploy_region = ENV.fetch('DEFAULT_DEPLOY_REGION', 'gb')
 

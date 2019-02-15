@@ -24,6 +24,17 @@ RSpec.describe GithubClient do
         github.create_status(repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo')
       }.to_not raise_error
     end
+
+    context 'when disabled' do
+      before do
+        allow(Rails.configuration).to receive(:disable_github_status_update).and_return(true)
+      end
+
+      it 'does not update the status' do
+        expect_any_instance_of(Octokit::Client).not_to receive(:create_status)
+        github.create_status(repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo')
+      end
+    end
   end
 
   describe '#repo_accessible?' do

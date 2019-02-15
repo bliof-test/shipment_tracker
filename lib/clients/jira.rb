@@ -6,12 +6,15 @@ class JiraClient
   class InvalidKeyError < RuntimeError; end
 
   def self.post_comment(issue_id, comment_msg)
-    issue = get_issue(issue_id)
-    comment = issue.comments.build
-    comment.save('body': comment_msg)
-  rescue JIRA::HTTPError => error
-    raise InvalidKeyError if error.code == '404'
-    raise error
+    return if Rails.configuration.disable_jira_comments
+    begin
+      issue = get_issue(issue_id)
+      comment = issue.comments.build
+      comment.save('body': comment_msg)
+    rescue JIRA::HTTPError => error
+      raise InvalidKeyError if error.code == '404'
+      raise error
+    end
   end
 
   def self.get_issue(id)

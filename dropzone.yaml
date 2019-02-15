@@ -12,6 +12,9 @@ vars:
   production:
     new_relic_app_id: 7057912
     git_worker_memory: 4096
+    delayed_job_instances: 3
+    delayed_job_memory: 1024
+    web_instances: 3
     web_memory: 1024
   staging:
     new_relic_app_id: 225742386
@@ -19,17 +22,21 @@ vars:
     new_relic_app_id: 216487708
   default:
     git_worker_memory: 1024
+    delayed_job_instances: 2
+    delayed_job_memory: 512
+    web_instances: 2
     web_memory: 512
 
 deploy_tasks:
   shipment_tracker:
+    enabled: true
     deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
   marathon:
     apps:
       - id: delayed-job
-        instances: 3
+        instances: {{ delayed_job_instances }}
         cpus: 0.25
-        mem: 512
+        mem: {{ delayed_job_memory }}
         args: ["bundle", "exec", "rake", "jobs:work"]
         constraints:
           - *az_constraint
@@ -62,7 +69,7 @@ deploy_tasks:
             - *git_volume
 
       - id: web
-        instances: 3
+        instances: {{ web_instances }}
         cpus: 0.25
         mem: {{ web_memory }}
         args: ["bundle", "exec", "unicorn", "--config-file", "config/unicorn.rb"]
