@@ -63,6 +63,7 @@ module Repositories
 
     def update_github_status?(event, feature_reviews)
       return false if Rails.configuration.data_maintenance_mode
+
       event.approval? || event.unapproval? || event.transfer? || feature_reviews.present?
     end
 
@@ -74,6 +75,7 @@ module Repositories
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
         next unless repository_location
+
         CommitStatusUpdateJob.perform_later(
           full_repo_name: repository_location.full_repo_name,
           sha: version,

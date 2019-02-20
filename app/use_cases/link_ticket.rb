@@ -22,6 +22,7 @@ class LinkTicket
 
     has_links = tickets.any? { |ticket| ticket.key == args[:jira_key] }
     return fail :duplicate_key, message: duplicate_key_message(args) if has_links
+
     continue(args)
   end
 

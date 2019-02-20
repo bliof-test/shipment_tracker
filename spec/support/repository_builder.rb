@@ -62,7 +62,7 @@ Support::RepositoryBuilder.add_example(
            o-A-B---
           /        \
         -o-------o--C---o
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -86,7 +86,7 @@ Support::RepositoryBuilder.add_example(
           o-A----B
          /        \
         -o-----o----C---o
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -110,7 +110,7 @@ Support::RepositoryBuilder.add_example(
              B--C----E
             /         \
       -o---A-------D---F---G-
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -152,7 +152,7 @@ Support::RepositoryBuilder.add_example(
            o-A-o
           /
         -o-----o
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -172,7 +172,7 @@ Support::RepositoryBuilder.add_example(
            A-B-C-o
           /       \
         -o----o----o
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -194,7 +194,7 @@ Support::RepositoryBuilder.add_example(
            A-B
           /   \
         -o--o--C
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 
@@ -215,7 +215,7 @@ Support::RepositoryBuilder.add_example(
            o-o-o-o-o-A-B
           /             \
         -o-------o-------C
-      EOS
+  EOS
   proc do |repo|
     branch_name = "branch-#{SecureRandom.hex(10)}"
 

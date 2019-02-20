@@ -60,11 +60,13 @@ class FeatureReviewWithStatuses < SimpleDelegator
 
   def release_exception_status
     return unless release_exception
+
     release_exception.approved? ? :success : :failure
   end
 
   def qa_status
     return if qa_submissions.blank?
+
     qa_submissions.last.accepted ? :success : :failure
   end
 

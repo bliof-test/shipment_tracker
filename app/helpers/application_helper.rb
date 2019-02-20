@@ -31,7 +31,7 @@ module ApplicationHelper
     return unless version && github_repo_url
 
     github_commit_url = "#{github_repo_url}/commit/#{version}"
-    link_to short_sha(version), github_commit_url, target: '_blank'
+    link_to short_sha(version), github_commit_url, target: '_blank', rel: 'noopener'
   end
 
   def pull_request_link(commit_subject, github_repo_url)
@@ -39,7 +39,7 @@ module ApplicationHelper
     if pull_request_num
       github_pull_request_url = "#{github_repo_url}/pull/#{pull_request_num}"
       pull_request_text = "pull request ##{pull_request_num}"
-      link = link_to pull_request_text, github_pull_request_url, target: '_blank'
+      link = link_to pull_request_text, github_pull_request_url, target: '_blank', rel: 'noopener'
       commit_subject.sub(pull_request_text, link)
     else
       commit_subject
@@ -58,6 +58,7 @@ module ApplicationHelper
   # Convenience method for working with ActiveModel::Errors.
   def error_message(attribute, message)
     return message.to_sentence if attribute == :base
+
     "#{attribute}: #{message.to_sentence}"
   end
 
@@ -79,6 +80,7 @@ module ApplicationHelper
 
   def icon(classes)
     return unless classes
+
     attributes = { class: classes, aria: { hidden: true } }
     haml_tag('span.glyphicon', '', attributes)
   end
@@ -87,6 +89,7 @@ module ApplicationHelper
 
   def panel_heading_button(button_hash)
     return unless button_hash
+
     haml_tag(:div, class: 'btn-group pull-right') do
       haml_tag(:a, class: 'btn btn-default btn-sm', href: button_hash.fetch(:url)) do
         haml_concat(button_hash.fetch(:text))

@@ -8,7 +8,7 @@ RSpec.describe ApplicationHelper do
     let(:github_repo_url) { 'https://github.com/organization/repo' }
 
     it 'returns a short-sha link to the commit' do
-      link = link_to('abcdefg', "#{github_repo_url}/commit/#{version}", target: '_blank')
+      link = link_to('abcdefg', "#{github_repo_url}/commit/#{version}", target: '_blank', rel: 'noopener')
       expect(helper.commit_link(version, github_repo_url)).to eq(link)
     end
   end
@@ -20,7 +20,7 @@ RSpec.describe ApplicationHelper do
       let(:commit_subject) { 'Merge pull request #123 from organization/repo' }
 
       it 'returns a link to the pull request' do
-        link = link_to('pull request #123', "#{github_repo_url}/pull/123", target: '_blank')
+        link = link_to('pull request #123', "#{github_repo_url}/pull/123", target: '_blank', rel: 'noopener')
         expected = "Merge #{link} from organization/repo"
         expect(helper.pull_request_link(commit_subject, github_repo_url)).to eq(expected)
       end

@@ -16,8 +16,8 @@ module Forms
     end
 
     WHITELIST_DOMAINS = %w[github.com].freeze
-    REPO_GIT_URI_REGEX = %r{\A(git)@([\w\.]+):([\w\.\/\-]+)(\.git)\z}
-    REPO_VCS_URI_REGEX = %r{\A(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?(/[\w\.\-]+)+(\.git)?(/)?\z}
+    REPO_GIT_URI_REGEX = %r{\A(git)@([\w\.]+):([\w\.\/\-]+)(\.git)\z}.freeze
+    REPO_VCS_URI_REGEX = %r{\A(file|git|ssh|http(s)?)(://)([\w\.@/\-~]+)(\:[0-9]{1,5})?(/[\w\.\-]+)+(\.git)?(/)?\z}.freeze
     DEFAULT_SELECTED_TOKENS = %w[circleci deploy].freeze
 
     attr_reader :uri, :token_types

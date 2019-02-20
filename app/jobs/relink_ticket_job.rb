@@ -30,6 +30,7 @@ class RelinkTicketJob < ActiveJob::Base
     linked_tickets.each do |ticket|
       ticket.paths.each do |feature_review_path|
         next unless feature_review_path.include?(before_sha)
+
         link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
     end

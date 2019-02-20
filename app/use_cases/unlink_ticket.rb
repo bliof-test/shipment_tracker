@@ -23,6 +23,7 @@ class UnlinkTicket
 
     has_links = tickets.any? { |ticket| ticket.key == args[:jira_key] }
     return fail :missing_key, message: missing_key_message(args) unless has_links
+
     continue(args)
   end
 

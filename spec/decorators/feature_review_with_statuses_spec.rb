@@ -129,7 +129,7 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:unit_test_results) do
         {
           'frontend' => FactoryBot.build(:unit_test_build, success: true),
-          'backend'  => FactoryBot.build(:unit_test_build, success: true),
+          'backend' => FactoryBot.build(:unit_test_build, success: true),
         }
       end
 
@@ -141,7 +141,7 @@ RSpec.describe FeatureReviewWithStatuses do
         let(:unit_test_results) do
           {
             'frontend' => FactoryBot.build(:unit_test_build, success: true),
-            'backend'  => FactoryBot.build(:unit_test_build),
+            'backend' => FactoryBot.build(:unit_test_build),
           }
         end
 
@@ -155,7 +155,7 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:unit_test_results) do
         {
           'frontend' => FactoryBot.build(:unit_test_build, success: false),
-          'backend'  => FactoryBot.build(:unit_test_build, success: true),
+          'backend' => FactoryBot.build(:unit_test_build, success: true),
         }
       end
 
@@ -170,7 +170,7 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:integration_test_results) do
         {
           'frontend' => FactoryBot.build(:integration_test_build, success: true),
-          'backend'  => FactoryBot.build(:integration_test_build, success: true),
+          'backend' => FactoryBot.build(:integration_test_build, success: true),
         }
       end
 
@@ -182,7 +182,7 @@ RSpec.describe FeatureReviewWithStatuses do
         let(:integration_test_results) do
           {
             'frontend' => FactoryBot.build(:integration_test_build, success: true),
-            'backend'  => FactoryBot.build(:integration_test_build),
+            'backend' => FactoryBot.build(:integration_test_build),
           }
         end
 
@@ -196,7 +196,7 @@ RSpec.describe FeatureReviewWithStatuses do
       let(:integration_test_results) do
         {
           'frontend' => FactoryBot.build(:integration_test_build, success: false),
-          'backend'  => FactoryBot.build(:integration_test_build, success: true),
+          'backend' => FactoryBot.build(:integration_test_build, success: true),
         }
       end
 

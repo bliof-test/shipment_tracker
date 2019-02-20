@@ -20,7 +20,7 @@ module Pages
         page.find('.builds table'),
         icon_translations: {
           'text-success' => 'success',
-          'text-danger'  => 'failed',
+          'text-danger' => 'failed',
           'text-warning' => 'warning',
         },
       ).items
@@ -37,7 +37,7 @@ module Pages
         page.find('.deploys table'),
         icon_translations: {
           'text-success' => 'yes',
-          'text-danger'  => 'no',
+          'text-danger' => 'no',
         },
       ).items
     end

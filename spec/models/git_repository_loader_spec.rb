@@ -98,6 +98,7 @@ RSpec.describe GitRepositoryLoader do
               first = true
               allow_any_instance_of(Rugged::Repository).to receive(:fetch) do
                 fail(Rugged::RepositoryError) unless first
+
                 first = false
                 fail(Rugged::OSError, "failed to create locked file '': File exists")
               end

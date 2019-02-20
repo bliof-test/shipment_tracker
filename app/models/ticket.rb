@@ -20,6 +20,7 @@ class Ticket
 
   def authorisation_status(versions_under_review)
     return 'Requires reapproval' if approved? && !authorised?(versions_under_review)
+
     status
   end
 
@@ -29,8 +30,10 @@ class Ticket
 
   def authorised?(versions_under_review, isae_3402_auditable = false)
     return false if approved_at.nil? || (isae_3402_auditable && authorised_by_developer?)
+
     linked_at = versions_under_review.map { |v| version_timestamps[v] }.compact.min
     return false if linked_at.nil?
+
     approved_at >= linked_at
   end
 
