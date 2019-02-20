@@ -22,9 +22,7 @@ Rails/DynamicFindBy:
   Enabled: false
 
 Metrics/LineLength:
-  Max: 120
-  Exclude:
-    - 'app/decorators/feature_review_with_statuses.rb'
+  Max: 122
 
 Style/SingleLineBlockParams:
   Enabled: false

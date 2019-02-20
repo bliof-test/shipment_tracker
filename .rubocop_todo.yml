@@ -17,7 +17,8 @@ Lint/Void:
 # Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, IgnoredPatterns.
 # URISchemes: http, https
 Metrics/LineLength:
-  Max: 122
+  Exclude:
+    - 'app/decorators/feature_review_with_statuses.rb'
 
 # Offense count: 4
 # Configuration parameters: EnforcedStyleForLeadingUnderscores.
