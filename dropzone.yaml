@@ -31,11 +31,26 @@ deploy_tasks:
     deploy_token: KxT3S6cFjtQ5aVsB3GSVrzQW
   marathon:
     apps:
+      - id: delayed-job-git-worker
+        instances: 1
+        cpus: 0.25
+        mem: {{ delayed_job_memory }}
+        args: ["bundle", "exec", "rake", "jobs:work"]
+        env:
+          QUEUE: update_git_repositories
+        constraints:
+          - *az_constraint
+        container:
+          volumes:
+            - *git_volume
+
       - id: delayed-job
         instances: {{ delayed_job_instances }}
         cpus: 0.25
         mem: {{ delayed_job_memory }}
         args: ["bundle", "exec", "rake", "jobs:work"]
+        env:
+          QUEUE: default
         constraints:
           - *az_constraint
         container:

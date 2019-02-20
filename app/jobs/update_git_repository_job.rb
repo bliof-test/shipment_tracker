@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 class UpdateGitRepositoryJob < ActiveJob::Base
-  queue_as :default
+  queue_as :update_git_repositories
 
   def perform(args)
-    repo_name = args.delete(:repo_name)
-    GitRepositoryLoader.from_rails_config.load(repo_name, update_repo: true)
+    GitRepositoryLoader.from_rails_config.load(args[:repo_name], update_repo: true)
+
+    RelinkTicketJob.perform_later(**args)
   end
 end
