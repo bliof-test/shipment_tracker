@@ -52,9 +52,7 @@ module Repositories
       current_deploy = create_deploy_snapshot!(event)
       Rails.logger.debug "Deploy snapshot: #{current_deploy.inspect}"
 
-      if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
-        audit_deploy(current_deploy)
-      end
+      audit_deploy(current_deploy) if DeployAlert.auditable?(current_deploy) && !Rails.configuration.data_maintenance_mode
     rescue GitRepositoryLoader::NotFound => error
       Honeybadger.notify(error, context: error_context(event))
     end
