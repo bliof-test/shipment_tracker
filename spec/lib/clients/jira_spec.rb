@@ -26,7 +26,7 @@ RSpec.describe JiraClient do
                                                    context_path: anything,
                                                    auth_type: anything,
                                                    read_timeout: anything,
-      ))
+                                                 ))
       JiraClient.post_comment('ISSUE-ID', 'Comment text')
     end
 

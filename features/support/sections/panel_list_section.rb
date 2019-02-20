@@ -4,7 +4,7 @@ module Sections
   class PanelListSection
     DEFAULT_STATUS_CLASSES = {
       'panel-success' => 'success',
-      'panel-danger'  => 'danger',
+      'panel-danger' => 'danger',
       'panel-warning' => 'warning',
     }.freeze
 

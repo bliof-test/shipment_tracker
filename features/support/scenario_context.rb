@@ -187,6 +187,7 @@ module Support
     def commit_from_pretend(pretend_commit)
       value = @repos.values.map { |r| r.commit_for_pretend_version(pretend_commit) }.compact.first
       fail "Could not find '#{pretend_commit}'" unless value
+
       value
     end
 

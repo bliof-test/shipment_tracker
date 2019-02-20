@@ -114,8 +114,8 @@ RSpec.describe Factories::FeatureReviewFactory do
     it 'excludes non-whitelisted query parameters' do
       actual_url = full_url(
         'apps[a]' => '123',
-        'time'    => Time.current.utc.to_s,
-        'some'    => 'non-whitelisted',
+        'time' => Time.current.utc.to_s,
+        'some' => 'non-whitelisted',
       )
       expected_path = '/feature_reviews?apps%5Ba%5D=123'
 
@@ -185,8 +185,8 @@ RSpec.describe Factories::FeatureReviewFactory do
   def full_url(query_values)
     Addressable::URI.new(
       scheme: 'http',
-      host:   'localhost',
-      path:   '/feature_reviews',
+      host: 'localhost',
+      path: '/feature_reviews',
       query_values: query_values,
     ).to_s
   end

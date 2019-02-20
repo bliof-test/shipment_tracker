@@ -18,6 +18,7 @@ Given 'the following tickets are created:' do |tickets_table|
 
     deploys = ticket_row['Deploys']
     next if deploys.empty?
+
     date, time, app_name, deploy_sha = deploys.split
     datetime = Time.zone.parse("#{date} #{time}")
     fr = "FR_#{app_name}"

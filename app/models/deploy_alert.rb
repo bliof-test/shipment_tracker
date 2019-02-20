@@ -15,6 +15,7 @@ class DeployAlert
 
   def self.auditable?(current_deploy)
     return false unless current_deploy.environment == 'production'
+
     GitRepositoryLocation.app_names.include?(current_deploy.app_name)
   end
 
@@ -76,6 +77,7 @@ class DeployAlert
 
     def rollback?
       return false unless previous_deploy
+
       git_repo.ancestor_of?(current_deploy.version, previous_deploy.version)
     end
 

@@ -15,6 +15,7 @@ class GithubClient
 
   def create_status(repo:, sha:, state:, description:, target_url: nil)
     return if Rails.configuration.disable_github_status_update
+
     begin
       client.create_status(
         repo, sha, state,

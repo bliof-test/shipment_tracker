@@ -20,12 +20,14 @@ class ApplicationController < ActionController::Base
 
   def data_maintenance_warning
     return unless Rails.configuration.data_maintenance_mode && request.format.html?
+
     flash.now[:warning] = 'The site is currently undergoing maintenance. '\
                           'Some data may appear out-of-date. ¯\_(ツ)_/¯'
   end
 
   def path_from_url(url_or_path)
     return nil if url_or_path.blank?
+
     URI.parse('http://domain.com').merge(url_or_path).request_uri
   rescue URI::InvalidURIError
     nil

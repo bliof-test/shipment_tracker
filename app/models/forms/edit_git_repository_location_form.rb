@@ -74,7 +74,7 @@ module Forms
     end
 
     def audit_options_list_valid?
-      @audit_options.all? { |option| GitRepositoryLocation::AUDIT_OPTIONS.keys.include?(option) }
+      @audit_options.all? { |option| GitRepositoryLocation::AUDIT_OPTIONS.key?(option) }
     end
 
     def parse_emails(raw_emails)

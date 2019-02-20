@@ -60,7 +60,7 @@ module FeatureReviewsHelper
     link_to(
       jira_key,
       "#{ShipmentTracker::JIRA_EXTERNAL_FQDN}/browse/#{jira_key}",
-      target: '_blank',
+      target: '_blank', rel: 'noopener',
     )
   end
 

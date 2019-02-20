@@ -11,6 +11,7 @@ class AddRepositoryLocation
     validation_form = Forms::RepositoryLocationsForm.new(args[:uri])
 
     return fail :invalid_uri, message: errors_for(validation_form) unless validation_form.valid?
+
     continue(args)
   end
 

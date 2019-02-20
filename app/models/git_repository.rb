@@ -18,6 +18,7 @@ class GitRepository
 
   def exists?(sha, allow_short_sha: false)
     return false unless valid_sha?(sha, allow_short_sha)
+
     Rails.logger.debug("Checking if SHA1 exists in local repository: #{sha}...")
     rugged_repository.exists?(sha).tap do |exists|
       Rails.logger.debug("SHA1 #{sha} #{exists ? 'exists' : 'does not exist'}")
@@ -69,6 +70,7 @@ class GitRepository
     while master
       common_ancestor_oid = rugged_repository.merge_base(master.oid, commit_oid)
       break if common_ancestor_oid != commit_oid
+
       dependent_commits << build_commit(master) if merge_commit_for?(master, commit_oid)
       master = master.parents.first
     end
@@ -130,6 +132,7 @@ class GitRepository
     return false if sha.nil?
     return false if !allow_short_sha && sha.length != 40
     return false unless sha.length.between?(7, 40)
+
     true
   end
 

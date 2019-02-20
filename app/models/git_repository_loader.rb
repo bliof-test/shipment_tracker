@@ -69,6 +69,7 @@ class GitRepositoryLoader
     end
   rescue Rugged::OSError => error
     raise unless fetch_in_progress?(error)
+
     name = git_repository_location.name
     if retries < RETRY_LIMIT
       retries += 1

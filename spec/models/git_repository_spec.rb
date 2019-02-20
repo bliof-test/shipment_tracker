@@ -138,7 +138,7 @@ RSpec.describe GitRepository do
             B--C----E
            /         \
      -o---A-------D---F---G-
-        EOS
+      EOS
     end
 
     it 'returns specified number of recent commits on the main branch' do

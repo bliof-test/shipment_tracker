@@ -24,6 +24,7 @@ class GitRepositoryLocation < ActiveRecord::Base
   def self.github_url_for_app(app_name)
     repo_location = find_by(name: app_name)
     return unless repo_location
+
     url_from_uri(repo_location.uri)
   end
 
