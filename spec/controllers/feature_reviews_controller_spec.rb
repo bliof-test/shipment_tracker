@@ -2,6 +2,18 @@
 
 require 'rails_helper'
 
+RSpec.shared_examples 'links the ticket with correct Jira id' do |ticket_id:|
+  it 'links the ticket' do
+    expect(LinkTicket).to receive(:run).with(
+      jira_key: ticket_id,
+      feature_review_path: feature_review_path(apps_with_versions),
+      root_url: 'http://test.host/',
+    )
+
+    link_ticket
+  end
+end
+
 RSpec.describe FeatureReviewsController do
   context 'when logged out' do
     it { is_expected.to require_authentication_on(:get, :new) }
@@ -192,6 +204,24 @@ RSpec.describe FeatureReviewsController do
         link_ticket
         expect(response).to redirect_to(feature_review_path(apps_with_versions))
       end
+    end
+
+    context 'ticket id has trailing space' do
+      let(:ticket_id) { 'JIRA-123 ' }
+
+      it_behaves_like 'links the ticket with correct Jira id', ticket_id: 'JIRA-123'
+    end
+
+    context 'ticket id has leading space' do
+      let(:ticket_id) { ' JIRA-123' }
+
+      it_behaves_like 'links the ticket with correct Jira id', ticket_id: 'JIRA-123'
+    end
+
+    context 'ticket id has lowercase letters' do
+      let(:ticket_id) { ' jira-123' }
+
+      it_behaves_like 'links the ticket with correct Jira id', ticket_id: 'JIRA-123'
     end
   end
 end
