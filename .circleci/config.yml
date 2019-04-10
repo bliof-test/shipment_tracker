@@ -30,7 +30,9 @@ install_system_packages: &install_system_packages
 
 restore_gems: &restore_gems
   restore_cache:
-    key: shipment_tracker-gems-v2-{{ checksum "Gemfile.lock" }}
+    keys:
+      - shipment_tracker-gems-v2-{{ checksum "Gemfile.lock" }}
+      - shipment_tracker-gems-v2
 
 bundle_install: &bundle_install
   run:
