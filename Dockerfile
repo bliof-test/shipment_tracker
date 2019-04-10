@@ -1,4 +1,4 @@
-FROM quay.io/fundingcircle/alpine-ruby:2.3 as builder
+FROM quay.io/fundingcircle/alpine-ruby:2.5 as builder
 
 RUN apk --no-cache add \
   cmake \
@@ -34,7 +34,7 @@ COPY vendor/assets vendor/assets
 
 RUN DATABASE_URL=postgresql:/// bundle exec rake assets:precompile
 
-FROM quay.io/fundingcircle/alpine-ruby:2.3
+FROM quay.io/fundingcircle/alpine-ruby:2.5
 LABEL maintainer="Funding Circle Engineering <engineering@fundingcircle.com>"
 
 RUN apk --no-cache add \
