@@ -37,6 +37,7 @@ class HandlePushEvent
       before_sha: payload.before_sha,
       after_sha: payload.after_sha,
       branch_created: payload.branch_created?,
+      branch_name: payload.branch_name
     )
 
     continue(payload)

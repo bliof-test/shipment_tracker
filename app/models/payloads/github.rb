@@ -31,7 +31,7 @@ module Payloads
     end
 
     def push_to_master?
-      @data['ref'] == 'refs/heads/master'
+      branch_name == 'master'
     end
 
     def branch_created?
@@ -40,6 +40,10 @@ module Payloads
 
     def branch_deleted?
       @data['deleted']
+    end
+
+    def branch_name
+      @data['ref'].split('/')[2]
     end
 
     private

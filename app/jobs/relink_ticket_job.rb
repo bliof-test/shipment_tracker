@@ -12,9 +12,17 @@ class RelinkTicketJob < ActiveJob::Base
     after_sha = args.delete(:after_sha)
     full_repo_name = args.delete(:full_repo_name)
     branch_created = args.delete(:branch_created)
+    branch_name = args.delete(:branch_name)
 
-    if branch_created || commit_on_master?(full_repo_name, after_sha) ||
-       relink_tickets(before_sha, after_sha).empty?
+    return if commit_on_master?(full_repo_name, after_sha)
+
+    if branch_created
+      if check_branch_for_ticket_and_link?(branch_name, after_sha)
+        post_not_found_status(full_repo_name, after_sha)
+      else
+        post_error_status(full_repo_name, after_sha) 
+      end 
+    elsif relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
       post_error_status(full_repo_name, after_sha)
@@ -36,9 +44,22 @@ class RelinkTicketJob < ActiveJob::Base
     end
   end
 
+  def check_branch_for_ticket_and_link?(branch_name, after_sha)
+    /(?<ticket_key>[A-Z]{2,8}-[1-9][0-9]*)/ =~ branch_name
+    return true if ticket_key.nil?
+
+    url = '' # TODO: build url - "#{Rails.application.routes.url_helpers.feature_reviews}/#{app_name}?#{params.to_query}" ?
+    link_feature_review_to_ticket(ticket_key, url)
+    return !@send_error_status
+  end
+
   def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
-    JiraClient.post_comment(ticket_key, LinkTicket.build_comment(feature_review_url(new_feature_review_path)))
+    link_feature_review_to_ticket(ticket_key, feature_review_url(new_feature_review_path))
+  end
+
+  def link_feature_review_to_ticket(ticket_key, url)
+    JiraClient.post_comment(ticket_key, LinkTicket.build_comment(url))
   rescue JiraClient::InvalidKeyError
     @send_error_status = true
     Rails.logger.warn "Failed to post comment to JIRA ticket #{ticket_key}. Ticket might have been deleted."
