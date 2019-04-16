@@ -14,10 +14,10 @@ class RelinkTicketJob < ActiveJob::Base
     branch_created = args.delete(:branch_created)
     branch_name = args.delete(:branch_name)
 
-    return if commit_on_master?(full_repo_name, after_sha)
+    return if branch_name == 'master'
 
     if branch_created
-      if check_branch_for_ticket_and_link?(branch_name, after_sha)
+      if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
         post_not_found_status(full_repo_name, after_sha)
       else
         post_error_status(full_repo_name, after_sha) 
@@ -44,12 +44,12 @@ class RelinkTicketJob < ActiveJob::Base
     end
   end
 
-  def check_branch_for_ticket_and_link?(branch_name, after_sha)
-    /(?<ticket_key>[A-Z]{2,8}-[1-9][0-9]*)/ =~ branch_name
+  def check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
+    ticket_key = extract_ticket_key_from_branch_name branch_name
+
     return true if ticket_key.nil?
 
-    url = '' # TODO: build url - "#{Rails.application.routes.url_helpers.feature_reviews}/#{app_name}?#{params.to_query}" ?
-    link_feature_review_to_ticket(ticket_key, url)
+    link_feature_review_to_ticket(ticket_key, url_for_repo_and_sha(full_repo_name, after_sha))
     return !@send_error_status
   end
 
@@ -80,9 +80,12 @@ class RelinkTicketJob < ActiveJob::Base
     CommitStatus.new(full_repo_name: full_repo_name, sha: sha).error
   end
 
-  def commit_on_master?(full_repo_name, sha)
-    git_repo = GitRepositoryLoader.from_rails_config.load(full_repo_name.split('/')[1], update_repo: true)
+  def extract_ticket_key_from_branch_name(branch_name)
+    /(?<ticket_key>[A-Z]{2,8}-[1-9][0-9]*)/ =~ branch_name
+    ticket_key
+  end
 
-    git_repo.commit_on_master?(sha)
+  def url_for_repo_and_sha(full_repo_name, sha)
+    CommitStatus.new(full_repo_name: full_repo_name, sha: sha).target_url
   end
 end

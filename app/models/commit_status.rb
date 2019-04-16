@@ -41,6 +41,14 @@ class CommitStatus
     @last_status ||= github.last_status_for(repo: full_repo_name, sha: sha)
   end
 
+  def target_url
+    if decorated_feature_reviews.length == 1
+      url_to_feature_review(decorated_feature_reviews.first.path)
+    else
+      url_to_search_feature_reviews
+    end
+  end
+
   private
 
   def commit
@@ -65,14 +73,6 @@ class CommitStatus
 
   def decorated_feature_reviews_query
     Queries::DecoratedFeatureReviewsQuery.new(short_repo_name, [commit])
-  end
-
-  def target_url
-    if decorated_feature_reviews.length == 1
-      url_to_feature_review(decorated_feature_reviews.first.path)
-    else
-      url_to_search_feature_reviews
-    end
   end
 
   def short_repo_name
