@@ -14,6 +14,14 @@ RSpec.describe RelinkTicketJob do
   let(:expected_url) { "https://localhost/feature_reviews?apps%5B#{repo_name}%5D=#{after_sha}" }
   
   describe '#perform' do
+    let(:ticket_repository) { instance_double(Repositories::TicketRepository) }
+
+    before :each do
+      allow(Repositories::TicketRepository).to receive(:new).and_return(ticket_repository)
+      allow(ticket_repository).to receive(:tickets_for_path).and_return([])
+      allow(ticket_repository).to receive(:tickets_for_versions).and_return([])
+    end
+    
     context 'given a commit on master' do
       let(:args) do
         {
@@ -31,7 +39,6 @@ RSpec.describe RelinkTicketJob do
       end
     end
 
-
     context 'given a push for a newly created branch with a ticket key in the branch name' do
       let(:args) do
         {
@@ -46,7 +53,10 @@ RSpec.describe RelinkTicketJob do
       it 'should link the correct ticket key' do
         expected_comment = "[Feature ready for review|#{expected_url}]"
         expect(JiraClient).to receive(:post_comment).with(ticket_key, expected_comment)
+        stub = stub_request(:post, "https://api.github.com/repos/#{full_repo_name}/statuses/#{after_sha}").
+         to_return(status: 200)
         subject.perform(args)
+        remove_request_stub(stub)
       end
     end
   end
