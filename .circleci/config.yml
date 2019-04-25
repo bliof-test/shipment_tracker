@@ -1,7 +1,7 @@
 version: 2
 
 ruby_image: &ruby_image
-  image: circleci/ruby:2.3.6-node
+  image: circleci/ruby:2.5.3-node
   environment:
     BUNDLE_JOBS: 3
     BUNDLE_RETRY: 3
@@ -30,7 +30,9 @@ install_system_packages: &install_system_packages
 
 restore_gems: &restore_gems
   restore_cache:
-    key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
+    keys:
+      - shipment_tracker-gems-v2-{{ checksum "Gemfile.lock" }}
+      - shipment_tracker-gems-v2
 
 bundle_install: &bundle_install
   run:
@@ -39,7 +41,7 @@ bundle_install: &bundle_install
 
 cache_gems: &cache_gems
   save_cache:
-    key: shipment_tracker-gems-{{ checksum "Gemfile.lock" }}
+    key: shipment_tracker-gems-v2-{{ checksum "Gemfile.lock" }}
     paths:
       - vendor/bundle
 

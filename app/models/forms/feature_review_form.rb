@@ -22,12 +22,10 @@ module Forms
     def valid?
       errors.add(:base, 'Please specify at least one application version') if apps.empty?
       apps.each do |repo_name, version|
-        begin
-          repo = git_repository_loader.load(repo_name.to_s)
-          errors.add(repo_name, "#{version} does not exist or is too short") unless repo.exists?(version)
-        rescue GitRepositoryLoader::NotFound
-          errors.add(repo_name, 'does not exist')
-        end
+        repo = git_repository_loader.load(repo_name.to_s)
+        errors.add(repo_name, "#{version} does not exist or is too short") unless repo.exists?(version)
+      rescue GitRepositoryLoader::NotFound
+        errors.add(repo_name, 'does not exist')
       end
       errors.empty?
     end
