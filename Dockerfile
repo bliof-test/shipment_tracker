@@ -1,13 +1,9 @@
-FROM quay.io/fundingcircle/alpine-ruby:2.5 as builder
+FROM quay.io/fundingcircle/alpine-ruby-builder:2.5 as builder
 
 RUN apk --no-cache add \
   cmake \
-  linux-headers \
   nodejs \
-  postgresql-dev \
   sqlite-dev \
-  tzdata \
-  zlib-dev \
  && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.8/main \
   libgit2-dev \
   libssh2-dev
