@@ -48,7 +48,7 @@ RSpec.configure do |config|
     mocks.verify_partial_doubles = true
   end
 
-  config.disable_monkey_patching!
+  # config.disable_monkey_patching!
 
   config.default_formatter = 'doc' if config.files_to_run.one?
 

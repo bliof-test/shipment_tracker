@@ -1,7 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'rails', '~> 4.2.11'
-
+gem 'rack', '1.6.11'
 gem 'addressable', require: 'addressable/uri'
 gem 'bootstrap-sass'
 gem 'delayed_job_active_record'
