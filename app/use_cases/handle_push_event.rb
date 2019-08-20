@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'git_repository_location'
-require 'relink_ticket_job'
+require 'update_ticket_links_job'
 
 class HandlePushEvent
   include SolidUseCase

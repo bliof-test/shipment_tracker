@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-RSpec.describe RelinkTicketJob do
+RSpec.describe UpdateTicketLinksJob do
   let(:org_name) { 'acme' }
   let(:repo_name) { 'awesome-app' }
   let(:full_repo_name) { "#{org_name}/#{repo_name}" }
