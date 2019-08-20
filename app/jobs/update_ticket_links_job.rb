@@ -17,11 +17,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
     return if branch_name == 'master'
 
     if branch_created
-      if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
-        post_not_found_status(full_repo_name, after_sha)
-      else
-        post_error_status(full_repo_name, after_sha) 
-      end 
+      check_and_link_new_branch(full_repo_name, branch_name, after_sha)
     elsif relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
@@ -31,6 +27,14 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
   private
 
+  def check_and_link_new_branch(full_repo_name, branch_name, after_sha)
+    if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
+      post_not_found_status(full_repo_name, after_sha)
+    else
+      post_error_status(full_repo_name, after_sha)
+    end
+  end
+
   def relink_tickets(before_sha, after_sha)
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
@@ -39,7 +43,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
       ticket.paths.each do |feature_review_path|
         next unless feature_review_path.include?(before_sha)
 
-        link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
+        update_path_and_link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
     end
   end
@@ -50,10 +54,10 @@ class UpdateTicketLinksJob < ActiveJob::Base
     return true if ticket_key.nil?
 
     link_feature_review_to_ticket(ticket_key, url_for_repo_and_sha(full_repo_name, after_sha))
-    return !@send_error_status
+    !@send_error_status
   end
 
-  def link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
+  def update_path_and_link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
     new_feature_review_path = old_feature_review_path.sub(before_sha, after_sha)
     link_feature_review_to_ticket(ticket_key, feature_review_url(new_feature_review_path))
   end
