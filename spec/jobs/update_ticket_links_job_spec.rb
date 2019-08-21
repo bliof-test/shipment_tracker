@@ -28,7 +28,7 @@ RSpec.describe UpdateTicketLinksJob do
           full_repo_name: full_repo_name,
           before_sha: before_sha,
           after_sha: after_sha,
-          branch_created: true,
+          branch_created: false,
           branch_name: 'master',
         }
       end
