@@ -14,11 +14,9 @@ class UpdateTicketLinksJob < ActiveJob::Base
     branch_created = args.delete(:branch_created)
     branch_name = args.delete(:branch_name)
 
-    return if branch_name == 'master'
-
     if branch_created
       check_and_link_new_branch(full_repo_name, branch_name, after_sha)
-    elsif relink_tickets(before_sha, after_sha).empty?
+    elsif commit_on_master?(full_repo_name, after_sha) || relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
       post_error_status(full_repo_name, after_sha)
@@ -91,5 +89,11 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
   def url_for_repo_and_sha(full_repo_name, sha)
     CommitStatus.new(full_repo_name: full_repo_name, sha: sha).target_url
+  end
+
+  def commit_on_master?(full_repo_name, sha)
+    git_repo = GitRepositoryLoader.from_rails_config.load(full_repo_name.split('/')[1], update_repo: true)
+
+    git_repo.commit_on_master?(sha)
   end
 end
