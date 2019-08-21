@@ -164,7 +164,7 @@ RSpec.describe HandlePushEvent do
     end
 
     context 'when commit is already on master' do
-      let(:on_master) { true }
+      let(:payload_data) { default_payload_data.merge('ref' => 'refs/heads/master') }
       let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       before do
