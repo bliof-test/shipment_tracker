@@ -25,14 +25,6 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
   private
 
-  def check_and_link_new_branch(full_repo_name, branch_name, after_sha)
-    if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
-      post_not_found_status(full_repo_name, after_sha)
-    else
-      post_error_status(full_repo_name, after_sha)
-    end
-  end
-
   def relink_tickets(before_sha, after_sha)
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
@@ -43,6 +35,14 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
         update_path_and_link_feature_review_to_ticket(ticket.key, feature_review_path, before_sha, after_sha)
       end
+    end
+  end
+
+  def check_and_link_new_branch(full_repo_name, branch_name, after_sha)
+    if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
+      post_not_found_status(full_repo_name, after_sha)
+    else
+      post_error_status(full_repo_name, after_sha)
     end
   end
 
