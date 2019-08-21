@@ -14,9 +14,11 @@ class UpdateTicketLinksJob < ActiveJob::Base
     branch_created = args.delete(:branch_created)
     branch_name = args.delete(:branch_name)
 
-    if branch_created
+    if branch_name == 'master'
+      post_not_found_status(full_repo_name, after_sha)
+    elsif branch_created
       check_and_link_new_branch(full_repo_name, branch_name, after_sha)
-    elsif branch_name == 'master' || relink_tickets(before_sha, after_sha).empty?
+    elsif relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
       post_error_status(full_repo_name, after_sha)
