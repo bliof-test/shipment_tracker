@@ -22,23 +22,6 @@ RSpec.describe UpdateTicketLinksJob do
       allow(ticket_repository).to receive(:tickets_for_versions).and_return([])
     end
 
-    context 'given a commit on master' do
-      let(:args) do
-        {
-          full_repo_name: full_repo_name,
-          before_sha: before_sha,
-          after_sha: after_sha,
-          branch_created: false,
-          branch_name: 'master',
-        }
-      end
-
-      it 'should not link any tickets' do
-        expect(JiraClient).not_to receive(:post_comment)
-        subject.perform(args)
-      end
-    end
-
     context 'given a push for a newly created branch with a ticket key in the branch name' do
       let(:args) do
         {
