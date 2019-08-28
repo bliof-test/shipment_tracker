@@ -27,7 +27,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
   private
 
-  JIRA_TICKET_REGEX = %r{\A(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)\z}.freeze
+  JIRA_TICKET_REGEX = /\A(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)\z/.freeze
 
   def relink_tickets(before_sha, after_sha)
     ticket_repo = Repositories::TicketRepository.new
