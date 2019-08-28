@@ -27,7 +27,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
 
   private
 
-  JIRA_TICKET_REGEX = /\A(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)\z/.freeze
+  JIRA_TICKET_REGEX = /(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)/.freeze
 
   def relink_tickets(before_sha, after_sha)
     ticket_repo = Repositories::TicketRepository.new
@@ -87,9 +87,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
   end
 
   def extract_ticket_key_from_branch_name(branch_name)
-    if matches = branch_name.match(JIRA_TICKET_REGEX)
-      matches[:ticket_key]
-    end
+    matches[:ticket_key] if matches = branch_name.match(JIRA_TICKET_REGEX)
   end
 
   def url_for_repo_and_sha(full_repo_name, sha)
