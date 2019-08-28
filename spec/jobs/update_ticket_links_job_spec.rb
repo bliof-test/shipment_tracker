@@ -33,7 +33,7 @@ RSpec.describe UpdateTicketLinksJob do
         }
       end
 
-      it 'should link the correct ticket key' do
+      it 'links the correct ticket key' do
         expected_comment = "[Feature ready for review|#{expected_url}]"
         expect(JiraClient).to receive(:post_comment).with(ticket_key, expected_comment)
         stub = stub_request(:post, "https://api.github.com/repos/#{full_repo_name}/statuses/#{after_sha}")
@@ -46,14 +46,14 @@ RSpec.describe UpdateTicketLinksJob do
 
   describe '#extract_ticket_key_from_branch_name' do
     context 'given a branch name that contains a JIRA ticket key' do
-      it 'should find the ticket key' do
+      it 'finds the ticket key' do
         extracted_key = subject.send(:extract_ticket_key_from_branch_name, branch_with_ticket_key)
         expect(extracted_key).to eq ticket_key
       end
     end
 
     context 'given a branch name that does not contain a JIRA ticket key' do
-      it 'should find the ticket key' do
+      it 'does not find a ticket key' do
         extracted_key = subject.send(:extract_ticket_key_from_branch_name, branch_without_ticket_key)
         expect(extracted_key).to eq nil
       end
@@ -62,7 +62,7 @@ RSpec.describe UpdateTicketLinksJob do
 
   describe '#url_for_repo_and_sha' do
     context 'given a valid repo name and sha' do
-      it 'should return a valid feature release URL' do
+      it 'returns a valid feature release URL' do
         url = subject.send(:url_for_repo_and_sha, full_repo_name, after_sha)
         expect(url).to eq "https://localhost/feature_reviews?apps%5B#{repo_name}%5D=#{after_sha}"
       end
@@ -71,7 +71,7 @@ RSpec.describe UpdateTicketLinksJob do
 
   describe '#check_branch_for_ticket_and_link?' do
     context 'given a branch name with out a ticket key' do
-      it 'should return true' do
+      it 'returns true' do
         result = subject.send(:check_branch_for_ticket_and_link?, '', branch_without_ticket_key, '')
         expect(result).to eq true
       end
