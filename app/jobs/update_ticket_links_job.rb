@@ -87,8 +87,9 @@ class UpdateTicketLinksJob < ActiveJob::Base
   end
 
   def extract_ticket_key_from_branch_name(branch_name)
-    JIRA_TICKET_REGEX =~ branch_name
-    ticket_key
+    if matches = branch_name.match(JIRA_TICKET_REGEX)
+      matches[:ticket_key]
+    end
   end
 
   def url_for_repo_and_sha(full_repo_name, sha)
