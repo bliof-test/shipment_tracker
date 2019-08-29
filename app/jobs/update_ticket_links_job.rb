@@ -51,7 +51,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
   end
 
   def check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
-    ticket_key = extract_ticket_key_from_branch_name branch_name
+    ticket_key = extract_ticket_key_from_branch_name(branch_name)
 
     return true if ticket_key.nil?
 
