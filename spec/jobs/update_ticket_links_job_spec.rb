@@ -27,7 +27,7 @@ RSpec.describe UpdateTicketLinksJob do
           before_sha: '123456789',
           after_sha: '987654321',
           branch_created: true,
-          branch_name: branch_with_ticket_key,
+          branch_name: "#{ticket_key}-super-feature",
         }
       end
 
@@ -46,21 +46,21 @@ RSpec.describe UpdateTicketLinksJob do
     context 'given a branch name that contains a JIRA ticket key at the start' do
       it 'finds the ticket key' do
         extracted_key = subject.send(:extract_ticket_key_from_branch_name, "#{ticket_key}-some-feature")
-        expect(extracted_key).to eq ticket_key
+        expect(extracted_key).to eq(ticket_key)
       end
     end
 
     context 'given a branch name that contains a JIRA ticket key in the middle' do
       it 'does not find a ticket key' do
         extracted_key = subject.send(:extract_ticket_key_from_branch_name, "some-#{ticket_key}-feature")
-        expect(extracted_key).to ticket_key
+        expect(extracted_key).to eq(ticket_key)
       end
     end
 
     context 'given a branch name that contains a JIRA ticket key at the end' do
       it 'does not find a ticket key' do
         extracted_key = subject.send(:extract_ticket_key_from_branch_name, "some-feature-#{ticket_key}")
-        expect(extracted_key).to ticket_key
+        expect(extracted_key).to eq(ticket_key)
       end
     end
 
