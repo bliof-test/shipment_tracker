@@ -19,7 +19,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
     if branch_name == 'master'
       post_not_found_status(full_repo_name, after_sha)
     elsif branch_created
-      check_branch_nane_for_ticket_and_link(full_repo_name, branch_name, after_sha)
+      check_branch_name_for_ticket_and_link(full_repo_name, branch_name, after_sha)
     elsif relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
@@ -42,10 +42,13 @@ class UpdateTicketLinksJob < ActiveJob::Base
     end
   end
 
-  def check_branch_nane_for_ticket_and_link(full_repo_name, branch_name, after_sha)
+  def check_branch_name_for_ticket_and_link(full_repo_name, branch_name, after_sha)
     ticket_key = extract_ticket_key_from_branch_name(branch_name)
-
-    post_not_found_status(full_repo_name, after_sha) && return unless ticket_key
+    
+    if ticket_key.nil?
+      post_not_found_status(full_repo_name, after_sha)
+      return
+    end
 
     link_feature_review_to_ticket(ticket_key, url_for_repo_and_sha(full_repo_name, after_sha))
     post_error_status(full_repo_name, after_sha) if @send_error_status
