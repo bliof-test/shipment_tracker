@@ -119,6 +119,12 @@ RSpec.describe HandlePushEvent do
         result = HandlePushEvent.run(payload)
         expect(result).to fail_with(:protected_branch)
       end
+
+      it 'does not re-link' do
+        expect(JiraClient).not_to receive(:post_comment)
+
+        HandlePushEvent.run(payload)
+      end
     end
   end
 
@@ -140,31 +146,6 @@ RSpec.describe HandlePushEvent do
 
     context 'when new branch created' do
       let(:payload_data) { default_payload_data.merge('created' => true) }
-      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
-
-      before do
-        allow_any_instance_of(CommitStatus).to receive(:not_found)
-      end
-
-      it 'does not re-link' do
-        expect(JiraClient).not_to receive(:post_comment)
-
-        HandlePushEvent.run(payload)
-      end
-
-      it 'posts not found status' do
-        allow(CommitStatus).to receive(:new).with(
-          full_repo_name: 'owner/repo_name',
-          sha: 'def1234',
-        ).and_return(commit_status)
-        expect(commit_status).to receive(:not_found)
-
-        HandlePushEvent.run(payload)
-      end
-    end
-
-    context 'when commit is already on master' do
-      let(:on_master) { true }
       let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       before do

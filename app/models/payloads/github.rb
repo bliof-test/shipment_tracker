@@ -2,6 +2,8 @@
 
 module Payloads
   class Github
+    BRANCH_NAME_REGEX = %r{^refs\/[.&[^\/]]+\/(?<branch_name>.+)$}.freeze
+
     def initialize(data)
       @data = data
     end
@@ -31,7 +33,7 @@ module Payloads
     end
 
     def push_to_master?
-      @data['ref'] == 'refs/heads/master'
+      branch_name == 'master'
     end
 
     def branch_created?
@@ -40,6 +42,11 @@ module Payloads
 
     def branch_deleted?
       @data['deleted']
+    end
+
+    def branch_name
+      matches = @data['ref'].match(BRANCH_NAME_REGEX)
+      matches[:branch_name] if matches
     end
 
     private
