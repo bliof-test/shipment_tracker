@@ -5,6 +5,8 @@ require 'honeybadger'
 require 'repositories/ticket_repository'
 
 class UpdateTicketLinksJob < ActiveJob::Base
+  JIRA_TICKET_REGEX = /(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)/.freeze
+  
   queue_as :default
 
   def perform(args)
@@ -26,8 +28,6 @@ class UpdateTicketLinksJob < ActiveJob::Base
   end
 
   private
-
-  JIRA_TICKET_REGEX = /(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)/.freeze
 
   def relink_tickets(before_sha, after_sha)
     ticket_repo = Repositories::TicketRepository.new
