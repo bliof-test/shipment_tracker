@@ -6,7 +6,7 @@ require 'repositories/ticket_repository'
 
 class UpdateTicketLinksJob < ActiveJob::Base
   JIRA_TICKET_REGEX = /(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)/.freeze
-  
+
   queue_as :default
 
   def perform(args)
@@ -19,7 +19,7 @@ class UpdateTicketLinksJob < ActiveJob::Base
     if branch_name == 'master'
       post_not_found_status(full_repo_name, after_sha)
     elsif branch_created
-      check_and_link_new_branch(full_repo_name, branch_name, after_sha)
+      check_branch_nane_for_ticket_and_link(full_repo_name, branch_name, after_sha)
     elsif relink_tickets(before_sha, after_sha).empty?
       post_not_found_status(full_repo_name, after_sha)
     elsif @send_error_status
@@ -42,21 +42,13 @@ class UpdateTicketLinksJob < ActiveJob::Base
     end
   end
 
-  def check_and_link_new_branch(full_repo_name, branch_name, after_sha)
-    if check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
-      post_not_found_status(full_repo_name, after_sha)
-    else
-      post_error_status(full_repo_name, after_sha)
-    end
-  end
-
-  def check_branch_for_ticket_and_link?(full_repo_name, branch_name, after_sha)
+  def check_branch_nane_for_ticket_and_link(full_repo_name, branch_name, after_sha)
     ticket_key = extract_ticket_key_from_branch_name(branch_name)
 
-    return true if ticket_key.nil?
+    post_not_found_status(full_repo_name, after_sha) && return unless ticket_key
 
     link_feature_review_to_ticket(ticket_key, url_for_repo_and_sha(full_repo_name, after_sha))
-    !@send_error_status
+    post_error_status(full_repo_name, after_sha) if @send_error_status
   end
 
   def update_path_and_link_feature_review_to_ticket(ticket_key, old_feature_review_path, before_sha, after_sha)
