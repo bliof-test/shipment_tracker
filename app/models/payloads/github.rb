@@ -2,6 +2,8 @@
 
 module Payloads
   class Github
+    BRANCH_NAME_REGEX = /^ref\/.+\/(?<branch_name>.+)$/.freeze
+
     def initialize(data)
       @data = data
     end
@@ -43,7 +45,8 @@ module Payloads
     end
 
     def branch_name
-      @data['ref'].split('/')[2]
+      matches = @data['ref'].match(BRANCH_NAME_REGEX)
+      matches[:branch_name] if matches
     end
 
     private
