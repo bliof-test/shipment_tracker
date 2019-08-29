@@ -2,7 +2,7 @@
 
 module Payloads
   class Github
-    BRANCH_NAME_REGEX = /^ref\/.+\/(?<branch_name>.+)$/.freeze
+    BRANCH_NAME_REGEX = %r{^ref\/.+\/(?<branch_name>.+)$}.freeze
 
     def initialize(data)
       @data = data
