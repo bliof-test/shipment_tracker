@@ -8,9 +8,7 @@ RSpec.describe UpdateTicketLinksJob do
   let(:full_repo_name) { "#{org_name}/#{repo_name}" }
   let(:before_sha) { '123456789' }
   let(:after_sha) { '987654321' }
-  let(:branch_without_ticket_key) { 'km-some-feature' }
   let(:ticket_key) { 'MOB-123' }
-  let(:branch_with_ticket_key) { "km-some-feature-#{ticket_key}" }
   let(:expected_url) { "https://localhost/feature_reviews?apps%5B#{repo_name}%5D=#{after_sha}" }
 
   describe '#perform' do
@@ -45,17 +43,40 @@ RSpec.describe UpdateTicketLinksJob do
   end
 
   describe '#extract_ticket_key_from_branch_name' do
-    context 'given a branch name that contains a JIRA ticket key' do
+    context 'given a branch name that contains a JIRA ticket key at the start' do
       it 'finds the ticket key' do
-        extracted_key = subject.send(:extract_ticket_key_from_branch_name, branch_with_ticket_key)
+        extracted_key = subject.send(:extract_ticket_key_from_branch_name, "#{ticket_key}-some-feature")
         expect(extracted_key).to eq ticket_key
+      end
+    end
+
+    context 'given a branch name that contains a JIRA ticket key in the middle' do
+      it 'does not find a ticket key' do
+        extracted_key = subject.send(:extract_ticket_key_from_branch_name, "some-#{ticket_key}-feature"))
+        expect(extracted_key).to ticket_key
+      end
+    end
+
+    context 'given a branch name that contains a JIRA ticket key at the end' do
+      it 'does not find a ticket key' do
+        extracted_key = subject.send(:extract_ticket_key_from_branch_name, "some-feature-#{ticket_key}"))
+        expect(extracted_key).to ticket_key
+      end
+    end
+
+    context 'given a branch name that has a lower case ticket key' do
+      it 'does not find a ticket key' do
+        extracted_key = subject.send(:extract_ticket_key_from_branch_name, ticket_key.downcase)
+
+        # Case check allows devs to be more explicit about what's a key and what's not
+        expect(extracted_key).to be_nil
       end
     end
 
     context 'given a branch name that does not contain a JIRA ticket key' do
       it 'does not find a ticket key' do
-        extracted_key = subject.send(:extract_ticket_key_from_branch_name, branch_without_ticket_key)
-        expect(extracted_key).to eq nil
+        extracted_key = subject.send(:extract_ticket_key_from_branch_name, 'super-duper-feature')
+        expect(extracted_key).to be_nil
       end
     end
   end
@@ -65,15 +86,6 @@ RSpec.describe UpdateTicketLinksJob do
       it 'returns a valid feature release URL' do
         url = subject.send(:url_for_repo_and_sha, full_repo_name, after_sha)
         expect(url).to eq "https://localhost/feature_reviews?apps%5B#{repo_name}%5D=#{after_sha}"
-      end
-    end
-  end
-
-  describe '#check_branch_for_ticket_and_link?' do
-    context 'given a branch name with out a ticket key' do
-      it 'returns true' do
-        result = subject.send(:check_branch_for_ticket_and_link?, '', branch_without_ticket_key, '')
-        expect(result).to eq true
       end
     end
   end
