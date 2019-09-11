@@ -110,5 +110,17 @@ RSpec.describe GithubClient do
 
       expect { github.last_status_for(repo: 'owner/repo', sha: 'abc123') }.to_not raise_error
     end
+
+    context 'when the response has no statuses' do
+      let(:combined_status) { {} }
+
+      it 'returns nil' do
+        expect_any_instance_of(Octokit::Client).to receive(:combined_status).with(
+          'owner/repo', 'abc123'
+        ).and_return(combined_status)
+
+        expect(github.last_status_for(repo: 'owner/repo', sha: 'abc123')).to be_nil
+      end
+    end
   end
 end
