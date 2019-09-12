@@ -27,6 +27,9 @@ vars:
     web_instances: 2
     web_memory: 512
 
+vault:
+  path: shipment_tracker/secrets
+
 deploy_tasks:
   shipment_tracker:
     enabled: true
