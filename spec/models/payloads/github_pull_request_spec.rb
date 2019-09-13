@@ -252,4 +252,23 @@ RSpec.describe Payloads::GithubPullRequest do
       end
     end
   end
+
+  describe '#title' do
+    context 'with title data' do
+      it 'returns the title' do
+        data = { 'pull_request' => { 'title' => 'A Cool Title' } }
+        payload = described_class.new(data)
+
+        expect(payload.title).to eq('A Cool Title')
+      end
+    end
+
+    context 'with no title data' do
+      it 'returns nil' do
+        payload = described_class.new('pull_request' => { 'some_key' => 'some_value' })
+
+        expect(payload.title).to be_nil
+      end
+    end
+  end
 end

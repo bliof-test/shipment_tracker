@@ -8,8 +8,18 @@ RSpec.describe HandlePullRequestCreatedEvent do
   let(:payload_data) {
     {
       'pull_request' => {
-        'head' => { 'sha' => 'def1234', 'ref' => branch_name },
-        'base' => { 'ref' => base_branch, 'repo' => { 'full_name' => 'owner/repo_name' } },
+        'head' => {
+          'sha' => 'def1234',
+          'ref' => branch_name,
+        },
+        'base' => {
+          'ref' => base_branch,
+          'repo' => {
+            'full_name' => 'owner/repo_name',
+            'name' => 'repo_name',
+          },
+        },
+        'title' => 'A Cool Title',
       },
       'before' => 'abc1234',
       'after' => 'def1234',
@@ -55,6 +65,21 @@ RSpec.describe HandlePullRequestCreatedEvent do
         sha: payload.after_sha,
       ).and_return(commit_status)
       expect(commit_status).to receive(:not_found)
+
+      described_class.run(payload)
+    end
+  end
+
+  describe 'auto-linking' do
+    it 'attempts to automatically link a Jira ticket' do
+      allow_any_instance_of(CommitStatus).to receive(:not_found)
+
+      expect(AutoLinkTicketJob).to receive(:perform_later).with(
+        repo_name: payload.repo_name,
+        head_sha: payload.head_sha,
+        branch_name: payload.branch_name,
+        title: payload.title,
+      )
 
       described_class.run(payload)
     end
