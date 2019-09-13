@@ -3,14 +3,13 @@
 require 'git_repository_location'
 require 'relink_ticket_job'
 
-class HandlePushEvent
+class HandlePullRequestUpdatedEvent
   include SolidUseCase
 
   steps :validate, :update_remote_head, :reset_commit_status, :relink_tickets
 
   def validate(payload)
-    return fail :branch_deleted if payload.branch_deleted?
-    return fail :annotated_tag if payload.push_annotated_tag?
+    return fail :base_not_master unless payload.base_branch_master?
     return fail :repo_not_under_audit unless GitRepositoryLocation.repo_tracked?(payload.full_repo_name)
 
     continue(payload)
@@ -25,8 +24,6 @@ class HandlePushEvent
   end
 
   def reset_commit_status(payload)
-    return fail :protected_branch if payload.push_to_master?
-
     CommitStatusResetJob.perform_later(
       full_repo_name: payload.full_repo_name,
       sha: payload.after_sha,
@@ -40,7 +37,6 @@ class HandlePushEvent
       full_repo_name: payload.full_repo_name,
       before_sha: payload.before_sha,
       after_sha: payload.after_sha,
-      branch_created: payload.branch_created?,
     )
 
     continue(payload)
