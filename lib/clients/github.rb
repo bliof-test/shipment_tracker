@@ -9,6 +9,15 @@ Octokit.middleware = Faraday::RackBuilder.new { |builder|
 }
 
 class GithubClient
+  class RateLimitError < RuntimeError
+    attr_accessor :rate_limit
+
+    def initialize(message, rate_limit)
+      super(message)
+      self.rate_limit = rate_limit
+    end
+  end
+
   def initialize(token)
     @token = token
   end
@@ -23,8 +32,12 @@ class GithubClient
         description: description,
         target_url: target_url
       )
-    rescue Octokit::NotFound
-      Rails.logger.warn "Failed to set #{state} commit status for #{repo} at #{sha}"
+    rescue Octokit::ClientError => e
+      Rails.logger.warn "Failed to set #{state} commit status for #{repo} at #{sha}: #{e.class.name} #{e.message}"
+
+      if e.class == Octokit::TooManyRequests
+        raise RateLimitError.new("Failed to set #{state} commit status for #{repo} at #{sha}", client.rate_limit)
+      end
     end
   end
 
@@ -42,19 +55,14 @@ class GithubClient
 
   def last_status_for(repo:, sha:)
     response = client.combined_status(repo, sha)
-  rescue Octokit::Error => e
+  rescue Octokit::ClientError => e
     Rails.logger.warn "Failed to fetch status for #{repo} at #{sha}: #{e.class.name} #{e.message}"
-    nil
-  else
-    if response[:statuses]
-      response[:statuses].reverse.find do |status|
-        status[:context] == 'shipment-tracker'
-      end
-    else
-      Rails.logger.warn "Failed to fetch status for #{repo} at #{sha}"
-      Rails.logger.debug "Combined status response for #{repo} at #{sha}: #{response}"
-      nil
+
+    if e.class == Octokit::TooManyRequests
+      raise RateLimitError.new("Failed to fetch status for #{repo} at #{sha}", client.rate_limit)
     end
+  else
+    response[:statuses]&.reverse&.find { |status| status[:context] == 'shipment-tracker' }
   end
 
   private

@@ -35,6 +35,22 @@ RSpec.describe GithubClient do
         github.create_status(repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo')
       end
     end
+
+    context 'when the GitHub API rate limit is reached' do
+      let(:rate_limit) { instance_double(Octokit::RateLimit) }
+
+      it 'raises a rate limit exception with the rate limit data' do
+        expect_any_instance_of(Octokit::Client).to receive(:create_status).and_raise(Octokit::TooManyRequests)
+        expect_any_instance_of(Octokit::Client).to receive(:rate_limit).and_return(rate_limit)
+
+        expect {
+          github.create_status(repo: 'owner/repo', sha: 'abc123', state: 'success', description: 'foo')
+        }.to raise_error { |error|
+          expect(error.message).to eq 'Failed to set success commit status for owner/repo at abc123'
+          expect(error.rate_limit).to eq rate_limit
+        }
+      end
+    end
   end
 
   describe '#repo_accessible?' do
