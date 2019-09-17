@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'git_repository_location'
-require 'update_ticket_links_job'
+require 'relink_ticket_job'
 
 class HandlePushEvent
   include SolidUseCase
@@ -32,12 +32,11 @@ class HandlePushEvent
   end
 
   def relink_tickets(payload)
-    UpdateTicketLinksJob.perform_later(
+    RelinkTicketJob.perform_later(
       full_repo_name: payload.full_repo_name,
       before_sha: payload.before_sha,
       after_sha: payload.after_sha,
       branch_created: payload.branch_created?,
-      branch_name: payload.branch_name,
     )
 
     continue(payload)

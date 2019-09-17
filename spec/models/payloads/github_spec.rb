@@ -157,22 +157,4 @@ RSpec.describe Payloads::Github do
       end
     end
   end
-
-  describe '#branch_name' do
-    it 'returns the branch name' do
-      branch_name = 'super-feature'
-      payload = Payloads::Github.new('ref' => "refs/heads/#{branch_name}")
-
-      expect(payload.branch_name).to eq(branch_name)
-    end
-
-    context('given a branch name containing slashes') do
-      it 'returns the branch name' do
-        branch_name = 'epic-name/super-feature'
-        payload = Payloads::Github.new('ref' => "refs/heads/#{branch_name}")
-
-        expect(payload.branch_name).to eq(branch_name)
-      end
-    end
-  end
 end
