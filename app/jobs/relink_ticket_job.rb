@@ -52,11 +52,19 @@ class RelinkTicketJob < ActiveJob::Base
   end
 
   def post_not_found_status(full_repo_name, sha)
-    CommitStatus.new(full_repo_name: full_repo_name, sha: sha).not_found
+    CommitStatusUpdateJob.perform_later(
+      full_repo_name: full_repo_name,
+      sha: sha,
+      method: 'not_found',
+    )
   end
 
   def post_error_status(full_repo_name, sha)
-    CommitStatus.new(full_repo_name: full_repo_name, sha: sha).error
+    CommitStatusUpdateJob.perform_later(
+      full_repo_name: full_repo_name,
+      sha: sha,
+      method: 'error',
+    )
   end
 
   def commit_on_master?(full_repo_name, sha)
