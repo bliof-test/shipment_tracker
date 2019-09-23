@@ -31,9 +31,7 @@ module Support
     def setup_application(name, owners: nil)
       return if @repos.key?(name)
 
-      dir = "#{Dir.mktmpdir}/#{name}"
-      Dir.mkdir(dir)
-      test_repo = Support::GitTestRepository.new(dir)
+      test_repo = Support::GitTestRepository.new
 
       @application = name
       @repos[name] = test_repo
