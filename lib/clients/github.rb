@@ -3,11 +3,6 @@
 require 'git_clone_url'
 require 'octokit'
 
-Octokit.middleware = Faraday::RackBuilder.new { |builder|
-  builder.response :logger
-  builder.adapter Faraday.default_adapter
-}
-
 class GithubClient
   class RateLimitError < RuntimeError
     attr_accessor :rate_limit
