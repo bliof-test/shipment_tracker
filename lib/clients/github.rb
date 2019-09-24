@@ -50,7 +50,7 @@ class GithubClient
 
   def last_status_for(repo:, sha:)
     response = client.combined_status(repo, sha)
-  rescue Octokit::ClientError => e
+  rescue Octokit::Error => e
     Rails.logger.warn "Failed to fetch status for #{repo} at #{sha}: #{e.class.name} #{e.message}"
 
     if e.class == Octokit::TooManyRequests
