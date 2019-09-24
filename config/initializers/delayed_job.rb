@@ -30,4 +30,4 @@ module Sinatra
   register DelayedJobAuth
 end
 
-DelayedJobWeb.register Sinatra::DelayedJobAuth
+DelayedJobWeb.register Sinatra::DelayedJobAuth unless Rails.env.development?

@@ -57,3 +57,9 @@ COPY --chown=shipment_tracker:shipment_tracker dropzone.yaml /usr/local/deploy/d
 COPY --chown=shipment_tracker:shipment_tracker . .
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
+
+ARG REVISION=unknown
+ENV REVISION=$REVISION
+ARG NAME=shipment_tracker
+LABEL name=$NAME version=$REVISION
+RUN echo "$REVISION" > REVISION

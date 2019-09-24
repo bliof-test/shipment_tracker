@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-class CommitStatusUpdateJob < ActiveJob::Base
+require 'commit_status'
+
+class CommitStatusUpdateJob < CommitStatusRetryableJob
   queue_as :default
 
   def perform(opts)
