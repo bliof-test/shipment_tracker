@@ -6,7 +6,7 @@ unless Rails.env.test?
                                                                       port: ENV.fetch('PROMETHEUS_EXPORTER_PORT'))
 
   require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::DelayedJob.register_plugin
+  PrometheusExporter::Instrumentation::DelayedJob.register_plugin(client: PrometheusExporter::Client.default)
 end
 
 Delayed::Worker.sleep_delay = 2
