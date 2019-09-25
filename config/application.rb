@@ -27,6 +27,8 @@ module ShipmentTracker
   GITHUB_REPO_STATUS_WRITE_TOKEN ||= ENV.fetch('GITHUB_REPO_STATUS_WRITE_TOKEN', nil)
   DEFAULT_DEPLOY_LOCALE ||= ENV.fetch('DEFAULT_DEPLOY_LOCALE', 'gb') # For older events without locale
   NUMBER_OF_TICKETS_TO_DISPLAY ||= ENV.fetch('NUMBER_OF_TICKETS_TO_DISPLAY', 100)
+  DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS ||=
+    ENV.fetch('DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS', '').split(',').map(&:strip)
   # TODO: Move our constants here. Keep Rails config for actual Rails configuration.
 
   class Application < Rails::Application

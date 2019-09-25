@@ -312,4 +312,18 @@ RSpec.describe CommitStatus do
       CommitStatus.new(full_repo_name: 'owner/repo', sha: 'abc123').last_status
     end
   end
+
+  describe 'disabling commit status updates with DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS' do
+    it "won't do a call to github if the app is in DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS" do
+      stub_const('ShipmentTracker::DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS', ['my-repo', 'test-org/cool-app'])
+
+      expect(client).not_to receive(:create_status)
+      CommitStatus.new(full_repo_name: 'owner/my-repo', sha: 'abc123').not_found
+      CommitStatus.new(full_repo_name: 'test-org/cool-app', sha: 'abc123').not_found
+
+      expect(client).not_to receive(:last_status_for)
+      CommitStatus.new(full_repo_name: 'owner/my-repo', sha: 'abc123').last_status
+      CommitStatus.new(full_repo_name: 'test-org/cool-app', sha: 'abc123').last_status
+    end
+  end
 end
