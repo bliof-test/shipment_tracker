@@ -40,4 +40,8 @@ class Ticket
   def authorised_by_developer?
     authored_by.present? && approved_by.present? && authored_by == approved_by
   end
+
+  def to_s
+    key
+  end
 end

@@ -72,6 +72,8 @@ module Repositories
 
       array_of_app_versions = feature_review_factory.create_from_tickets(tickets).map(&:app_versions)
 
+      Rails.logger.debug "App versions for tickets #{tickets.join(', ')}: #{array_of_app_versions.join(', ')}"
+
       array_of_app_versions.map(&:invert).reduce({}, :merge).each do |version, app_name|
         repository_location = git_repository_location.find_by_name(app_name)
         next unless repository_location

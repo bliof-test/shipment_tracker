@@ -27,6 +27,8 @@ class RelinkTicketJob < ActiveJob::Base
     ticket_repo = Repositories::TicketRepository.new
     linked_tickets = ticket_repo.tickets_for_versions(before_sha)
 
+    Rails.logger.debug "Linked tickets for #{before_sha}: #{linked_tickets.join(', ')}"
+
     linked_tickets.each do |ticket|
       ticket.paths.each do |feature_review_path|
         next unless feature_review_path.include?(before_sha)
