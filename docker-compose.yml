@@ -22,6 +22,7 @@ services:
       JIRA_USE_SSL: 'false'
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PORT_HTTP: 1201
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
@@ -93,6 +94,19 @@ services:
     depends_on:
       web:
         condition: service_healthy
+
+  prometheus-exporter:
+    image: shipment_tracker
+    command: bundle exec prometheus_exporter
+    env_file: secrets.env
+    tty: true
+    stdin_open: true
+    depends_on:
+      web:
+        condition: service_healthy
+    healthcheck:
+      test: curl localhost:9394/metrics
+      interval: 10s
 
   postgres:
     image: postgres:9.6-alpine
