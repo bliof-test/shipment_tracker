@@ -23,6 +23,7 @@ services:
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PORT_HTTP: 1201
       PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
