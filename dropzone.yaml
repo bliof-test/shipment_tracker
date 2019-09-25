@@ -86,6 +86,16 @@ deploy_tasks:
                 hostPort: 0
                 labels:
                   metrics: "/metrics"
+        healthChecks:
+          - path: /metrics
+            portIndex: 0
+            protocol: HTTP
+            gracePeriodSeconds: 30
+            intervalSeconds: 30
+            timeoutSeconds: 20
+            maxConsecutiveFailures: 3
+        labels:
+          tags: http
         taskKillGracePeriodSeconds: 30
         constraints:
           - *az_constraint
