@@ -97,8 +97,6 @@ deploy_tasks:
         labels:
           tags: http
         taskKillGracePeriodSeconds: 30
-        constraints:
-          - *az_constraint
 
       - id: web
         instances: {{ web_instances }}
