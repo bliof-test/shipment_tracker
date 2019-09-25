@@ -14,6 +14,7 @@ vars:
     git_worker_memory: 4096
     delayed_job_instances: 3
     delayed_job_memory: 1024
+    prometheus_exporter_memory: 512
     web_instances: 3
     web_memory: 1024
   staging:
@@ -24,6 +25,7 @@ vars:
     git_worker_memory: 1024
     delayed_job_instances: 2
     delayed_job_memory: 512
+    prometheus_exporter_memory: 128
     web_instances: 2
     web_memory: 512
 
@@ -70,6 +72,23 @@ deploy_tasks:
         container:
           volumes:
             - *git_volume
+
+      - id: prometheus-exporter
+        instances: 1
+        cpus: 0.25
+        mem: {{ prometheus_exporter_memory }}
+        args: ["bundle", "exec", "prometheus_exporter"]
+        container:
+          docker:
+            portMappings:
+              - name: http
+                containerPort: 9394
+                hostPort: 0
+                labels:
+                  metrics: "/metrics"
+        taskKillGracePeriodSeconds: 30
+        constraints:
+          - *az_constraint
 
       - id: web
         instances: {{ web_instances }}
