@@ -28,7 +28,7 @@ after_fork do |_server, _worker|
 
   require 'prometheus_exporter/client'
   require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::Process.start(type:"web")
+  PrometheusExporter::Instrumentation::Process.start(type: 'web')
 
   defined?(ActiveRecord::Base) &&
     ActiveRecord::Base.establish_connection

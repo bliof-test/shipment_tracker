@@ -1,4 +1,6 @@
-if Rails.env != "test"
+# frozen_string_literal: true
+
+if Rails.env != 'test'
   require 'prometheus_exporter/client'
   PrometheusExporter::Client.default = PrometheusExporter::Client.new(host: ENV.fetch('PROMETHEUS_EXPORTER_HOST'))
 
@@ -11,5 +13,5 @@ if Rails.env != "test"
 
   # this reports basic process stats like RSS and GC info, type master
   # means it is instrumenting the master process
-  PrometheusExporter::Instrumentation::Process.start(type: "master")
+  PrometheusExporter::Instrumentation::Process.start(type: 'master')
 end
