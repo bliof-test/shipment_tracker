@@ -38,6 +38,8 @@ class CommitStatus
   end
 
   def last_status
+    return unless allow_requests?
+
     @last_status ||= github.last_status_for(repo: full_repo_name, sha: sha)
   end
 
@@ -48,12 +50,23 @@ class CommitStatus
   end
 
   def post_status(notification, target_url = nil)
+    return unless allow_requests?
+
     github.create_status(
       repo: full_repo_name,
       sha: sha,
       state: notification[:status],
       description: notification[:description],
       target_url: target_url,
+    )
+  end
+
+  def allow_requests?
+    app = full_repo_name.split('/').last
+
+    !(
+      ShipmentTracker::DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS.include?(app) ||
+      ShipmentTracker::DISABLE_GITHUB_STATUS_UPDATES_FOR_APPS.include?(full_repo_name)
     )
   end
 
