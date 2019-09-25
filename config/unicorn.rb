@@ -26,9 +26,11 @@ after_fork do |_server, _worker|
     $healthcheck = 'term'
   end
 
-  require 'prometheus_exporter/client'
+  require_relative 'prometheus_client'
+
   require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::Process.start(type: 'web')
+  PrometheusExporter::Instrumentation::Process.start(client: PrometheusExporter::Client.default,
+                                                     type: 'web')
 
   defined?(ActiveRecord::Base) &&
     ActiveRecord::Base.establish_connection
