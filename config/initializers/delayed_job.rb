@@ -2,6 +2,8 @@
 
 if Rails.env != 'test'
   require 'prometheus_exporter/client'
+  PrometheusExporter::Client.default = PrometheusExporter::Client.new(host: ENV.fetch('PROMETHEUS_EXPORTER_HOST'))
+
   require 'prometheus_exporter/instrumentation'
   PrometheusExporter::Instrumentation::DelayedJob.register_plugin
 end
