@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 if Rails.env != "test"
+  require 'prometheus_exporter/client'
   require 'prometheus_exporter/instrumentation'
   PrometheusExporter::Instrumentation::DelayedJob.register_plugin
 end
