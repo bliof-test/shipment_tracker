@@ -4,7 +4,7 @@ unless Rails.env.test?
   require_relative '../prometheus_client'
 
   require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::DelayedJob.register_plugin(client: PrometheusExporter::Client.default)
+  PrometheusExporter::Instrumentation::DelayedJob.register_plugin
 end
 
 Delayed::Worker.sleep_delay = 2
