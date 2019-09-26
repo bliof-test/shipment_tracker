@@ -2,6 +2,7 @@
 
 require 'git_clone_url'
 require 'octokit'
+require 'prometheus_exporter/client'
 
 class GithubClient
   class RateLimitError < RuntimeError
@@ -12,6 +13,12 @@ class GithubClient
       self.rate_limit = rate_limit
     end
   end
+
+  RATE_LIMIT = PrometheusExporter::Client.default.register(
+    :gauge,
+    'github_rate_limit_requests_remaining',
+    'Number of GitHub API requests remaining before rate limit'
+  )
 
   def initialize(token)
     @token = token
@@ -33,6 +40,8 @@ class GithubClient
       if e.class == Octokit::TooManyRequests
         raise RateLimitError.new("Failed to set #{state} commit status for #{repo} at #{sha}", client.rate_limit)
       end
+    ensure
+      RATE_LIMIT.observe(client.rate_limit.remaining)
     end
   end
 
@@ -58,6 +67,8 @@ class GithubClient
     end
   else
     response[:statuses]&.reverse&.find { |status| status[:context] == 'shipment-tracker' }
+  ensure
+    RATE_LIMIT.observe(client.rate_limit.remaining)
   end
 
   private
