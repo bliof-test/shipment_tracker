@@ -40,6 +40,64 @@ RSpec.describe Payloads::GithubPullRequest do
     end
   end
 
+  describe '#merged?' do
+    context 'when payload contains the "closed" action' do
+      let(:data) {
+        {
+          'action' => 'closed',
+          'pull_request' => { 'merged' => merged },
+        }
+      }
+
+      context 'when merged' do
+        let(:merged) { true }
+
+        it 'returns true' do
+          payload = described_class.new(data)
+
+          expect(payload.merged?).to be true
+        end
+      end
+
+      context 'when closed' do
+        let(:merged) { false }
+
+        it 'returns false' do
+          payload = described_class.new(data)
+
+          expect(payload.merged?).to be false
+        end
+      end
+    end
+
+    context 'when payload does not contain the "closed" action' do
+      it 'returns false' do
+        payload = described_class.new('action' => 'some_value')
+
+        expect(payload.merged?).to be false
+      end
+    end
+  end
+
+  describe '#merge_commit_sha' do
+    context 'when the payload contain the merge commit' do
+      it 'returns merge commit' do
+        data = { 'pull_request' => { 'merge_commit_sha' => 'def1234' } }
+        payload = described_class.new(data)
+
+        expect(payload.merge_commit_sha).to eq 'def1234'
+      end
+    end
+
+    context 'when the payload does not contain the merge commit' do
+      it 'returns nil' do
+        payload = described_class.new('pull_request' => { 'some_key' => 'some_value' })
+
+        expect(payload.merge_commit_sha).to be_nil
+      end
+    end
+  end
+
   describe '#branch_name' do
     context 'when the payload contain the pull request branch name' do
       it 'returns branch name' do
@@ -88,6 +146,28 @@ RSpec.describe Payloads::GithubPullRequest do
       end
     end
 
+    context 'when merged' do
+      context 'when payload contains "base sha" data' do
+        let(:data) {
+          {
+            'action' => 'closed',
+            'pull_request' => {
+              'merged' => true,
+              'base' => {
+                'sha' => 'abc123',
+              },
+            },
+          }
+        }
+
+        it 'returns sha' do
+          payload = described_class.new(data)
+
+          expect(payload.before_sha).to eq('abc123')
+        end
+      end
+    end
+
     context 'when payload does not contain "before" data' do
       it 'returns nil' do
         payload = described_class.new('some_key' => 'some_value')
@@ -103,6 +183,26 @@ RSpec.describe Payloads::GithubPullRequest do
         payload = described_class.new('after' => 'abc123')
 
         expect(payload.after_sha).to eq('abc123')
+      end
+    end
+
+    context 'when merged' do
+      context 'when payload contains "merge_commit_sha" data' do
+        let(:data) {
+          {
+            'action' => 'closed',
+            'pull_request' => {
+              'merged' => true,
+              'merge_commit_sha' => 'abc123',
+            },
+          }
+        }
+
+        it 'returns sha' do
+          payload = described_class.new(data)
+
+          expect(payload.after_sha).to eq('abc123')
+        end
       end
     end
 

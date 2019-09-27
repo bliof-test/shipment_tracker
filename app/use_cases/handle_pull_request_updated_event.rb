@@ -5,21 +5,15 @@ require 'relink_ticket_job'
 
 class HandlePullRequestUpdatedEvent
   include SolidUseCase
+  include PullRequestEventValidatable
 
   steps :validate, :update_remote_head, :reset_commit_status, :relink_tickets
-
-  def validate(payload)
-    return fail :base_not_master unless payload.base_branch_master?
-    return fail :repo_not_under_audit unless GitRepositoryLocation.repo_tracked?(payload.full_repo_name)
-
-    continue(payload)
-  end
 
   def update_remote_head(payload)
     git_repository_location = GitRepositoryLocation.find_by_full_repo_name(payload.full_repo_name)
     return fail :repo_not_found unless git_repository_location
 
-    git_repository_location.update(remote_head: payload.head_sha)
+    git_repository_location.update(remote_head: payload.after_sha)
     continue(payload)
   end
 

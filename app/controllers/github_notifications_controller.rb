@@ -7,18 +7,25 @@ class GithubNotificationsController < ApplicationController
 
   def create
     if pull_request?
-      if pull_request_payload.updated?
-        HandlePullRequestUpdatedEvent.run(pull_request_payload)
-      elsif pull_request_payload.created?
-        HandlePullRequestCreatedEvent.run(pull_request_payload)
-      end
-      head :ok
+      handle_pull_request_event
     else
       head :accepted
     end
   end
 
   private
+
+  def handle_pull_request_event
+    if pull_request_payload.updated? || pull_request_payload.merged?
+      HandlePullRequestUpdatedEvent.run(pull_request_payload)
+      head :ok
+    elsif pull_request_payload.created?
+      HandlePullRequestCreatedEvent.run(pull_request_payload)
+      head :ok
+    else
+      head :accepted
+    end
+  end
 
   def unauthenticated_strategy
     self.status = 403

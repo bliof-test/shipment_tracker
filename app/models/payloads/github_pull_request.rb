@@ -18,16 +18,32 @@ module Payloads
       @data['action'] == 'synchronize'
     end
 
+    def closed?
+      @data['action'] == 'closed'
+    end
+
+    def merged?
+      closed? && pull_request['merged']
+    end
+
     def before_sha
-      @data['before']
+      merged? ? base_sha : @data['before']
     end
 
     def after_sha
-      @data['after']
+      merged? ? merge_commit_sha : @data['after']
     end
 
     def head_sha
       pull_request&.dig('head', 'sha')
+    end
+
+    def base_sha
+      pull_request&.dig('base', 'sha')
+    end
+
+    def merge_commit_sha
+      pull_request['merge_commit_sha']
     end
 
     def repo_name

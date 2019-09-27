@@ -26,6 +26,8 @@ RSpec.describe GithubNotificationsController do
           expect(HandlePullRequestCreatedEvent).to receive(:run).with(anything)
 
           post :create, github_notification: { 'action' => 'opened' }
+
+          expect(response).to have_http_status(:ok)
         end
       end
 
@@ -34,6 +36,26 @@ RSpec.describe GithubNotificationsController do
           expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
 
           post :create, github_notification: { 'action' => 'synchronize' }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when event is a pull request merged' do
+        it 'runs the HandlePullRequestUpdatedEvent use case' do
+          expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
+
+          post :create, github_notification: { 'action' => 'closed', 'pull_request' => { 'merged' => true } }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when event is an other pull request event' do
+        it 'responds with a 202 Accepted' do
+          post :create, github_notification: { 'action' => 'edited' }
+
+          expect(response).to have_http_status(:accepted)
         end
       end
     end
