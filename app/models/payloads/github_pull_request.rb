@@ -61,5 +61,9 @@ module Payloads
     def base_branch_master?
       pull_request&.dig('base', 'ref') == 'master'
     end
+
+    def title
+      pull_request['title']
+    end
   end
 end
