@@ -9,10 +9,54 @@ RSpec.describe GithubNotificationsController do
         request.env['HTTP_X_GITHUB_EVENT'] = 'push'
       end
 
-      it 'runs the HandlePushEvent use case' do
-        expect(HandlePushEvent).to receive(:run).with(anything)
+      it 'responds with a 202 Accepted' do
+        post :create
 
-        post :create, github_notification: {}
+        expect(response).to have_http_status(:accepted)
+      end
+    end
+
+    context 'when event is a pull request notification' do
+      before do
+        request.env['HTTP_X_GITHUB_EVENT'] = 'pull_request'
+      end
+
+      context 'when event is a pull request opened' do
+        it 'runs the HandlePullRequestCreatedEvent use case' do
+          expect(HandlePullRequestCreatedEvent).to receive(:run).with(anything)
+
+          post :create, github_notification: { 'action' => 'opened' }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when event is a pull request updated' do
+        it 'runs the HandlePullRequestUpdatedEvent use case' do
+          expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
+
+          post :create, github_notification: { 'action' => 'synchronize' }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when event is a pull request merged' do
+        it 'runs the HandlePullRequestUpdatedEvent use case' do
+          expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
+
+          post :create, github_notification: { 'action' => 'closed', 'pull_request' => { 'merged' => true } }
+
+          expect(response).to have_http_status(:ok)
+        end
+      end
+
+      context 'when event is an other pull request event' do
+        it 'responds with a 202 Accepted' do
+          post :create, github_notification: { 'action' => 'edited' }
+
+          expect(response).to have_http_status(:accepted)
+        end
       end
     end
 

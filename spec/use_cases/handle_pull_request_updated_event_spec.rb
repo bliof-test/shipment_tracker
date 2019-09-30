@@ -1,24 +1,24 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
-require 'handle_push_event'
-require 'payloads/github'
+require 'handle_pull_request_updated_event'
+require 'payloads/github_pull_request'
 
-RSpec.describe HandlePushEvent do
-  let(:default_payload_data) {
+RSpec.describe HandlePullRequestUpdatedEvent do
+  let(:payload_data) {
     {
-      'ref' => 'refs/heads/branch_name',
+      'pull_request' => {
+        'head' => { 'sha' => 'def1234', 'ref' => branch_name },
+        'base' => { 'ref' => base_branch, 'repo' => { 'full_name' => repository } },
+      },
       'before' => 'abc1234',
       'after' => 'def1234',
-      'head_commit' => { 'id' => 'fca1234' },
-      'created' => false,
-      'deleted' => false,
-      'repository' => { 'full_name' => 'owner/repo_name' },
     }
   }
-  let(:payload_data) { default_payload_data }
-
-  let(:payload) { Payloads::Github.new(payload_data) }
+  let(:payload) { Payloads::GithubPullRequest.new(payload_data) }
+  let(:branch_name) { 'branch-name' }
+  let(:base_branch) { 'master' }
+  let(:repository) { 'owner/repo_1' }
 
   before do
     allow_any_instance_of(CommitStatus).to receive(:reset)
@@ -26,27 +26,23 @@ RSpec.describe HandlePushEvent do
   end
 
   describe 'validation' do
-    it 'fails if repo not audited' do
-      allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(false)
+    context 'when repo is not audited' do
+      before do
+        allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(false)
+      end
 
-      result = HandlePushEvent.run(payload)
-
-      expect(result).to fail_with(:repo_not_under_audit)
+      it 'fails' do
+        result = described_class.run(payload)
+        expect(result).to fail_with(:repo_not_under_audit)
+      end
     end
 
-    it 'fails if event is for pushing an annotated tag' do
-      github_payload = instance_double(Payloads::Github, push_annotated_tag?: true, branch_deleted?: false)
+    context 'when base branch is not "master"' do
+      let(:base_branch) { 'other-base-branch' }
 
-      result = HandlePushEvent.run(github_payload)
-      expect(result).to fail_with(:annotated_tag)
-    end
-
-    context 'when branch is deleted' do
-      let(:payload_data) { default_payload_data.merge('deleted' => true) }
-
-      it 'fails with branch_deleted' do
-        result = HandlePushEvent.run(payload)
-        expect(result).to fail_with(:branch_deleted)
+      it 'fails' do
+        result = described_class.run(payload)
+        expect(result).to fail_with(:base_not_master)
       end
     end
   end
@@ -58,7 +54,7 @@ RSpec.describe HandlePushEvent do
       end
 
       it 'fails' do
-        result = HandlePushEvent.run(payload)
+        result = described_class.run(payload)
         expect(result).to fail_with(:repo_not_found)
       end
     end
@@ -79,8 +75,8 @@ RSpec.describe HandlePushEvent do
       end
 
       it 'updates the corresponding repository location' do
-        expect(git_repository_location).to receive(:update).with(remote_head: 'fca1234')
-        HandlePushEvent.run(payload)
+        expect(git_repository_location).to receive(:update).with(remote_head: 'def1234')
+        described_class.run(payload)
       end
     end
   end
@@ -107,18 +103,7 @@ RSpec.describe HandlePushEvent do
       ).and_return(commit_status)
       expect(commit_status).to receive(:reset)
 
-      HandlePushEvent.run(payload)
-    end
-
-    context 'commit is pushed to master' do
-      let(:payload_data) { default_payload_data.merge('ref' => 'refs/heads/master') }
-
-      it 'fails with :protected_branch' do
-        expect_any_instance_of(CommitStatus).not_to receive(:reset)
-
-        result = HandlePushEvent.run(payload)
-        expect(result).to fail_with(:protected_branch)
-      end
+      described_class.run(payload)
     end
   end
 
@@ -138,56 +123,6 @@ RSpec.describe HandlePushEvent do
       allow(git_repo).to receive(:commit_on_master?) { on_master }
     end
 
-    context 'when new branch created' do
-      let(:payload_data) { default_payload_data.merge('created' => true) }
-      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
-
-      before do
-        allow_any_instance_of(CommitStatus).to receive(:not_found)
-      end
-
-      it 'does not re-link' do
-        expect(JiraClient).not_to receive(:post_comment)
-
-        HandlePushEvent.run(payload)
-      end
-
-      it 'posts not found status' do
-        allow(CommitStatus).to receive(:new).with(
-          full_repo_name: 'owner/repo_name',
-          sha: 'def1234',
-        ).and_return(commit_status)
-        expect(commit_status).to receive(:not_found)
-
-        HandlePushEvent.run(payload)
-      end
-    end
-
-    context 'when commit is already on master' do
-      let(:on_master) { true }
-      let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
-
-      before do
-        allow_any_instance_of(CommitStatus).to receive(:not_found)
-      end
-
-      it 'does not re-link' do
-        expect(JiraClient).not_to receive(:post_comment)
-
-        HandlePushEvent.run(payload)
-      end
-
-      it 'posts not found status' do
-        allow(CommitStatus).to receive(:new).with(
-          full_repo_name: 'owner/repo_name',
-          sha: 'def1234',
-        ).and_return(commit_status)
-        expect(commit_status).to receive(:not_found)
-
-        HandlePushEvent.run(payload)
-      end
-    end
-
     context 'when there are no previously linked tickets' do
       let(:tickets) { [] }
       let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
@@ -199,22 +134,22 @@ RSpec.describe HandlePushEvent do
       it 'does not post a JIRA comment' do
         expect(JiraClient).not_to receive(:post_comment)
 
-        HandlePushEvent.run(payload)
+        described_class.run(payload)
       end
 
       it 'posts a "failure" commit status to GitHub' do
         allow(CommitStatus).to receive(:new).with(
-          full_repo_name: 'owner/repo_name',
+          full_repo_name: 'owner/repo_1',
           sha: 'def1234',
         ).and_return(commit_status)
         expect(commit_status).to receive(:not_found)
 
-        HandlePushEvent.run(payload)
+        described_class.run(payload)
       end
     end
 
     context 'when there are previously linked tickets' do
-      let(:payload_data) { default_payload_data.merge('repository' => { 'full_name' => 'owner/app1' }) }
+      let(:repository) { 'owner/app1' }
 
       let(:tickets) {
         [
@@ -245,12 +180,12 @@ RSpec.describe HandlePushEvent do
               "[Feature ready for review|#{feature_review_url(app1: 'def1234')}]",
             )
 
-            HandlePushEvent.run(payload)
+            described_class.run(payload)
           end
         end
 
         context 'with multiple apps per Feature Review' do
-          let(:payload_data) { default_payload_data.merge('repository' => { 'full_name' => 'owner/app2' }) }
+          let(:repository) { 'owner/app2' }
 
           let(:paths_issue1) {
             [
@@ -275,14 +210,14 @@ RSpec.describe HandlePushEvent do
               "[Feature ready for review|#{feature_review_url(app2: 'def1234', app5: 'fdc1234')}]",
             )
 
-            HandlePushEvent.run(payload)
+            described_class.run(payload)
           end
         end
       end
     end
 
     context 'when the linking fails for a ticket' do
-      let(:payload_data) { default_payload_data.merge('repository' => { 'full_name' => 'owner/app1' }) }
+      let(:repository) { 'owner/app1' }
       let(:commit_status) { instance_double(CommitStatus, not_found: nil, reset: nil) }
 
       let(:tickets) {
@@ -313,7 +248,7 @@ RSpec.describe HandlePushEvent do
 
         expect(JiraClient).to receive(:post_comment).with(tickets.second.key, anything)
 
-        HandlePushEvent.run(payload)
+        described_class.run(payload)
       end
 
       it 'posts "error" status to GitHub on InvalidKeyError' do
@@ -321,7 +256,7 @@ RSpec.describe HandlePushEvent do
 
         expect_any_instance_of(CommitStatus).to receive(:error).once
 
-        HandlePushEvent.run(payload)
+        described_class.run(payload)
       end
 
       it 'posts "error" status to GitHub on any other error' do
@@ -333,7 +268,7 @@ RSpec.describe HandlePushEvent do
         ).and_return(commit_status)
         expect(commit_status).to receive(:error).once
 
-        HandlePushEvent.run(payload)
+        described_class.run(payload)
       end
     end
   end
