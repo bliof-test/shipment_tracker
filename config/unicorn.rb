@@ -26,8 +26,6 @@ after_fork do |_server, _worker|
     $healthcheck = 'term'
   end
 
-  require_relative 'prometheus_client'
-
   require 'prometheus_exporter/instrumentation'
   PrometheusExporter::Instrumentation::Process.start(type: 'web')
 
