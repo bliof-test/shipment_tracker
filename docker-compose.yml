@@ -108,6 +108,8 @@ services:
     healthcheck:
       test: curl localhost:9394/metrics
       interval: 10s
+    ports:
+      - 127.0.0.1:9394:9394
 
   postgres:
     image: postgres:9.6-alpine
