@@ -87,7 +87,7 @@ deploy_tasks:
                 labels:
                   metrics: "/metrics"
         healthChecks:
-          - path: /
+          - path: /send-metrics
             portIndex: 0
             protocol: HTTP
             gracePeriodSeconds: 30

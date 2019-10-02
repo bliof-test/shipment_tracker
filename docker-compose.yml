@@ -106,7 +106,7 @@ services:
       web:
         condition: service_healthy
     healthcheck:
-      test: curl localhost:9394/metrics
+      test: curl -f localhost:9394/send-metrics
       interval: 10s
 
   postgres:
