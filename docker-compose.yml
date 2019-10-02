@@ -53,6 +53,8 @@ services:
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
       SSH_USER: git
@@ -73,6 +75,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       RAILS_ENV: "${RAILS_ENV:-development}"
     env_file: secrets.env
     tty: true
@@ -88,6 +92,8 @@ services:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PROTECT_STDOUT: 'true'
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       RAILS_ENV: "${RAILS_ENV:-development}"
     env_file: secrets.env
     tty: true
