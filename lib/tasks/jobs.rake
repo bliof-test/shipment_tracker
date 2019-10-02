@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'honeybadger'
+require 'prometheus_exporter/instrumentation'
 
 class Counter
   def initialize
@@ -18,6 +19,15 @@ class Counter
 end
 
 namespace :jobs do
+  namespace :instrumentation do
+    task :delayed_job do
+      # This reports basic process stats like RSS and GC info
+      PrometheusExporter::Instrumentation::Process.start(type: 'delayed-job')
+    end
+  end
+
+  task :work => 'instrumentation:delayed_job'
+
   def shutdown(task)
     warn "Terminating rake task #{task}..."
     @shutdown = true
@@ -41,6 +51,9 @@ namespace :jobs do
     Signal.trap('INT') do
       shutdown(t)
     end
+
+    # This reports basic process stats like RSS and GC info
+    PrometheusExporter::Instrumentation::Process.start(type: 'event-worker')
 
     Rails.logger.info "Starting #{t}"
     Rails.logger.tagged(t) do
@@ -72,6 +85,9 @@ namespace :jobs do
     Signal.trap('INT') do
       shutdown(t)
     end
+
+    # This reports basic process stats like RSS and GC info
+    PrometheusExporter::Instrumentation::Process.start(type: 'git-worker')
 
     Rails.logger.info "Starting #{t}"
     loader = GitRepositoryLoader.from_rails_config
