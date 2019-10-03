@@ -64,7 +64,7 @@ class GitRepositoryLoader
 
   def fetch_repository(git_repository_location, repository, options)
     retries ||= 0
-    instrument('fetch') do
+    instrument('fetch', git_repository_location.name) do
       repository.fetch('origin', options) unless up_to_date?(git_repository_location, repository)
     end
   rescue Rugged::OSError => error
@@ -84,7 +84,7 @@ class GitRepositoryLoader
     dir = repository_dir_name(git_repository_location)
     Rails.logger.info "Wiping directory #{dir} and re-cloning repository to the same location..."
     FileUtils.rmtree(dir)
-    instrument('clone') do
+    instrument('clone', git_repository_location.name) do
       Rugged::Repository.clone_at(git_repository_location.uri, dir, options.merge(bare: true))
     end
   end
@@ -144,9 +144,10 @@ class GitRepositoryLoader
     ssh_private_key_file&.unlink
   end
 
-  def instrument(name, &block)
+  def instrument(name, repository, &block)
     ActiveSupport::Notifications.instrument(
       "#{name}.git_repository_loader",
+      repository: repository,
       &block
     )
   end
