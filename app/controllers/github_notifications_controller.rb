@@ -16,11 +16,14 @@ class GithubNotificationsController < ApplicationController
   private
 
   def handle_pull_request_event
-    if pull_request_payload.updated? || pull_request_payload.merged?
+    if pull_request_payload.updated?
       HandlePullRequestUpdatedEvent.run(pull_request_payload)
       head :ok
     elsif pull_request_payload.created?
       HandlePullRequestCreatedEvent.run(pull_request_payload)
+      head :ok
+    elsif pull_request_payload.merged?
+      HandlePullRequestMergedEvent.run(pull_request_payload)
       head :ok
     else
       head :accepted
