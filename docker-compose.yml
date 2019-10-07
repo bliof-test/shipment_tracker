@@ -15,7 +15,7 @@ services:
       PROTECT_STDOUT: 'true'
       PROMETHEUS_EXPORTER_HOST: prometheus-exporter
       PROMETHEUS_EXPORTER_PORT: 9394
-      RAILS_ENV: "${RAILS_ENV:-development}"
+      RAILS_ENV: "${RAILS_ENV:-production}"
     environment:
       <<: *common_environment
       AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
