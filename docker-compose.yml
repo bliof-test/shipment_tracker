@@ -22,6 +22,8 @@ services:
       JIRA_USE_SSL: 'false'
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PORT_HTTP: 1201
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
@@ -33,6 +35,8 @@ services:
     ports:
       - 127.0.0.1:1201:1201
     depends_on:
+      prometheus-exporter:
+        condition: service_healthy
       postgres:
         condition: service_healthy
       jira:
@@ -85,14 +89,34 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
       PROTECT_STDOUT: 'true'
       RAILS_ENV: "${RAILS_ENV:-development}"
     env_file: secrets.env
     tty: true
     stdin_open: true
     depends_on:
-      web:
+      prometheus-exporter:
         condition: service_healthy
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: bundle exec rake jobs:check
+      interval: 10s
+
+  prometheus-exporter:
+    image: shipment_tracker
+    command: bundle exec prometheus_exporter
+    env_file: secrets.env
+    tty: true
+    stdin_open: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: curl -f localhost:9394/send-metrics
+      interval: 10s
 
   postgres:
     image: postgres:9.6-alpine

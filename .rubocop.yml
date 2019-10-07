@@ -99,6 +99,10 @@ Style/GlobalVars:
   AllowedVariables:
     - $healthcheck
 
+Style/HashSyntax:
+  Exclude:
+    - 'lib/tasks/*'
+
 Naming/HeredocDelimiterNaming:
   Exclude:
     - 'spec/**/*'

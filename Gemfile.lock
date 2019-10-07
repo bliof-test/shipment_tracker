@@ -235,6 +235,7 @@ GEM
       activerecord (>= 4.2)
       activesupport (>= 4.2)
     powerpack (0.1.2)
+    prometheus_exporter (0.4.13)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -440,6 +441,7 @@ DEPENDENCIES
   pg
   pg_failover
   pg_search
+  prometheus_exporter
   pry-byebug
   pry-rails
   rack-test
