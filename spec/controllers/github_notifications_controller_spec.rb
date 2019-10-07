@@ -22,7 +22,7 @@ RSpec.describe GithubNotificationsController do
       end
 
       context 'when event is a pull request opened' do
-        it 'runs the HandlePullRequestCreatedEvent use case' do
+        it 'runs the correct use case and responds with a 200 OK' do
           expect(HandlePullRequestCreatedEvent).to receive(:run).with(anything)
 
           post :create, github_notification: { 'action' => 'opened' }
@@ -32,7 +32,7 @@ RSpec.describe GithubNotificationsController do
       end
 
       context 'when event is a pull request updated' do
-        it 'runs the HandlePullRequestUpdatedEvent use case' do
+        it 'runs the correct use case and responds with a 200 OK' do
           expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
 
           post :create, github_notification: { 'action' => 'synchronize' }
@@ -42,8 +42,8 @@ RSpec.describe GithubNotificationsController do
       end
 
       context 'when event is a pull request merged' do
-        it 'runs the HandlePullRequestUpdatedEvent use case' do
-          expect(HandlePullRequestUpdatedEvent).to receive(:run).with(anything)
+        it 'runs the correct use case and responds with a 200 OK' do
+          expect(HandlePullRequestMergedEvent).to receive(:run).with(anything)
 
           post :create, github_notification: { 'action' => 'closed', 'pull_request' => { 'merged' => true } }
 
