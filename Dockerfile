@@ -16,6 +16,7 @@ RUN bundle config build.rugged --use-system-libraries \
 ARG RAILS_ENV=production
 
 COPY Rakefile ./
+COPY lib/tasks/env.rake lib/tasks/
 
 COPY \
  config/application.rb \
@@ -27,8 +28,9 @@ COPY config/environments/production.rb config/environments/
 
 COPY app/assets app/assets
 COPY vendor/assets vendor/assets
+COPY .env.assets .
 
-RUN DATABASE_URL=postgresql:/// bundle exec rake assets:precompile
+RUN bundle exec rake assets:precompile
 
 FROM quay.io/fundingcircle/alpine-ruby:2.5
 LABEL maintainer="Funding Circle Engineering <engineering@fundingcircle.com>"

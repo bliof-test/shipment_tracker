@@ -7,25 +7,27 @@ services:
     command: >
       sh -c 'bundle exec rake db:structure:load && \
              exec bundle exec unicorn --config-file config/unicorn.rb'
+    environment: &common_environment
+      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      HONEYBADGER_ENV: development
+      HONEYBADGER_REPORT_DATA: 'true'
+      LOG_LEVEL: "${LOG_LEVEL:-debug}"
+      PROTECT_STDOUT: 'true'
+      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
+      PROMETHEUS_EXPORTER_PORT: 9394
+      RAILS_ENV: "${RAILS_ENV:-production}"
     environment:
+      <<: *common_environment
       AUTH0_CLIENT_ID: Y9ltgcdXUkNA4hRDWuP0nxDaZVdIskBM
       AUTH0_CONNECTION: fundingcircle.com
       AUTH0_DOMAIN: fundingcircle.auth0.com
-      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
-      HONEYBADGER_ENV: development
-      HONEYBADGER_REPORT_DATA: 'true'
       JIRA_FQDN: http://jira:8080
       JIRA_PASSWD: shipment_tracker
       JIRA_PATH: ''
       JIRA_USER: shipment_tracker
       JIRA_USE_SSL: 'false'
-      LOG_LEVEL: "${LOG_LEVEL:-debug}"
       PORT_HTTP: 1201
-      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
-      PROMETHEUS_EXPORTER_PORT: 9394
-      PROTECT_STDOUT: 'true'
-      RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
       SSH_USER: git
       UNICORN_TIMEOUT: 3600
@@ -51,11 +53,8 @@ services:
     image: shipment_tracker
     command: bundle exec rake jobs:update_git_loop
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
+      <<: *common_environment
       GIT_REPOSITORY_CACHE_DIR: /tmp/git
-      LOG_LEVEL: "${LOG_LEVEL:-debug}"
-      PROTECT_STDOUT: 'true'
-      RAILS_ENV: "${RAILS_ENV:-development}"
       SSH_PRIVATE_KEY:
       SSH_USER: git
     env_file: secrets.env
@@ -72,10 +71,7 @@ services:
     image: shipment_tracker
     command: bundle exec rake jobs:update_events_loop
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
-      LOG_LEVEL: "${LOG_LEVEL:-debug}"
-      PROTECT_STDOUT: 'true'
-      RAILS_ENV: "${RAILS_ENV:-development}"
+      <<: *common_environment
     env_file: secrets.env
     tty: true
     stdin_open: true
@@ -87,12 +83,7 @@ services:
     image: shipment_tracker
     command: bundle exec rake jobs:work
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres/shipment_tracker
-      LOG_LEVEL: "${LOG_LEVEL:-debug}"
-      PROMETHEUS_EXPORTER_HOST: prometheus-exporter
-      PROMETHEUS_EXPORTER_PORT: 9394
-      PROTECT_STDOUT: 'true'
-      RAILS_ENV: "${RAILS_ENV:-development}"
+      <<: *common_environment
     env_file: secrets.env
     tty: true
     stdin_open: true
@@ -117,6 +108,8 @@ services:
     healthcheck:
       test: curl -f localhost:9394/send-metrics
       interval: 10s
+    ports:
+      - 127.0.0.1:9394:9394
 
   postgres:
     image: postgres:9.6-alpine

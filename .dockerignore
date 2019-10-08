@@ -1,7 +1,6 @@
 .bundle
 .circleci
 .dockerignore
-.env*
 .git
 .ruby-gemset
 .ruby-version
