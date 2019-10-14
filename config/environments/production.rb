@@ -91,7 +91,5 @@ Rails.application.configure do
   # Show developer-friendly error page if set
   config.consider_all_requests_local = ENV.key?('CONSIDER_ALL_REQUESTS_LOCAL')
 
-  require 'prometheus_exporter/client'
-  PrometheusExporter::Client.default = PrometheusExporter::Client.new(host: ENV.fetch('PROMETHEUS_EXPORTER_HOST'),
-                                                                      port: ENV.fetch('PROMETHEUS_EXPORTER_PORT'))
+  require_relative '../prometheus_client'
 end

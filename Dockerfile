@@ -22,6 +22,7 @@ COPY \
  config/application.rb \
  config/boot.rb \
  config/environment.rb \
+ config/prometheus_client.rb \
  config/
 
 COPY config/environments/production.rb config/environments/

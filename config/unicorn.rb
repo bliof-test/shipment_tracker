@@ -1,9 +1,22 @@
 # frozen_string_literal: true
 
+require 'prometheus_exporter'
+require 'prometheus_exporter/instrumentation'
+require_relative 'prometheus_client'
+
+port_http = ENV.fetch('PORT_HTTP')
+pid_file = '/tmp/unicorn.pid'
+
+PrometheusExporter::Instrumentation::Unicorn.start(
+  pid_file: pid_file,
+  listener_address: "0.0.0.0:#{port_http}",
+)
+
 worker_processes Integer(ENV['WEB_CONCURRENCY'] || 1)
 preload_app true
-listen ENV.fetch('PORT_HTTP')
+listen port_http
 timeout ENV.fetch('UNICORN_TIMEOUT', 60).to_i
+pid pid_file
 
 unless ENV['PROTECT_STDOUT'] == 'true'
   root = File.expand_path('..', __dir__)
