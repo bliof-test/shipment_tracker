@@ -36,7 +36,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 127.0.0.1:1201:1201
+      - 127.0.0.1:1201-1202:1201
     depends_on:
       prometheus-exporter:
         condition: service_healthy
@@ -49,6 +49,7 @@ services:
     healthcheck:
       test: curl localhost:1201/healthcheck
       interval: 10s
+    scale: 2
 
   git-worker:
     image: shipment_tracker
