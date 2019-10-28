@@ -1,3 +1,9 @@
+GIT
+  remote: https://github.com/discourse/prometheus_exporter.git
+  revision: 565a8e0e74f1a8d7af12dfd207b562f98b52c006
+  specs:
+    prometheus_exporter (0.4.14)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -235,7 +241,6 @@ GEM
       activerecord (>= 4.2)
       activesupport (>= 4.2)
     powerpack (0.1.2)
-    prometheus_exporter (0.4.13)
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
@@ -322,7 +327,7 @@ GEM
     ruby_dep (1.5.0)
     ruby_parser (3.12.0)
       sexp_processor (~> 4.9)
-    rugged (0.28.1)
+    rugged (0.28.3.1)
     safe_yaml (1.0.4)
     sass (3.7.3)
       sass-listen (~> 4.0.0)
@@ -388,7 +393,7 @@ GEM
     uglifier (4.1.20)
       execjs (>= 0.3.0, < 3)
     unicode-display_width (1.4.1)
-    unicorn (5.5.0)
+    unicorn (5.5.1)
       kgio (~> 2.6)
       raindrops (~> 0.7)
     unicorn-rails (2.2.1)
@@ -441,7 +446,7 @@ DEPENDENCIES
   pg
   pg_failover
   pg_search
-  prometheus_exporter
+  prometheus_exporter!
   pry-byebug
   pry-rails
   rack-test
