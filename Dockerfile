@@ -4,7 +4,6 @@ RUN apk --no-cache add \
   cmake \
   nodejs \
   sqlite-dev \
- && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.8/main \
   libgit2-dev \
   libssh2-dev
 
@@ -43,7 +42,6 @@ RUN apk --no-cache add \
   sqlite-dev \
   tzdata \
   zlib \
- && apk add --no-cache --repository http://dl-cdn.alpinelinux.org/alpine/v3.8/main \
   libgit2 \
   libssh2
 
