@@ -1,6 +1,7 @@
 GIT
-  remote: https://github.com/discourse/prometheus_exporter.git
-  revision: 565a8e0e74f1a8d7af12dfd207b562f98b52c006
+  remote: https://github.com/LS80/prometheus_exporter.git
+  revision: 87e0b3b594970a704be1916754b1deaa6bfd390d
+  branch: delayed-job
   specs:
     prometheus_exporter (0.4.14)
 
