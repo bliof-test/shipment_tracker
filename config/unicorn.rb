@@ -10,7 +10,7 @@ pid_file = '/tmp/unicorn.pid'
 PrometheusExporter::Instrumentation::Unicorn.start(
   pid_file: pid_file,
   listener_address: "0.0.0.0:#{port_http}",
-  frequency: 1,
+  frequency: 0.01,
 )
 
 worker_processes Integer(ENV['WEB_CONCURRENCY'] || 1)
