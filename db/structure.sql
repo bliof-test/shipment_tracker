@@ -2,26 +2,19 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.6.15
+-- Dumped by pg_dump version 11.5
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
+SET xmloption = content;
 SET client_min_messages = warning;
-
---
--- Name: plpgsql; Type: EXTENSION; Schema: -; Owner: -
---
-
-CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
-
---
--- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner: -
---
-
-COMMENT ON EXTENSION plpgsql IS 'PL/pgSQL procedural language';
-
+SET row_security = off;
 
 --
 -- Name: hstore; Type: EXTENSION; Schema: -; Owner: -
@@ -51,13 +44,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
 COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
 
 
-SET search_path = public, pg_catalog;
-
 --
 -- Name: deployed_apps(json); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION deployed_apps(deploys json) RETURNS character varying
+CREATE FUNCTION public.deployed_apps(deploys json) RETURNS character varying
     LANGUAGE plpgsql
     AS $$
       BEGIN
@@ -71,7 +62,7 @@ CREATE FUNCTION deployed_apps(deploys json) RETURNS character varying
 -- Name: released_tickets_trigger(); Type: FUNCTION; Schema: public; Owner: -
 --
 
-CREATE FUNCTION released_tickets_trigger() RETURNS trigger
+CREATE FUNCTION public.released_tickets_trigger() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
       BEGIN
@@ -89,10 +80,10 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: builds; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: builds; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE builds (
+CREATE TABLE public.builds (
     id integer NOT NULL,
     version character varying,
     success boolean,
@@ -108,7 +99,7 @@ CREATE TABLE builds (
 -- Name: builds_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE builds_id_seq
+CREATE SEQUENCE public.builds_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -120,14 +111,14 @@ CREATE SEQUENCE builds_id_seq
 -- Name: builds_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE builds_id_seq OWNED BY builds.id;
+ALTER SEQUENCE public.builds_id_seq OWNED BY public.builds.id;
 
 
 --
--- Name: delayed_jobs; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: delayed_jobs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE delayed_jobs (
+CREATE TABLE public.delayed_jobs (
     id integer NOT NULL,
     priority integer DEFAULT 0 NOT NULL,
     attempts integer DEFAULT 0 NOT NULL,
@@ -147,7 +138,7 @@ CREATE TABLE delayed_jobs (
 -- Name: delayed_jobs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE delayed_jobs_id_seq
+CREATE SEQUENCE public.delayed_jobs_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -159,14 +150,14 @@ CREATE SEQUENCE delayed_jobs_id_seq
 -- Name: delayed_jobs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE delayed_jobs_id_seq OWNED BY delayed_jobs.id;
+ALTER SEQUENCE public.delayed_jobs_id_seq OWNED BY public.delayed_jobs.id;
 
 
 --
--- Name: deploys; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: deploys; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE deploys (
+CREATE TABLE public.deploys (
     id integer NOT NULL,
     app_name character varying,
     server character varying,
@@ -176,7 +167,7 @@ CREATE TABLE deploys (
     environment character varying,
     region character varying,
     uuid uuid,
-    deploy_alert character varying
+    deploy_alert text
 );
 
 
@@ -184,7 +175,7 @@ CREATE TABLE deploys (
 -- Name: deploys_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE deploys_id_seq
+CREATE SEQUENCE public.deploys_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -196,14 +187,14 @@ CREATE SEQUENCE deploys_id_seq
 -- Name: deploys_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE deploys_id_seq OWNED BY deploys.id;
+ALTER SEQUENCE public.deploys_id_seq OWNED BY public.deploys.id;
 
 
 --
--- Name: event_counts; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: event_counts; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE event_counts (
+CREATE TABLE public.event_counts (
     id integer NOT NULL,
     snapshot_name character varying,
     event_id integer
@@ -214,7 +205,7 @@ CREATE TABLE event_counts (
 -- Name: event_counts_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE event_counts_id_seq
+CREATE SEQUENCE public.event_counts_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -226,20 +217,20 @@ CREATE SEQUENCE event_counts_id_seq
 -- Name: event_counts_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE event_counts_id_seq OWNED BY event_counts.id;
+ALTER SEQUENCE public.event_counts_id_seq OWNED BY public.event_counts.id;
 
 
 --
--- Name: events; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: events; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE events (
+CREATE TABLE public.events (
     id integer NOT NULL,
     details json,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     type character varying,
-    uuid uuid DEFAULT uuid_generate_v4()
+    uuid uuid DEFAULT public.uuid_generate_v4()
 );
 
 
@@ -247,7 +238,7 @@ CREATE TABLE events (
 -- Name: events_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE events_id_seq
+CREATE SEQUENCE public.events_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -259,14 +250,14 @@ CREATE SEQUENCE events_id_seq
 -- Name: events_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE events_id_seq OWNED BY events.id;
+ALTER SEQUENCE public.events_id_seq OWNED BY public.events.id;
 
 
 --
--- Name: git_repository_locations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: git_repository_locations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE git_repository_locations (
+CREATE TABLE public.git_repository_locations (
     id integer NOT NULL,
     uri character varying,
     name character varying,
@@ -281,7 +272,7 @@ CREATE TABLE git_repository_locations (
 -- Name: git_repository_locations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE git_repository_locations_id_seq
+CREATE SEQUENCE public.git_repository_locations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -293,14 +284,14 @@ CREATE SEQUENCE git_repository_locations_id_seq
 -- Name: git_repository_locations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE git_repository_locations_id_seq OWNED BY git_repository_locations.id;
+ALTER SEQUENCE public.git_repository_locations_id_seq OWNED BY public.git_repository_locations.id;
 
 
 --
--- Name: manual_tests; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: manual_tests; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE manual_tests (
+CREATE TABLE public.manual_tests (
     id integer NOT NULL,
     email character varying,
     versions text[] DEFAULT '{}'::text[],
@@ -314,7 +305,7 @@ CREATE TABLE manual_tests (
 -- Name: manual_tests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE manual_tests_id_seq
+CREATE SEQUENCE public.manual_tests_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -326,14 +317,14 @@ CREATE SEQUENCE manual_tests_id_seq
 -- Name: manual_tests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE manual_tests_id_seq OWNED BY manual_tests.id;
+ALTER SEQUENCE public.manual_tests_id_seq OWNED BY public.manual_tests.id;
 
 
 --
--- Name: release_exceptions; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: release_exceptions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE release_exceptions (
+CREATE TABLE public.release_exceptions (
     id integer NOT NULL,
     repo_owner_id integer,
     versions text[] DEFAULT '{}'::text[],
@@ -350,7 +341,7 @@ CREATE TABLE release_exceptions (
 -- Name: release_exceptions_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE release_exceptions_id_seq
+CREATE SEQUENCE public.release_exceptions_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -362,14 +353,14 @@ CREATE SEQUENCE release_exceptions_id_seq
 -- Name: release_exceptions_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE release_exceptions_id_seq OWNED BY release_exceptions.id;
+ALTER SEQUENCE public.release_exceptions_id_seq OWNED BY public.release_exceptions.id;
 
 
 --
--- Name: released_tickets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: released_tickets; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE released_tickets (
+CREATE TABLE public.released_tickets (
     id integer NOT NULL,
     key character varying,
     summary character varying,
@@ -386,7 +377,7 @@ CREATE TABLE released_tickets (
 -- Name: released_tickets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE released_tickets_id_seq
+CREATE SEQUENCE public.released_tickets_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -398,14 +389,14 @@ CREATE SEQUENCE released_tickets_id_seq
 -- Name: released_tickets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE released_tickets_id_seq OWNED BY released_tickets.id;
+ALTER SEQUENCE public.released_tickets_id_seq OWNED BY public.released_tickets.id;
 
 
 --
--- Name: repo_admins; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: repo_admins; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE repo_admins (
+CREATE TABLE public.repo_admins (
     id integer NOT NULL,
     name character varying,
     email character varying NOT NULL,
@@ -418,7 +409,7 @@ CREATE TABLE repo_admins (
 -- Name: repo_admins_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE repo_admins_id_seq
+CREATE SEQUENCE public.repo_admins_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -430,14 +421,14 @@ CREATE SEQUENCE repo_admins_id_seq
 -- Name: repo_admins_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE repo_admins_id_seq OWNED BY repo_admins.id;
+ALTER SEQUENCE public.repo_admins_id_seq OWNED BY public.repo_admins.id;
 
 
 --
--- Name: repo_ownerships; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: repo_ownerships; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE repo_ownerships (
+CREATE TABLE public.repo_ownerships (
     id integer NOT NULL,
     app_name character varying NOT NULL,
     repo_owners character varying,
@@ -451,7 +442,7 @@ CREATE TABLE repo_ownerships (
 -- Name: repo_ownerships_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE repo_ownerships_id_seq
+CREATE SEQUENCE public.repo_ownerships_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -463,23 +454,23 @@ CREATE SEQUENCE repo_ownerships_id_seq
 -- Name: repo_ownerships_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE repo_ownerships_id_seq OWNED BY repo_ownerships.id;
+ALTER SEQUENCE public.repo_ownerships_id_seq OWNED BY public.repo_ownerships.id;
 
 
 --
--- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE schema_migrations (
+CREATE TABLE public.schema_migrations (
     version character varying NOT NULL
 );
 
 
 --
--- Name: tickets; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: tickets; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE tickets (
+CREATE TABLE public.tickets (
     id integer NOT NULL,
     key character varying,
     summary character varying,
@@ -488,7 +479,7 @@ CREATE TABLE tickets (
     event_created_at timestamp without time zone,
     versions text[] DEFAULT '{}'::text[],
     approved_at timestamp without time zone,
-    version_timestamps hstore DEFAULT ''::hstore NOT NULL,
+    version_timestamps public.hstore DEFAULT ''::public.hstore NOT NULL,
     approved_by character varying,
     authored_by character varying
 );
@@ -498,7 +489,7 @@ CREATE TABLE tickets (
 -- Name: tickets_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE tickets_id_seq
+CREATE SEQUENCE public.tickets_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -510,14 +501,14 @@ CREATE SEQUENCE tickets_id_seq
 -- Name: tickets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE tickets_id_seq OWNED BY tickets.id;
+ALTER SEQUENCE public.tickets_id_seq OWNED BY public.tickets.id;
 
 
 --
--- Name: tokens; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: tokens; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE tokens (
+CREATE TABLE public.tokens (
     id integer NOT NULL,
     source character varying,
     value character varying,
@@ -531,7 +522,7 @@ CREATE TABLE tokens (
 -- Name: tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE tokens_id_seq
+CREATE SEQUENCE public.tokens_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -543,14 +534,14 @@ CREATE SEQUENCE tokens_id_seq
 -- Name: tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE tokens_id_seq OWNED BY tokens.id;
+ALTER SEQUENCE public.tokens_id_seq OWNED BY public.tokens.id;
 
 
 --
--- Name: uatests; Type: TABLE; Schema: public; Owner: -; Tablespace: 
+-- Name: uatests; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE uatests (
+CREATE TABLE public.uatests (
     id integer NOT NULL,
     server character varying,
     success boolean,
@@ -564,7 +555,7 @@ CREATE TABLE uatests (
 -- Name: uatests_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE uatests_id_seq
+CREATE SEQUENCE public.uatests_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -576,400 +567,393 @@ CREATE SEQUENCE uatests_id_seq
 -- Name: uatests_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE uatests_id_seq OWNED BY uatests.id;
+ALTER SEQUENCE public.uatests_id_seq OWNED BY public.uatests.id;
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: builds id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY builds ALTER COLUMN id SET DEFAULT nextval('builds_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY delayed_jobs ALTER COLUMN id SET DEFAULT nextval('delayed_jobs_id_seq'::regclass);
+ALTER TABLE ONLY public.builds ALTER COLUMN id SET DEFAULT nextval('public.builds_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: delayed_jobs id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY deploys ALTER COLUMN id SET DEFAULT nextval('deploys_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY event_counts ALTER COLUMN id SET DEFAULT nextval('event_counts_id_seq'::regclass);
+ALTER TABLE ONLY public.delayed_jobs ALTER COLUMN id SET DEFAULT nextval('public.delayed_jobs_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: deploys id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY events ALTER COLUMN id SET DEFAULT nextval('events_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY git_repository_locations ALTER COLUMN id SET DEFAULT nextval('git_repository_locations_id_seq'::regclass);
+ALTER TABLE ONLY public.deploys ALTER COLUMN id SET DEFAULT nextval('public.deploys_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: event_counts id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY manual_tests ALTER COLUMN id SET DEFAULT nextval('manual_tests_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY release_exceptions ALTER COLUMN id SET DEFAULT nextval('release_exceptions_id_seq'::regclass);
+ALTER TABLE ONLY public.event_counts ALTER COLUMN id SET DEFAULT nextval('public.event_counts_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: events id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY released_tickets ALTER COLUMN id SET DEFAULT nextval('released_tickets_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY repo_admins ALTER COLUMN id SET DEFAULT nextval('repo_admins_id_seq'::regclass);
+ALTER TABLE ONLY public.events ALTER COLUMN id SET DEFAULT nextval('public.events_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: git_repository_locations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY repo_ownerships ALTER COLUMN id SET DEFAULT nextval('repo_ownerships_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY tickets ALTER COLUMN id SET DEFAULT nextval('tickets_id_seq'::regclass);
+ALTER TABLE ONLY public.git_repository_locations ALTER COLUMN id SET DEFAULT nextval('public.git_repository_locations_id_seq'::regclass);
 
 
 --
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: manual_tests id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tokens ALTER COLUMN id SET DEFAULT nextval('tokens_id_seq'::regclass);
-
-
---
--- Name: id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY uatests ALTER COLUMN id SET DEFAULT nextval('uatests_id_seq'::regclass);
+ALTER TABLE ONLY public.manual_tests ALTER COLUMN id SET DEFAULT nextval('public.manual_tests_id_seq'::regclass);
 
 
 --
--- Name: builds_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: release_exceptions id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY builds
+ALTER TABLE ONLY public.release_exceptions ALTER COLUMN id SET DEFAULT nextval('public.release_exceptions_id_seq'::regclass);
+
+
+--
+-- Name: released_tickets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.released_tickets ALTER COLUMN id SET DEFAULT nextval('public.released_tickets_id_seq'::regclass);
+
+
+--
+-- Name: repo_admins id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.repo_admins ALTER COLUMN id SET DEFAULT nextval('public.repo_admins_id_seq'::regclass);
+
+
+--
+-- Name: repo_ownerships id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.repo_ownerships ALTER COLUMN id SET DEFAULT nextval('public.repo_ownerships_id_seq'::regclass);
+
+
+--
+-- Name: tickets id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tickets ALTER COLUMN id SET DEFAULT nextval('public.tickets_id_seq'::regclass);
+
+
+--
+-- Name: tokens id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.tokens ALTER COLUMN id SET DEFAULT nextval('public.tokens_id_seq'::regclass);
+
+
+--
+-- Name: uatests id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.uatests ALTER COLUMN id SET DEFAULT nextval('public.uatests_id_seq'::regclass);
+
+
+--
+-- Name: builds builds_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.builds
     ADD CONSTRAINT builds_pkey PRIMARY KEY (id);
 
 
 --
--- Name: delayed_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: delayed_jobs delayed_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY delayed_jobs
+ALTER TABLE ONLY public.delayed_jobs
     ADD CONSTRAINT delayed_jobs_pkey PRIMARY KEY (id);
 
 
 --
--- Name: deploys_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: deploys deploys_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY deploys
+ALTER TABLE ONLY public.deploys
     ADD CONSTRAINT deploys_pkey PRIMARY KEY (id);
 
 
 --
--- Name: event_counts_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: event_counts event_counts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY event_counts
+ALTER TABLE ONLY public.event_counts
     ADD CONSTRAINT event_counts_pkey PRIMARY KEY (id);
 
 
 --
--- Name: events_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: events events_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY events
+ALTER TABLE ONLY public.events
     ADD CONSTRAINT events_pkey PRIMARY KEY (id);
 
 
 --
--- Name: git_repository_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: git_repository_locations git_repository_locations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY git_repository_locations
+ALTER TABLE ONLY public.git_repository_locations
     ADD CONSTRAINT git_repository_locations_pkey PRIMARY KEY (id);
 
 
 --
--- Name: manual_tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: manual_tests manual_tests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY manual_tests
+ALTER TABLE ONLY public.manual_tests
     ADD CONSTRAINT manual_tests_pkey PRIMARY KEY (id);
 
 
 --
--- Name: release_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: release_exceptions release_exceptions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY release_exceptions
+ALTER TABLE ONLY public.release_exceptions
     ADD CONSTRAINT release_exceptions_pkey PRIMARY KEY (id);
 
 
 --
--- Name: released_tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: released_tickets released_tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY released_tickets
+ALTER TABLE ONLY public.released_tickets
     ADD CONSTRAINT released_tickets_pkey PRIMARY KEY (id);
 
 
 --
--- Name: repo_admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: repo_admins repo_admins_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY repo_admins
+ALTER TABLE ONLY public.repo_admins
     ADD CONSTRAINT repo_admins_pkey PRIMARY KEY (id);
 
 
 --
--- Name: repo_ownerships_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: repo_ownerships repo_ownerships_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY repo_ownerships
+ALTER TABLE ONLY public.repo_ownerships
     ADD CONSTRAINT repo_ownerships_pkey PRIMARY KEY (id);
 
 
 --
--- Name: tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: tickets tickets_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tickets
+ALTER TABLE ONLY public.tickets
     ADD CONSTRAINT tickets_pkey PRIMARY KEY (id);
 
 
 --
--- Name: tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: tokens tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY tokens
+ALTER TABLE ONLY public.tokens
     ADD CONSTRAINT tokens_pkey PRIMARY KEY (id);
 
 
 --
--- Name: uatests_pkey; Type: CONSTRAINT; Schema: public; Owner: -; Tablespace: 
+-- Name: uatests uatests_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY uatests
+ALTER TABLE ONLY public.uatests
     ADD CONSTRAINT uatests_pkey PRIMARY KEY (id);
 
 
 --
--- Name: delayed_jobs_priority; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: delayed_jobs_priority; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX delayed_jobs_priority ON public.delayed_jobs USING btree (priority, run_at);
 
 
 --
--- Name: index_builds_on_version; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_builds_on_version; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_builds_on_version ON public.builds USING btree (version);
 
 
 --
--- Name: index_deploys_on_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_deploys_on_app_name; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_deploys_on_app_name ON public.deploys USING btree (app_name);
 
 
 --
--- Name: index_deploys_on_deploy_alert; Type: INDEX; Schema: public; Owner: -; Tablespace: 
---
-
-CREATE INDEX index_deploys_on_deploy_alert ON public.deploys USING btree (deploy_alert);
-
-
---
--- Name: index_deploys_on_server_and_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_deploys_on_server_and_app_name; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_deploys_on_server_and_app_name ON public.deploys USING btree (server, app_name);
 
 
 --
--- Name: index_deploys_on_uuid; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_deploys_on_uuid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_deploys_on_uuid ON public.deploys USING btree (uuid);
 
 
 --
--- Name: index_deploys_on_version; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_deploys_on_version; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_deploys_on_version ON public.deploys USING btree (version);
 
 
 --
--- Name: index_events_on_uuid; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_events_on_uuid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_events_on_uuid ON public.events USING btree (uuid);
 
 
 --
--- Name: index_git_repository_locations_on_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_git_repository_locations_on_name; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_git_repository_locations_on_name ON public.git_repository_locations USING btree (name);
 
 
 --
--- Name: index_manual_tests_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_manual_tests_on_versions; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_manual_tests_on_versions ON public.manual_tests USING gin (versions);
 
 
 --
--- Name: index_release_exceptions_on_repo_owner_id; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_release_exceptions_on_repo_owner_id; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_release_exceptions_on_repo_owner_id ON public.release_exceptions USING btree (repo_owner_id);
 
 
 --
--- Name: index_release_exceptions_on_submitted_at; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_release_exceptions_on_submitted_at; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_release_exceptions_on_submitted_at ON public.release_exceptions USING btree (submitted_at);
 
 
 --
--- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_released_tickets_on_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_released_tickets_on_key ON public.released_tickets USING btree (key);
 
 
 --
--- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_released_tickets_on_tsv; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_released_tickets_on_tsv ON public.released_tickets USING gin (tsv);
 
 
 --
--- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_released_tickets_on_versions; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_released_tickets_on_versions ON public.released_tickets USING gin (versions);
 
 
 --
--- Name: index_repo_admins_on_email; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_repo_admins_on_email; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_repo_admins_on_email ON public.repo_admins USING btree (email);
 
 
 --
--- Name: index_repo_ownerships_on_app_name; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_repo_ownerships_on_app_name; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_repo_ownerships_on_app_name ON public.repo_ownerships USING btree (app_name);
 
 
 --
--- Name: index_tickets_on_key; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_tickets_on_key; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_tickets_on_key ON public.tickets USING btree (key);
 
 
 --
--- Name: index_tickets_on_paths; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_tickets_on_paths; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_tickets_on_paths ON public.tickets USING gin (paths);
 
 
 --
--- Name: index_tickets_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_tickets_on_versions; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_tickets_on_versions ON public.tickets USING gin (versions);
 
 
 --
--- Name: index_tokens_on_value; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_tokens_on_value; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX index_tokens_on_value ON public.tokens USING btree (value);
 
 
 --
--- Name: index_uatests_on_versions; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: index_uatests_on_versions; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX index_uatests_on_versions ON public.uatests USING gin (versions);
 
 
 --
--- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: -; Tablespace: 
+-- Name: unique_schema_migrations; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE UNIQUE INDEX unique_schema_migrations ON public.schema_migrations USING btree (version);
 
 
 --
--- Name: released_tickets_tsv_update; Type: TRIGGER; Schema: public; Owner: -
+-- Name: released_tickets released_tickets_tsv_update; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER released_tickets_tsv_update BEFORE INSERT OR UPDATE ON public.released_tickets FOR EACH ROW EXECUTE PROCEDURE released_tickets_trigger();
+CREATE TRIGGER released_tickets_tsv_update BEFORE INSERT OR UPDATE ON public.released_tickets FOR EACH ROW EXECUTE PROCEDURE public.released_tickets_trigger();
 
 
 --
--- Name: fk_rails_90b3b0f798; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: release_exceptions fk_rails_90b3b0f798; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY release_exceptions
-    ADD CONSTRAINT fk_rails_90b3b0f798 FOREIGN KEY (repo_owner_id) REFERENCES repo_admins(id);
+ALTER TABLE ONLY public.release_exceptions
+    ADD CONSTRAINT fk_rails_90b3b0f798 FOREIGN KEY (repo_owner_id) REFERENCES public.repo_admins(id);
 
 
 --
 -- PostgreSQL database dump complete
 --
 
-SET search_path TO "$user",public;
+SET search_path TO "$user", public;
 
 INSERT INTO schema_migrations (version) VALUES ('20150427164403');
 
@@ -1070,4 +1054,8 @@ INSERT INTO schema_migrations (version) VALUES ('20171219093236');
 INSERT INTO schema_migrations (version) VALUES ('20180115135632');
 
 INSERT INTO schema_migrations (version) VALUES ('20180123100359');
+
+INSERT INTO schema_migrations (version) VALUES ('20191107161136');
+
+INSERT INTO schema_migrations (version) VALUES ('20191107163219');
 
