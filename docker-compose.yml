@@ -123,6 +123,8 @@ services:
     healthcheck:
       test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
       interval: 10s
+    ports:
+      - 127.0.0.1:5532:5432
 
   jira:
     image: dchevell/jira-core
