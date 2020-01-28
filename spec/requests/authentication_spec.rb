@@ -20,6 +20,13 @@ RSpec.describe 'Authentication' do
 
         expect(session[:redirect_path]).to eq('/feature_reviews/new')
       end
+
+      it 'logs in as admin when ENV["SKIP_AUTHENTICATION"] = "true" is present' do
+        with_env('SKIP_AUTHENTICATION' => 'true') do
+          get '/feature_reviews/new'
+          expect(response).to have_http_status(200)
+        end
+      end
     end
   end
 end

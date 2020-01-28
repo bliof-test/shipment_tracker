@@ -21,8 +21,12 @@ module Authentication
   end
 
   def current_user
-    setup_current_user!
-    User.new(session[:current_user])
+    if ENV['SKIP_AUTHENTICATION'] == 'true'
+      User.new(first_name: 'Admin', email: 'admin@example.com')
+    else
+      setup_current_user!
+      User.new(session[:current_user])
+    end
   end
 
   def setup_current_user!

@@ -391,9 +391,6 @@ GEM
     unicorn (5.5.1)
       kgio (~> 2.6)
       raindrops (~> 0.7)
-    unicorn-rails (2.2.1)
-      rack
-      unicorn
     uri-ssh_git (2.0.0)
     virtus (1.0.5)
       axiom-types (~> 0.1)
@@ -461,7 +458,6 @@ DEPENDENCIES
   therubyracer
   uglifier
   unicorn
-  unicorn-rails
   virtus
   webmock
 

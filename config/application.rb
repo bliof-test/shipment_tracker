@@ -14,8 +14,6 @@ require 'sprockets/railtie'
 # Requires gems listed in Gemfile, including any gems limited to :test, :development, or :production groups.
 Bundler.require(*Rails.groups)
 
-Dotenv.load
-
 module ShipmentTracker
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)

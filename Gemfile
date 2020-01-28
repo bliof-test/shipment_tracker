@@ -29,7 +29,6 @@ gem 'sass-rails'
 gem 'slack-notifier'
 gem 'solid_use_case'
 gem 'uglifier'
-gem 'unicorn-rails'
 gem 'unicorn'
 gem 'virtus'
 
