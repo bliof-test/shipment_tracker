@@ -28,7 +28,6 @@ services:
       JIRA_USER: shipment_tracker
       JIRA_USE_SSL: 'false'
       PORT_HTTP: 1201
-      SECRET_KEY_BASE: "$SECRET_KEY_BASE"
       SSH_PRIVATE_KEY:
       SSH_USER: git
       UNICORN_TIMEOUT: 3600
