@@ -46,7 +46,7 @@ services:
     volumes:
       - git:/tmp/git
     healthcheck:
-      test: curl -fsSL "http://localhost:1201/healthcheck" || exit 1
+      test: curl --fail --show-error --silent --location "http://localhost:1201/healthcheck" || exit 1
       interval: 10s
       retries: 60
       timeout: 5s
@@ -110,7 +110,7 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: curl -fsSL "http://localhost:9394/send-metrics" || exit 1
+      test: curl --fail --show-error --silent --location "http://localhost:9394/send-metrics" || exit 1
       interval: 10s
       retries: 60
       timeout: 5s
