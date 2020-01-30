@@ -1,34 +1,16 @@
 # frozen_string_literal: true
 
-require 'prometheus_exporter'
-require 'prometheus_exporter/instrumentation'
-require_relative 'prometheus_client'
+pid_file = './tmp/unicorn.pid'
 
-port_http = ENV.fetch('PORT_HTTP')
-pid_file = '/tmp/unicorn.pid'
+require_relative '../lib/prometheus_client'
 
-PrometheusExporter::Instrumentation::Unicorn.start(
-  pid_file: pid_file,
-  listener_address: "0.0.0.0:#{port_http}",
-  frequency: 0.01,
-)
+worker_processes 4
 
-worker_processes Integer(ENV['WEB_CONCURRENCY'] || 1)
-preload_app true
-listen port_http
-timeout ENV.fetch('UNICORN_TIMEOUT', 60).to_i
 pid pid_file
+listen ENV.fetch('PORT_HTTP')
 
-unless ENV['PROTECT_STDOUT'] == 'true'
-  root = File.expand_path('..', __dir__)
-  paths = {
-    stderr: File.join(root, 'log/production.log'),
-    stdout: File.join(root, 'log/production.log'),
-  }
-
-  stderr_path paths.fetch(:stderr)
-  stdout_path paths.fetch(:stdout)
-end
+preload_app true
+timeout ENV.fetch('UNICORN_TIMEOUT', 60).to_i
 
 before_fork do |_server, _worker|
   defined?(ActiveRecord::Base) &&
@@ -40,8 +22,7 @@ after_fork do |_server, _worker|
     $healthcheck = 'term'
   end
 
-  require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::Process.start(type: 'web')
+  PrometheusClient.instrument_process(type: 'web')
 
   defined?(ActiveRecord::Base) &&
     ActiveRecord::Base.establish_connection

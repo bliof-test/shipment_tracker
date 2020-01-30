@@ -68,5 +68,7 @@ module ShipmentTracker
 
     config.loga = { service_name: 'shipment-tracker' }
     config.log_level = ENV.fetch('LOG_LEVEL', 'info')
+
+    require_relative '../lib/prometheus_client'
   end
 end
