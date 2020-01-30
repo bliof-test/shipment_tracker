@@ -220,13 +220,13 @@ workflows:
             - features
       - publish-docker-image:
           context: org-global
-      - pagerduty_plan:
-          context: org-pagerduty
-          filters:
-            branches:
-              ignore: master
+      # - pagerduty_plan:
+      #     context: org-pagerduty
+      #     filters:
+      #       branches:
+      #         ignore: master
       - pagerduty_apply:
           context: org-pagerduty
-          filters:
-            branches:
-              only: master
+          # filters:
+          #   branches:
+          #     only: master
