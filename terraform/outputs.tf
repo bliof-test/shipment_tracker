@@ -1,3 +1,3 @@
-output "pagerduty_honeybadger_integration_key" {
-  value = "${module.pagerduty.pagerduty_honeybadger_integration_key}"
+output "pagerduty_service_integrations" {
+  value = "${module.pagerduty.pagerduty_service_integrations}"
 }

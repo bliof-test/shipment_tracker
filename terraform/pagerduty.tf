@@ -1,5 +1,5 @@
 module "pagerduty" {
-  source = "github.com/fundingcircle/terraform-module-pagerduty?ref=v0.0.5"
+  source = "github.com/fundingcircle/terraform-module-pagerduty?ref=v0.0.6"
 
   pagerduty_token        = "${var.pagerduty_token}"
   service_name           = "${var.service_name}"
