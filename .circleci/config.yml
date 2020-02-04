@@ -227,6 +227,10 @@ workflows:
               ignore: master
       - pagerduty_apply:
           context: org-pagerduty
+          requires:
+            - specs
+            - features
+            - publish-docker-image
           filters:
             branches:
               only: master
