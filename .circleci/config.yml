@@ -175,7 +175,7 @@ jobs:
           PLUGIN_ACTIONS: plan
           PLUGIN_ROOT_DIR: terraform/
           TF_VAR_service_name: shipment_tracker
-          TF_VAR_escalation_policy_name: Global DevOps Escalation Policy
+          TF_VAR_escalation_policy_name: Observability
 
     steps:
       - checkout
@@ -192,7 +192,7 @@ jobs:
         environment:
           PLUGIN_ROOT_DIR: terraform/
           TF_VAR_service_name: shipment_tracker
-          TF_VAR_escalation_policy_name: Global DevOps Escalation Policy
+          TF_VAR_escalation_policy_name: Observability
 
     steps:
       - checkout
