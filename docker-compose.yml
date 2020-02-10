@@ -1,6 +1,6 @@
 version: '2.4'
 services:
-  web:
+  web: &web_node
     build:
       context: .
     image: shipment_tracker
@@ -35,7 +35,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 127.0.0.1:1201-1202:1201
+      - 127.0.0.1:1201:1201
     depends_on:
       prometheus-exporter:
         condition: service_healthy
@@ -51,7 +51,11 @@ services:
       retries: 60
       timeout: 5s
       start_period: 30s
-    scale: 2
+
+  web-02:
+    <<: *web_node
+    ports:
+      - 127.0.0.1:1202:1201
 
   git-worker:
     image: shipment_tracker
