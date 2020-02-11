@@ -4,7 +4,7 @@ pid_file = './tmp/unicorn.pid'
 
 require_relative '../lib/prometheus_client'
 
-worker_processes 4
+worker_processes ENV.fetch('WEB_CONCURRENCY', 4).to_i
 
 pid pid_file
 listen ENV.fetch('PORT_HTTP')
