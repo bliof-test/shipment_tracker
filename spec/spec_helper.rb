@@ -29,9 +29,11 @@ require 'solid_use_case/rspec_matchers'
 
 require 'clients/github'
 require 'support/feature_review_helpers'
+require 'support/env_helpers'
 
 RSpec.configure do |config|
   config.include Support::FeatureReviewHelpers
+  config.include Support::EnvHelpers
   config.include SolidUseCase::RSpecMatchers
 
   config.before(:each, :disable_repo_verification) do

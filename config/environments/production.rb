@@ -90,6 +90,4 @@ Rails.application.configure do
 
   # Show developer-friendly error page if set
   config.consider_all_requests_local = ENV.key?('CONSIDER_ALL_REQUESTS_LOCAL')
-
-  require_relative '../prometheus_client'
 end

@@ -1,6 +1,6 @@
 version: '2.4'
 services:
-  web:
+  web: &web_node
     build:
       context: .
     image: shipment_tracker
@@ -28,7 +28,6 @@ services:
       JIRA_USER: shipment_tracker
       JIRA_USE_SSL: 'false'
       PORT_HTTP: 1201
-      SECRET_KEY_BASE: "$SECRET_KEY_BASE"
       SSH_PRIVATE_KEY:
       SSH_USER: git
       UNICORN_TIMEOUT: 3600
@@ -36,7 +35,7 @@ services:
     tty: true
     stdin_open: true
     ports:
-      - 127.0.0.1:1201-1202:1201
+      - 127.0.0.1:1201:1201
     depends_on:
       prometheus-exporter:
         condition: service_healthy
@@ -47,9 +46,16 @@ services:
     volumes:
       - git:/tmp/git
     healthcheck:
-      test: curl localhost:1201/healthcheck
+      test: curl --fail --show-error --silent --location "http://localhost:1201/healthcheck" || exit 1
       interval: 10s
-    scale: 2
+      retries: 60
+      timeout: 5s
+      start_period: 30s
+
+  web-02:
+    <<: *web_node
+    ports:
+      - 127.0.0.1:1202:1201
 
   git-worker:
     image: shipment_tracker
@@ -108,8 +114,11 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-      test: curl -f localhost:9394/send-metrics
+      test: curl --fail --show-error --silent --location "http://localhost:9394/send-metrics" || exit 1
       interval: 10s
+      retries: 60
+      timeout: 5s
+      start_period: 30s
     ports:
       - 127.0.0.1:9394:9394
 
@@ -123,6 +132,8 @@ services:
     healthcheck:
       test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
       interval: 10s
+    ports:
+      - 127.0.0.1:5532:5432
 
   jira:
     image: dchevell/jira-core

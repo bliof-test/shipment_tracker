@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-unless Rails.env.test?
-  require 'prometheus_exporter/instrumentation'
-  PrometheusExporter::Instrumentation::DelayedJob.register_plugin
-end
+PrometheusClient.instrument_delayed_job
 
 Delayed::Worker.sleep_delay = 2
 Delayed::Worker.max_attempts = 10

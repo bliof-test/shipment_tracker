@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'honeybadger'
-require 'prometheus_exporter/instrumentation'
+require 'prometheus_client'
 
 class Counter
   def initialize
@@ -22,7 +22,7 @@ namespace :jobs do
   namespace :instrumentation do
     task :delayed_job do
       # This reports basic process stats like RSS and GC info
-      PrometheusExporter::Instrumentation::Process.start(type: 'delayed-job')
+      PrometheusClient.instrument_process(type: 'delayed-job')
     end
   end
 
@@ -53,7 +53,7 @@ namespace :jobs do
     end
 
     # This reports basic process stats like RSS and GC info
-    PrometheusExporter::Instrumentation::Process.start(type: 'event-worker')
+    PrometheusClient.instrument_process(type: 'event-worker')
 
     Rails.logger.info "Starting #{t}"
     Rails.logger.tagged(t) do
@@ -87,7 +87,7 @@ namespace :jobs do
     end
 
     # This reports basic process stats like RSS and GC info
-    PrometheusExporter::Instrumentation::Process.start(type: 'git-worker')
+    PrometheusClient.instrument_process(type: 'git-worker')
 
     Rails.logger.info "Starting #{t}"
     loader = GitRepositoryLoader.from_rails_config

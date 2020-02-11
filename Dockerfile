@@ -16,12 +16,12 @@ ARG RAILS_ENV=production
 
 COPY Rakefile ./
 COPY lib/tasks/env.rake lib/tasks/
+COPY lib/prometheus_client.rb lib/
 
 COPY \
  config/application.rb \
  config/boot.rb \
  config/environment.rb \
- config/prometheus_client.rb \
  config/
 
 COPY config/environments/production.rb config/environments/

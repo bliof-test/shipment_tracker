@@ -14,8 +14,6 @@ require 'sprockets/railtie'
 # Requires gems listed in Gemfile, including any gems limited to :test, :development, or :production groups.
 Bundler.require(*Rails.groups)
 
-Dotenv.load
-
 module ShipmentTracker
   JIRA_USER ||= ENV.fetch('JIRA_USER', nil)
   JIRA_PASSWD ||= ENV.fetch('JIRA_PASSWD', nil)
@@ -70,5 +68,7 @@ module ShipmentTracker
 
     config.loga = { service_name: 'shipment-tracker' }
     config.log_level = ENV.fetch('LOG_LEVEL', 'info')
+
+    require_relative '../lib/prometheus_client'
   end
 end
