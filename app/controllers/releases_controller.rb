@@ -9,7 +9,10 @@ class ReleasesController < ApplicationController
 
   def show
     update_region_cookies
-    redirect_to release_path(app_name, region: region) unless params[:region]
+    unless params[:region]
+      redirect_to release_path(app_name, region: region)
+      return
+    end
     projection = build_projection
     @pending_releases = projection.pending_releases
     @deployed_releases = projection.deployed_releases
