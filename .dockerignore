@@ -9,3 +9,4 @@ log/*.log
 tmp
 docker-compose.yml
 config/database.yml
+terraform/
