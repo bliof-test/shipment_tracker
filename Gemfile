@@ -38,8 +38,6 @@ group :dockerignore do
 end
 
 group :development do
-  gem 'better_errors'
-  gem 'binding_of_caller'
   gem 'foreman', require: false
   gem 'spring'
   gem 'spring-commands-rspec'
