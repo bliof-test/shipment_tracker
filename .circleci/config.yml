@@ -174,8 +174,6 @@ jobs:
         environment:
           PLUGIN_ACTIONS: plan
           PLUGIN_ROOT_DIR: terraform/
-          TF_VAR_service_name: shipment_tracker
-          TF_VAR_escalation_policy_name: "Global Platform Escalation Policy"
 
     steps:
       - checkout
@@ -191,8 +189,6 @@ jobs:
           password: $DOCKER_PASSWORD
         environment:
           PLUGIN_ROOT_DIR: terraform/
-          TF_VAR_service_name: shipment_tracker
-          TF_VAR_escalation_policy_name: "Global Platform Escalation Policy"
 
     steps:
       - checkout
