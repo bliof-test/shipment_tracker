@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '< 5'
+gem 'rails', '~> 5.0.0'
 
 gem 'addressable', require: 'addressable/uri'
 gem 'bootstrap-sass'
@@ -12,7 +12,7 @@ gem 'git_clone_url'
 gem 'haml-rails'
 gem 'has_secure_token'
 gem 'honeybadger', '< 5'
-gem 'jira-ruby', require: 'jira'
+gem 'jira-ruby', '~> 0.1.0', require: 'jira'
 gem 'jquery-rails'
 gem 'loga'
 gem 'newrelic_rpm'
