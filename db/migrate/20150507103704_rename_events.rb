@@ -1,4 +1,4 @@
-class RenameEvents < ActiveRecord::Migration
+class RenameEvents < ActiveRecord::Migration[4.2]
 
   def conversion
     {

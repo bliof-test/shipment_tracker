@@ -1,4 +1,4 @@
-class CreateManualTest < ActiveRecord::Migration
+class CreateManualTest < ActiveRecord::Migration[4.2]
   def change
     create_table :manual_tests do |t|
       t.string :email

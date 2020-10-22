@@ -1,4 +1,4 @@
-class CreateFeatureReviews < ActiveRecord::Migration
+class CreateFeatureReviews < ActiveRecord::Migration[4.2]
   def change
     create_table :feature_reviews do |t|
       t.string :url, unique: true

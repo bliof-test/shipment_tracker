@@ -3,6 +3,6 @@
 require 'active_record'
 
 module Snapshots
-  class ReleaseException < ActiveRecord::Base
+  class ReleaseException < ApplicationRecord
   end
 end

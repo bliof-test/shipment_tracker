@@ -1,4 +1,4 @@
-class DropDeploysDeployAlertIndex < ActiveRecord::Migration
+class DropDeploysDeployAlertIndex < ActiveRecord::Migration[4.2]
   def up
     remove_index :deploys, :deploy_alert
   end

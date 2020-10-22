@@ -3,7 +3,7 @@
 require 'active_record'
 
 module Snapshots
-  class EventCount < ActiveRecord::Base
+  class EventCount < ApplicationRecord
     class << self
       def global_event_pointer
         pointer_for('global_event_pointer')

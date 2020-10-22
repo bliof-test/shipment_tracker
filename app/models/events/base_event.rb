@@ -3,7 +3,7 @@
 require 'active_record'
 
 module Events
-  class BaseEvent < ActiveRecord::Base
+  class BaseEvent < ApplicationRecord
     self.table_name = 'events'
 
     class BatchedRelation

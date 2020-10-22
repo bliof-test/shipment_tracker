@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Token < ActiveRecord::Base
+class Token < ApplicationRecord
   has_secure_token :value
 
   before_validation(on: %i[create update]) do

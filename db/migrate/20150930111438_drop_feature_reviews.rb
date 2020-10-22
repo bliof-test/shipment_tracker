@@ -1,4 +1,4 @@
-class DropFeatureReviews < ActiveRecord::Migration
+class DropFeatureReviews < ActiveRecord::Migration[4.2]
   def up
     drop_table :feature_reviews
   end

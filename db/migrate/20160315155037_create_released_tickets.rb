@@ -1,4 +1,4 @@
-class CreateReleasedTickets < ActiveRecord::Migration
+class CreateReleasedTickets < ActiveRecord::Migration[4.2]
   def change
     create_table :released_tickets do |t|
       t.string :key

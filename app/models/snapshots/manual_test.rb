@@ -3,6 +3,6 @@
 require 'active_record'
 
 module Snapshots
-  class ManualTest < ActiveRecord::Base
+  class ManualTest < ApplicationRecord
   end
 end
