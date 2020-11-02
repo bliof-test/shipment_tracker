@@ -16,7 +16,7 @@ gem 'jira-ruby', '~> 0.1.0', require: 'jira'
 gem 'jquery-rails'
 gem 'loga'
 gem 'newrelic_rpm'
-gem 'octokit', '4.14.0', require: false
+gem 'octokit', require: false
 gem 'omniauth-auth0'
 gem 'omniauth'
 gem 'pg_failover'
