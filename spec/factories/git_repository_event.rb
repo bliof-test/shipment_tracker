@@ -5,8 +5,8 @@ require 'events/git_repository_location_event'
 FactoryBot.define do
   factory :git_repository_location_event, class: Events::GitRepositoryLocationEvent do
     transient do
-      app_name 'test-app'
-      audit_options []
+      app_name { 'test-app' }
+      audit_options { [] }
     end
 
     details {

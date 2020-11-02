@@ -5,10 +5,10 @@ require 'events/manual_test_event'
 FactoryBot.define do
   factory :manual_test_event, class: Events::ManualTestEvent do
     transient do
-      accepted true
-      email 'alice@example.com'
-      comment 'LGTM'
-      apps('frontend' => 'abc')
+      accepted { true }
+      email { 'alice@example.com' }
+      comment { 'LGTM' }
+      apps { { 'frontend' => 'abc' } }
     end
 
     details {

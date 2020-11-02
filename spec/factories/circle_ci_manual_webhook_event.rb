@@ -5,7 +5,7 @@ require 'events/circle_ci_manual_webhook_event'
 FactoryBot.define do
   factory :circle_ci_manual_webhook_event, class: Events::CircleCiManualWebhookEvent do
     transient do
-      success? true
+      success? { true }
       sequence(:version)
     end
 

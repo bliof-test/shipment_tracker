@@ -8,16 +8,16 @@ FactoryBot.define do
       sequence(:issue_id)
       sequence(:key) { |n| "JIRA-#{n}" }
 
-      summary ''
-      description ''
-      display_name 'joe'
-      user_email 'joe.bloggs@example.com'
-      assignee_email 'joe.assignee@example.com'
-      status 'To Do'
-      updated '2015-05-07T15:24:34.957+0100'
-      comment_body nil
+      summary { '' }
+      description { '' }
+      display_name { 'joe' }
+      user_email { 'joe.bloggs@example.com' }
+      assignee_email { 'joe.assignee@example.com' }
+      status { 'To Do' }
+      updated { '2015-05-07T15:24:34.957+0100' }
+      comment_body { nil }
 
-      changelog_details({})
+      changelog_details { {} }
 
       default_details do
         {
@@ -52,23 +52,23 @@ FactoryBot.define do
     initialize_with { new(attributes) }
 
     trait :todo do
-      status 'To Do'
+      status { 'To Do' }
     end
 
     trait :in_progress do
-      status 'In Progress'
+      status { 'In Progress' }
     end
 
     trait :ready_for_review do
-      status 'Ready For Review'
+      status { 'Ready For Review' }
     end
 
     trait :ready_for_deploy do
-      status 'Ready for Deployment'
+      status { 'Ready for Deployment' }
     end
 
     trait :done do
-      status 'Done'
+      status { 'Done' }
     end
 
     trait :created do
@@ -76,7 +76,7 @@ FactoryBot.define do
     end
 
     trait :started do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -86,12 +86,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       in_progress
     end
 
     trait :development_completed do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -101,12 +101,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       ready_for_review
     end
 
     trait :rejected do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -116,12 +116,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       in_progress
     end
 
     trait :approved do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -131,12 +131,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       ready_for_deploy
     end
 
     trait :deployed do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -146,12 +146,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       done
     end
 
     trait :unapproved do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -161,12 +161,12 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       in_progress
     end
 
     trait :moved do
-      changelog_details(
+      changelog_details { { 
         'changelog' => {
           'items' => [
             {
@@ -176,7 +176,7 @@ FactoryBot.define do
             },
           ],
         },
-      )
+       } }
       todo
     end
   end

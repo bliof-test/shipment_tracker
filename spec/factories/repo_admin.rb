@@ -2,7 +2,7 @@
 
 FactoryBot.define do
   factory :repo_admin do
-    name 'Foo'
+    name { 'Foo' }
     email { |n| "foo#{n}@bar.baz" }
   end
 end
