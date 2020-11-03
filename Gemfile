@@ -17,11 +17,11 @@ gem 'jquery-rails'
 gem 'loga'
 gem 'newrelic_rpm'
 gem 'octokit', require: false
-gem 'omniauth-auth0'
+gem 'omniauth-auth0', '~> 1.4.0'
 gem 'omniauth'
 gem 'pg_failover'
 gem 'pg_search'
-gem 'pg'
+gem 'pg', '~> 0.18.0'
 gem 'raindrops'
 gem 'prometheus_exporter', require: false
 gem 'pry-rails'
@@ -49,7 +49,7 @@ end
 group :development, :test do
   gem 'rspec-rails'
   gem 'rspec_junit_formatter'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.65.0'
   gem 'pry-byebug'
 end
 
@@ -63,6 +63,7 @@ group :test do
   gem 'database_cleaner'
   gem 'factory_bot'
   gem 'rack-test', require: 'rack/test'
+  gem 'rails-controller-testing'
   gem 'shoulda-matchers', require: false
   gem 'simplecov', require: false
   gem 'webmock', require: false
