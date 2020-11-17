@@ -37,7 +37,6 @@ LABEL maintainer="Funding Circle Engineering <engineering@fundingcircle.com>"
 
 RUN apk --no-cache add \
   nodejs \
-  postgresql \
   postgresql-client \
   sqlite-dev \
   tzdata \
