@@ -63,11 +63,11 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       let!(:deployed_tickets) {
         [
           store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks },
-                                               { app: 'app1', deployed_at: time - 1.week }].to_json),
+                                               { app: 'app1', deployed_at: time - 1.week }]),
           store.create(key: 'ENG-2', deploys: [{ app: 'app1', deployed_at: time - 1.week },
-                                               { app: 'app1', deployed_at: time }].to_json),
+                                               { app: 'app1', deployed_at: time }]),
           store.create(key: 'ENG-3', deploys: [{ app: 'app1', deployed_at: time - 4.weeks },
-                                               { app: 'app1', deployed_at: time - 3.weeks }].to_json),
+                                               { app: 'app1', deployed_at: time - 3.weeks }]),
         ].map { |record| ReleasedTicket.new(record.attributes) }
       }
 
@@ -105,17 +105,17 @@ RSpec.describe Repositories::ReleasedTicketRepository do
       context "when 'from' and 'to' dates are selected" do
         let!(:deployed_tickets) {
           [
-            store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks }].to_json),
+            store.create(key: 'ENG-1', deploys: [{ app: 'app1', deployed_at: time - 3.weeks }]),
             store.create(key: 'ENG-2', deploys: [{ app: 'app2', deployed_at: time - 5.weeks },
-                                                 { app: 'app2', deployed_at: time }].to_json),
+                                                 { app: 'app2', deployed_at: time }]),
             store.create(key: 'ENG-3', deploys: [{ app: 'app3', deployed_at: time - 5.weeks },
-                                                 { app: 'app3', deployed_at: time - 3.weeks }].to_json),
+                                                 { app: 'app3', deployed_at: time - 3.weeks }]),
             store.create(key: 'ENG-4', deploys: [{ app: 'app4', deployed_at: time - 3.weeks },
-                                                 { app: 'app4', deployed_at: time }].to_json),
+                                                 { app: 'app4', deployed_at: time }]),
             store.create(key: 'ENG-5', deploys: [{ app: 'app5', deployed_at: time - 6.weeks },
-                                                 { app: 'app5', deployed_at: time - 5.weeks }].to_json),
+                                                 { app: 'app5', deployed_at: time - 5.weeks }]),
             store.create(key: 'ENG-6', deploys: [{ app: 'app6', deployed_at: time - 1.week },
-                                                 { app: 'app6', deployed_at: time }].to_json),
+                                                 { app: 'app6', deployed_at: time }]),
           ].map { |record| ReleasedTicket.new(record.attributes) }
         }
 
