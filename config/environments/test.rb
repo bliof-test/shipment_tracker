@@ -36,4 +36,6 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :test
   config.deploy_alert_email = 'deploy-alerts@shipment-tracker.test'
+
+  config.assets.compile = false
 end
