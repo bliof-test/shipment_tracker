@@ -9,7 +9,7 @@ RSpec.describe 'Authentication for GitHub Notifications' do
     end
 
     it 'is not forbidden' do
-      post '/github_notifications'
+      post '/github_notifications', params: {}
 
       expect(response).to_not be_forbidden
     end
@@ -25,14 +25,14 @@ RSpec.describe 'Authentication for GitHub Notifications' do
       end
 
       it 'is not forbidden' do
-        post "/github_notifications?token=#{token}"
+        post "/github_notifications?token=#{token}", params: {}
 
         expect(response).to_not be_forbidden
       end
 
       it 'does not create an authorised session' do
-        post "/github_notifications?token=#{token}"
-        post '/github_notifications'
+        post "/github_notifications?token=#{token}", params: {}
+        post '/github_notifications', params: {}
 
         expect(response).to be_forbidden
       end
@@ -40,7 +40,7 @@ RSpec.describe 'Authentication for GitHub Notifications' do
 
     context 'with an invalid token' do
       it 'is forbidden' do
-        post '/github_notifications?token=asdfasdf'
+        post '/github_notifications?token=asdfasdf', params: {}
 
         expect(response).to be_forbidden
       end
@@ -49,7 +49,7 @@ RSpec.describe 'Authentication for GitHub Notifications' do
 
   describe 'authentication with no token or cookie' do
     it 'is forbidden' do
-      post '/github_notifications'
+      post '/github_notifications', params: {}
 
       expect(response).to be_forbidden
     end

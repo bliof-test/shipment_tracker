@@ -61,7 +61,7 @@ RSpec.describe 'Projection performance', type: :request do
             create :jira_event, comment_body: "Here you go: #{url}"
 
             file << benchmark(event_count) do
-              get(search_feature_reviews_path, application: 'frontend', version: version)
+              get(search_feature_reviews_path, params: { application: 'frontend', version: version })
             end
           end
         end

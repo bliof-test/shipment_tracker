@@ -32,7 +32,7 @@ module Support
             'first_name' => first_name,
           },
         }
-        get Rails.configuration.login_callback_url
+        get Rails.configuration.login_callback_url, params: {}
       ensure
         OmniAuth.config.test_mode = false
       end

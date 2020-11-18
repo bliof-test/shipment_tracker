@@ -12,7 +12,7 @@ RSpec.describe 'ReleasesControllerFormats', type: :request do
 
     context 'when app name contains a valid non-html format' do
       it 'assigns the app name correctly' do
-        get '/releases/example.js?region=gb'
+        get '/releases/example.js', params: { region: 'gb' }
 
         expect(response).to have_http_status(:success)
         expect(assigns(:app_name)).to eq('example.js')
@@ -21,7 +21,7 @@ RSpec.describe 'ReleasesControllerFormats', type: :request do
 
     context 'when app name does not contain a format' do
       it 'assigns the app name correctly' do
-        get '/releases/example?region=gb'
+        get '/releases/example', params: { region: 'gb' }
 
         expect(response).to have_http_status(:success)
         expect(assigns(:app_name)).to eq('example')

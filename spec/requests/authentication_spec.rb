@@ -6,7 +6,7 @@ RSpec.describe 'Authentication' do
   describe 'auth0' do
     context 'when not logged in' do
       it 'redirects to auth0 and sets the redirect_path' do
-        get '/feature_reviews/new'
+        get '/feature_reviews/new', params: {}
 
         expect(response).to redirect_to('/auth/auth0')
         follow_redirect!
@@ -23,7 +23,7 @@ RSpec.describe 'Authentication' do
 
       it 'logs in as admin when ENV["SKIP_AUTHENTICATION"] = "true" is present' do
         with_env('SKIP_AUTHENTICATION' => 'true') do
-          get '/feature_reviews/new'
+          get '/feature_reviews/new', params: {}
           expect(response).to have_http_status(200)
         end
       end

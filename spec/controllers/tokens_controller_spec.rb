@@ -40,7 +40,7 @@ RSpec.describe TokensController do
     it 'creates a new token' do
       expect(Token).to receive(:create).with(source: 'circleci', name: 'frontend')
 
-      post :create, token: { source: 'circleci', name: 'frontend' }
+      post :create, params: { token: { source: 'circleci', name: 'frontend' } }
 
       expect(response).to redirect_to(tokens_path)
     end
@@ -50,7 +50,7 @@ RSpec.describe TokensController do
     it 'updates a token given a X-editable payload' do
       expect(Token).to receive(:update).with(42, 'name' => 'New name')
 
-      put :update, id: 42, name: 'name', value: 'New name', pk: 42, format: :json
+      put :update, params: { id: 42, name: 'name', value: 'New name', pk: 42 }, format: :json
     end
   end
 
@@ -58,7 +58,7 @@ RSpec.describe TokensController do
     it 'revokes a token' do
       expect(Token).to receive(:revoke).with(123)
 
-      delete :destroy, id: 123
+      delete :destroy, params: { id: 123 }
 
       expect(response).to redirect_to(tokens_path)
     end
