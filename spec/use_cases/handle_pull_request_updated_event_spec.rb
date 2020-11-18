@@ -23,6 +23,7 @@ RSpec.describe HandlePullRequestUpdatedEvent do
   before do
     allow_any_instance_of(CommitStatus).to receive(:reset)
     allow(GitRepositoryLocation).to receive(:repo_tracked?).and_return(true)
+    ActiveJob::Base.queue_adapter = :test
   end
 
   describe 'validation' do
