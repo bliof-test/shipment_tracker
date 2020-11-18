@@ -25,7 +25,7 @@ class EventsController < ApplicationController
       flash[:success] = 'Thank you for your submission. It will appear in a moment.'
       redirect_to redirect_path
     else
-      render status: :ok, text: 'ok'
+      render status: :ok, plain: 'ok'
     end
   end
 
@@ -38,7 +38,7 @@ class EventsController < ApplicationController
       flash[:error] = event.errors.full_messages
       redirect_to redirect_path
     else
-      render status: :bad_request, text: "Error - #{event.errors.full_messages}"
+      render status: :bad_request, plain: "Error - #{event.errors.full_messages}"
     end
   end
 
@@ -47,6 +47,6 @@ class EventsController < ApplicationController
   end
 
   def unauthenticated_strategy
-    render status: :forbidden, text: 'Forbidden'
+    render status: :forbidden, plain: 'Forbidden'
   end
 end

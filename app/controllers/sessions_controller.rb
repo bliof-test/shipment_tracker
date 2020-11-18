@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
   end
 
   def auth0_failure_callback
-    render text: 'Sorry - you are not authorized to use this application.', status: :unauthorized
+    render plain: 'Sorry - you are not authorized to use this application.', status: :unauthorized
   end
 
   def destroy
