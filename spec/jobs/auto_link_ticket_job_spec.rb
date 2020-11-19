@@ -45,7 +45,6 @@ RSpec.describe AutoLinkTicketJob do
     context 'when there is a ticket name in the middle of the branch name' do
       let(:branch_name) { 'abc-TEST-102-branch-name' }
 
-
       it 'attempts to link the ticket' do
         expect(LinkTicket).to receive(:run).with(hash_including(jira_key: 'TEST-102'))
         perform_enqueued_jobs { job }

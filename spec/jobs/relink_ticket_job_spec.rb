@@ -46,7 +46,7 @@ RSpec.describe RelinkTicketJob do
         perform_enqueued_jobs { job }
 
         expect(WebMock).to have_requested(:post, github_status_url).with(
-          :body => hash_including({state: "failure"})
+          body: hash_including(state: 'failure')
         ).once
       end
     end

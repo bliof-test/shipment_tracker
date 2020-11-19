@@ -63,7 +63,7 @@ RSpec.describe 'EventsController' do
       end
 
       it 'saves the event' do
-        post "/events/circleci?token=#{token}", params: {foo: 'bar', token: 'the payloads token'}
+        post "/events/circleci?token=#{token}", params: { foo: 'bar', token: 'the payloads token' }
 
         expect(response).to be_ok
 
@@ -77,7 +77,7 @@ RSpec.describe 'EventsController' do
           params: {
             foo: 'bar',
             token: 'the payloads token',
-            event: { foo: 'bar', token: 'the payloads token' }
+            event: { foo: 'bar', token: 'the payloads token' },
           },
         )
 
@@ -88,7 +88,7 @@ RSpec.describe 'EventsController' do
       end
 
       it 'does not create authorised session' do
-        post "/events/circleci?token=#{token}", params: {foo: 'bar', token: 'the payloads token'}
+        post "/events/circleci?token=#{token}", params: { foo: 'bar', token: 'the payloads token' }
 
         expect(Events::CircleCiEvent.count).to eq(1)
 

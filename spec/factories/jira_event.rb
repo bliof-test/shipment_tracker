@@ -76,107 +76,121 @@ FactoryBot.define do
     end
 
     trait :started do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'To Do',
-              'toString' => 'In Progress',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'To Do',
+                'toString' => 'In Progress',
+              },
+            ],
+          },
+        }
+      }
       in_progress
     end
 
     trait :development_completed do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'In Progress',
-              'toString' => 'Ready For Review',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'In Progress',
+                'toString' => 'Ready For Review',
+              },
+            ],
+          },
+        }
+      }
       ready_for_review
     end
 
     trait :rejected do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'Ready for Review',
-              'toString' => 'In Progress',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'Ready for Review',
+                'toString' => 'In Progress',
+              },
+            ],
+          },
+        }
+      }
       in_progress
     end
 
     trait :approved do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'Ready For Review',
-              'toString' => 'Ready for Deployment',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'Ready For Review',
+                'toString' => 'Ready for Deployment',
+              },
+            ],
+          },
+        }
+      }
       ready_for_deploy
     end
 
     trait :deployed do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'Ready for Deployment',
-              'toString' => 'Done',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'Ready for Deployment',
+                'toString' => 'Done',
+              },
+            ],
+          },
+        }
+      }
       done
     end
 
     trait :unapproved do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'status',
-              'fromString' => 'Ready for Deployment',
-              'toString' => 'In Progress',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'status',
+                'fromString' => 'Ready for Deployment',
+                'toString' => 'In Progress',
+              },
+            ],
+          },
+        }
+      }
       in_progress
     end
 
     trait :moved do
-      changelog_details { { 
-        'changelog' => {
-          'items' => [
-            {
-              'field' => 'Key',
-              'fromString' => 'ONEJIRA-1',
-              'toString' => 'TWOJIRA-2',
-            },
-          ],
-        },
-       } }
+      changelog_details {
+        {
+          'changelog' => {
+            'items' => [
+              {
+                'field' => 'Key',
+                'fromString' => 'ONEJIRA-1',
+                'toString' => 'TWOJIRA-2',
+              },
+            ],
+          },
+        }
+      }
       todo
     end
   end
