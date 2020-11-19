@@ -65,6 +65,6 @@ group :test do
   gem 'rack-test', require: 'rack/test'
   gem 'rails-controller-testing'
   gem 'shoulda-matchers', require: false
-  gem 'simplecov', require: false
+  gem 'simplecov', '< 0.18', require: false
   gem 'webmock', require: false
 end
