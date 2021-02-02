@@ -63,4 +63,9 @@ ARG REVISION=unknown
 ENV REVISION=$REVISION
 ARG NAME=shipment_tracker
 LABEL name=$NAME version=$REVISION
+LABEL org.opencontainers.image.url=$URL
+LABEL org.opencontainers.image.source=$SOURCE
+LABEL org.opencontainers.image.created=$CREATED
+LABEL org.opencontainers.image.revision=$REVISION
+LABEL org.fundingcircle.image.manager=$MANAGER
 RUN echo "$REVISION" > REVISION
