@@ -62,6 +62,10 @@ ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 ARG REVISION=unknown
 ENV REVISION=$REVISION
 ARG NAME=shipment_tracker
+ARG SOURCE=https://github.com/FundingCircle/shipment_tracker
+ARG URL
+ARG CREATED
+ARG MANAGER
 LABEL name=$NAME version=$REVISION
 LABEL org.opencontainers.image.url=$URL
 LABEL org.opencontainers.image.source=$SOURCE
