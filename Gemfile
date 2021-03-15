@@ -18,7 +18,7 @@ gem 'loga'
 gem 'newrelic_rpm'
 gem 'octokit', require: false
 gem 'omniauth-auth0', '~> 1.4.0'
-gem 'omniauth'
+gem 'omniauth', '< 2'
 gem 'pg_failover'
 gem 'pg_search'
 gem 'pg', '~> 0.18.0'
