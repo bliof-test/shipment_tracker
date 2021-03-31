@@ -4,7 +4,7 @@ require 'clients/jira'
 require 'honeybadger'
 require 'repositories/ticket_repository'
 
-class RelinkTicketJob < ActiveJob::Base
+class RelinkTicketJob < ApplicationJob
   queue_as :default
 
   def perform(args)
