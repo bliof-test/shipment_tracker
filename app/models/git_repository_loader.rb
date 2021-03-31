@@ -45,6 +45,7 @@ class GitRepositoryLoader
 
   def find_repo_location(repository_name)
     git_repository_location = GitRepositoryLocation.find_by_name(repository_name)
+    p 'GitRepositoryLocation', git_repository_location
     unless git_repository_location
       fail GitRepositoryLoader::NotFound,
         "Cannot find GitRepositoryLocation record for #{repository_name.inspect}"
