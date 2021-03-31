@@ -125,17 +125,18 @@ services:
 
   postgres:
     image: postgres:9.6-alpine
-    command: postgres -c log_statement=all
+    command: postgres -c log_statement=all -c log_line_prefix='%d %t %v '
     environment:
       POSTGRES_DB: shipment_tracker
       POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: st_test
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: pg_isready --host=localhost --dbname=shipment_tracker --username=postgres || exit 1
       interval: 10s
     ports:
-      - 127.0.0.1:5532:5432
+      - 127.0.0.1:5432:5432
 
   jira:
     image: dchevell/jira-core
