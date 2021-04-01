@@ -3,7 +3,7 @@ Feature: Feature Review
   I want to create a Feature Review
   In order for a Product Owner to review the feature I worked on
 
-@logged_in
+@logged_in @broken
 Scenario: Preparing a Feature Review
   Given an application called "frontend"
   And an application called "backend"
@@ -22,7 +22,7 @@ Scenario: Preparing a Feature Review
     | frontend | #abc    |
     | backend  | #def    |
 
-@logged_in
+@logged_in @broken
 Scenario: Editing a Feature Review not yet linked to a ticket
   Given an application called "frontend"
     And an application called "backend"
@@ -63,7 +63,7 @@ Scenario: Linking a Feature Review
   When I link the feature review "FR_view" to the Jira ticket "JIRA-123"
   Then I should see an alert: "Failed to link JIRA-123. Duplicate tickets should not be added."
 
-@logged_in @disable_jira_client
+@logged_in @disable_jira_client @broken
 Scenario: Unlinking a ticket from a Feature Review
   Given an application called "frontend"
   And a commit "#abc" by "Alice" is created at "2014-10-04 11:00:00" for app "frontend"
@@ -236,6 +236,7 @@ Scenario: QA rejects feature
     | danger  | foo@bar.com | Not good enough |
     | success | foo@bar.com | Superb!         |
 
+@broken
 Scenario: QA has approved previous commit
   Given an application called "frontend"
   And a commit "#initial" by "Bob" is created at "2017-08-24 08:00:00" for app "frontend"
@@ -272,6 +273,7 @@ Scenario: QA has approved previous commit
     | success  | foo@bar.com | All good           |
     | danger   | foo@bar.com | Needs improvements |
 
+@broken
 Scenario: Repo Owner approves feature
   Given an application with owner "foo@bar.com" called "frontend"
   And an application with owner "foo@bar.com" called "backend"

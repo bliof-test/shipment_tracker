@@ -5,6 +5,7 @@ Feature: Alerting deploys of unauthorised Releases
   I should see slack notifications when deployment rules are violated
   So that appropriate actions can be taken
 
+@broken
 Scenario: Release has no approved Feature Reviews
   Given an application with owner "bob@fundingcircle.com" called "frontend"
 

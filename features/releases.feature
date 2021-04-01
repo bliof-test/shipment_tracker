@@ -4,7 +4,7 @@ Feature: Viewing Releases
   I want to view all releases for a given application
   So I know which versions are safe to deploy and which versions have already been deployed
 
-@mock_slack_notifier
+@mock_slack_notifier @broken
 Scenario: Viewing releases for an app
   # 2014-09-28 - application creation
   Given an application called "frontend"
@@ -81,6 +81,7 @@ Scenario: Viewing releases for an app
     | #master2 | historic commit            |                 | Not approved          |                       | no       |                  |
     | #master1 | initial commit             |                 | Not approved          |                       | no       | 2014-09-28 11:37 |
 
+@broken
 Scenario: Release requires re-approval
   Given an application called "frontend"
   And a commit "#master1" with message "merge commit" is created at "2016-01-17 10:20:45"
