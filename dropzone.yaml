@@ -88,12 +88,9 @@ deploy_tasks:
                   metrics: "/metrics"
         healthChecks:
           - path: /send-metrics
-            portIndex: 0
             protocol: HTTP
             gracePeriodSeconds: 30
             intervalSeconds: 30
-            timeoutSeconds: 20
-            maxConsecutiveFailures: 3
         labels:
           tags: http
         taskKillGracePeriodSeconds: 30
@@ -118,12 +115,9 @@ deploy_tasks:
                 hostPort: 0
         healthChecks:
           - path: /healthcheck
-            portIndex: 0
             protocol: HTTP
             gracePeriodSeconds: 30
             intervalSeconds: 30
-            timeoutSeconds: 20
-            maxConsecutiveFailures: 3
         labels:
           tags: http,public-http
           overrideTaskName: shipment-tracker
