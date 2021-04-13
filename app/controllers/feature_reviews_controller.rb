@@ -72,7 +72,7 @@ class FeatureReviewsController < ApplicationController
   end
 
   def feature_review_form
-    form_input = params.fetch(:forms_feature_review_form, {})
+    form_input = params.fetch(:forms_feature_review_form, ActionController::Parameters.new).permit!.to_h
     Forms::FeatureReviewForm.new(
       apps: form_input[:apps],
       git_repository_loader: git_repository_loader,
