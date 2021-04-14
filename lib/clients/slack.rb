@@ -10,8 +10,9 @@ class SlackClient
   end
 
   def initialize(webhook, channel)
-    @notifier = Slack::Notifier.new(webhook)
-    notifier.channel = prepend_hash(channel)
+    @notifier = Slack::Notifier.new(webhook) do
+      defaults channel: prepend_hash(channel)
+    end
   end
 
   def send_with_attachments(attachments)
