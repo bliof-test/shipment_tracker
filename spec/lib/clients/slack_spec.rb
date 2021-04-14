@@ -44,7 +44,7 @@ RSpec.describe SlackClient do
     before do
       allow(Slack::Notifier).to receive(:new).and_return(notifier)
     end
-    it 'pings the notififier with the given attachments' do
+    it 'pings the notifier with the given attachments' do
       client.send_with_attachments(attachments)
       expect(notifier).to have_received(:ping).with(attachments: attachments, link_names: 1)
     end
