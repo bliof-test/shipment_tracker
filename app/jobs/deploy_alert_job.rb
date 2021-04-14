@@ -4,7 +4,7 @@ require 'deploy'
 require 'deploy_alert'
 require 'clients/slack'
 
-class DeployAlertJob < ActiveJob::Base
+class DeployAlertJob < ApplicationJob
   queue_as :default
 
   def perform(deploy_attrs)

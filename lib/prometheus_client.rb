@@ -39,6 +39,8 @@ module PrometheusClient
   def instrument_octokit
     return unless instrument?
 
+    logger.info('Instrumenting Octokit')
+
     Octokit.middleware.use GithubMiddleware
   end
 
@@ -105,7 +107,12 @@ module PrometheusClient
       'The number of GitHub API requests remaining until rate limited',
     )
 
+    def logger
+      @logger ||= Logger.new($stdout)
+    end
+
     def on_complete(env)
+      logger.debug "GitHub rate limit remaining: #{env.response_headers['x-ratelimit-remaining']}"
       REQUESTS_REMAINING_GAUGE.observe(env.response_headers['x-ratelimit-remaining'].to_i)
     end
   end

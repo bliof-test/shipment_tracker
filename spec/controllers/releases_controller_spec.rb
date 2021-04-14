@@ -53,7 +53,7 @@ RSpec.describe ReleasesController do
     end
 
     it 'shows the list of commits for an app' do
-      get :show, id: app_name, region: 'gb'
+      get :show, params: { id: app_name, region: 'gb' }
 
       expect(response).to have_http_status(:success)
       expect(assigns(:app_name)).to eq(app_name)
@@ -68,7 +68,7 @@ RSpec.describe ReleasesController do
       end
 
       it 'responds with a 404' do
-        get :show, id: 'hokus-pokus', region: 'gp'
+        get :show, params: { id: 'hokus-pokus', region: 'gp' }
 
         expect(response).to be_not_found
       end
@@ -76,13 +76,13 @@ RSpec.describe ReleasesController do
 
     context 'when no region is passed in and no cookie set' do
       it 'redirects to region "gb"' do
-        get :show, id: app_name
+        get :show, params: { id: app_name }
         expect(response).to have_http_status(:redirect)
         expect(response.redirect_url).to eq('http://test.host/releases/frontend?region=gb')
       end
 
       it 'sets cookie to region "gb"' do
-        get :show, id: app_name
+        get :show, params: { id: app_name }
         expect(response.cookies['deploy_region']).to eq('gb')
       end
     end
@@ -92,7 +92,7 @@ RSpec.describe ReleasesController do
 
       it 'redirects to releases with same region as set in cookie' do
         request.cookies['deploy_region'] = region
-        get :show, id: app_name
+        get :show, params: { id: app_name }
         expect(response).to have_http_status(:redirect)
         expect(response.redirect_url).to eq("http://test.host/releases/frontend?region=#{region}")
         expect(cookies['deploy_region']).to eq(region)
@@ -105,7 +105,7 @@ RSpec.describe ReleasesController do
 
       it 'navigates to releases with same region as set in parameters and updates cookie value' do
         cookies['deploy_region'] = cookie_region
-        get :show, id: app_name, region: params_region
+        get :show, params: { id: app_name, region: params_region }
         expect(cookies['deploy_region']).to eq(params_region)
       end
     end

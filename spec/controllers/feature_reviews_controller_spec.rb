@@ -78,7 +78,7 @@ RSpec.describe FeatureReviewsController do
       end
 
       it 'renders the new page' do
-        post :create, forms_feature_review_form: { apps: { frontend: 'abc' } }
+        post :create, params: { forms_feature_review_form: { apps: { frontend: 'abc' } } }
 
         is_expected.to render_template('new')
         expect(assigns(:feature_review_form)).to eql(feature_review_form)
@@ -93,7 +93,7 @@ RSpec.describe FeatureReviewsController do
       end
 
       it 'redirects to #show' do
-        post :create, forms_feature_review_form: { apps: { frontend: 'abc' } }
+        post :create, params: { forms_feature_review_form: { apps: { frontend: 'abc' } } }
 
         is_expected.to redirect_to('/the/url')
       end
@@ -132,7 +132,7 @@ RSpec.describe FeatureReviewsController do
           .with(feature_review, at: nil)
           .and_return(feature_review_query)
 
-        get :show, apps: apps_with_versions
+        get :show, params: { apps: apps_with_versions }
 
         expect(assigns(:feature_review_with_statuses)).to eq(feature_review_with_statuses)
       end
@@ -148,7 +148,7 @@ RSpec.describe FeatureReviewsController do
           .with(feature_review, at: precise_time)
           .and_return(feature_review_query)
 
-        get :show, apps: apps_with_versions, time: time
+        get :show, params: { apps: apps_with_versions, time: time }
 
         expect(assigns(:feature_review_with_statuses)).to eq(feature_review_with_statuses)
       end
@@ -161,7 +161,7 @@ RSpec.describe FeatureReviewsController do
     let(:message) { 'Some message' }
 
     subject(:link_ticket) {
-      post :link_ticket, return_to: feature_review_path(apps_with_versions), jira_key: ticket_id
+      post :link_ticket, params: { return_to: feature_review_path(apps_with_versions), jira_key: ticket_id }
     }
 
     before do

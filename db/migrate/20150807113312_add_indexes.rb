@@ -1,4 +1,4 @@
-class AddIndexes < ActiveRecord::Migration
+class AddIndexes < ActiveRecord::Migration[4.2]
   def change
     add_index(:builds, :version)
     add_index(:deploys, [:server, :app_name])

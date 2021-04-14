@@ -1,4 +1,4 @@
-class CreateReleaseExceptions < ActiveRecord::Migration
+class CreateReleaseExceptions < ActiveRecord::Migration[4.2]
   def change
     create_table :release_exceptions do |t|
       t.references :repo_owner, index: true, foreign_key: true

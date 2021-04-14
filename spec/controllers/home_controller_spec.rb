@@ -28,13 +28,13 @@ RSpec.describe HomeController do
         versions: ['cf5a10f6ddff6fb5199bb86893bf77e48a82cbce'],
       )
 
-      get :index, q: ' some text cf5a10f6ddff6fb5199bb86893bf77e48a82cbce'
+      get :index, params: { q: ' some text cf5a10f6ddff6fb5199bb86893bf77e48a82cbce' }
 
       expect(response).to have_http_status(:success)
     end
 
     it 'flashes a warning and still performs the search when a date is unparsable' do
-      get :index, from: 'not a date'
+      get :index, params: { from: 'not a date' }
 
       expect(flash[:warning]).to eq('invalid date')
       expect(response).to be_ok

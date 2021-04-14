@@ -3,6 +3,6 @@
 require 'active_record'
 
 module Snapshots
-  class Deploy < ActiveRecord::Base
+  class Deploy < ApplicationRecord
   end
 end

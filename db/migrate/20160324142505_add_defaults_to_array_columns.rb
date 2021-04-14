@@ -1,4 +1,4 @@
-class AddDefaultsToArrayColumns < ActiveRecord::Migration
+class AddDefaultsToArrayColumns < ActiveRecord::Migration[4.2]
   def up
     change_column :tickets, :paths, :text, array: true, default: []
     change_column :tickets, :versions, :text, array: true, default: []

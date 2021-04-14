@@ -5,11 +5,11 @@ require 'events/jenkins_event'
 FactoryBot.define do
   factory :jenkins_event, class: Events::JenkinsEvent do
     transient do
-      success? true
-      sequence(:version)
-      build_url 'http://example.com'
-      build_type 'unit'
-      app_name 'abc'
+      success? { true }
+      sequence :version
+      build_url { 'http://example.com' }
+      build_type { 'unit' }
+      app_name { 'abc' }
     end
 
     details {

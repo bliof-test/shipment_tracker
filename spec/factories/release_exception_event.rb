@@ -5,10 +5,10 @@ require 'events/release_exception_event'
 FactoryBot.define do
   factory :release_exception_event, class: Events::ReleaseExceptionEvent do
     transient do
-      approved true
-      email 'test@example.com'
-      comment 'LGTM'
-      apps('frontend' => 'abc')
+      approved { true }
+      email { 'test@example.com' }
+      comment { 'LGTM' }
+      apps { { 'frontend' => 'abc' } }
     end
 
     details {

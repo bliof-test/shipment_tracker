@@ -1,4 +1,4 @@
-class AddTsvectorToTickets < ActiveRecord::Migration
+class AddTsvectorToTickets < ActiveRecord::Migration[4.2]
   def up
     add_column :released_tickets, :tsv, :tsvector
     add_index :released_tickets, :tsv, using: :gin

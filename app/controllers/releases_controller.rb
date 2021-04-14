@@ -16,7 +16,7 @@ class ReleasesController < ApplicationController
     @app_name = app_name
     @github_repo_url = GitRepositoryLocation.github_url_for_app(app_name)
   rescue GitRepositoryLoader::NotFound
-    render text: 'Repository not found', status: :not_found
+    render plain: 'Repository not found', status: :not_found
   end
 
   private

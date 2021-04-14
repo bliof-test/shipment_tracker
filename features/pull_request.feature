@@ -2,6 +2,7 @@ Feature:
   Developer raises a pull request in github
 
 @logged_in
+@broken
 Scenario: Opening a pull request
   Given an application called "frontend"
   And a commit "#master1" with message "master commit" is created at "2014-09-28 00:01:00"

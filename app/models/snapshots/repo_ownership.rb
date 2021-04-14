@@ -3,7 +3,7 @@
 require 'active_record'
 
 module Snapshots
-  class RepoOwnership < ActiveRecord::Base
+  class RepoOwnership < ApplicationRecord
     class << self
       def for(repo)
         app_name = repo.is_a?(String) ? repo : repo.name

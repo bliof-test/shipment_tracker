@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rails', '~> 4.2.11'
+gem 'rails', '~> 5.0.0'
 
 gem 'addressable', require: 'addressable/uri'
 gem 'bootstrap-sass'
@@ -12,16 +12,16 @@ gem 'git_clone_url'
 gem 'haml-rails'
 gem 'has_secure_token'
 gem 'honeybadger', '< 5'
-gem 'jira-ruby', require: 'jira'
+gem 'jira-ruby', '~> 0.1.0', require: 'jira'
 gem 'jquery-rails'
 gem 'loga'
 gem 'newrelic_rpm'
-gem 'octokit', '4.14.0', require: false
-gem 'omniauth-auth0'
-gem 'omniauth'
+gem 'octokit', require: false
+gem 'omniauth-auth0', '~> 1.4.0'
+gem 'omniauth', '< 2'
 gem 'pg_failover'
 gem 'pg_search'
-gem 'pg'
+gem 'pg', '~> 0.18.0'
 gem 'raindrops'
 gem 'prometheus_exporter', require: false
 gem 'pry-rails'
@@ -42,14 +42,14 @@ group :development do
   gem 'spring'
   gem 'spring-commands-rspec'
   gem 'guard-rspec', require: false
-  gem 'guard-cucumber', require: false
+  gem 'guard-cucumber', '< 2', require: false
   gem 'mailcatcher'
 end
 
 group :development, :test do
   gem 'rspec-rails'
   gem 'rspec_junit_formatter'
-  gem 'rubocop'
+  gem 'rubocop', '~> 0.65.0'
   gem 'pry-byebug'
 end
 
@@ -59,11 +59,13 @@ end
 
 group :test do
   gem 'capybara'
-  gem 'cucumber-rails', require: false
+  gem 'cucumber-rails', '< 1.5', require: false
+  gem 'cucumber', '< 2', require: false
   gem 'database_cleaner'
   gem 'factory_bot'
   gem 'rack-test', require: 'rack/test'
+  gem 'rails-controller-testing'
   gem 'shoulda-matchers', require: false
-  gem 'simplecov', require: false
+  gem 'simplecov', '< 0.18', require: false
   gem 'webmock', require: false
 end

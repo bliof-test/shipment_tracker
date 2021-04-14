@@ -3,8 +3,8 @@
 require 'active_record'
 
 module Snapshots
-  class ReleasedTicket < ActiveRecord::Base
-    include PgSearch
+  class ReleasedTicket < ApplicationRecord
+    include PgSearch::Model
 
     validates :key, uniqueness: true
 

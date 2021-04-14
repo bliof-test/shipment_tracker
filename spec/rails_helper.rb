@@ -10,6 +10,7 @@ require 'shoulda-matchers'
 
 require 'support/login'
 require 'support/require_authentication_matcher'
+require 'webmock/rspec'
 
 # Add additional requires below this line. Rails is not loaded until this point!
 

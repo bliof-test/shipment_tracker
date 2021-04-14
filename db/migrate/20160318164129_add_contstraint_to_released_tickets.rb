@@ -1,4 +1,4 @@
-class AddContstraintToReleasedTickets < ActiveRecord::Migration
+class AddContstraintToReleasedTickets < ActiveRecord::Migration[4.2]
   def up
     change_column(:released_tickets, :key, :string, unique: true)
     add_index(:released_tickets, :key, unique: true)

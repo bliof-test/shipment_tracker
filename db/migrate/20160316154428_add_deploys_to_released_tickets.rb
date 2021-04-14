@@ -1,4 +1,4 @@
-class AddDeploysToReleasedTickets < ActiveRecord::Migration
+class AddDeploysToReleasedTickets < ActiveRecord::Migration[4.2]
   def up
     add_column :released_tickets, :deploys, :json, default: []
     add_column :released_tickets, :versions, :string, array: true

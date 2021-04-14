@@ -1,4 +1,4 @@
-class SetTheGlobalEventPointer < ActiveRecord::Migration
+class SetTheGlobalEventPointer < ActiveRecord::Migration[4.2]
   module Events
     class BaseEvent < ActiveRecord::Base
       self.table_name = 'events'

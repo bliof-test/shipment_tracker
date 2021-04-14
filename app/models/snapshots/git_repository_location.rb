@@ -3,7 +3,7 @@
 require 'active_record'
 
 module Snapshots
-  class GitRepositoryLocation < ActiveRecord::Base
+  class GitRepositoryLocation < ApplicationRecord
     class << self
       def for(app_name)
         find_or_initialize_by(name: app_name)

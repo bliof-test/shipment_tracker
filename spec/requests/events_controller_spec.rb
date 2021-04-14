@@ -10,7 +10,7 @@ RSpec.describe 'EventsController' do
       end
 
       it 'saves the event' do
-        post '/events/circleci', foo: 'bar'
+        post '/events/circleci', params: { foo: 'bar' }
 
         expect(response).to be_ok
         expect(response.headers).to have_key('Set-Cookie')
@@ -22,7 +22,7 @@ RSpec.describe 'EventsController' do
       context 'with a return_to param' do
         context 'when return_to is a relative path' do
           it 'redirects to the path' do
-            post '/events/circleci?return_to=/my/projection?with=data'
+            post '/events/circleci', params: { return_to: '/my/projection?with=data' }
 
             expect(response).to redirect_to('/my/projection?with=data')
           end
@@ -30,7 +30,7 @@ RSpec.describe 'EventsController' do
 
         context 'when return_to is an absolute path' do
           it 'ignores the domain and just redirects to the path' do
-            post '/events/circleci?return_to=http://evil.com/magic/url?with=query'
+            post '/events/circleci', params: { return_to: 'http://evil.com/magic/url?with=query' }
 
             expect(response).to redirect_to('/magic/url?with=query')
           end
@@ -38,7 +38,7 @@ RSpec.describe 'EventsController' do
 
         context 'when return_to is not a valid path' do
           it 'does not redirect' do
-            post '/events/circleci?return_to=TOTALLY NOT VALID'
+            post '/events/circleci', params: { return_to: 'TOTALLY NOT VALID' }
 
             expect(response).to_not have_http_status(302), 'We should not redirect'
           end
@@ -46,7 +46,7 @@ RSpec.describe 'EventsController' do
 
         context 'when return_to is blank' do
           it 'does not redirect' do
-            post '/events/circleci?return_to='
+            post '/events/circleci', params: { return_to: '' }
 
             expect(response).to_not have_http_status(302), 'We should not redirect'
           end
@@ -63,7 +63,7 @@ RSpec.describe 'EventsController' do
       end
 
       it 'saves the event' do
-        post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token'
+        post "/events/circleci?token=#{token}", params: { foo: 'bar', token: 'the payloads token' }
 
         expect(response).to be_ok
 
@@ -74,9 +74,11 @@ RSpec.describe 'EventsController' do
       it 'discards duplicated data' do
         post(
           "/events/circleci?token=#{token}",
-          foo: 'bar',
-          token: 'the payloads token',
-          event: { foo: 'bar', token: 'the payloads token' },
+          params: {
+            foo: 'bar',
+            token: 'the payloads token',
+            event: { foo: 'bar', token: 'the payloads token' },
+          },
         )
 
         expect(response).to be_ok
@@ -86,12 +88,12 @@ RSpec.describe 'EventsController' do
       end
 
       it 'does not create authorised session' do
-        post "/events/circleci?token=#{token}", foo: 'bar', token: 'the payloads token'
+        post "/events/circleci?token=#{token}", params: { foo: 'bar', token: 'the payloads token' }
 
         expect(Events::CircleCiEvent.count).to eq(1)
 
         # subsequent post without token should not work
-        post '/events/circleci', more: 'data'
+        post '/events/circleci', params: { more: 'data' }
         expect(response).to be_forbidden
 
         expect(Events::CircleCiEvent.count).to eq(1)
@@ -100,7 +102,7 @@ RSpec.describe 'EventsController' do
 
     context 'with no token' do
       it 'returns 403 Forbidden' do
-        post '/events/circleci', foo: 'bar'
+        post '/events/circleci', params: { foo: 'bar' }
 
         expect(response).to be_forbidden
       end
@@ -108,7 +110,7 @@ RSpec.describe 'EventsController' do
 
     context 'with an invalid token' do
       it 'returns 403 Forbidden' do
-        post '/events/circleci?token=asdfasdf', foo: 'bar'
+        post '/events/circleci?token=asdfasdf', params: { foo: 'bar' }
 
         expect(response).to be_forbidden
       end
@@ -129,13 +131,13 @@ RSpec.describe 'EventsController' do
         end
 
         it 'will return 403 Forbidden if there is a base error for the event' do
-          post '/events/test', foo: 'bar'
+          post '/events/test', params: { foo: 'bar' }
 
           expect(response).to be_forbidden
         end
 
         it 'will not redirect event if there is return_to' do
-          post '/events/test?return_to=/my/projection?with=data'
+          post '/events/test', params: { return_to: '/my/projection?with=data' }
 
           expect(response).to be_forbidden
           expect(response['Location']).to be_blank
@@ -153,13 +155,13 @@ RSpec.describe 'EventsController' do
         end
 
         it 'will return 400 if there is a validation error' do
-          post '/events/test', foo: 'bar'
+          post '/events/test', params: { foo: 'bar' }
 
           expect(response).to be_bad_request
         end
 
         it 'will redirect back with an error flash if there is return_to' do
-          post '/events/test?return_to=/my/projection?with=data'
+          post '/events/test', params: { return_to: '/my/projection?with=data' }
 
           expect(response).to redirect_to('/my/projection?with=data')
           expect(flash[:error]).to be_present

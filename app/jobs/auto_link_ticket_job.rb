@@ -2,7 +2,7 @@
 
 require 'link_ticket'
 
-class AutoLinkTicketJob < ActiveJob::Base
+class AutoLinkTicketJob < ApplicationJob
   include Rails.application.routes.url_helpers
 
   JIRA_TICKET_REGEX = /(?<ticket_key>[A-Z]{2,10}-[1-9][0-9]*)/.freeze

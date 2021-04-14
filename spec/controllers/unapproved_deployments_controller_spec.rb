@@ -25,7 +25,7 @@ RSpec.describe UnapprovedDeploymentsController do
     end
 
     it 'shows the list of commits for an app' do
-      get :show, id: app_name, region: 'gb'
+      get :show, params: { id: app_name, region: 'gb' }
 
       expect(response).to have_http_status(:success)
       expect(assigns(:app_name)).to eq(app_name)

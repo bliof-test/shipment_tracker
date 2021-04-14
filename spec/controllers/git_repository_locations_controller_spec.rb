@@ -21,7 +21,7 @@ RSpec.describe GitRepositoryLocationsController do
   end
 
   describe 'POST #create', :logged_in, :disable_repo_verification do
-    before { post :create, params }
+    before { post :create, params: params }
 
     context 'when the GitRepositoryLocation is invalid' do
       let(:params) { { repository_locations_form: { uri: 'github.com:invalid\uri' } } }
@@ -49,7 +49,7 @@ RSpec.describe GitRepositoryLocationsController do
     it 'can be rendered' do
       repo = FactoryBot.create(:git_repository_location)
 
-      get :edit, id: repo
+      get :edit, params: { id: repo }
 
       expect(response).to have_http_status(:success)
     end
@@ -66,13 +66,13 @@ RSpec.describe GitRepositoryLocationsController do
       }
 
       it 'sets the owner of the repo' do
-        patch :update, params
+        patch :update, params: params
 
         expect(repo.owners.first.email).to eq('test@example.com')
       end
 
       it 'redirects to edit and sets successful flash' do
-        patch :update, params
+        patch :update, params: params
 
         expect(response).to redirect_to(action: :index)
         expect(flash[:success]).to be_present
@@ -89,11 +89,11 @@ RSpec.describe GitRepositoryLocationsController do
       }
 
       it 'does not change the owner of the repo' do
-        expect { patch :update, params }.not_to change { repo.reload }
+        expect { patch :update, params: params }.not_to change { repo.reload }
       end
 
       it 'renders edit and does not set successful flash' do
-        patch :update, params
+        patch :update, params: params
 
         expect(response).to render_template(:edit)
         expect(flash[:success]).not_to be_present

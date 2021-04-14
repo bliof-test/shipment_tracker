@@ -5,8 +5,8 @@ require 'events/repo_ownership_event'
 FactoryBot.define do
   factory :repo_ownership_event, class: Events::RepoOwnershipEvent do
     transient do
-      app_name 'test-app'
-      repo_owners ''
+      app_name { 'test-app' }
+      repo_owners { '' }
     end
 
     details {

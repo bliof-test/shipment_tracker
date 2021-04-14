@@ -1,4 +1,4 @@
-class CreateRepoOwnersAndRepoOwnerships < ActiveRecord::Migration
+class CreateRepoOwnersAndRepoOwnerships < ActiveRecord::Migration[4.2]
   def change
     create_table :repo_owners do |t|
       t.string :name

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-require File.expand_path('boot', __dir__)
+require_relative 'boot'
 
 # Pick the frameworks you want:
+require 'rails/all'
 require 'active_model/railtie'
 require 'active_record/railtie'
 require 'active_job/railtie'

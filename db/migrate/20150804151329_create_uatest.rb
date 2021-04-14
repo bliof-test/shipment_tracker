@@ -1,4 +1,4 @@
-class CreateUatest < ActiveRecord::Migration
+class CreateUatest < ActiveRecord::Migration[4.2]
   def change
     create_table :uatests do |t|
       t.string :server
