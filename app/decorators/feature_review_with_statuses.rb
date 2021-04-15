@@ -10,7 +10,8 @@ require 'ticket'
 class FeatureReviewWithStatuses < SimpleDelegator
   attr_reader :unit_test_results, :qa_submissions, :release_exception, :integration_test_results, :tickets, :time
 
-  def initialize(feature_review, unit_test_results: {}, qa_submissions: nil, integration_test_results: {}, tickets: [], release_exception: nil, at: nil)
+  def initialize(feature_review, unit_test_results: {}, qa_submissions: nil, integration_test_results: {},
+    tickets: [], release_exception: nil, at: nil)
     super(feature_review)
     @feature_review = feature_review
     @time = at
@@ -81,7 +82,8 @@ class FeatureReviewWithStatuses < SimpleDelegator
   end
 
   def authorised?
-    @authorised ||= approved_by_owner? || (tickets.present? && tickets.all? { |t| t.authorised?(versions, isae_3402_auditable?) })
+    @authorised ||= approved_by_owner? ||
+                    (tickets.present? && tickets.all? { |t| t.authorised?(versions, isae_3402_auditable?) })
   end
 
   def authorisation_status
