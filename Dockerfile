@@ -1,4 +1,4 @@
-FROM quay.io/fundingcircle/alpine-ruby-builder:2.5 as builder
+FROM quay.io/fundingcircle/alpine-ruby-builder:2.7 as builder
 
 RUN apk --no-cache add \
   cmake \
@@ -32,7 +32,7 @@ COPY .env.assets .
 
 RUN bundle exec rake assets:precompile
 
-FROM quay.io/fundingcircle/alpine-ruby:2.5
+FROM quay.io/fundingcircle/alpine-ruby:2.7
 LABEL maintainer="Funding Circle Engineering <engineering@fundingcircle.com>"
 
 RUN apk --no-cache add \

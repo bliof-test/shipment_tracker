@@ -25,7 +25,7 @@ gem 'pg', '~> 0.18.0'
 gem 'raindrops'
 gem 'prometheus_exporter', require: false
 gem 'pry-rails'
-gem 'rugged', '~> 1.0.0'
+gem 'rugged'
 gem 'sass-rails'
 gem 'slack-notifier'
 gem 'solid_use_case'
