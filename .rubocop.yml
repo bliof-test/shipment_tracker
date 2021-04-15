@@ -1,3 +1,4 @@
+require: rubocop-rails
 inherit_from: .rubocop_todo.yml
 
 AllCops:
@@ -20,7 +21,7 @@ Rails/TimeZone:
 Rails/DynamicFindBy:
   Enabled: false
 
-Metrics/LineLength:
+Layout/LineLength:
   Max: 122
 
 Style/SingleLineBlockParams:
@@ -52,10 +53,10 @@ Metrics/BlockLength:
 Metrics/AbcSize:
   Max: 20
 
-Layout/IndentArray:
+Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
 
-Layout/AlignParameters:
+Layout/ParameterAlignment:
   EnforcedStyle: with_fixed_indentation
 
 Style/NestedParenthesizedCalls:
@@ -90,7 +91,7 @@ Style/SignalException:
     - 'app/use_cases/unlink_ticket.rb'
 
 Style/FrozenStringLiteralComment:
-  Enabled: enable
+  Enabled: true
 
 Style/DoubleNegation:
   Enabled: false
@@ -119,5 +120,5 @@ Metrics/ParameterLists:
     - 'spec/support/git_test_repository.rb'
 
 # Complains for `_` or `at:`
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
