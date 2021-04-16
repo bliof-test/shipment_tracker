@@ -25,7 +25,7 @@ gem 'pg', '~> 0.18.0'
 gem 'raindrops'
 gem 'prometheus_exporter', require: false
 gem 'pry-rails'
-gem 'rugged', '~> 1.0.0'
+gem 'rugged'
 gem 'sass-rails'
 gem 'slack-notifier'
 gem 'solid_use_case'
@@ -49,7 +49,8 @@ end
 group :development, :test do
   gem 'rspec-rails'
   gem 'rspec_junit_formatter'
-  gem 'rubocop', '~> 0.65.0'
+  gem 'rubocop', '~> 0.80.0'
+  gem 'rubocop-rails'
   gem 'pry-byebug'
 end
 
