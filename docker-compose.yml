@@ -4,6 +4,7 @@ services:
     build:
       context: .
     image: shipment_tracker
+    entrypoint: []
     command: >
       sh -c 'bundle exec rake db:structure:load && \
              exec bundle exec unicorn --config-file config/unicorn.rb'
@@ -60,6 +61,7 @@ services:
 
   git-worker:
     image: shipment_tracker
+    entrypoint: []
     command: bundle exec rake jobs:update_git_loop
     environment:
       <<: *common_environment
@@ -78,6 +80,7 @@ services:
 
   event-worker:
     image: shipment_tracker
+    entrypoint: []
     command: bundle exec rake jobs:update_events_loop
     environment:
       <<: *common_environment
@@ -90,6 +93,7 @@ services:
 
   delayed-job:
     image: shipment_tracker
+    entrypoint: []
     command: bundle exec rake jobs:work
     environment:
       <<: *common_environment
@@ -107,6 +111,7 @@ services:
 
   prometheus-exporter:
     image: shipment_tracker
+    entrypoint: []
     command: bundle exec prometheus_exporter
     env_file: secrets.env
     tty: true

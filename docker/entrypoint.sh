@@ -1,5 +1,7 @@
 #!/bin/sh -e
-exec envconsul-launch \
-  -prefix shipment_tracker/config \
-  -secret-no-prefix shipment_tracker/secrets \
+. /etc/mesos-vault-token
+
+exec envconsul \
+  -config /etc/envconsul-common.hcl \
+  -config /app/envconsul.hcl \
   "$@"
