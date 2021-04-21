@@ -11,6 +11,7 @@ WORKDIR /tmp
 COPY Gemfile* ./
 RUN bundle config build.rugged --use-system-libraries \
  && bundle install --deployment --without dockerignore development test
+RUN find vendor/bundle/ruby/*/gems/jquery-rails-*/vendor/assets/javascripts/ \( -name jquery.* -o -name jquery2.* \) -delete
 
 ARG RAILS_ENV=production
 
