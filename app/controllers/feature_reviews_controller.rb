@@ -51,7 +51,7 @@ class FeatureReviewsController < ApplicationController
         flash[:error] = error.message
       end
     end
-    redirect_to feature_reviews_path(apps: params[:apps])
+    redirect_to feature_reviews_path(apps: params.permit(:apps)[:apps])
   end
 
   private
