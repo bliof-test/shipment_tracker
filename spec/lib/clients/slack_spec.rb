@@ -5,7 +5,7 @@ require 'clients/slack'
 
 RSpec.describe SlackClient do
   before do
-    allow_any_instance_of(Slack::Notifier).to receive(:ping)
+    allow_any_instance_of(Slack::Web::Client).to receive(:chat_postMessage)
   end
 
   describe '.send_deploy_alert' do
@@ -35,24 +35,19 @@ RSpec.describe SlackClient do
   end
 
   describe '#send_with_attachments' do
-    subject(:client) { SlackClient.new(webhook, channel) }
+    subject(:client) { SlackClient.new(token, channel) }
     let(:notifier) { double(:notifier).as_null_object }
     let(:attachments) { double }
-    let(:webhook) { double }
+    let(:token) { double }
     let(:channel) { 'double' }
 
     before do
-      allow(Slack::Notifier).to receive(:new).and_return(notifier)
-    end
-    it 'pings the notifier with the given attachments' do
-      client.send_with_attachments(attachments)
-      expect(notifier).to have_received(:ping).with(attachments: attachments, link_names: 1)
+      allow(Slack::Web::Client).to receive(:new).and_return(notifier)
     end
 
-    xit 'posts to the correct channel' do
+    it 'posts the message with the given attachments' do
       client.send_with_attachments(attachments)
-      expect(Slack::Notifier).to have_received(:new).with(webhook)
-      expect(notifier).to have_received(:channel=).with('#double')
+      expect(notifier).to have_received(:chat_postMessage).with(channel: channel, attachments: attachments, as_user: true)
     end
   end
 end

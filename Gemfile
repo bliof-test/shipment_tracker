@@ -27,7 +27,7 @@ gem 'prometheus_exporter', require: false
 gem 'pry-rails'
 gem 'rugged'
 gem 'sass-rails'
-gem 'slack-notifier'
+gem 'slack-ruby-client'
 gem 'solid_use_case'
 gem 'uglifier'
 gem 'unicorn'
