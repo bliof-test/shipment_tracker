@@ -7,7 +7,7 @@ ruby_image: &ruby_image
     BUNDLE_RETRY: 3
     BUNDLE_PATH: vendor/bundle
     RAILS_ENV: test
-    DATABASE_URL: postgresql://st_test@127.0.0.1/shipment_tracker_test
+    DATABASE_URL: postgresql://st_test:test_password@127.0.0.1/shipment_tracker_test
     CODECLIMATE_REPO_TOKEN: $CODECLIMATE_REPO_TOKEN
     CC_TEST_REPORTER_ID: $CODECLIMATE_REPO_TOKEN
 
@@ -15,11 +15,11 @@ defaults: &defaults
   working_directory: ~/shipment_tracker
   docker:
     - *ruby_image
-    - image: circleci/postgres:9.6-alpine
+    - image: circleci/postgres:13.2
       environment:
         POSTGRES_DB: shipment_tracker_test
         POSTGRES_USER: st_test
-        POSTGRES_PASSWORD: ''
+        POSTGRES_PASSWORD: 'test_password'
 
 install_system_packages: &install_system_packages
   run:
