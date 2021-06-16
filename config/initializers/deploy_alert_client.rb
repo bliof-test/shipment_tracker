@@ -5,7 +5,7 @@ require 'clients/slack'
 class DeployAlertClient
   def self.slack_client
     @slack_client ||= SlackClient.new(
-      ENV.fetch('SLACK_WEBHOOK', 'http://localhost'),
+      ENV['SLACK_TOKEN'],
       ENV.fetch('DEPLOY_ALERT_SLACK_CHANNEL', 'general'),
     )
   end
