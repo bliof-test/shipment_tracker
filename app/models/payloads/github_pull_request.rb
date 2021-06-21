@@ -59,7 +59,7 @@ module Payloads
     end
 
     def base_branch_master?
-      pull_request&.dig('base', 'ref') == 'master'
+      %w[main master].include? pull_request&.dig('base', 'ref')
     end
 
     def title
