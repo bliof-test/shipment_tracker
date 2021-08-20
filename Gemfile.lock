@@ -248,7 +248,7 @@ GEM
     parallel (1.20.1)
     parser (3.0.1.0)
       ast (~> 2.4.1)
-    pg (0.18.4)
+    pg (1.2.3)
     pg_failover (1.1.0)
     pg_search (2.3.0)
       activerecord (>= 4.2)
@@ -472,7 +472,7 @@ DEPENDENCIES
   octokit
   omniauth (< 2)
   omniauth-auth0 (~> 1.4.0)
-  pg (~> 0.18.0)
+  pg (~> 1.2.3)
   pg_failover
   pg_search
   prometheus_exporter

@@ -21,7 +21,7 @@ gem 'omniauth-auth0', '~> 1.4.0'
 gem 'omniauth', '< 2'
 gem 'pg_failover'
 gem 'pg_search'
-gem 'pg', '~> 0.18.0'
+gem 'pg', '~> 1.2.3'
 gem 'raindrops'
 gem 'prometheus_exporter', require: false
 gem 'pry-rails'
