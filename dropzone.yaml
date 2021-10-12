@@ -2,10 +2,10 @@ git_volume: &git_volume
   hostPath: /nfs/shipment_tracker
   containerPath: /git
   mode: RW
-
-az_constraint: &az_constraint # Same availability zone as NFS server
+# temporarily changed, until Jira unblocks our IP in eu-west-1, so no longer matches the NFS server
+az_constraint: &az_constraint # Same availability zone as NFS server(which is in 'a')
   - az
-  - LIKE
+  - UNLIKE
   - ^a$
 
 vars:
