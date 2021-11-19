@@ -186,36 +186,6 @@ jobs:
               --env "GIT_SHA=$CIRCLE_SHA1" \
               --volume /var/run/docker.sock:/var/run/docker.sock \
               quay.io/fundingcircle/drone-prisma-cloud:1
-  pagerduty_plan:
-    docker:
-      - image: quay.io/fundingcircle/circleci-terraform:6.2-0.12.16
-        auth:
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
-        environment:
-          PLUGIN_ACTIONS: plan
-          PLUGIN_ROOT_DIR: terraform/
-
-    steps:
-      - checkout
-      - run:
-          name: Terraform Plan
-          command: /bin/circleci-terraform
-
-  pagerduty_apply:
-    docker:
-      - image: quay.io/fundingcircle/circleci-terraform:6.2-0.12.16
-        auth:
-          username: $DOCKER_USERNAME
-          password: $DOCKER_PASSWORD
-        environment:
-          PLUGIN_ROOT_DIR: terraform/
-
-    steps:
-      - checkout
-      - run:
-          name: Terraform Apply
-          command: /bin/circleci-terraform
 
 workflows:
   version: 2
@@ -237,17 +207,3 @@ workflows:
             - features
       - publish-docker-image:
           context: org-global
-      - pagerduty_plan:
-          context: org-pagerduty
-          filters:
-            branches:
-              ignore: master
-      - pagerduty_apply:
-          context: org-pagerduty
-          requires:
-            - specs
-            - features
-            - publish-docker-image
-          filters:
-            branches:
-              only: master
