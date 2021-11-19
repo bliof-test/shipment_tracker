@@ -4,7 +4,7 @@ variable "escalation_policy_name" {
 }
 
 variable "service_name" {
-  default = "shipment_tracker"
+  default = "shipment-tracker"
 }
 
 variable "aws_account_id" {
