@@ -1,0 +1,3 @@
+bucket = "313303557381-tfstate"
+region = "eu-west-1"
+role_arn = "arn:aws:iam::313303557381:role/automation-drone"
