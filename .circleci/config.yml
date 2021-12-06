@@ -156,7 +156,12 @@ jobs:
               --build-arg URL="https://github.com/FundingCircle/${CIRCLE_PROJECT_REPONAME}/tree/${CIRCLE_SHA1}" \
               --build-arg SOURCE="${CIRCLE_REPOSITORY_URL}" \
               --build-arg CREATED="$(date --utc +%FT%TZ)" \
-              --build-arg MANAGER="${ENGINEERING_MANAGER_PLATFORM}"
+              --build-arg MANAGER="${ENGINEERING_MANAGER_PLATFORM}" \
+              --label "org.opencontainers.image.url=https://github.com/FundingCircle/${CIRCLE_PROJECT_REPONAME}/blob/${CIRCLE_SHA1}/Dockerfile" \
+              --label "org.opencontainers.image.source=${CIRCLE_REPOSITORY_URL}" \
+              --label "org.opencontainers.image.created=$(date --utc +%FT%TZ)" \
+              --label "org.opencontainers.image.revision=${CIRCLE_SHA1}" \
+              --label "org.fundingcircle.image.manager=${ENGINEERING_MANAGER_PLATFORM}"
       - run:
           name: Push to Docker registry
           command: |
