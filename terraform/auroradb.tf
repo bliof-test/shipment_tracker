@@ -40,8 +40,8 @@ resource "aws_rds_cluster" "rds_cluster" {
   engine_mode        = "serverless"
   scaling_configuration {
     auto_pause   = false
-    min_capacity = 8
-    max_capacity = 8
+    min_capacity = var.aurora_acus_min
+    max_capacity = var.aurora_acus_max
   }
   backup_retention_period   = 30
   skip_final_snapshot       = !local.environment.is.production

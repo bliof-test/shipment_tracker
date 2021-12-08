@@ -27,3 +27,12 @@ variable "legacy_vpc_security_group_id" {
   default = "sg-6b57e40f" # UAT
 }
 
+variable "aurora_acus_min" {
+  type    = number
+  default = 2
+}
+
+variable "aurora_acus_max" {
+  type    = number
+  default = 2
+}
